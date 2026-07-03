@@ -269,4 +269,51 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get searchLockedBody =>
       'Go Pro to search across tags and screenshot text.';
+
+  @override
+  String get sortingEmptyTitle => 'Nothing left to sort';
+
+  @override
+  String get sortingEmptyBody => 'All your screenshots look organized.';
+
+  @override
+  String get sortingLimitTitle => 'Your free sorting quota is used up';
+
+  @override
+  String get sortingLimitBody => 'Go Pro for unlimited sorting.';
+
+  @override
+  String get sortingAssignSheetTitle => 'Which board should this go to?';
+
+  @override
+  String get sortingHintDelete => 'Delete';
+
+  @override
+  String get sortingHintAssign => 'Add to board';
+
+  @override
+  String get sortingHintSkip => 'Skip';
+
+  @override
+  String sortingRemainingCount(int count) {
+    return '$count left';
+  }
+
+  @override
+  String get sortingDeleteFailed => 'Couldn\'t delete the screenshot.';
+
+  @override
+  String get bulkSelectAction => 'Select';
+
+  @override
+  String bulkSelectionCount(int count) {
+    return '$count selected';
+  }
+
+  @override
+  String get bulkDeleteAction => 'Delete selected';
+
+  @override
+  String get bulkDeleteFailed =>
+      'Couldn\'t delete the selected screenshots. Please try again.';
 }

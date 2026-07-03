@@ -106,5 +106,29 @@
   "searchPrompt": "Start typing to search",
   "searchEmpty": "No results found",
   "searchLockedTitle": "Search is a Pro feature",
-  "searchLockedBody": "Go Pro to search across tags and screenshot text."
+  "searchLockedBody": "Go Pro to search across tags and screenshot text.",
+  "sortingEmptyTitle": "Nothing left to sort",
+  "sortingEmptyBody": "All your screenshots look organized.",
+  "sortingLimitTitle": "Your free sorting quota is used up",
+  "sortingLimitBody": "Go Pro for unlimited sorting.",
+  "sortingAssignSheetTitle": "Which board should this go to?",
+  "sortingHintDelete": "Delete",
+  "sortingHintAssign": "Add to board",
+  "sortingHintSkip": "Skip",
+  "sortingRemainingCount": "{count} left",
+  "@sortingRemainingCount": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "sortingDeleteFailed": "Couldn't delete the screenshot.",
+  "bulkSelectAction": "Select",
+  "bulkSelectionCount": "{count} selected",
+  "@bulkSelectionCount": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "bulkDeleteAction": "Delete selected",
+  "bulkDeleteFailed": "Couldn't delete the selected screenshots. Please try again."
 }

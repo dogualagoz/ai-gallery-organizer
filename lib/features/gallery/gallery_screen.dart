@@ -26,6 +26,11 @@ class GalleryScreen extends ConsumerWidget {
         title: Text(l10n.galleryTitle),
         actions: [
           IconButton(
+            tooltip: l10n.sortingTitle,
+            icon: const Icon(Icons.swipe_outlined),
+            onPressed: () => context.push(AppRoutes.sorting),
+          ),
+          IconButton(
             tooltip: l10n.searchTitle,
             icon: const Icon(Icons.search),
             onPressed: () => context.push(AppRoutes.search),

@@ -106,5 +106,29 @@
   "searchPrompt": "Aramak için yazmaya başla",
   "searchEmpty": "Sonuç bulunamadı",
   "searchLockedTitle": "Arama bir Pro özelliği",
-  "searchLockedBody": "Etiket ve görsel metinlerinde arama yapmak için Pro'ya geç."
+  "searchLockedBody": "Etiket ve görsel metinlerinde arama yapmak için Pro'ya geç.",
+  "sortingEmptyTitle": "Sıralanacak bir şey kalmadı",
+  "sortingEmptyBody": "Tüm ekran görüntülerin düzenli görünüyor.",
+  "sortingLimitTitle": "Ücretsiz sıralama hakkın doldu",
+  "sortingLimitBody": "Sınırsız sıralama için Pro'ya geç.",
+  "sortingAssignSheetTitle": "Hangi panoya eklensin?",
+  "sortingHintDelete": "Sil",
+  "sortingHintAssign": "Panoya ekle",
+  "sortingHintSkip": "Atla",
+  "sortingRemainingCount": "{count} kaldı",
+  "@sortingRemainingCount": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "sortingDeleteFailed": "Ekran görüntüsü silinemedi.",
+  "bulkSelectAction": "Seç",
+  "bulkSelectionCount": "{count} seçildi",
+  "@bulkSelectionCount": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "bulkDeleteAction": "Seçilenleri sil",
+  "bulkDeleteFailed": "Seçilenler silinemedi. Lütfen tekrar dene."
 }

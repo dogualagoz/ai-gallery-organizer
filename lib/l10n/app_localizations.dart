@@ -577,6 +577,90 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Go Pro to search across tags and screenshot text.'**
   String get searchLockedBody;
+
+  /// No description provided for @sortingEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing left to sort'**
+  String get sortingEmptyTitle;
+
+  /// No description provided for @sortingEmptyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'All your screenshots look organized.'**
+  String get sortingEmptyBody;
+
+  /// No description provided for @sortingLimitTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your free sorting quota is used up'**
+  String get sortingLimitTitle;
+
+  /// No description provided for @sortingLimitBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Go Pro for unlimited sorting.'**
+  String get sortingLimitBody;
+
+  /// No description provided for @sortingAssignSheetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Which board should this go to?'**
+  String get sortingAssignSheetTitle;
+
+  /// No description provided for @sortingHintDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get sortingHintDelete;
+
+  /// No description provided for @sortingHintAssign.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to board'**
+  String get sortingHintAssign;
+
+  /// No description provided for @sortingHintSkip.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip'**
+  String get sortingHintSkip;
+
+  /// No description provided for @sortingRemainingCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} left'**
+  String sortingRemainingCount(int count);
+
+  /// No description provided for @sortingDeleteFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t delete the screenshot.'**
+  String get sortingDeleteFailed;
+
+  /// No description provided for @bulkSelectAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Select'**
+  String get bulkSelectAction;
+
+  /// No description provided for @bulkSelectionCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} selected'**
+  String bulkSelectionCount(int count);
+
+  /// No description provided for @bulkDeleteAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete selected'**
+  String get bulkDeleteAction;
+
+  /// No description provided for @bulkDeleteFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t delete the selected screenshots. Please try again.'**
+  String get bulkDeleteFailed;
 }
 
 class _AppLocalizationsDelegate

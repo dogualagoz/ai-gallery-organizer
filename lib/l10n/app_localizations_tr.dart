@@ -267,4 +267,50 @@ class AppLocalizationsTr extends AppLocalizations {
   @override
   String get searchLockedBody =>
       'Etiket ve görsel metinlerinde arama yapmak için Pro\'ya geç.';
+
+  @override
+  String get sortingEmptyTitle => 'Sıralanacak bir şey kalmadı';
+
+  @override
+  String get sortingEmptyBody => 'Tüm ekran görüntülerin düzenli görünüyor.';
+
+  @override
+  String get sortingLimitTitle => 'Ücretsiz sıralama hakkın doldu';
+
+  @override
+  String get sortingLimitBody => 'Sınırsız sıralama için Pro\'ya geç.';
+
+  @override
+  String get sortingAssignSheetTitle => 'Hangi panoya eklensin?';
+
+  @override
+  String get sortingHintDelete => 'Sil';
+
+  @override
+  String get sortingHintAssign => 'Panoya ekle';
+
+  @override
+  String get sortingHintSkip => 'Atla';
+
+  @override
+  String sortingRemainingCount(int count) {
+    return '$count kaldı';
+  }
+
+  @override
+  String get sortingDeleteFailed => 'Ekran görüntüsü silinemedi.';
+
+  @override
+  String get bulkSelectAction => 'Seç';
+
+  @override
+  String bulkSelectionCount(int count) {
+    return '$count seçildi';
+  }
+
+  @override
+  String get bulkDeleteAction => 'Seçilenleri sil';
+
+  @override
+  String get bulkDeleteFailed => 'Seçilenler silinemedi. Lütfen tekrar dene.';
 }
