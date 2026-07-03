@@ -210,4 +210,63 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get categoryOther => 'Other';
+
+  @override
+  String get cancelAction => 'Cancel';
+
+  @override
+  String get boardsSystemSection => 'Categories';
+
+  @override
+  String get boardsCustomSection => 'My boards';
+
+  @override
+  String get boardsNewBoardAction => 'New board';
+
+  @override
+  String get boardsNewBoardDialogTitle => 'New board';
+
+  @override
+  String get boardsNewBoardHint => 'Board name';
+
+  @override
+  String get boardsCreateAction => 'Create';
+
+  @override
+  String get boardsRenameAction => 'Rename';
+
+  @override
+  String get boardsRenameDialogTitle => 'Rename board';
+
+  @override
+  String get boardsDeleteAction => 'Delete board';
+
+  @override
+  String get boardsDeleteConfirmTitle => 'Delete this board?';
+
+  @override
+  String get boardsDeleteConfirmBody =>
+      'Screenshots inside won\'t be deleted, only removed from this board.';
+
+  @override
+  String get boardsLimitTitle => 'You\'ve reached the free board limit';
+
+  @override
+  String get boardDetailEmpty => 'No screenshots here yet';
+
+  @override
+  String get searchHint => 'Search tags, text, or category';
+
+  @override
+  String get searchPrompt => 'Start typing to search';
+
+  @override
+  String get searchEmpty => 'No results found';
+
+  @override
+  String get searchLockedTitle => 'Search is a Pro feature';
+
+  @override
+  String get searchLockedBody =>
+      'Go Pro to search across tags and screenshot text.';
 }

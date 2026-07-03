@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../features/boards/board_detail_screen.dart';
 import '../../features/boards/boards_screen.dart';
 import '../../features/detail/detail_screen.dart';
 import '../../features/gallery/gallery_screen.dart';
@@ -12,6 +13,7 @@ import '../../features/search/search_screen.dart';
 import '../../features/settings/settings_screen.dart';
 import '../../features/sorting/sorting_screen.dart';
 import '../l10n/l10n_extension.dart';
+import '../models/screenshot_category.dart';
 import '../services/preferences_service.dart';
 
 /// Rota yolları — string tekrarını önlemek için tek yerde.
@@ -26,6 +28,13 @@ abstract final class AppRoutes {
 
   /// Detay rotası assetId parametresi alır.
   static String detail(String assetId) => '/detail/$assetId';
+
+  /// Sistem kategori board'u rotası.
+  static String boardCategory(ScreenshotCategory category) =>
+      '/boards/category/${category.wireName}';
+
+  /// Kullanıcı board'u rotası.
+  static String boardCustom(String boardId) => '/boards/custom/$boardId';
 }
 
 final appRouterProvider = Provider<GoRouter>((ref) {
@@ -80,6 +89,20 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/detail/:assetId',
         builder: (context, state) =>
             DetailScreen(assetId: state.pathParameters['assetId']!),
+      ),
+      GoRoute(
+        path: '/boards/category/:category',
+        builder: (context, state) => BoardDetailScreen.category(
+          category: ScreenshotCategory.fromWire(
+            state.pathParameters['category'],
+          ),
+        ),
+      ),
+      GoRoute(
+        path: '/boards/custom/:boardId',
+        builder: (context, state) => BoardDetailScreen.custom(
+          boardId: state.pathParameters['boardId']!,
+        ),
       ),
       GoRoute(
         path: AppRoutes.search,

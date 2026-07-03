@@ -463,6 +463,120 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Other'**
   String get categoryOther;
+
+  /// No description provided for @cancelAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get cancelAction;
+
+  /// No description provided for @boardsSystemSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Categories'**
+  String get boardsSystemSection;
+
+  /// No description provided for @boardsCustomSection.
+  ///
+  /// In en, this message translates to:
+  /// **'My boards'**
+  String get boardsCustomSection;
+
+  /// No description provided for @boardsNewBoardAction.
+  ///
+  /// In en, this message translates to:
+  /// **'New board'**
+  String get boardsNewBoardAction;
+
+  /// No description provided for @boardsNewBoardDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'New board'**
+  String get boardsNewBoardDialogTitle;
+
+  /// No description provided for @boardsNewBoardHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Board name'**
+  String get boardsNewBoardHint;
+
+  /// No description provided for @boardsCreateAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Create'**
+  String get boardsCreateAction;
+
+  /// No description provided for @boardsRenameAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Rename'**
+  String get boardsRenameAction;
+
+  /// No description provided for @boardsRenameDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Rename board'**
+  String get boardsRenameDialogTitle;
+
+  /// No description provided for @boardsDeleteAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete board'**
+  String get boardsDeleteAction;
+
+  /// No description provided for @boardsDeleteConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this board?'**
+  String get boardsDeleteConfirmTitle;
+
+  /// No description provided for @boardsDeleteConfirmBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Screenshots inside won\'t be deleted, only removed from this board.'**
+  String get boardsDeleteConfirmBody;
+
+  /// No description provided for @boardsLimitTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ve reached the free board limit'**
+  String get boardsLimitTitle;
+
+  /// No description provided for @boardDetailEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No screenshots here yet'**
+  String get boardDetailEmpty;
+
+  /// No description provided for @searchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search tags, text, or category'**
+  String get searchHint;
+
+  /// No description provided for @searchPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Start typing to search'**
+  String get searchPrompt;
+
+  /// No description provided for @searchEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No results found'**
+  String get searchEmpty;
+
+  /// No description provided for @searchLockedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Search is a Pro feature'**
+  String get searchLockedTitle;
+
+  /// No description provided for @searchLockedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Go Pro to search across tags and screenshot text.'**
+  String get searchLockedBody;
 }
 
 class _AppLocalizationsDelegate

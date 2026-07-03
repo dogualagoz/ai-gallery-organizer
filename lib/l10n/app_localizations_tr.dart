@@ -208,4 +208,63 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get categoryOther => 'Diğer';
+
+  @override
+  String get cancelAction => 'İptal';
+
+  @override
+  String get boardsSystemSection => 'Kategoriler';
+
+  @override
+  String get boardsCustomSection => 'Panolarım';
+
+  @override
+  String get boardsNewBoardAction => 'Yeni pano';
+
+  @override
+  String get boardsNewBoardDialogTitle => 'Yeni pano';
+
+  @override
+  String get boardsNewBoardHint => 'Pano adı';
+
+  @override
+  String get boardsCreateAction => 'Oluştur';
+
+  @override
+  String get boardsRenameAction => 'Yeniden adlandır';
+
+  @override
+  String get boardsRenameDialogTitle => 'Panoyu yeniden adlandır';
+
+  @override
+  String get boardsDeleteAction => 'Panoyu sil';
+
+  @override
+  String get boardsDeleteConfirmTitle => 'Pano silinsin mi?';
+
+  @override
+  String get boardsDeleteConfirmBody =>
+      'İçindeki ekran görüntüleri silinmez, yalnızca pano bağlantıları kaldırılır.';
+
+  @override
+  String get boardsLimitTitle => 'Ücretsiz pano limitine ulaştın';
+
+  @override
+  String get boardDetailEmpty => 'Burada henüz ekran görüntüsü yok';
+
+  @override
+  String get searchHint => 'Etiket, metin veya kategori ara';
+
+  @override
+  String get searchPrompt => 'Aramak için yazmaya başla';
+
+  @override
+  String get searchEmpty => 'Sonuç bulunamadı';
+
+  @override
+  String get searchLockedTitle => 'Arama bir Pro özelliği';
+
+  @override
+  String get searchLockedBody =>
+      'Etiket ve görsel metinlerinde arama yapmak için Pro\'ya geç.';
 }
