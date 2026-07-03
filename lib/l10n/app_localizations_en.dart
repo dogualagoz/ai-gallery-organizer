@@ -55,4 +55,44 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get comingSoon => 'Coming soon';
+
+  @override
+  String get onboardingTitle1 => 'Your screenshots, finally sorted';
+
+  @override
+  String get onboardingBody1 =>
+      'Snaply finds every screenshot in your library and files it into tidy boards — automatically.';
+
+  @override
+  String get onboardingTitle2 => 'Private by design';
+
+  @override
+  String get onboardingBody2 =>
+      'Your screenshots stay on your device. Each one is briefly analyzed to label it, nothing is stored anywhere else.';
+
+  @override
+  String get onboardingTitle3 => 'Allow photo access';
+
+  @override
+  String get onboardingBody3 =>
+      'To find and organize your screenshots, Snaply needs access to your photo library. You stay in control.';
+
+  @override
+  String get onboardingContinue => 'Continue';
+
+  @override
+  String get onboardingStart => 'Allow and start';
+
+  @override
+  String get permissionDeniedTitle => 'Photo access needed';
+
+  @override
+  String get permissionDeniedBody =>
+      'Snaply can\'t see your screenshots without permission. You can enable access in Settings.';
+
+  @override
+  String get openSettings => 'Open Settings';
+
+  @override
+  String get notNow => 'Not now';
 }

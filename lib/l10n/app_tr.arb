@@ -15,5 +15,17 @@
   "sortingTitle": "Sırala",
   "paywallTitle": "Pro'ya Geç",
   "detailTitle": "Detay",
-  "comingSoon": "Çok yakında"
+  "comingSoon": "Çok yakında",
+  "onboardingTitle1": "Ekran görüntülerin nihayet düzenli",
+  "onboardingBody1": "Snaply galerindeki tüm ekran görüntülerini bulur ve otomatik olarak düzenli panolara yerleştirir.",
+  "onboardingTitle2": "Tasarımı gereği gizli",
+  "onboardingBody2": "Ekran görüntülerin cihazında kalır. Her biri yalnızca etiketlenmek için kısaca analiz edilir, başka hiçbir yerde saklanmaz.",
+  "onboardingTitle3": "Fotoğraf erişimine izin ver",
+  "onboardingBody3": "Snaply'nin ekran görüntülerini bulup düzenleyebilmesi için fotoğraf kütüphanesine erişmesi gerekiyor. Kontrol sende.",
+  "onboardingContinue": "Devam",
+  "onboardingStart": "İzin ver ve başla",
+  "permissionDeniedTitle": "Fotoğraf erişimi gerekli",
+  "permissionDeniedBody": "İzin olmadan Snaply ekran görüntülerini göremez. Erişimi Ayarlar'dan açabilirsin.",
+  "openSettings": "Ayarları Aç",
+  "notNow": "Şimdi değil"
 }

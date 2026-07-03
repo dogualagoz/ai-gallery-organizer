@@ -15,5 +15,17 @@
   "sortingTitle": "Sort",
   "paywallTitle": "Go Pro",
   "detailTitle": "Details",
-  "comingSoon": "Coming soon"
+  "comingSoon": "Coming soon",
+  "onboardingTitle1": "Your screenshots, finally sorted",
+  "onboardingBody1": "Snaply finds every screenshot in your library and files it into tidy boards — automatically.",
+  "onboardingTitle2": "Private by design",
+  "onboardingBody2": "Your screenshots stay on your device. Each one is briefly analyzed to label it, nothing is stored anywhere else.",
+  "onboardingTitle3": "Allow photo access",
+  "onboardingBody3": "To find and organize your screenshots, Snaply needs access to your photo library. You stay in control.",
+  "onboardingContinue": "Continue",
+  "onboardingStart": "Allow and start",
+  "permissionDeniedTitle": "Photo access needed",
+  "permissionDeniedBody": "Snaply can't see your screenshots without permission. You can enable access in Settings.",
+  "openSettings": "Open Settings",
+  "notNow": "Not now"
 }
