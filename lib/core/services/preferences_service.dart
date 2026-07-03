@@ -21,8 +21,8 @@ abstract final class PrefKeys {
 /// Onboarding tamamlandı bilgisi (router redirect bunu izler).
 final onboardingCompleteProvider =
     NotifierProvider<OnboardingCompleteNotifier, bool>(
-  OnboardingCompleteNotifier.new,
-);
+      OnboardingCompleteNotifier.new,
+    );
 
 class OnboardingCompleteNotifier extends Notifier<bool> {
   @override
@@ -49,8 +49,9 @@ final themeModeProvider = NotifierProvider<ThemeModeNotifier, ThemeMode>(
 class ThemeModeNotifier extends Notifier<ThemeMode> {
   @override
   ThemeMode build() {
-    final String? stored =
-        ref.read(sharedPreferencesProvider).getString(PrefKeys.themeMode);
+    final String? stored = ref
+        .read(sharedPreferencesProvider)
+        .getString(PrefKeys.themeMode);
     return ThemeMode.values.firstWhere(
       (mode) => mode.name == stored,
       // Ürün kararı: default açık tema (sistem değil).

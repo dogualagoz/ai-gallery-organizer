@@ -134,6 +134,61 @@ class AppLocalizationsTr extends AppLocalizations {
   String get detailOcrTitle => 'Görseldeki metin';
 
   @override
+  String get detailAnalyzeNow => 'Şimdi analiz et';
+
+  @override
+  String get detailShare => 'Paylaş';
+
+  @override
+  String get detailDelete => 'Sil';
+
+  @override
+  String get detailShareFailed => 'Paylaşım açılamadı. Lütfen tekrar dene.';
+
+  @override
+  String get detailDeleteFailed =>
+      'Ekran görüntüsü silinemedi. Lütfen tekrar dene.';
+
+  @override
+  String analysisPendingBanner(int count) {
+    return '$count ekran görüntüsü analiz bekliyor';
+  }
+
+  @override
+  String get analysisStartAction => 'Analiz et';
+
+  @override
+  String analysisProgress(int done, int total) {
+    return '$done/$total analiz edildi';
+  }
+
+  @override
+  String get analysisCancelAction => 'İptal';
+
+  @override
+  String analysisCompleted(int count) {
+    return '$count ekran görüntüsü analiz edildi';
+  }
+
+  @override
+  String analysisCompletedWithFailures(int done, int failed) {
+    return '$done analiz edildi, $failed başarısız';
+  }
+
+  @override
+  String get analysisFailedBanner =>
+      'Analiz başarısız oldu. Bağlantını kontrol edip tekrar dene.';
+
+  @override
+  String get analysisRetryAction => 'Tekrar dene';
+
+  @override
+  String get analysisLimitBanner => 'Ücretsiz analiz hakkın doldu.';
+
+  @override
+  String get dismissAction => 'Kapat';
+
+  @override
   String get categoryLockScreen => 'Kilit ekranı';
 
   @override

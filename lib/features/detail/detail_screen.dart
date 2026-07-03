@@ -10,6 +10,7 @@ import '../../core/l10n/l10n_extension.dart';
 import '../../core/models/screenshot_entry.dart';
 import '../gallery/data/screenshot_repository.dart';
 import '../gallery/providers/gallery_provider.dart';
+import 'widgets/detail_actions.dart';
 
 class DetailScreen extends ConsumerWidget {
   const DetailScreen({super.key, required this.assetId});
@@ -33,6 +34,8 @@ class DetailScreen extends ConsumerWidget {
               padding: const EdgeInsets.all(AppSpacing.md),
               children: [
                 _ScreenshotImage(assetId: assetId, asset: asset),
+                const SizedBox(height: AppSpacing.lg),
+                DetailActions(entry: entry, asset: asset),
                 const SizedBox(height: AppSpacing.lg),
                 _MetadataSection(entry: entry),
               ],
@@ -113,11 +116,7 @@ class _MetadataSection extends StatelessWidget {
       children: [
         if (entry.category != null)
           Chip(
-            avatar: Icon(
-              entry.category!.icon,
-              size: 18,
-              color: scheme.primary,
-            ),
+            avatar: Icon(entry.category!.icon, size: 18, color: scheme.primary),
             label: Text(entry.category!.label(l10n)),
           ),
         if (entry.tags.isNotEmpty) ...[
@@ -143,10 +142,7 @@ class _MetadataSection extends StatelessWidget {
               color: scheme.surfaceContainerHighest,
               borderRadius: BorderRadius.circular(AppRadius.md),
             ),
-            child: SelectableText(
-              entry.ocrText!,
-              style: textTheme.bodyMedium,
-            ),
+            child: SelectableText(entry.ocrText!, style: textTheme.bodyMedium),
           ),
         ],
       ],

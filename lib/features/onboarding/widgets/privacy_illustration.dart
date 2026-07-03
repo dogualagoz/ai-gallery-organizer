@@ -18,8 +18,10 @@ class _PrivacyIllustrationState extends State<PrivacyIllustration>
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(vsync: this, duration: AppDurations.scene * 2)
-      ..repeat();
+    _controller = AnimationController(
+      vsync: this,
+      duration: AppDurations.scene * 2,
+    )..repeat();
   }
 
   @override
@@ -56,11 +58,7 @@ class _PrivacyIllustrationState extends State<PrivacyIllustration>
             color: scheme.primary.withValues(alpha: 0.1),
             shape: BoxShape.circle,
           ),
-          child: Icon(
-            Icons.shield_outlined,
-            size: 64,
-            color: scheme.primary,
-          ),
+          child: Icon(Icons.shield_outlined, size: 64, color: scheme.primary),
         ),
       ),
     );

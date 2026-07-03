@@ -1,4 +1,4 @@
-// Ana galeri ekranı: screenshot ızgarası + eşitleme + boş/hata durumları.
+// Ana galeri ekranı: screenshot ızgarası + analiz banner'ı + eşitleme + boş/hata durumları.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -7,6 +7,7 @@ import '../../core/constants/ui_constants.dart';
 import '../../core/l10n/l10n_extension.dart';
 import '../../core/models/screenshot_entry.dart';
 import '../../core/router/app_router.dart';
+import '../analysis/widgets/analysis_banner.dart';
 import 'data/screenshot_repository.dart';
 import 'providers/gallery_provider.dart';
 import 'widgets/gallery_empty_state.dart';
@@ -38,9 +39,8 @@ class GalleryScreen extends ConsumerWidget {
       ),
       body: gallery.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => GalleryEmptyState(
-          onSync: () => _syncWithFeedback(context, ref),
-        ),
+        error: (error, _) =>
+            GalleryEmptyState(onSync: () => _syncWithFeedback(context, ref)),
         data: (entries) => entries.isEmpty
             ? GalleryEmptyState(onSync: () => _syncWithFeedback(context, ref))
             : _GalleryGrid(entries: entries),
@@ -53,10 +53,12 @@ class GalleryScreen extends ConsumerWidget {
     final String failureMessage = context.l10n.gallerySyncFailed;
     try {
       await ref.read(galleryProvider.notifier).sync();
-    } catch (_) {
+    } catch (error, stackTrace) {
+      debugPrint('Galeri manuel eşitleme hatası: $error\n$stackTrace');
       if (!context.mounted) return;
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(failureMessage)));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(failureMessage)));
     }
   }
 }
@@ -83,11 +85,21 @@ class _GalleryGrid extends ConsumerWidget {
               AppSpacing.sm,
             ),
             sliver: SliverToBoxAdapter(
-              child: Text(
-                context.l10n.galleryCount(entries.length),
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  AnalysisBanner(
+                    pendingCount: entries
+                        .where((entry) => entry.isPending)
+                        .length,
+                  ),
+                  Text(
+                    context.l10n.galleryCount(entries.length),
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
+                  ),
+                ],
               ),
             ),
           ),

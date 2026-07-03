@@ -42,9 +42,8 @@ class SettingsScreen extends ConsumerWidget {
               ),
             ],
             selected: {themeMode},
-            onSelectionChanged: (selection) => ref
-                .read(themeModeProvider.notifier)
-                .setMode(selection.first),
+            onSelectionChanged: (selection) =>
+                ref.read(themeModeProvider.notifier).setMode(selection.first),
           ),
           // TODO(blok8): Pro durumu, restore purchases, gizlilik/şartlar, versiyon.
         ],

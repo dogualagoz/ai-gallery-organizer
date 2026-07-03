@@ -44,6 +44,43 @@
   "detailNotAnalyzed": "Not analyzed yet",
   "detailTagsTitle": "Tags",
   "detailOcrTitle": "Text in screenshot",
+  "detailAnalyzeNow": "Analyze now",
+  "detailShare": "Share",
+  "detailDelete": "Delete",
+  "detailShareFailed": "Couldn't open the share sheet. Please try again.",
+  "detailDeleteFailed": "Couldn't delete the screenshot. Please try again.",
+  "analysisPendingBanner": "{count} screenshots waiting for analysis",
+  "@analysisPendingBanner": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "analysisStartAction": "Analyze",
+  "analysisProgress": "{done} of {total} analyzed",
+  "@analysisProgress": {
+    "placeholders": {
+      "done": {"type": "int"},
+      "total": {"type": "int"}
+    }
+  },
+  "analysisCancelAction": "Cancel",
+  "analysisCompleted": "{count} screenshots analyzed",
+  "@analysisCompleted": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "analysisCompletedWithFailures": "{done} analyzed, {failed} failed",
+  "@analysisCompletedWithFailures": {
+    "placeholders": {
+      "done": {"type": "int"},
+      "failed": {"type": "int"}
+    }
+  },
+  "analysisFailedBanner": "Analysis failed. Check your connection and try again.",
+  "analysisRetryAction": "Retry",
+  "analysisLimitBanner": "Your free analysis quota is used up.",
+  "dismissAction": "Dismiss",
   "categoryLockScreen": "Lock screen",
   "categorySocial": "Social",
   "categoryShopping": "Shopping",

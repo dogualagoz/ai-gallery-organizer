@@ -89,14 +89,26 @@ class ScreenshotRepository {
         break;
       }
     }
-    if (screenshotAlbum == null) {
-      debugPrint('ScreenshotRepository: Screenshots albümü bulunamadı');
-      return const [];
+    if (screenshotAlbum != null) {
+      final int count = await screenshotAlbum.assetCountAsync;
+      if (count > 0) {
+        return screenshotAlbum.getAssetListRange(start: 0, end: count);
+      }
     }
 
-    final int count = await screenshotAlbum.assetCountAsync;
-    if (count == 0) return const [];
-    return screenshotAlbum.getAssetListRange(start: 0, end: count);
+    // Simülatörde `simctl addmedia` ile eklenen görseller gerçek screenshot
+    // olarak sınıflanmadığından Screenshots albümü boş kalır; debug'da tüm
+    // görsellere düşülür ki AI akışı test edilebilsin.
+    if (kDebugMode && paths.isNotEmpty) {
+      debugPrint('ScreenshotRepository: debug fallback — tüm görseller');
+      final AssetPathEntity fallback = paths.first;
+      final int count = await fallback.assetCountAsync;
+      if (count == 0) return const [];
+      return fallback.getAssetListRange(start: 0, end: count);
+    }
+
+    debugPrint('ScreenshotRepository: Screenshots albümü bulunamadı/boş');
+    return const [];
   }
 
   /// AI analiz sonucunu kaydeder.

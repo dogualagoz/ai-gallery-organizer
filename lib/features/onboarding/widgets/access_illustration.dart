@@ -69,7 +69,11 @@ class _AccessIllustrationState extends State<AccessIllustration>
     // Kutucuklar soldan sağa, yukarıdan aşağıya sırayla belirir.
     final double t = CurvedAnimation(
       parent: _controller,
-      curve: Interval(index * 0.08, 0.6 + index * 0.04, curve: Curves.easeOutBack),
+      curve: Interval(
+        index * 0.08,
+        0.6 + index * 0.04,
+        curve: Curves.easeOutBack,
+      ),
     ).value;
 
     return Transform.scale(

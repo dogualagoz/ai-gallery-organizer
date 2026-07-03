@@ -74,8 +74,10 @@ class _SortIllustrationState extends State<SortIllustration>
   void initState() {
     super.initState();
     // Sürekli git-gel: dağınık <-> düzenli. Sakin bir tempo için uzun süre.
-    _controller = AnimationController(vsync: this, duration: AppDurations.scene * 2)
-      ..repeat(reverse: true);
+    _controller = AnimationController(
+      vsync: this,
+      duration: AppDurations.scene * 2,
+    )..repeat(reverse: true);
   }
 
   @override

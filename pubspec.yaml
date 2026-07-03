@@ -50,6 +50,7 @@ dependencies:
   firebase_core: ^4.11.0
   firebase_ai: ^3.13.1
   firebase_app_check: ^0.4.5
+  share_plus: ^13.2.0
 
 dev_dependencies:
   flutter_test:

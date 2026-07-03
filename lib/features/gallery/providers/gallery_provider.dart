@@ -11,8 +11,8 @@ import '../data/screenshot_repository.dart';
 /// box değişikliklerini dinleyerek güncel kalır (AI analizi yazınca vs.).
 final galleryProvider =
     AsyncNotifierProvider<GalleryNotifier, List<ScreenshotEntry>>(
-  GalleryNotifier.new,
-);
+      GalleryNotifier.new,
+    );
 
 class GalleryNotifier extends AsyncNotifier<List<ScreenshotEntry>> {
   Timer? _reloadDebounce;
@@ -23,8 +23,9 @@ class GalleryNotifier extends AsyncNotifier<List<ScreenshotEntry>> {
 
     // Toplu yazımlarda (sync/analiz) her put ayrı event üretir;
     // listeyi tek seferde yenilemek için kısa debounce uygulanır.
-    final StreamSubscription<void> subscription =
-        repo.watchChanges().listen((_) {
+    final StreamSubscription<void> subscription = repo.watchChanges().listen((
+      _,
+    ) {
       _reloadDebounce?.cancel();
       _reloadDebounce = Timer(const Duration(milliseconds: 100), () {
         state = AsyncData(repo.sortedEntries());

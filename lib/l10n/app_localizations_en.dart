@@ -135,6 +135,62 @@ class AppLocalizationsEn extends AppLocalizations {
   String get detailOcrTitle => 'Text in screenshot';
 
   @override
+  String get detailAnalyzeNow => 'Analyze now';
+
+  @override
+  String get detailShare => 'Share';
+
+  @override
+  String get detailDelete => 'Delete';
+
+  @override
+  String get detailShareFailed =>
+      'Couldn\'t open the share sheet. Please try again.';
+
+  @override
+  String get detailDeleteFailed =>
+      'Couldn\'t delete the screenshot. Please try again.';
+
+  @override
+  String analysisPendingBanner(int count) {
+    return '$count screenshots waiting for analysis';
+  }
+
+  @override
+  String get analysisStartAction => 'Analyze';
+
+  @override
+  String analysisProgress(int done, int total) {
+    return '$done of $total analyzed';
+  }
+
+  @override
+  String get analysisCancelAction => 'Cancel';
+
+  @override
+  String analysisCompleted(int count) {
+    return '$count screenshots analyzed';
+  }
+
+  @override
+  String analysisCompletedWithFailures(int done, int failed) {
+    return '$done analyzed, $failed failed';
+  }
+
+  @override
+  String get analysisFailedBanner =>
+      'Analysis failed. Check your connection and try again.';
+
+  @override
+  String get analysisRetryAction => 'Retry';
+
+  @override
+  String get analysisLimitBanner => 'Your free analysis quota is used up.';
+
+  @override
+  String get dismissAction => 'Dismiss';
+
+  @override
   String get categoryLockScreen => 'Lock screen';
 
   @override

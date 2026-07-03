@@ -1,0 +1,1 @@
+{"flutter":{"platforms":{"ios":{"default":{"projectId":"snaply-organizer","appId":"1:247796442185:ios:6d792437f919edd2a74b98","uploadDebugSymbols":false,"fileOutput":"ios/Runner/GoogleService-Info.plist"}},"dart":{"lib/firebase_options.dart":{"projectId":"snaply-organizer","configurations":{"ios":"1:247796442185:ios:6d792437f919edd2a74b98"}}}}}}

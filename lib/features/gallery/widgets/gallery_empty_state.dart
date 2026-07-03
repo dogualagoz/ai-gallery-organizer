@@ -42,9 +42,9 @@ class GalleryEmptyState extends StatelessWidget {
             const SizedBox(height: AppSpacing.sm),
             Text(
               l10n.galleryEmptyBody,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: scheme.onSurfaceVariant,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(color: scheme.onSurfaceVariant),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: AppSpacing.lg),

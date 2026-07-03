@@ -332,6 +332,96 @@ abstract class AppLocalizations {
   /// **'Text in screenshot'**
   String get detailOcrTitle;
 
+  /// No description provided for @detailAnalyzeNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Analyze now'**
+  String get detailAnalyzeNow;
+
+  /// No description provided for @detailShare.
+  ///
+  /// In en, this message translates to:
+  /// **'Share'**
+  String get detailShare;
+
+  /// No description provided for @detailDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get detailDelete;
+
+  /// No description provided for @detailShareFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t open the share sheet. Please try again.'**
+  String get detailShareFailed;
+
+  /// No description provided for @detailDeleteFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t delete the screenshot. Please try again.'**
+  String get detailDeleteFailed;
+
+  /// No description provided for @analysisPendingBanner.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} screenshots waiting for analysis'**
+  String analysisPendingBanner(int count);
+
+  /// No description provided for @analysisStartAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Analyze'**
+  String get analysisStartAction;
+
+  /// No description provided for @analysisProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'{done} of {total} analyzed'**
+  String analysisProgress(int done, int total);
+
+  /// No description provided for @analysisCancelAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get analysisCancelAction;
+
+  /// No description provided for @analysisCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} screenshots analyzed'**
+  String analysisCompleted(int count);
+
+  /// No description provided for @analysisCompletedWithFailures.
+  ///
+  /// In en, this message translates to:
+  /// **'{done} analyzed, {failed} failed'**
+  String analysisCompletedWithFailures(int done, int failed);
+
+  /// No description provided for @analysisFailedBanner.
+  ///
+  /// In en, this message translates to:
+  /// **'Analysis failed. Check your connection and try again.'**
+  String get analysisFailedBanner;
+
+  /// No description provided for @analysisRetryAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get analysisRetryAction;
+
+  /// No description provided for @analysisLimitBanner.
+  ///
+  /// In en, this message translates to:
+  /// **'Your free analysis quota is used up.'**
+  String get analysisLimitBanner;
+
+  /// No description provided for @dismissAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Dismiss'**
+  String get dismissAction;
+
   /// No description provided for @categoryLockScreen.
   ///
   /// In en, this message translates to:

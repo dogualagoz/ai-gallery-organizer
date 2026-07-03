@@ -50,24 +50,30 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state, navigationShell) =>
             _MainShell(navigationShell: navigationShell),
         branches: [
-          StatefulShellBranch(routes: [
-            GoRoute(
-              path: AppRoutes.gallery,
-              builder: (context, state) => const GalleryScreen(),
-            ),
-          ]),
-          StatefulShellBranch(routes: [
-            GoRoute(
-              path: AppRoutes.boards,
-              builder: (context, state) => const BoardsScreen(),
-            ),
-          ]),
-          StatefulShellBranch(routes: [
-            GoRoute(
-              path: AppRoutes.settings,
-              builder: (context, state) => const SettingsScreen(),
-            ),
-          ]),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: AppRoutes.gallery,
+                builder: (context, state) => const GalleryScreen(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: AppRoutes.boards,
+                builder: (context, state) => const BoardsScreen(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: AppRoutes.settings,
+                builder: (context, state) => const SettingsScreen(),
+              ),
+            ],
+          ),
         ],
       ),
       GoRoute(
@@ -86,10 +92,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.paywall,
         // Paywall alttan tam sayfa modal olarak açılır (iOS alışkanlığı).
-        pageBuilder: (context, state) => const MaterialPage(
-          fullscreenDialog: true,
-          child: PaywallScreen(),
-        ),
+        pageBuilder: (context, state) =>
+            const MaterialPage(fullscreenDialog: true, child: PaywallScreen()),
       ),
     ],
   );

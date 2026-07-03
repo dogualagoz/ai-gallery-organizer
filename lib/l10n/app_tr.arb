@@ -44,6 +44,43 @@
   "detailNotAnalyzed": "Henüz analiz edilmedi",
   "detailTagsTitle": "Etiketler",
   "detailOcrTitle": "Görseldeki metin",
+  "detailAnalyzeNow": "Şimdi analiz et",
+  "detailShare": "Paylaş",
+  "detailDelete": "Sil",
+  "detailShareFailed": "Paylaşım açılamadı. Lütfen tekrar dene.",
+  "detailDeleteFailed": "Ekran görüntüsü silinemedi. Lütfen tekrar dene.",
+  "analysisPendingBanner": "{count} ekran görüntüsü analiz bekliyor",
+  "@analysisPendingBanner": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "analysisStartAction": "Analiz et",
+  "analysisProgress": "{done}/{total} analiz edildi",
+  "@analysisProgress": {
+    "placeholders": {
+      "done": {"type": "int"},
+      "total": {"type": "int"}
+    }
+  },
+  "analysisCancelAction": "İptal",
+  "analysisCompleted": "{count} ekran görüntüsü analiz edildi",
+  "@analysisCompleted": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "analysisCompletedWithFailures": "{done} analiz edildi, {failed} başarısız",
+  "@analysisCompletedWithFailures": {
+    "placeholders": {
+      "done": {"type": "int"},
+      "failed": {"type": "int"}
+    }
+  },
+  "analysisFailedBanner": "Analiz başarısız oldu. Bağlantını kontrol edip tekrar dene.",
+  "analysisRetryAction": "Tekrar dene",
+  "analysisLimitBanner": "Ücretsiz analiz hakkın doldu.",
+  "dismissAction": "Kapat",
   "categoryLockScreen": "Kilit ekranı",
   "categorySocial": "Sosyal medya",
   "categoryShopping": "Alışveriş",

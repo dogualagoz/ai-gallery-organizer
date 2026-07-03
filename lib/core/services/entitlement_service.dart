@@ -37,7 +37,11 @@ class EntitlementState {
   bool get canSearch => isPro;
   bool get canBulkDelete => isPro;
 
-  EntitlementState copyWith({bool? isPro, int? aiAnalysisUsed, int? swipesUsed}) {
+  EntitlementState copyWith({
+    bool? isPro,
+    int? aiAnalysisUsed,
+    int? swipesUsed,
+  }) {
     return EntitlementState(
       isPro: isPro ?? this.isPro,
       aiAnalysisUsed: aiAnalysisUsed ?? this.aiAnalysisUsed,
@@ -48,8 +52,8 @@ class EntitlementState {
 
 final entitlementProvider =
     NotifierProvider<EntitlementNotifier, EntitlementState>(
-  EntitlementNotifier.new,
-);
+      EntitlementNotifier.new,
+    );
 
 class EntitlementNotifier extends Notifier<EntitlementState> {
   @override

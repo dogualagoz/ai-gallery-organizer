@@ -1,4 +1,5 @@
-// Uygulama giriş noktası: Hive + SharedPreferences başlatılır, ProviderScope kurulur.
+// Uygulama giriş noktası: Firebase + Hive + SharedPreferences başlatılır, ProviderScope kurulur.
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -8,6 +9,7 @@ import 'core/router/app_router.dart';
 import 'core/services/hive_service.dart';
 import 'core/services/preferences_service.dart';
 import 'core/theme/app_theme.dart';
+import 'firebase_options.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -15,6 +17,8 @@ Future<void> main() async {
   // Router redirect'i senkron okuma yaptığı için prefs açılışta yüklenir.
   final SharedPreferences prefs = await SharedPreferences.getInstance();
   await HiveService.init();
+  // AI analizi (firebase_ai) için gerekli; options ile plist'e bağımlılık kalmaz.
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   runApp(
     ProviderScope(
