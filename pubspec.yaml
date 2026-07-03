@@ -46,6 +46,7 @@ dependencies:
   in_app_purchase: ^3.3.0
   flutter_localizations:
     sdk: flutter
+  photo_manager_image_provider: ^2.2.0
 
 dev_dependencies:
   flutter_test:

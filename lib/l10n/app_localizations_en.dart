@@ -95,4 +95,63 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get notNow => 'Not now';
+
+  @override
+  String get gallerySyncTooltip => 'Sync library';
+
+  @override
+  String get galleryEmptyTitle => 'No screenshots yet';
+
+  @override
+  String get galleryEmptyBody =>
+      'Take a screenshot, or sync your library to bring existing ones in.';
+
+  @override
+  String get gallerySyncAction => 'Sync now';
+
+  @override
+  String get gallerySyncFailed =>
+      'Couldn\'t sync your library. Please try again.';
+
+  @override
+  String get galleryPermissionTitle => 'Snaply can\'t see your library';
+
+  @override
+  String get galleryPermissionBody =>
+      'Photo access is off. Enable it in Settings to organize your screenshots.';
+
+  @override
+  String galleryCount(int count) {
+    return '$count screenshots';
+  }
+
+  @override
+  String get detailNotAnalyzed => 'Not analyzed yet';
+
+  @override
+  String get detailTagsTitle => 'Tags';
+
+  @override
+  String get detailOcrTitle => 'Text in screenshot';
+
+  @override
+  String get categoryLockScreen => 'Lock screen';
+
+  @override
+  String get categorySocial => 'Social';
+
+  @override
+  String get categoryShopping => 'Shopping';
+
+  @override
+  String get categoryNotesPasswords => 'Notes & passwords';
+
+  @override
+  String get categoryMessages => 'Messages';
+
+  @override
+  String get categoryReceipts => 'Receipts';
+
+  @override
+  String get categoryOther => 'Other';
 }

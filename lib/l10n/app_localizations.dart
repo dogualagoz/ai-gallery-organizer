@@ -265,6 +265,114 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Not now'**
   String get notNow;
+
+  /// No description provided for @gallerySyncTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync library'**
+  String get gallerySyncTooltip;
+
+  /// No description provided for @galleryEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No screenshots yet'**
+  String get galleryEmptyTitle;
+
+  /// No description provided for @galleryEmptyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Take a screenshot, or sync your library to bring existing ones in.'**
+  String get galleryEmptyBody;
+
+  /// No description provided for @gallerySyncAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync now'**
+  String get gallerySyncAction;
+
+  /// No description provided for @gallerySyncFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t sync your library. Please try again.'**
+  String get gallerySyncFailed;
+
+  /// No description provided for @galleryPermissionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Snaply can\'t see your library'**
+  String get galleryPermissionTitle;
+
+  /// No description provided for @galleryPermissionBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo access is off. Enable it in Settings to organize your screenshots.'**
+  String get galleryPermissionBody;
+
+  /// No description provided for @galleryCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} screenshots'**
+  String galleryCount(int count);
+
+  /// No description provided for @detailNotAnalyzed.
+  ///
+  /// In en, this message translates to:
+  /// **'Not analyzed yet'**
+  String get detailNotAnalyzed;
+
+  /// No description provided for @detailTagsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Tags'**
+  String get detailTagsTitle;
+
+  /// No description provided for @detailOcrTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Text in screenshot'**
+  String get detailOcrTitle;
+
+  /// No description provided for @categoryLockScreen.
+  ///
+  /// In en, this message translates to:
+  /// **'Lock screen'**
+  String get categoryLockScreen;
+
+  /// No description provided for @categorySocial.
+  ///
+  /// In en, this message translates to:
+  /// **'Social'**
+  String get categorySocial;
+
+  /// No description provided for @categoryShopping.
+  ///
+  /// In en, this message translates to:
+  /// **'Shopping'**
+  String get categoryShopping;
+
+  /// No description provided for @categoryNotesPasswords.
+  ///
+  /// In en, this message translates to:
+  /// **'Notes & passwords'**
+  String get categoryNotesPasswords;
+
+  /// No description provided for @categoryMessages.
+  ///
+  /// In en, this message translates to:
+  /// **'Messages'**
+  String get categoryMessages;
+
+  /// No description provided for @categoryReceipts.
+  ///
+  /// In en, this message translates to:
+  /// **'Receipts'**
+  String get categoryReceipts;
+
+  /// No description provided for @categoryOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get categoryOther;
 }
 
 class _AppLocalizationsDelegate

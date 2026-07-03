@@ -27,5 +27,28 @@
   "permissionDeniedTitle": "Fotoğraf erişimi gerekli",
   "permissionDeniedBody": "İzin olmadan Snaply ekran görüntülerini göremez. Erişimi Ayarlar'dan açabilirsin.",
   "openSettings": "Ayarları Aç",
-  "notNow": "Şimdi değil"
+  "notNow": "Şimdi değil",
+  "gallerySyncTooltip": "Kütüphaneyi eşitle",
+  "galleryEmptyTitle": "Henüz ekran görüntüsü yok",
+  "galleryEmptyBody": "Bir ekran görüntüsü al ya da mevcut olanları getirmek için kütüphaneni eşitle.",
+  "gallerySyncAction": "Şimdi eşitle",
+  "gallerySyncFailed": "Kütüphane eşitlenemedi. Lütfen tekrar dene.",
+  "galleryPermissionTitle": "Snaply kütüphaneni göremiyor",
+  "galleryPermissionBody": "Fotoğraf erişimi kapalı. Ekran görüntülerini düzenlemek için Ayarlar'dan aç.",
+  "galleryCount": "{count} ekran görüntüsü",
+  "@galleryCount": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "detailNotAnalyzed": "Henüz analiz edilmedi",
+  "detailTagsTitle": "Etiketler",
+  "detailOcrTitle": "Görseldeki metin",
+  "categoryLockScreen": "Kilit ekranı",
+  "categorySocial": "Sosyal medya",
+  "categoryShopping": "Alışveriş",
+  "categoryNotesPasswords": "Not ve şifreler",
+  "categoryMessages": "Mesajlar",
+  "categoryReceipts": "Fatura ve makbuzlar",
+  "categoryOther": "Diğer"
 }

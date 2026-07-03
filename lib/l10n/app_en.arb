@@ -27,5 +27,28 @@
   "permissionDeniedTitle": "Photo access needed",
   "permissionDeniedBody": "Snaply can't see your screenshots without permission. You can enable access in Settings.",
   "openSettings": "Open Settings",
-  "notNow": "Not now"
+  "notNow": "Not now",
+  "gallerySyncTooltip": "Sync library",
+  "galleryEmptyTitle": "No screenshots yet",
+  "galleryEmptyBody": "Take a screenshot, or sync your library to bring existing ones in.",
+  "gallerySyncAction": "Sync now",
+  "gallerySyncFailed": "Couldn't sync your library. Please try again.",
+  "galleryPermissionTitle": "Snaply can't see your library",
+  "galleryPermissionBody": "Photo access is off. Enable it in Settings to organize your screenshots.",
+  "galleryCount": "{count} screenshots",
+  "@galleryCount": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "detailNotAnalyzed": "Not analyzed yet",
+  "detailTagsTitle": "Tags",
+  "detailOcrTitle": "Text in screenshot",
+  "categoryLockScreen": "Lock screen",
+  "categorySocial": "Social",
+  "categoryShopping": "Shopping",
+  "categoryNotesPasswords": "Notes & passwords",
+  "categoryMessages": "Messages",
+  "categoryReceipts": "Receipts",
+  "categoryOther": "Other"
 }

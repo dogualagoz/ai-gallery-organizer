@@ -95,4 +95,62 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get notNow => 'Şimdi değil';
+
+  @override
+  String get gallerySyncTooltip => 'Kütüphaneyi eşitle';
+
+  @override
+  String get galleryEmptyTitle => 'Henüz ekran görüntüsü yok';
+
+  @override
+  String get galleryEmptyBody =>
+      'Bir ekran görüntüsü al ya da mevcut olanları getirmek için kütüphaneni eşitle.';
+
+  @override
+  String get gallerySyncAction => 'Şimdi eşitle';
+
+  @override
+  String get gallerySyncFailed => 'Kütüphane eşitlenemedi. Lütfen tekrar dene.';
+
+  @override
+  String get galleryPermissionTitle => 'Snaply kütüphaneni göremiyor';
+
+  @override
+  String get galleryPermissionBody =>
+      'Fotoğraf erişimi kapalı. Ekran görüntülerini düzenlemek için Ayarlar\'dan aç.';
+
+  @override
+  String galleryCount(int count) {
+    return '$count ekran görüntüsü';
+  }
+
+  @override
+  String get detailNotAnalyzed => 'Henüz analiz edilmedi';
+
+  @override
+  String get detailTagsTitle => 'Etiketler';
+
+  @override
+  String get detailOcrTitle => 'Görseldeki metin';
+
+  @override
+  String get categoryLockScreen => 'Kilit ekranı';
+
+  @override
+  String get categorySocial => 'Sosyal medya';
+
+  @override
+  String get categoryShopping => 'Alışveriş';
+
+  @override
+  String get categoryNotesPasswords => 'Not ve şifreler';
+
+  @override
+  String get categoryMessages => 'Mesajlar';
+
+  @override
+  String get categoryReceipts => 'Fatura ve makbuzlar';
+
+  @override
+  String get categoryOther => 'Diğer';
 }
