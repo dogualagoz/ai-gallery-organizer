@@ -1,0 +1,19 @@
+{
+  "@@locale": "tr",
+  "appTitle": "Snaply",
+  "tabGallery": "Galeri",
+  "tabBoards": "Panolar",
+  "tabSettings": "Ayarlar",
+  "galleryTitle": "Ekran Görüntüleri",
+  "boardsTitle": "Panolar",
+  "settingsTitle": "Ayarlar",
+  "settingsTheme": "Görünüm",
+  "settingsThemeLight": "Açık",
+  "settingsThemeDark": "Koyu",
+  "settingsThemeSystem": "Sistem",
+  "searchTitle": "Ara",
+  "sortingTitle": "Sırala",
+  "paywallTitle": "Pro'ya Geç",
+  "detailTitle": "Detay",
+  "comingSoon": "Çok yakında"
+}

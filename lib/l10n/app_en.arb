@@ -1,0 +1,19 @@
+{
+  "@@locale": "en",
+  "appTitle": "Snaply",
+  "tabGallery": "Gallery",
+  "tabBoards": "Boards",
+  "tabSettings": "Settings",
+  "galleryTitle": "Screenshots",
+  "boardsTitle": "Boards",
+  "settingsTitle": "Settings",
+  "settingsTheme": "Appearance",
+  "settingsThemeLight": "Light",
+  "settingsThemeDark": "Dark",
+  "settingsThemeSystem": "System",
+  "searchTitle": "Search",
+  "sortingTitle": "Sort",
+  "paywallTitle": "Go Pro",
+  "detailTitle": "Details",
+  "comingSoon": "Coming soon"
+}
