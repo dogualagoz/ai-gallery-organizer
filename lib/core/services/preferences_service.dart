@@ -20,6 +20,7 @@ abstract final class PrefKeys {
   static const String aiDailyDate = 'ai_daily_date';
   static const String analysisCredits = 'analysis_credits';
   static const String deliveredPackTxIds = 'delivered_pack_tx_ids';
+  static const String autoSortEnabled = 'auto_sort_enabled';
 }
 
 /// Onboarding tamamlandı bilgisi (router redirect bunu izler).
@@ -68,5 +69,29 @@ class ThemeModeNotifier extends Notifier<ThemeMode> {
     await ref
         .read(sharedPreferencesProvider)
         .setString(PrefKeys.themeMode, mode.name);
+  }
+}
+
+/// Pro kullanıcının auto-sort tercihi (default açık). Free'de anlamsız —
+/// entitlement kontrolü ayrı yapılır, bu yalnız kullanıcı tercihini tutar.
+final autoSortEnabledProvider =
+    NotifierProvider<AutoSortEnabledNotifier, bool>(
+      AutoSortEnabledNotifier.new,
+    );
+
+class AutoSortEnabledNotifier extends Notifier<bool> {
+  @override
+  bool build() {
+    return ref
+            .read(sharedPreferencesProvider)
+            .getBool(PrefKeys.autoSortEnabled) ??
+        true;
+  }
+
+  Future<void> setEnabled(bool enabled) async {
+    state = enabled;
+    await ref
+        .read(sharedPreferencesProvider)
+        .setBool(PrefKeys.autoSortEnabled, enabled);
   }
 }

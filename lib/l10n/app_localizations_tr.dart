@@ -42,6 +42,21 @@ class AppLocalizationsTr extends AppLocalizations {
   String get settingsThemeSystem => 'Sistem';
 
   @override
+  String get autoSortPausedChip =>
+      'Otomatik düzenleme duraklatıldı — Pro\'ya geç';
+
+  @override
+  String get settingsSectionAutoSort => 'Otomatik düzenleme';
+
+  @override
+  String get settingsAutoSortTitle =>
+      'Yeni ekran görüntülerini otomatik sırala';
+
+  @override
+  String get settingsAutoSortSubtitle =>
+      'Yeni ekran görüntüsü geldiğinde arka planda çalışır';
+
+  @override
   String get searchTitle => 'Ara';
 
   @override

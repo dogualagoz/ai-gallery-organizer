@@ -164,6 +164,30 @@ abstract class AppLocalizations {
   /// **'System'**
   String get settingsThemeSystem;
 
+  /// No description provided for @autoSortPausedChip.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto-sort paused — upgrade to Pro'**
+  String get autoSortPausedChip;
+
+  /// No description provided for @settingsSectionAutoSort.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto-sort'**
+  String get settingsSectionAutoSort;
+
+  /// No description provided for @settingsAutoSortTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Automatically sort new screenshots'**
+  String get settingsAutoSortTitle;
+
+  /// No description provided for @settingsAutoSortSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Runs in the background whenever new screenshots appear'**
+  String get settingsAutoSortSubtitle;
+
   /// No description provided for @searchTitle.
   ///
   /// In en, this message translates to:

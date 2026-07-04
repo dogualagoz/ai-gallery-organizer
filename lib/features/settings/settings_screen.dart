@@ -56,6 +56,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           const SizedBox(height: AppSpacing.lg),
           const _ThemeSection(),
           const SizedBox(height: AppSpacing.lg),
+          _AutoSortSection(isPro: isPro),
+          const SizedBox(height: AppSpacing.lg),
           _PurchasesSection(
             pending: restorePending,
             onRestore: () {
@@ -214,6 +216,72 @@ class _ThemeSection extends ConsumerWidget {
           },
         ),
       ],
+    );
+  }
+}
+
+/// Auto-sort bölümü: Pro'da aç/kapa anahtarı, free'de kilitli satır → paywall.
+class _AutoSortSection extends ConsumerWidget {
+  const _AutoSortSection({required this.isPro});
+
+  final bool isPro;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          l10n.settingsSectionAutoSort,
+          style: Theme.of(context).textTheme.titleMedium,
+        ),
+        const SizedBox(height: AppSpacing.sm),
+        _SettingsGroup(
+          children: [
+            if (isPro)
+              _AutoSortSwitchTile(
+                title: l10n.settingsAutoSortTitle,
+                subtitle: l10n.settingsAutoSortSubtitle,
+              )
+            else
+              _SettingsTile(
+                icon: Icons.lock_outline,
+                label: l10n.settingsAutoSortTitle,
+                onTap: () => context.push(AppRoutes.paywall),
+              ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+/// Pro kullanıcı için auto-sort aç/kapa anahtarı.
+class _AutoSortSwitchTile extends ConsumerWidget {
+  const _AutoSortSwitchTile({required this.title, required this.subtitle});
+
+  final String title;
+  final String subtitle;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final bool enabled = ref.watch(autoSortEnabledProvider);
+    final ColorScheme scheme = Theme.of(context).colorScheme;
+
+    return SwitchListTile(
+      secondary: Icon(Icons.auto_awesome, color: scheme.primary),
+      title: Text(title, style: Theme.of(context).textTheme.bodyLarge),
+      subtitle: Text(
+        subtitle,
+        style: Theme.of(
+          context,
+        ).textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant),
+      ),
+      value: enabled,
+      onChanged: (value) =>
+          ref.read(autoSortEnabledProvider.notifier).setEnabled(value),
     );
   }
 }

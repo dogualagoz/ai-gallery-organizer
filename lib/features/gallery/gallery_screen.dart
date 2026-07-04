@@ -7,7 +7,10 @@ import '../../core/constants/ui_constants.dart';
 import '../../core/l10n/l10n_extension.dart';
 import '../../core/models/screenshot_entry.dart';
 import '../../core/router/app_router.dart';
+import '../../core/services/entitlement_service.dart';
+import '../analysis/providers/auto_sort_provider.dart';
 import '../analysis/widgets/analysis_banner.dart';
+import '../analysis/widgets/auto_sort_chip.dart';
 import 'data/screenshot_repository.dart';
 import 'providers/gallery_provider.dart';
 import 'widgets/gallery_empty_state.dart';
@@ -18,6 +21,9 @@ class GalleryScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Ekran boyunca yaşatılır: galeri güncellendikçe Pro kullanıcı için
+    // analiz kuyruğunu otomatik tetikler.
+    ref.watch(autoSortControllerProvider);
     final l10n = context.l10n;
     final gallery = ref.watch(galleryProvider);
 
@@ -77,6 +83,7 @@ class _GalleryGrid extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final repo = ref.watch(screenshotRepositoryProvider);
+    final bool isPro = ref.watch(entitlementProvider).isPro;
 
     return RefreshIndicator(
       onRefresh: () => ref.read(galleryProvider.notifier).sync(),
@@ -93,6 +100,7 @@ class _GalleryGrid extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  if (!isPro) const AutoSortChip(),
                   AnalysisBanner(
                     pendingCount: entries
                         .where((entry) => entry.isPending)

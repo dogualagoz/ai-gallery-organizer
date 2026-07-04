@@ -42,6 +42,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsThemeSystem => 'System';
 
   @override
+  String get autoSortPausedChip => 'Auto-sort paused — upgrade to Pro';
+
+  @override
+  String get settingsSectionAutoSort => 'Auto-sort';
+
+  @override
+  String get settingsAutoSortTitle => 'Automatically sort new screenshots';
+
+  @override
+  String get settingsAutoSortSubtitle =>
+      'Runs in the background whenever new screenshots appear';
+
+  @override
   String get searchTitle => 'Search';
 
   @override
