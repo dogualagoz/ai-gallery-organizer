@@ -157,14 +157,21 @@ class _SortingDeck extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final double bottomInset = MediaQuery.paddingOf(context).bottom;
+    // _MainShell'deki navbar boşluğunun BİREBİR aynısı: sm(üst) + pil + alt
+    // boşluk. Fazla pay bırakmak kartı yukarı kaydırıp altta boş alan
+    // bırakıyor, azı ise kartın altını pilin arkasında saklıyordu.
+    final double navBarClearance =
+        AppSpacing.sm +
+        AppSizes.navBarHeight +
+        (bottomInset > AppSpacing.md ? bottomInset : AppSpacing.md);
+
     return Padding(
-      // Alt kabuk sekmesi olarak yüzen navbar'ın arkasına uzanır (extendBody);
-      // deck kart+ipuçları navbar'ın altında kalmasın diye ekstra pay bırakılır.
       padding: EdgeInsets.fromLTRB(
         AppSpacing.lg,
         AppSpacing.lg,
         AppSpacing.lg,
-        AppSpacing.lg + AppSizes.navBarHeight + MediaQuery.paddingOf(context).bottom,
+        navBarClearance,
       ),
       child: Column(
         children: [
