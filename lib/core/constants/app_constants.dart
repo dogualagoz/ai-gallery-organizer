@@ -10,9 +10,6 @@ abstract final class FreeLimits {
 
   /// Ücretsiz manuel swipe sıralama hakkı.
   static const int swipeSorts = 100;
-
-  /// Ücretsiz özel board sayısı.
-  static const int customBoards = 3;
 }
 
 /// Hive box isimleri — tek yerden yönetilir, string tekrarını önler.

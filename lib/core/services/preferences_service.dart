@@ -18,6 +18,7 @@ abstract final class PrefKeys {
   static const String isPro = 'is_pro';
   static const String aiDailyCount = 'ai_daily_count';
   static const String aiDailyDate = 'ai_daily_date';
+  static const String analysisCredits = 'analysis_credits';
 }
 
 /// Onboarding tamamlandı bilgisi (router redirect bunu izler).

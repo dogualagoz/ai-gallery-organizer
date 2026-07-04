@@ -188,6 +188,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get analysisLimitBanner => 'Your free analysis quota is used up.';
 
   @override
+  String analysisLimitCompleted(int count) {
+    return '$count screenshots organized. Go Pro to keep going.';
+  }
+
+  @override
   String get analysisDailyCapBanner =>
       'Daily analysis limit reached. It will continue tomorrow.';
 
@@ -295,7 +300,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Screenshots inside won\'t be deleted, only removed from this board.';
 
   @override
-  String get boardsLimitTitle => 'You\'ve reached the free board limit';
+  String get boardsLimitTitle => 'Custom boards are a Pro feature';
 
   @override
   String get boardDetailEmpty => 'No screenshots here yet';

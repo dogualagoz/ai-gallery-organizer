@@ -1,5 +1,7 @@
 // Free/Pro yetki durumu ve free limit sayaçları (Bölüm 3 freemium modeli).
-// IAP entegrasyonu (Blok 7) isPro'yu buradan günceller.
+// IAP entegrasyonu isPro'yu ve analysisCredits'i buradan günceller.
+import 'dart:math';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../constants/app_constants.dart';
@@ -11,6 +13,7 @@ class EntitlementState {
     required this.isPro,
     required this.aiAnalysisUsed,
     required this.swipesUsed,
+    this.analysisCredits = 0,
   });
 
   final bool isPro;
@@ -21,17 +24,22 @@ class EntitlementState {
   /// Bugüne dek kullanılan manuel swipe sıralama sayısı.
   final int swipesUsed;
 
-  bool get canAnalyze => isPro || aiAnalysisUsed < FreeLimits.aiAnalysis;
+  /// Satın alınan analiz paketlerinden kalan kredi (free kota bitince kullanılır).
+  final int analysisCredits;
+
+  bool get canAnalyze => isPro || totalRemainingAnalysis > 0;
 
   bool get canSwipe => isPro || swipesUsed < FreeLimits.swipeSorts;
 
   /// Kalan ücretsiz analiz hakkı (Pro'da anlamsız, 0 altına düşmez).
-  int get remainingAnalysis =>
+  int get remainingFreeAnalysis =>
       (FreeLimits.aiAnalysis - aiAnalysisUsed).clamp(0, FreeLimits.aiAnalysis);
 
-  /// [boardCount] mevcut özel board sayısıyken yeni board açılabilir mi?
-  bool canCreateBoard(int boardCount) =>
-      isPro || boardCount < FreeLimits.customBoards;
+  /// Free kota + satın alınan kredilerin toplamı.
+  int get totalRemainingAnalysis => remainingFreeAnalysis + analysisCredits;
+
+  /// Özel pano oluşturma artık tamamen Pro'ya özel.
+  bool get canCreateBoards => isPro;
 
   /// Arama ve toplu silme yalnız Pro'da açık.
   bool get canSearch => isPro;
@@ -41,11 +49,13 @@ class EntitlementState {
     bool? isPro,
     int? aiAnalysisUsed,
     int? swipesUsed,
+    int? analysisCredits,
   }) {
     return EntitlementState(
       isPro: isPro ?? this.isPro,
       aiAnalysisUsed: aiAnalysisUsed ?? this.aiAnalysisUsed,
       swipesUsed: swipesUsed ?? this.swipesUsed,
+      analysisCredits: analysisCredits ?? this.analysisCredits,
     );
   }
 }
@@ -63,6 +73,7 @@ class EntitlementNotifier extends Notifier<EntitlementState> {
       isPro: prefs.getBool(PrefKeys.isPro) ?? false,
       aiAnalysisUsed: prefs.getInt(PrefKeys.aiAnalysisUsed) ?? 0,
       swipesUsed: prefs.getInt(PrefKeys.swipesUsed) ?? 0,
+      analysisCredits: prefs.getInt(PrefKeys.analysisCredits) ?? 0,
     );
   }
 
@@ -72,12 +83,28 @@ class EntitlementNotifier extends Notifier<EntitlementState> {
     await ref.read(sharedPreferencesProvider).setBool(PrefKeys.isPro, isPro);
   }
 
-  /// [count] adet analiz hakkı tüketir.
+  /// [count] adet analiz hakkı tüketir — önce free kota, taşan kısım kredilerden.
   Future<void> registerAnalysis(int count) async {
-    state = state.copyWith(aiAnalysisUsed: state.aiAnalysisUsed + count);
+    final int freeUsed = min(count, state.remainingFreeAnalysis);
+    final int creditUsed = count - freeUsed;
+    state = state.copyWith(
+      aiAnalysisUsed: state.aiAnalysisUsed + freeUsed,
+      analysisCredits: (state.analysisCredits - creditUsed).clamp(
+        0,
+        state.analysisCredits,
+      ),
+    );
+    final prefs = ref.read(sharedPreferencesProvider);
+    await prefs.setInt(PrefKeys.aiAnalysisUsed, state.aiAnalysisUsed);
+    await prefs.setInt(PrefKeys.analysisCredits, state.analysisCredits);
+  }
+
+  /// Satın alınan analiz paketi teslimatı (Blok 5: consumable IAP).
+  Future<void> addCredits(int amount) async {
+    state = state.copyWith(analysisCredits: state.analysisCredits + amount);
     await ref
         .read(sharedPreferencesProvider)
-        .setInt(PrefKeys.aiAnalysisUsed, state.aiAnalysisUsed);
+        .setInt(PrefKeys.analysisCredits, state.analysisCredits);
   }
 
   /// Tek swipe hakkı tüketir.

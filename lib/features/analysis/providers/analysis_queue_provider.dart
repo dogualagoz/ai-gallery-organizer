@@ -118,7 +118,7 @@ class AnalysisQueueNotifier extends Notifier<AnalysisQueueState> {
     }
     final int budget = entitlement.isPro
         ? pending.length
-        : min(pending.length, entitlement.remainingAnalysis);
+        : min(pending.length, entitlement.totalRemainingAnalysis);
 
     _cancelRequested = false;
     _dailyCapHit = false;

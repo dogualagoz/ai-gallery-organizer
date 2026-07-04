@@ -99,7 +99,7 @@ class _SortingScreenState extends ConsumerState<SortingScreen> {
     if (choice == null || !mounted) return;
 
     if (choice == _createNewBoardSentinel) {
-      await _createBoardAndAssign(assetId, boards.length);
+      await _createBoardAndAssign(assetId);
       return;
     }
     HapticFeedback.lightImpact();
@@ -107,9 +107,9 @@ class _SortingScreenState extends ConsumerState<SortingScreen> {
     await ref.read(entitlementProvider.notifier).registerSwipe();
   }
 
-  Future<void> _createBoardAndAssign(String assetId, int boardCount) async {
+  Future<void> _createBoardAndAssign(String assetId) async {
     final l10n = context.l10n;
-    if (!ref.read(entitlementProvider).canCreateBoard(boardCount)) {
+    if (!ref.read(entitlementProvider).canCreateBoards) {
       if (mounted) context.push(AppRoutes.paywall);
       return;
     }

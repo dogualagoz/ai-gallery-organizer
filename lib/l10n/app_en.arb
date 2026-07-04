@@ -80,6 +80,12 @@
   "analysisFailedBanner": "Analysis failed. Check your connection and try again.",
   "analysisRetryAction": "Retry",
   "analysisLimitBanner": "Your free analysis quota is used up.",
+  "analysisLimitCompleted": "{count} screenshots organized. Go Pro to keep going.",
+  "@analysisLimitCompleted": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
   "analysisDailyCapBanner": "Daily analysis limit reached. It will continue tomorrow.",
   "dismissAction": "Dismiss",
   "categoryLockScreen": "Lock screen",
@@ -115,7 +121,7 @@
   "boardsDeleteAction": "Delete board",
   "boardsDeleteConfirmTitle": "Delete this board?",
   "boardsDeleteConfirmBody": "Screenshots inside won't be deleted, only removed from this board.",
-  "boardsLimitTitle": "You've reached the free board limit",
+  "boardsLimitTitle": "Custom boards are a Pro feature",
   "boardDetailEmpty": "No screenshots here yet",
   "searchHint": "Search tags, text, or category",
   "searchPrompt": "Start typing to search",

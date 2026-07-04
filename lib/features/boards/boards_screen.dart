@@ -73,7 +73,7 @@ class BoardsScreen extends ConsumerWidget {
               boards: boards,
               entries: entries,
               repo: repo,
-              canCreate: entitlement.canCreateBoard(boards.length),
+              canCreate: entitlement.canCreateBoards,
             ),
           ),
         ],

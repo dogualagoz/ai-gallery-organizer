@@ -26,7 +26,7 @@ class AnalysisBanner extends ConsumerWidget {
       AnalysisQueueStatus.running => _RunningContent(queue: queue),
       AnalysisQueueStatus.completed => _CompletedContent(queue: queue),
       AnalysisQueueStatus.failed => const _FailedContent(),
-      AnalysisQueueStatus.limitReached => const _LimitContent(),
+      AnalysisQueueStatus.limitReached => _LimitContent(done: queue.done),
       AnalysisQueueStatus.dailyCapReached => const _DailyCapContent(),
     };
     if (content == null) return const SizedBox.shrink();
@@ -168,12 +168,18 @@ class _FailedContent extends ConsumerWidget {
   }
 }
 
-/// Free limit dolduğunda paywall çağrısı.
+/// Free limit dolduğunda paywall çağrısı. Bu turda başarı varsa "{count}
+/// gruplandırıldı" özetiyle gösterilir, yoksa genel limit mesajıyla.
 class _LimitContent extends ConsumerWidget {
-  const _LimitContent();
+  const _LimitContent({required this.done});
+
+  final int done;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final String message = done > 0
+        ? context.l10n.analysisLimitCompleted(done)
+        : context.l10n.analysisLimitBanner;
     return Row(
       children: [
         Icon(
@@ -183,10 +189,7 @@ class _LimitContent extends ConsumerWidget {
         ),
         const SizedBox(width: AppSpacing.sm),
         Expanded(
-          child: Text(
-            context.l10n.analysisLimitBanner,
-            style: Theme.of(context).textTheme.bodyMedium,
-          ),
+          child: Text(message, style: Theme.of(context).textTheme.bodyMedium),
         ),
         FilledButton.tonal(
           style: FilledButton.styleFrom(minimumSize: Size.zero),

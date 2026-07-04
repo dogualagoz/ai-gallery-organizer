@@ -80,6 +80,12 @@
   "analysisFailedBanner": "Analiz başarısız oldu. Bağlantını kontrol edip tekrar dene.",
   "analysisRetryAction": "Tekrar dene",
   "analysisLimitBanner": "Ücretsiz analiz hakkın doldu.",
+  "analysisLimitCompleted": "{count} ekran görüntüsü gruplandırıldı. Devam etmek için Pro'ya geç.",
+  "@analysisLimitCompleted": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
   "analysisDailyCapBanner": "Günlük analiz limiti doldu. Yarın kaldığı yerden devam eder.",
   "dismissAction": "Kapat",
   "categoryLockScreen": "Kilit ekranı",
@@ -115,7 +121,7 @@
   "boardsDeleteAction": "Panoyu sil",
   "boardsDeleteConfirmTitle": "Pano silinsin mi?",
   "boardsDeleteConfirmBody": "İçindeki ekran görüntüleri silinmez, yalnızca pano bağlantıları kaldırılır.",
-  "boardsLimitTitle": "Ücretsiz pano limitine ulaştın",
+  "boardsLimitTitle": "Özel panolar Pro'ya özel",
   "boardDetailEmpty": "Burada henüz ekran görüntüsü yok",
   "searchHint": "Etiket, metin veya kategori ara",
   "searchPrompt": "Aramak için yazmaya başla",

@@ -246,8 +246,8 @@ class _FeatureComparison extends StatelessWidget {
       ),
       (
         l10n.paywallFeatureBoards,
-        l10n.paywallLimitedValue(FreeLimits.customBoards),
-        l10n.paywallUnlimitedValue,
+        l10n.paywallLockedValue,
+        l10n.paywallUnlockedValue,
       ),
       (
         l10n.paywallFeatureSwipe,

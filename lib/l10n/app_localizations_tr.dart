@@ -186,6 +186,11 @@ class AppLocalizationsTr extends AppLocalizations {
   String get analysisLimitBanner => 'Ücretsiz analiz hakkın doldu.';
 
   @override
+  String analysisLimitCompleted(int count) {
+    return '$count ekran görüntüsü gruplandırıldı. Devam etmek için Pro\'ya geç.';
+  }
+
+  @override
   String get analysisDailyCapBanner =>
       'Günlük analiz limiti doldu. Yarın kaldığı yerden devam eder.';
 
@@ -293,7 +298,7 @@ class AppLocalizationsTr extends AppLocalizations {
       'İçindeki ekran görüntüleri silinmez, yalnızca pano bağlantıları kaldırılır.';
 
   @override
-  String get boardsLimitTitle => 'Ücretsiz pano limitine ulaştın';
+  String get boardsLimitTitle => 'Özel panolar Pro\'ya özel';
 
   @override
   String get boardDetailEmpty => 'Burada henüz ekran görüntüsü yok';

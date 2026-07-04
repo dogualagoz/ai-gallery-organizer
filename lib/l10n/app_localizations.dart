@@ -416,6 +416,12 @@ abstract class AppLocalizations {
   /// **'Your free analysis quota is used up.'**
   String get analysisLimitBanner;
 
+  /// No description provided for @analysisLimitCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} screenshots organized. Go Pro to keep going.'**
+  String analysisLimitCompleted(int count);
+
   /// No description provided for @analysisDailyCapBanner.
   ///
   /// In en, this message translates to:
@@ -629,7 +635,7 @@ abstract class AppLocalizations {
   /// No description provided for @boardsLimitTitle.
   ///
   /// In en, this message translates to:
-  /// **'You\'ve reached the free board limit'**
+  /// **'Custom boards are a Pro feature'**
   String get boardsLimitTitle;
 
   /// No description provided for @boardDetailEmpty.
