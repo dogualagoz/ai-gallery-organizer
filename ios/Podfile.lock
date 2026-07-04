@@ -78,6 +78,8 @@ PODS:
   - in_app_purchase_storekit (0.0.1):
     - Flutter
     - FlutterMacOS
+  - package_info_plus (0.4.5):
+    - Flutter
   - photo_manager (3.9.0):
     - Flutter
     - FlutterMacOS
@@ -100,6 +102,7 @@ DEPENDENCIES:
   - firebase_core (from `.symlinks/plugins/firebase_core/ios`)
   - Flutter (from `Flutter`)
   - in_app_purchase_storekit (from `.symlinks/plugins/in_app_purchase_storekit/darwin`)
+  - package_info_plus (from `.symlinks/plugins/package_info_plus/ios`)
   - photo_manager (from `.symlinks/plugins/photo_manager/darwin`)
   - share_plus (from `.symlinks/plugins/share_plus/ios`)
   - shared_preferences_foundation (from `.symlinks/plugins/shared_preferences_foundation/darwin`)
@@ -135,6 +138,8 @@ EXTERNAL SOURCES:
     :path: Flutter
   in_app_purchase_storekit:
     :path: ".symlinks/plugins/in_app_purchase_storekit/darwin"
+  package_info_plus:
+    :path: ".symlinks/plugins/package_info_plus/ios"
   photo_manager:
     :path: ".symlinks/plugins/photo_manager/darwin"
   share_plus:
@@ -162,6 +167,7 @@ SPEC CHECKSUMS:
   GoogleUtilities: 766ace00c6b10d8148408f329d10c4f051931850
   GTMSessionFetcher: 127211aeec0b1e904fc49f4f6f895dcc535b0ecf
   in_app_purchase_storekit: 22cca7d08eebca9babdf4d07d0baccb73325d3c8
+  package_info_plus: af8e2ca6888548050f16fa2f1938db7b5a5df499
   photo_manager: 25fd77df14f4f0ba5ef99e2c61814dde77e2bceb
   PromisesObjC: 752c3227f599e3467650e47ea36f433eeb10c273
   PromisesSwift: 217dea0fd5d2ad65222a109c48698add13cc1c5b

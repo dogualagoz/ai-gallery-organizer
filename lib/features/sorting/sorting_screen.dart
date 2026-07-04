@@ -1,6 +1,7 @@
 // Swipe sıralama ekranı: analiz edilmemiş/"diğer" screenshot'lar için
 // sola sil / sağa panoya ata / yukarı atla kart akışı.
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:photo_manager/photo_manager.dart';
@@ -61,8 +62,10 @@ class _SortingScreenState extends ConsumerState<SortingScreen> {
               remaining: queue.length,
               asset: repo.assetFor(queue.first.assetId),
               onDelete: () => _handleDelete(queue.first.assetId),
-              onSkip: () =>
-                  setState(() => _skippedIds.add(queue.first.assetId)),
+              onSkip: () {
+                HapticFeedback.selectionClick();
+                setState(() => _skippedIds.add(queue.first.assetId));
+              },
               onAssign: () => _handleAssign(queue.first.assetId),
             ),
     );
@@ -78,6 +81,7 @@ class _SortingScreenState extends ConsumerState<SortingScreen> {
       return false;
     }
     if (deleted.isEmpty) return false;
+    HapticFeedback.mediumImpact();
     await ref.read(screenshotRepositoryProvider).removeEntry(assetId);
     await ref.read(entitlementProvider.notifier).registerSwipe();
     return true;
@@ -98,6 +102,7 @@ class _SortingScreenState extends ConsumerState<SortingScreen> {
       await _createBoardAndAssign(assetId, boards.length);
       return;
     }
+    HapticFeedback.lightImpact();
     await ref.read(screenshotRepositoryProvider).assignToBoard(assetId, choice);
     await ref.read(entitlementProvider.notifier).registerSwipe();
   }

@@ -17,6 +17,18 @@ abstract final class AppRadius {
   static const double md = 12;
   static const double lg = 20;
   static const double xl = 28;
+
+  /// Tam yuvarlak hap formu (navbar, rozetler).
+  static const double pill = 40;
+}
+
+/// Sabit bileşen ölçüleri.
+abstract final class AppSizes {
+  static const double navBarHeight = 64;
+  static const double navBarIcon = 24;
+
+  /// Board kartlarındaki kapak şeridi yüksekliği referansı.
+  static const double boardCoverMin = 72;
 }
 
 /// Standart animasyon süreleri.

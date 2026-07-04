@@ -409,4 +409,34 @@ class AppLocalizationsTr extends AppLocalizations {
   @override
   String get paywallAutoRenewNote =>
       'Abonelikler seçilen dönem sonunda otomatik yenilenir; istediğin zaman App Store ayarlarından iptal edebilirsin.';
+
+  @override
+  String get settingsProActive => 'Snaply Pro üyesisin';
+
+  @override
+  String get settingsProActiveBody => 'Tüm özellikler açık. Teşekkürler!';
+
+  @override
+  String get settingsGoPro => 'Snaply Pro\'ya geç';
+
+  @override
+  String get settingsGoProBody =>
+      'Sınırsız analiz, pano ve arama seni bekliyor.';
+
+  @override
+  String get settingsPurchasesSection => 'Satın alımlar';
+
+  @override
+  String get settingsRestoreSuccess => 'Satın alımlar geri yüklendi.';
+
+  @override
+  String get settingsAboutSection => 'Hakkında';
+
+  @override
+  String settingsVersion(String version) {
+    return 'Sürüm $version';
+  }
+
+  @override
+  String get settingsLinkFailed => 'Bağlantı açılamadı. Lütfen tekrar dene.';
 }

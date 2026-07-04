@@ -829,6 +829,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Subscriptions renew automatically at the end of each period; cancel anytime in your App Store settings.'**
   String get paywallAutoRenewNote;
+
+  /// No description provided for @settingsProActive.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re on Snaply Pro'**
+  String get settingsProActive;
+
+  /// No description provided for @settingsProActiveBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Every feature is unlocked. Thank you!'**
+  String get settingsProActiveBody;
+
+  /// No description provided for @settingsGoPro.
+  ///
+  /// In en, this message translates to:
+  /// **'Upgrade to Snaply Pro'**
+  String get settingsGoPro;
+
+  /// No description provided for @settingsGoProBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlimited analysis, boards and search await.'**
+  String get settingsGoProBody;
+
+  /// No description provided for @settingsPurchasesSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Purchases'**
+  String get settingsPurchasesSection;
+
+  /// No description provided for @settingsRestoreSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Purchases restored.'**
+  String get settingsRestoreSuccess;
+
+  /// No description provided for @settingsAboutSection.
+  ///
+  /// In en, this message translates to:
+  /// **'About'**
+  String get settingsAboutSection;
+
+  /// No description provided for @settingsVersion.
+  ///
+  /// In en, this message translates to:
+  /// **'Version {version}'**
+  String settingsVersion(String version);
+
+  /// No description provided for @settingsLinkFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The link couldn\'t be opened. Please try again.'**
+  String get settingsLinkFailed;
 }
 
 class _AppLocalizationsDelegate

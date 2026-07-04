@@ -15,6 +15,7 @@ import '../../features/sorting/sorting_screen.dart';
 import '../l10n/l10n_extension.dart';
 import '../models/screenshot_category.dart';
 import '../services/preferences_service.dart';
+import '../widgets/glass_nav_bar.dart';
 
 /// Rota yolları — string tekrarını önlemek için tek yerde.
 abstract final class AppRoutes {
@@ -131,28 +132,30 @@ class _MainShell extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      // İçerik camın arkasından aksın diye gövde navbar'ın altına uzatılır.
+      extendBody: true,
       body: navigationShell,
-      bottomNavigationBar: NavigationBar(
+      bottomNavigationBar: GlassNavBar(
         selectedIndex: navigationShell.currentIndex,
-        onDestinationSelected: (index) => navigationShell.goBranch(
+        onSelected: (index) => navigationShell.goBranch(
           index,
           // Aynı sekmeye tekrar basınca kök ekrana döner (iOS davranışı).
           initialLocation: index == navigationShell.currentIndex,
         ),
         destinations: [
-          NavigationDestination(
-            icon: const Icon(Icons.grid_view_outlined),
-            selectedIcon: const Icon(Icons.grid_view_rounded),
+          GlassNavDestination(
+            icon: Icons.grid_view_outlined,
+            selectedIcon: Icons.grid_view_rounded,
             label: context.l10n.tabGallery,
           ),
-          NavigationDestination(
-            icon: const Icon(Icons.folder_outlined),
-            selectedIcon: const Icon(Icons.folder_rounded),
+          GlassNavDestination(
+            icon: Icons.folder_outlined,
+            selectedIcon: Icons.folder_rounded,
             label: context.l10n.tabBoards,
           ),
-          NavigationDestination(
-            icon: const Icon(Icons.settings_outlined),
-            selectedIcon: const Icon(Icons.settings_rounded),
+          GlassNavDestination(
+            icon: Icons.settings_outlined,
+            selectedIcon: Icons.settings_rounded,
             label: context.l10n.tabSettings,
           ),
         ],

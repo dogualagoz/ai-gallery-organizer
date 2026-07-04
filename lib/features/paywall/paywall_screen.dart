@@ -1,12 +1,13 @@
 // Paywall ekranı: özellik karşılaştırması + 3 plan kartı + IAP satın alma/restore.
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/constants/app_constants.dart';
 import '../../core/constants/ui_constants.dart';
 import '../../core/l10n/l10n_extension.dart';
+import '../../core/utils/link_opener.dart';
 import 'providers/purchase_provider.dart';
 
 class PaywallScreen extends ConsumerWidget {
@@ -21,6 +22,7 @@ class PaywallScreen extends ConsumerWidget {
 
     ref.listen(purchaseFlowProvider, (_, next) {
       if (next.status == PurchaseFlowStatus.success) {
+        HapticFeedback.mediumImpact();
         ref.read(purchaseFlowProvider.notifier).dismissError();
         if (context.mounted) Navigator.of(context).pop();
       } else if (next.status == PurchaseFlowStatus.error) {
@@ -99,7 +101,6 @@ class _PaywallContentState extends ConsumerState<_PaywallContent> {
     final l10n = context.l10n;
     final PurchaseFlowStatus status = ref.watch(purchaseFlowProvider).status;
     final bool busy = status == PurchaseFlowStatus.pending;
-    final ColorScheme scheme = Theme.of(context).colorScheme;
 
     return ListView(
       padding: const EdgeInsets.fromLTRB(
@@ -109,19 +110,7 @@ class _PaywallContentState extends ConsumerState<_PaywallContent> {
         AppSpacing.xl,
       ),
       children: [
-        Icon(Icons.workspace_premium_outlined, size: 48, color: scheme.primary),
-        const SizedBox(height: AppSpacing.sm),
-        Text(
-          l10n.paywallWelcomeTitle,
-          style: Theme.of(context).textTheme.headlineSmall,
-        ),
-        const SizedBox(height: AppSpacing.xs),
-        Text(
-          l10n.paywallSubtitle,
-          style: Theme.of(
-            context,
-          ).textTheme.bodyMedium?.copyWith(color: scheme.onSurfaceVariant),
-        ),
+        const _PaywallHeader(),
         const SizedBox(height: AppSpacing.lg),
         const _FeatureComparison(),
         const SizedBox(height: AppSpacing.lg),
@@ -136,10 +125,7 @@ class _PaywallContentState extends ConsumerState<_PaywallContent> {
           ),
         const SizedBox(height: AppSpacing.md),
         FilledButton(
-          onPressed: busy ? null : () => _buy(context),
-          style: FilledButton.styleFrom(
-            minimumSize: const Size.fromHeight(52),
-          ),
+          onPressed: busy ? null : _buy,
           child: busy
               ? const SizedBox.square(
                   dimension: 20,
@@ -147,14 +133,68 @@ class _PaywallContentState extends ConsumerState<_PaywallContent> {
                 )
               : Text(l10n.paywallContinueAction),
         ),
+        _PaywallFooter(busy: busy),
+      ],
+    );
+  }
+
+  Future<void> _buy() async {
+    final ProductDetails product = widget.products.firstWhere(
+      (p) => p.id == _selectedProductId,
+    );
+    await ref.read(purchaseFlowProvider.notifier).buy(product);
+  }
+}
+
+/// Üst kısım: rozet ikonu, başlık ve alt başlık.
+class _PaywallHeader extends StatelessWidget {
+  const _PaywallHeader();
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final ColorScheme scheme = Theme.of(context).colorScheme;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(Icons.workspace_premium_outlined, size: 48, color: scheme.primary),
         const SizedBox(height: AppSpacing.sm),
-        Center(
-          child: TextButton(
-            onPressed: busy
-                ? null
-                : () => ref.read(purchaseFlowProvider.notifier).restore(),
-            child: Text(l10n.paywallRestoreAction),
-          ),
+        Text(
+          l10n.paywallWelcomeTitle,
+          style: Theme.of(context).textTheme.headlineSmall,
+        ),
+        const SizedBox(height: AppSpacing.xs),
+        Text(
+          l10n.paywallSubtitle,
+          style: Theme.of(
+            context,
+          ).textTheme.bodyMedium?.copyWith(color: scheme.onSurfaceVariant),
+        ),
+      ],
+    );
+  }
+}
+
+/// Alt kısım: restore, otomatik yenileme notu ve yasal linkler.
+class _PaywallFooter extends ConsumerWidget {
+  const _PaywallFooter({required this.busy});
+
+  final bool busy;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
+    final ColorScheme scheme = Theme.of(context).colorScheme;
+
+    return Column(
+      children: [
+        const SizedBox(height: AppSpacing.sm),
+        TextButton(
+          onPressed: busy
+              ? null
+              : () => ref.read(purchaseFlowProvider.notifier).restore(),
+          child: Text(l10n.paywallRestoreAction),
         ),
         const SizedBox(height: AppSpacing.md),
         Text(
@@ -169,30 +209,24 @@ class _PaywallContentState extends ConsumerState<_PaywallContent> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             TextButton(
-              onPressed: () => _openUrl(LegalUrls.termsOfUse),
+              onPressed: () => openExternalUrl(context, LegalUrls.termsOfUse),
               child: Text(l10n.paywallTermsLink),
             ),
-            Text('·', style: TextStyle(color: scheme.onSurfaceVariant)),
+            Text(
+              '·',
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(color: scheme.onSurfaceVariant),
+            ),
             TextButton(
-              onPressed: () => _openUrl(LegalUrls.privacyPolicy),
+              onPressed: () =>
+                  openExternalUrl(context, LegalUrls.privacyPolicy),
               child: Text(l10n.paywallPrivacyLink),
             ),
           ],
         ),
       ],
     );
-  }
-
-  Future<void> _buy(BuildContext context) async {
-    final ProductDetails product = widget.products.firstWhere(
-      (p) => p.id == _selectedProductId,
-    );
-    await ref.read(purchaseFlowProvider.notifier).buy(product);
-  }
-
-  Future<void> _openUrl(String url) async {
-    final Uri uri = Uri.parse(url);
-    if (await canLaunchUrl(uri)) await launchUrl(uri);
   }
 }
 

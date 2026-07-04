@@ -178,5 +178,19 @@
   "paywallProductsUnavailable": "Plans couldn't be loaded right now. Please try again later.",
   "paywallTermsLink": "Terms of Use",
   "paywallPrivacyLink": "Privacy Policy",
-  "paywallAutoRenewNote": "Subscriptions renew automatically at the end of each period; cancel anytime in your App Store settings."
+  "paywallAutoRenewNote": "Subscriptions renew automatically at the end of each period; cancel anytime in your App Store settings.",
+  "settingsProActive": "You're on Snaply Pro",
+  "settingsProActiveBody": "Every feature is unlocked. Thank you!",
+  "settingsGoPro": "Upgrade to Snaply Pro",
+  "settingsGoProBody": "Unlimited analysis, boards and search await.",
+  "settingsPurchasesSection": "Purchases",
+  "settingsRestoreSuccess": "Purchases restored.",
+  "settingsAboutSection": "About",
+  "settingsVersion": "Version {version}",
+  "@settingsVersion": {
+    "placeholders": {
+      "version": {"type": "String"}
+    }
+  },
+  "settingsLinkFailed": "The link couldn't be opened. Please try again."
 }

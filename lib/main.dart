@@ -36,7 +36,8 @@ class SnaplyApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     // Paywall ekranı kapalıyken tamamlanan/restore edilen satın almaları
     // yakalayabilmek için stream dinleyicisini uygulama boyunca canlı tutar.
-    ref.watch(purchaseFlowProvider);
+    // listen (watch değil): durum değişimleri kök ağacı yeniden build etmesin.
+    ref.listen(purchaseFlowProvider, (_, _) {});
     return MaterialApp.router(
       onGenerateTitle: (context) => context.l10n.appTitle,
       debugShowCheckedModeBanner: false,

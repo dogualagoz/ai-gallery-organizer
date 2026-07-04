@@ -178,5 +178,19 @@
   "paywallProductsUnavailable": "Planlar şu anda yüklenemedi. Lütfen daha sonra tekrar dene.",
   "paywallTermsLink": "Kullanım Şartları",
   "paywallPrivacyLink": "Gizlilik Politikası",
-  "paywallAutoRenewNote": "Abonelikler seçilen dönem sonunda otomatik yenilenir; istediğin zaman App Store ayarlarından iptal edebilirsin."
+  "paywallAutoRenewNote": "Abonelikler seçilen dönem sonunda otomatik yenilenir; istediğin zaman App Store ayarlarından iptal edebilirsin.",
+  "settingsProActive": "Snaply Pro üyesisin",
+  "settingsProActiveBody": "Tüm özellikler açık. Teşekkürler!",
+  "settingsGoPro": "Snaply Pro'ya geç",
+  "settingsGoProBody": "Sınırsız analiz, pano ve arama seni bekliyor.",
+  "settingsPurchasesSection": "Satın alımlar",
+  "settingsRestoreSuccess": "Satın alımlar geri yüklendi.",
+  "settingsAboutSection": "Hakkında",
+  "settingsVersion": "Sürüm {version}",
+  "@settingsVersion": {
+    "placeholders": {
+      "version": {"type": "String"}
+    }
+  },
+  "settingsLinkFailed": "Bağlantı açılamadı. Lütfen tekrar dene."
 }

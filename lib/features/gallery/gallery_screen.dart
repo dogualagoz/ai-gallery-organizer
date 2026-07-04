@@ -109,11 +109,12 @@ class _GalleryGrid extends ConsumerWidget {
             ),
           ),
           SliverPadding(
-            padding: const EdgeInsets.fromLTRB(
+            padding: EdgeInsets.fromLTRB(
               AppSpacing.md,
               0,
               AppSpacing.md,
-              AppSpacing.lg,
+              // Yüzen navbar son satırı örtmesin diye alt boşluk eklenir.
+              MediaQuery.paddingOf(context).bottom + AppSpacing.md,
             ),
             sliver: SliverGrid.builder(
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(

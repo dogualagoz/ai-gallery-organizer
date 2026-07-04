@@ -1,26 +1,26 @@
-// Uygulama teması: açık (default) + koyu. Sıcak kağıt/mürekkep paleti,
-// tek canlı vurgu rengi (persimmon). Stash'ten bilinçli olarak farklı bir dil.
+// Uygulama teması: açık (default) + koyu. Serin sis zemin + mürekkep +
+// iris (çivit) vurgu ve menekşe ikincil renk. Modern iOS diline yakın.
 import 'package:flutter/material.dart';
 
 import '../constants/ui_constants.dart';
 
 /// Marka renkleri — ColorScheme dışında doğrudan kullanılmaz.
 abstract final class _BrandColors {
-  // Açık tema: sıcak kağıt zemin + koyu mürekkep + persimmon vurgu.
-  static const Color paper = Color(0xFFFAF6F0);
-  static const Color surfaceLight = Color(0xFFFFFDFA);
-  static const Color ink = Color(0xFF1F1B16);
-  static const Color persimmon = Color(0xFFD9482B);
-  static const Color sage = Color(0xFF6B7F5E);
-  static const Color outlineLight = Color(0xFFE3DCD2);
+  // Açık tema: serin sis zemin + koyu mürekkep + iris vurgu.
+  static const Color mist = Color(0xFFF4F4F9);
+  static const Color surfaceLight = Color(0xFFFFFFFF);
+  static const Color ink = Color(0xFF1B1B24);
+  static const Color iris = Color(0xFF5457D6);
+  static const Color violet = Color(0xFF7E6BD9);
+  static const Color outlineLight = Color(0xFFDEDEE9);
 
-  // Koyu tema: sıcak kömür zemin, aynı vurgu biraz parlatılmış.
-  static const Color charcoal = Color(0xFF171410);
-  static const Color surfaceDark = Color(0xFF221E19);
-  static const Color cream = Color(0xFFF2EDE5);
-  static const Color persimmonBright = Color(0xFFFF6B4A);
-  static const Color sageBright = Color(0xFF93A886);
-  static const Color outlineDark = Color(0xFF3A342C);
+  // Koyu tema: gece zemini, aynı vurgular parlatılmış.
+  static const Color night = Color(0xFF121217);
+  static const Color surfaceDark = Color(0xFF1B1B22);
+  static const Color fog = Color(0xFFECECF4);
+  static const Color irisBright = Color(0xFF8A8CFF);
+  static const Color violetBright = Color(0xFFA995F0);
+  static const Color outlineDark = Color(0xFF34343F);
 }
 
 /// Açık ve koyu [ThemeData] üreticisi.
@@ -31,40 +31,48 @@ abstract final class AppTheme {
 
   static const ColorScheme _lightScheme = ColorScheme(
     brightness: Brightness.light,
-    primary: _BrandColors.persimmon,
+    primary: _BrandColors.iris,
     onPrimary: Colors.white,
-    secondary: _BrandColors.sage,
+    primaryContainer: Color(0xFFE3E3FB),
+    onPrimaryContainer: Color(0xFF24247A),
+    secondary: _BrandColors.violet,
     onSecondary: Colors.white,
+    secondaryContainer: Color(0xFFECE7FB),
+    onSecondaryContainer: Color(0xFF2E2075),
     error: Color(0xFFB3261E),
     onError: Colors.white,
     surface: _BrandColors.surfaceLight,
     onSurface: _BrandColors.ink,
-    surfaceContainerHighest: Color(0xFFF0EAE1),
-    surfaceContainer: _BrandColors.paper,
-    onSurfaceVariant: Color(0xFF6F675C),
+    surfaceContainerHighest: Color(0xFFEBEBF4),
+    surfaceContainer: _BrandColors.mist,
+    onSurfaceVariant: Color(0xFF6E6E80),
     outline: _BrandColors.outlineLight,
-    outlineVariant: Color(0xFFEFE9DF),
+    outlineVariant: Color(0xFFEAEAF2),
     inverseSurface: _BrandColors.ink,
-    onInverseSurface: _BrandColors.paper,
+    onInverseSurface: _BrandColors.mist,
   );
 
   static const ColorScheme _darkScheme = ColorScheme(
     brightness: Brightness.dark,
-    primary: _BrandColors.persimmonBright,
-    onPrimary: Color(0xFF2B120A),
-    secondary: _BrandColors.sageBright,
-    onSecondary: Color(0xFF17200F),
+    primary: _BrandColors.irisBright,
+    onPrimary: Color(0xFF1A1B4B),
+    primaryContainer: Color(0xFF34367F),
+    onPrimaryContainer: Color(0xFFE1E1FF),
+    secondary: _BrandColors.violetBright,
+    onSecondary: Color(0xFF251A55),
+    secondaryContainer: Color(0xFF3C2F79),
+    onSecondaryContainer: Color(0xFFEAE3FF),
     error: Color(0xFFF2B8B5),
     onError: Color(0xFF601410),
     surface: _BrandColors.surfaceDark,
-    onSurface: _BrandColors.cream,
-    surfaceContainerHighest: Color(0xFF2E2922),
-    surfaceContainer: _BrandColors.charcoal,
-    onSurfaceVariant: Color(0xFFA89E90),
+    onSurface: _BrandColors.fog,
+    surfaceContainerHighest: Color(0xFF26262F),
+    surfaceContainer: _BrandColors.night,
+    onSurfaceVariant: Color(0xFF9A9AAB),
     outline: _BrandColors.outlineDark,
-    outlineVariant: Color(0xFF2A251E),
-    inverseSurface: _BrandColors.cream,
-    onInverseSurface: _BrandColors.charcoal,
+    outlineVariant: Color(0xFF28282F),
+    inverseSurface: _BrandColors.fog,
+    onInverseSurface: _BrandColors.night,
   );
 
   static ThemeData _build(ColorScheme scheme) {
@@ -79,17 +87,14 @@ abstract final class AppTheme {
       textTheme: Typography.material2021(platform: TargetPlatform.iOS)
           .englishLike
           .apply(bodyColor: scheme.onSurface, displayColor: scheme.onSurface),
+      // Not: push geçişleri iOS'ta framework default'u olan Cupertino
+      // (sağdan kayma + interaktif geri swipe) ile gelir; ek ayar gerekmez.
       appBarTheme: AppBarTheme(
         backgroundColor: scheme.surfaceContainer,
         foregroundColor: scheme.onSurface,
         elevation: 0,
         scrolledUnderElevation: 0,
         centerTitle: false,
-      ),
-      navigationBarTheme: NavigationBarThemeData(
-        backgroundColor: scheme.surface,
-        indicatorColor: scheme.primary.withValues(alpha: 0.12),
-        elevation: 0,
       ),
       cardTheme: CardThemeData(
         color: scheme.surface,

@@ -412,4 +412,35 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get paywallAutoRenewNote =>
       'Subscriptions renew automatically at the end of each period; cancel anytime in your App Store settings.';
+
+  @override
+  String get settingsProActive => 'You\'re on Snaply Pro';
+
+  @override
+  String get settingsProActiveBody => 'Every feature is unlocked. Thank you!';
+
+  @override
+  String get settingsGoPro => 'Upgrade to Snaply Pro';
+
+  @override
+  String get settingsGoProBody =>
+      'Unlimited analysis, boards and search await.';
+
+  @override
+  String get settingsPurchasesSection => 'Purchases';
+
+  @override
+  String get settingsRestoreSuccess => 'Purchases restored.';
+
+  @override
+  String get settingsAboutSection => 'About';
+
+  @override
+  String settingsVersion(String version) {
+    return 'Version $version';
+  }
+
+  @override
+  String get settingsLinkFailed =>
+      'The link couldn\'t be opened. Please try again.';
 }
