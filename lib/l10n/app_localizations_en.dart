@@ -316,4 +316,100 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get bulkDeleteFailed =>
       'Couldn\'t delete the selected screenshots. Please try again.';
+
+  @override
+  String get paywallWelcomeTitle => 'Snaply Pro';
+
+  @override
+  String get paywallSubtitle =>
+      'Unlimited analysis, unlimited boards, and more';
+
+  @override
+  String get paywallFeatureAnalysis => 'Automatic AI analysis';
+
+  @override
+  String get paywallFeatureBoards => 'Custom boards';
+
+  @override
+  String get paywallFeatureSwipe => 'Swipe sorting';
+
+  @override
+  String get paywallFeatureSearch => 'Tag and text search';
+
+  @override
+  String get paywallFeatureBulkDelete => 'Bulk delete';
+
+  @override
+  String get paywallFreeLabel => 'Free';
+
+  @override
+  String get paywallProLabel => 'Pro';
+
+  @override
+  String paywallLimitedValue(int count) {
+    return '$count';
+  }
+
+  @override
+  String get paywallUnlimitedValue => 'Unlimited';
+
+  @override
+  String get paywallLockedValue => 'Locked';
+
+  @override
+  String get paywallUnlockedValue => 'Unlocked';
+
+  @override
+  String get paywallPlanMonthly => 'Monthly';
+
+  @override
+  String get paywallPlanYearly => 'Yearly';
+
+  @override
+  String get paywallPlanLifetime => 'Lifetime';
+
+  @override
+  String get paywallYearlyBadge => 'Best value';
+
+  @override
+  String get paywallYearlyTrial => 'Try 14 days free';
+
+  @override
+  String paywallPerMonth(String price) {
+    return '$price / month';
+  }
+
+  @override
+  String paywallPerYear(String price) {
+    return '$price / year';
+  }
+
+  @override
+  String paywallOneTime(String price) {
+    return '$price one-time';
+  }
+
+  @override
+  String get paywallContinueAction => 'Continue';
+
+  @override
+  String get paywallRestoreAction => 'Restore purchases';
+
+  @override
+  String get paywallPurchaseFailed =>
+      'Purchase couldn\'t be completed. Please try again.';
+
+  @override
+  String get paywallProductsUnavailable =>
+      'Plans couldn\'t be loaded right now. Please try again later.';
+
+  @override
+  String get paywallTermsLink => 'Terms of Use';
+
+  @override
+  String get paywallPrivacyLink => 'Privacy Policy';
+
+  @override
+  String get paywallAutoRenewNote =>
+      'Subscriptions renew automatically at the end of each period; cancel anytime in your App Store settings.';
 }

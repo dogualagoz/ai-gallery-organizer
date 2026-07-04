@@ -661,6 +661,174 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Couldn\'t delete the selected screenshots. Please try again.'**
   String get bulkDeleteFailed;
+
+  /// No description provided for @paywallWelcomeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Snaply Pro'**
+  String get paywallWelcomeTitle;
+
+  /// No description provided for @paywallSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlimited analysis, unlimited boards, and more'**
+  String get paywallSubtitle;
+
+  /// No description provided for @paywallFeatureAnalysis.
+  ///
+  /// In en, this message translates to:
+  /// **'Automatic AI analysis'**
+  String get paywallFeatureAnalysis;
+
+  /// No description provided for @paywallFeatureBoards.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom boards'**
+  String get paywallFeatureBoards;
+
+  /// No description provided for @paywallFeatureSwipe.
+  ///
+  /// In en, this message translates to:
+  /// **'Swipe sorting'**
+  String get paywallFeatureSwipe;
+
+  /// No description provided for @paywallFeatureSearch.
+  ///
+  /// In en, this message translates to:
+  /// **'Tag and text search'**
+  String get paywallFeatureSearch;
+
+  /// No description provided for @paywallFeatureBulkDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Bulk delete'**
+  String get paywallFeatureBulkDelete;
+
+  /// No description provided for @paywallFreeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Free'**
+  String get paywallFreeLabel;
+
+  /// No description provided for @paywallProLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Pro'**
+  String get paywallProLabel;
+
+  /// No description provided for @paywallLimitedValue.
+  ///
+  /// In en, this message translates to:
+  /// **'{count}'**
+  String paywallLimitedValue(int count);
+
+  /// No description provided for @paywallUnlimitedValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlimited'**
+  String get paywallUnlimitedValue;
+
+  /// No description provided for @paywallLockedValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Locked'**
+  String get paywallLockedValue;
+
+  /// No description provided for @paywallUnlockedValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlocked'**
+  String get paywallUnlockedValue;
+
+  /// No description provided for @paywallPlanMonthly.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly'**
+  String get paywallPlanMonthly;
+
+  /// No description provided for @paywallPlanYearly.
+  ///
+  /// In en, this message translates to:
+  /// **'Yearly'**
+  String get paywallPlanYearly;
+
+  /// No description provided for @paywallPlanLifetime.
+  ///
+  /// In en, this message translates to:
+  /// **'Lifetime'**
+  String get paywallPlanLifetime;
+
+  /// No description provided for @paywallYearlyBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Best value'**
+  String get paywallYearlyBadge;
+
+  /// No description provided for @paywallYearlyTrial.
+  ///
+  /// In en, this message translates to:
+  /// **'Try 14 days free'**
+  String get paywallYearlyTrial;
+
+  /// No description provided for @paywallPerMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'{price} / month'**
+  String paywallPerMonth(String price);
+
+  /// No description provided for @paywallPerYear.
+  ///
+  /// In en, this message translates to:
+  /// **'{price} / year'**
+  String paywallPerYear(String price);
+
+  /// No description provided for @paywallOneTime.
+  ///
+  /// In en, this message translates to:
+  /// **'{price} one-time'**
+  String paywallOneTime(String price);
+
+  /// No description provided for @paywallContinueAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get paywallContinueAction;
+
+  /// No description provided for @paywallRestoreAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore purchases'**
+  String get paywallRestoreAction;
+
+  /// No description provided for @paywallPurchaseFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Purchase couldn\'t be completed. Please try again.'**
+  String get paywallPurchaseFailed;
+
+  /// No description provided for @paywallProductsUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Plans couldn\'t be loaded right now. Please try again later.'**
+  String get paywallProductsUnavailable;
+
+  /// No description provided for @paywallTermsLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Terms of Use'**
+  String get paywallTermsLink;
+
+  /// No description provided for @paywallPrivacyLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy Policy'**
+  String get paywallPrivacyLink;
+
+  /// No description provided for @paywallAutoRenewNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Subscriptions renew automatically at the end of each period; cancel anytime in your App Store settings.'**
+  String get paywallAutoRenewNote;
 }
 
 class _AppLocalizationsDelegate

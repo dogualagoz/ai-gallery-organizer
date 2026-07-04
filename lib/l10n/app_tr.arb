@@ -130,5 +130,53 @@
     }
   },
   "bulkDeleteAction": "Seçilenleri sil",
-  "bulkDeleteFailed": "Seçilenler silinemedi. Lütfen tekrar dene."
+  "bulkDeleteFailed": "Seçilenler silinemedi. Lütfen tekrar dene.",
+  "paywallWelcomeTitle": "Snaply Pro",
+  "paywallSubtitle": "Sınırsız analiz, sınırsız pano ve daha fazlası",
+  "paywallFeatureAnalysis": "Otomatik AI analizi",
+  "paywallFeatureBoards": "Özel pano sayısı",
+  "paywallFeatureSwipe": "Swipe ile sıralama",
+  "paywallFeatureSearch": "Etiket ve metin araması",
+  "paywallFeatureBulkDelete": "Toplu silme",
+  "paywallFreeLabel": "Ücretsiz",
+  "paywallProLabel": "Pro",
+  "paywallLimitedValue": "{count} adet",
+  "@paywallLimitedValue": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "paywallUnlimitedValue": "Sınırsız",
+  "paywallLockedValue": "Kilitli",
+  "paywallUnlockedValue": "Açık",
+  "paywallPlanMonthly": "Aylık",
+  "paywallPlanYearly": "Yıllık",
+  "paywallPlanLifetime": "Ömür boyu",
+  "paywallYearlyBadge": "En avantajlı",
+  "paywallYearlyTrial": "14 gün ücretsiz dene",
+  "paywallPerMonth": "{price} / ay",
+  "@paywallPerMonth": {
+    "placeholders": {
+      "price": {"type": "String"}
+    }
+  },
+  "paywallPerYear": "{price} / yıl",
+  "@paywallPerYear": {
+    "placeholders": {
+      "price": {"type": "String"}
+    }
+  },
+  "paywallOneTime": "{price} tek seferlik",
+  "@paywallOneTime": {
+    "placeholders": {
+      "price": {"type": "String"}
+    }
+  },
+  "paywallContinueAction": "Devam Et",
+  "paywallRestoreAction": "Satın alımları geri yükle",
+  "paywallPurchaseFailed": "Satın alma tamamlanamadı. Lütfen tekrar dene.",
+  "paywallProductsUnavailable": "Planlar şu anda yüklenemedi. Lütfen daha sonra tekrar dene.",
+  "paywallTermsLink": "Kullanım Şartları",
+  "paywallPrivacyLink": "Gizlilik Politikası",
+  "paywallAutoRenewNote": "Abonelikler seçilen dönem sonunda otomatik yenilenir; istediğin zaman App Store ayarlarından iptal edebilirsin."
 }

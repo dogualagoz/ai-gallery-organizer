@@ -313,4 +313,100 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get bulkDeleteFailed => 'Seçilenler silinemedi. Lütfen tekrar dene.';
+
+  @override
+  String get paywallWelcomeTitle => 'Snaply Pro';
+
+  @override
+  String get paywallSubtitle =>
+      'Sınırsız analiz, sınırsız pano ve daha fazlası';
+
+  @override
+  String get paywallFeatureAnalysis => 'Otomatik AI analizi';
+
+  @override
+  String get paywallFeatureBoards => 'Özel pano sayısı';
+
+  @override
+  String get paywallFeatureSwipe => 'Swipe ile sıralama';
+
+  @override
+  String get paywallFeatureSearch => 'Etiket ve metin araması';
+
+  @override
+  String get paywallFeatureBulkDelete => 'Toplu silme';
+
+  @override
+  String get paywallFreeLabel => 'Ücretsiz';
+
+  @override
+  String get paywallProLabel => 'Pro';
+
+  @override
+  String paywallLimitedValue(int count) {
+    return '$count adet';
+  }
+
+  @override
+  String get paywallUnlimitedValue => 'Sınırsız';
+
+  @override
+  String get paywallLockedValue => 'Kilitli';
+
+  @override
+  String get paywallUnlockedValue => 'Açık';
+
+  @override
+  String get paywallPlanMonthly => 'Aylık';
+
+  @override
+  String get paywallPlanYearly => 'Yıllık';
+
+  @override
+  String get paywallPlanLifetime => 'Ömür boyu';
+
+  @override
+  String get paywallYearlyBadge => 'En avantajlı';
+
+  @override
+  String get paywallYearlyTrial => '14 gün ücretsiz dene';
+
+  @override
+  String paywallPerMonth(String price) {
+    return '$price / ay';
+  }
+
+  @override
+  String paywallPerYear(String price) {
+    return '$price / yıl';
+  }
+
+  @override
+  String paywallOneTime(String price) {
+    return '$price tek seferlik';
+  }
+
+  @override
+  String get paywallContinueAction => 'Devam Et';
+
+  @override
+  String get paywallRestoreAction => 'Satın alımları geri yükle';
+
+  @override
+  String get paywallPurchaseFailed =>
+      'Satın alma tamamlanamadı. Lütfen tekrar dene.';
+
+  @override
+  String get paywallProductsUnavailable =>
+      'Planlar şu anda yüklenemedi. Lütfen daha sonra tekrar dene.';
+
+  @override
+  String get paywallTermsLink => 'Kullanım Şartları';
+
+  @override
+  String get paywallPrivacyLink => 'Gizlilik Politikası';
+
+  @override
+  String get paywallAutoRenewNote =>
+      'Abonelikler seçilen dönem sonunda otomatik yenilenir; istediğin zaman App Store ayarlarından iptal edebilirsin.';
 }

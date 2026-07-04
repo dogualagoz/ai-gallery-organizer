@@ -9,6 +9,7 @@ import 'core/router/app_router.dart';
 import 'core/services/hive_service.dart';
 import 'core/services/preferences_service.dart';
 import 'core/theme/app_theme.dart';
+import 'features/paywall/providers/purchase_provider.dart';
 import 'firebase_options.dart';
 
 Future<void> main() async {
@@ -33,6 +34,9 @@ class SnaplyApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Paywall ekranı kapalıyken tamamlanan/restore edilen satın almaları
+    // yakalayabilmek için stream dinleyicisini uygulama boyunca canlı tutar.
+    ref.watch(purchaseFlowProvider);
     return MaterialApp.router(
       onGenerateTitle: (context) => context.l10n.appTitle,
       debugShowCheckedModeBanner: false,

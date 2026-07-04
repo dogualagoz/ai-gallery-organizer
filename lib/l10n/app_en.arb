@@ -130,5 +130,53 @@
     }
   },
   "bulkDeleteAction": "Delete selected",
-  "bulkDeleteFailed": "Couldn't delete the selected screenshots. Please try again."
+  "bulkDeleteFailed": "Couldn't delete the selected screenshots. Please try again.",
+  "paywallWelcomeTitle": "Snaply Pro",
+  "paywallSubtitle": "Unlimited analysis, unlimited boards, and more",
+  "paywallFeatureAnalysis": "Automatic AI analysis",
+  "paywallFeatureBoards": "Custom boards",
+  "paywallFeatureSwipe": "Swipe sorting",
+  "paywallFeatureSearch": "Tag and text search",
+  "paywallFeatureBulkDelete": "Bulk delete",
+  "paywallFreeLabel": "Free",
+  "paywallProLabel": "Pro",
+  "paywallLimitedValue": "{count}",
+  "@paywallLimitedValue": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "paywallUnlimitedValue": "Unlimited",
+  "paywallLockedValue": "Locked",
+  "paywallUnlockedValue": "Unlocked",
+  "paywallPlanMonthly": "Monthly",
+  "paywallPlanYearly": "Yearly",
+  "paywallPlanLifetime": "Lifetime",
+  "paywallYearlyBadge": "Best value",
+  "paywallYearlyTrial": "Try 14 days free",
+  "paywallPerMonth": "{price} / month",
+  "@paywallPerMonth": {
+    "placeholders": {
+      "price": {"type": "String"}
+    }
+  },
+  "paywallPerYear": "{price} / year",
+  "@paywallPerYear": {
+    "placeholders": {
+      "price": {"type": "String"}
+    }
+  },
+  "paywallOneTime": "{price} one-time",
+  "@paywallOneTime": {
+    "placeholders": {
+      "price": {"type": "String"}
+    }
+  },
+  "paywallContinueAction": "Continue",
+  "paywallRestoreAction": "Restore purchases",
+  "paywallPurchaseFailed": "Purchase couldn't be completed. Please try again.",
+  "paywallProductsUnavailable": "Plans couldn't be loaded right now. Please try again later.",
+  "paywallTermsLink": "Terms of Use",
+  "paywallPrivacyLink": "Privacy Policy",
+  "paywallAutoRenewNote": "Subscriptions renew automatically at the end of each period; cancel anytime in your App Store settings."
 }

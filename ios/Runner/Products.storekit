@@ -1,0 +1,111 @@
+{
+  "identifier" : "C6E5A1F0",
+  "nonRenewingSubscriptions" : [
+
+  ],
+  "products" : [
+    {
+      "displayPrice" : "199.99",
+      "familyShareable" : false,
+      "internalID" : "9F6E1A00",
+      "localizations" : [
+        {
+          "description" : "Lifetime access to Snaply Pro, one-time payment.",
+          "displayName" : "Snaply Pro — Lifetime",
+          "locale" : "en_US"
+        },
+        {
+          "description" : "Snaply Pro'ya ömür boyu erişim, tek seferlik ödeme.",
+          "displayName" : "Snaply Pro — Ömür Boyu",
+          "locale" : "tr"
+        }
+      ],
+      "productID" : "snaply_pro_lifetime",
+      "referenceName" : "Snaply Pro Lifetime",
+      "type" : "NonConsumable"
+    }
+  ],
+  "settings" : {
+
+  },
+  "subscriptionGroups" : [
+    {
+      "id" : "A1B2C3D4",
+      "localizations" : [
+
+      ],
+      "name" : "Snaply Pro",
+      "subscriptions" : [
+        {
+          "adHocOffers" : [
+
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "39.99",
+          "familyShareable" : false,
+          "groupNumber" : 1,
+          "internalID" : "9F6E1A01",
+          "introductoryOffer" : null,
+          "localizations" : [
+            {
+              "description" : "Snaply Pro subscription, billed monthly.",
+              "displayName" : "Snaply Pro — Monthly",
+              "locale" : "en_US"
+            },
+            {
+              "description" : "Her ay yenilenen Snaply Pro aboneliği.",
+              "displayName" : "Snaply Pro — Aylık",
+              "locale" : "tr"
+            }
+          ],
+          "productID" : "snaply_pro_monthly",
+          "recurringSubscriptionPeriod" : "P1M",
+          "referenceName" : "Snaply Pro Monthly",
+          "subscriptionGroupID" : "A1B2C3D4",
+          "type" : "RecurringSubscription"
+        },
+        {
+          "adHocOffers" : [
+
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "299.99",
+          "familyShareable" : false,
+          "groupNumber" : 1,
+          "internalID" : "9F6E1A02",
+          "introductoryOffer" : {
+            "internalID" : "9F6E1A03",
+            "numberOfPeriods" : 1,
+            "paymentMode" : "free",
+            "subscriptionPeriod" : "P2W"
+          },
+          "localizations" : [
+            {
+              "description" : "Snaply Pro yearly subscription with a 14-day free trial.",
+              "displayName" : "Snaply Pro — Yearly",
+              "locale" : "en_US"
+            },
+            {
+              "description" : "14 gün ücretsiz deneme ile Snaply Pro yıllık abonelik.",
+              "displayName" : "Snaply Pro — Yıllık",
+              "locale" : "tr"
+            }
+          ],
+          "productID" : "snaply_pro_yearly",
+          "recurringSubscriptionPeriod" : "P1Y",
+          "referenceName" : "Snaply Pro Yearly",
+          "subscriptionGroupID" : "A1B2C3D4",
+          "type" : "RecurringSubscription"
+        }
+      ]
+    }
+  ],
+  "version" : {
+    "major" : 1,
+    "minor" : 2
+  }
+}
