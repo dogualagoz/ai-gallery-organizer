@@ -9,7 +9,12 @@
 	<key>CFBundleDisplayName</key>
 	<string>Snaply</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Snaply needs access to your photo library to find and organize your screenshots. Your photos stay on your device.</string>
+	<string>Snaply needs access to your photo library to find and organize your screenshots. Screenshots are sent securely for AI labeling only and are never stored anywhere else.</string>
+	<key>CFBundleLocalizations</key>
+	<array>
+		<string>en</string>
+		<string>tr</string>
+	</array>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>

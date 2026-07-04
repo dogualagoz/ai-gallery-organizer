@@ -68,7 +68,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get onboardingBody2 =>
-      'Your screenshots stay on your device. Each one is briefly analyzed to label it, nothing is stored anywhere else.';
+      'Your screenshots are stored on your device. Each one is sent briefly to AI only to label it; nothing is kept on any server.';
 
   @override
   String get onboardingTitle3 => 'Allow photo access';

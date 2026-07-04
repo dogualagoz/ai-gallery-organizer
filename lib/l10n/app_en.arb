@@ -19,7 +19,7 @@
   "onboardingTitle1": "Your screenshots, finally sorted",
   "onboardingBody1": "Snaply finds every screenshot in your library and files it into tidy boards — automatically.",
   "onboardingTitle2": "Private by design",
-  "onboardingBody2": "Your screenshots stay on your device. Each one is briefly analyzed to label it, nothing is stored anywhere else.",
+  "onboardingBody2": "Your screenshots are stored on your device. Each one is sent briefly to AI only to label it; nothing is kept on any server.",
   "onboardingTitle3": "Allow photo access",
   "onboardingBody3": "To find and organize your screenshots, Snaply needs access to your photo library. You stay in control.",
   "onboardingContinue": "Continue",

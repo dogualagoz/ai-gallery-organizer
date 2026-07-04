@@ -1,5 +1,7 @@
 // Uygulama giriş noktası: Firebase + Hive + SharedPreferences başlatılır, ProviderScope kurulur.
+import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -20,6 +22,19 @@ Future<void> main() async {
   await HiveService.init();
   // AI analizi (firebase_ai) için gerekli; options ile plist'e bağımlılık kalmaz.
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  // App Check: API anahtarının uygulama dışından kötüye kullanımını engeller.
+  // Debug'da debug provider (token konsola yazılır, Firebase Console'a eklenir);
+  // release'de App Attest, eski cihazlarda DeviceCheck'e düşer.
+  try {
+    await FirebaseAppCheck.instance.activate(
+      providerApple: kDebugMode
+          ? const AppleDebugProvider()
+          : const AppleAppAttestWithDeviceCheckFallbackProvider(),
+    );
+  } catch (error, stackTrace) {
+    // Aktivasyon hatası açılışı engellememeli; enforcement kapalıyken istekler yine geçer.
+    debugPrint('App Check aktivasyon hatası: $error\n$stackTrace');
+  }
 
   runApp(
     ProviderScope(

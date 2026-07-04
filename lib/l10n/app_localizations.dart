@@ -215,7 +215,7 @@ abstract class AppLocalizations {
   /// No description provided for @onboardingBody2.
   ///
   /// In en, this message translates to:
-  /// **'Your screenshots stay on your device. Each one is briefly analyzed to label it, nothing is stored anywhere else.'**
+  /// **'Your screenshots are stored on your device. Each one is sent briefly to AI only to label it; nothing is kept on any server.'**
   String get onboardingBody2;
 
   /// No description provided for @onboardingTitle3.

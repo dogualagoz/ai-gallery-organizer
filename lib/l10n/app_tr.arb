@@ -19,7 +19,7 @@
   "onboardingTitle1": "Ekran görüntülerin nihayet düzenli",
   "onboardingBody1": "Snaply galerindeki tüm ekran görüntülerini bulur ve otomatik olarak düzenli panolara yerleştirir.",
   "onboardingTitle2": "Tasarımı gereği gizli",
-  "onboardingBody2": "Ekran görüntülerin cihazında kalır. Her biri yalnızca etiketlenmek için kısaca analiz edilir, başka hiçbir yerde saklanmaz.",
+  "onboardingBody2": "Ekran görüntülerin cihazında saklanır. Her biri yalnızca etiketlenmek için AI'a kısaca gönderilir; hiçbir sunucuda tutulmaz.",
   "onboardingTitle3": "Fotoğraf erişimine izin ver",
   "onboardingBody3": "Snaply'nin ekran görüntülerini bulup düzenleyebilmesi için fotoğraf kütüphanesine erişmesi gerekiyor. Kontrol sende.",
   "onboardingContinue": "Devam",

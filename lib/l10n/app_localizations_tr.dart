@@ -68,7 +68,7 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get onboardingBody2 =>
-      'Ekran görüntülerin cihazında kalır. Her biri yalnızca etiketlenmek için kısaca analiz edilir, başka hiçbir yerde saklanmaz.';
+      'Ekran görüntülerin cihazında saklanır. Her biri yalnızca etiketlenmek için AI\'a kısaca gönderilir; hiçbir sunucuda tutulmaz.';
 
   @override
   String get onboardingTitle3 => 'Fotoğraf erişimine izin ver';
