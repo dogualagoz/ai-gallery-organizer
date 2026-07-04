@@ -127,13 +127,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'Couldn\'t sync your library. Please try again.';
 
   @override
-  String get galleryPermissionTitle => 'Snaply can\'t see your library';
-
-  @override
-  String get galleryPermissionBody =>
-      'Photo access is off. Enable it in Settings to organize your screenshots.';
-
-  @override
   String galleryCount(int count) {
     return '$count screenshots';
   }
@@ -440,26 +433,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get paywallUnitOnce => 'one-time';
 
   @override
-  String get paywallFreeLabel => 'Free';
-
-  @override
-  String get paywallProLabel => 'Pro';
-
-  @override
-  String paywallLimitedValue(int count) {
-    return '$count';
-  }
-
-  @override
-  String get paywallUnlimitedValue => 'Unlimited';
-
-  @override
-  String get paywallLockedValue => 'Locked';
-
-  @override
-  String get paywallUnlockedValue => 'Unlocked';
-
-  @override
   String get paywallPlanMonthly => 'Monthly';
 
   @override
@@ -467,9 +440,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get paywallPlanLifetime => 'Lifetime';
-
-  @override
-  String get paywallYearlyBadge => 'Best value';
 
   @override
   String paywallSavingsBadge(int percent) {
@@ -527,21 +497,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String paywallPackPurchased(int count) {
     return '$count analyses added to your account!';
-  }
-
-  @override
-  String paywallPerMonth(String price) {
-    return '$price / month';
-  }
-
-  @override
-  String paywallPerYear(String price) {
-    return '$price / year';
-  }
-
-  @override
-  String paywallOneTime(String price) {
-    return '$price one-time';
   }
 
   @override

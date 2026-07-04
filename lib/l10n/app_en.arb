@@ -37,8 +37,6 @@
   "galleryEmptyBody": "Take a screenshot, or sync your library to bring existing ones in.",
   "gallerySyncAction": "Sync now",
   "gallerySyncFailed": "Couldn't sync your library. Please try again.",
-  "galleryPermissionTitle": "Snaply can't see your library",
-  "galleryPermissionBody": "Photo access is off. Enable it in Settings to organize your screenshots.",
   "galleryCount": "{count} screenshots",
   "@galleryCount": {
     "placeholders": {
@@ -173,21 +171,9 @@
   "paywallUnitMonth": "/month",
   "paywallUnitYear": "/year",
   "paywallUnitOnce": "one-time",
-  "paywallFreeLabel": "Free",
-  "paywallProLabel": "Pro",
-  "paywallLimitedValue": "{count}",
-  "@paywallLimitedValue": {
-    "placeholders": {
-      "count": {"type": "int"}
-    }
-  },
-  "paywallUnlimitedValue": "Unlimited",
-  "paywallLockedValue": "Locked",
-  "paywallUnlockedValue": "Unlocked",
   "paywallPlanMonthly": "Monthly",
   "paywallPlanYearly": "Yearly",
   "paywallPlanLifetime": "Lifetime",
-  "paywallYearlyBadge": "Best value",
   "paywallSavingsBadge": "Save {percent}%",
   "@paywallSavingsBadge": {
     "placeholders": {
@@ -226,24 +212,6 @@
   "@paywallPackPurchased": {
     "placeholders": {
       "count": {"type": "int"}
-    }
-  },
-  "paywallPerMonth": "{price} / month",
-  "@paywallPerMonth": {
-    "placeholders": {
-      "price": {"type": "String"}
-    }
-  },
-  "paywallPerYear": "{price} / year",
-  "@paywallPerYear": {
-    "placeholders": {
-      "price": {"type": "String"}
-    }
-  },
-  "paywallOneTime": "{price} one-time",
-  "@paywallOneTime": {
-    "placeholders": {
-      "price": {"type": "String"}
     }
   },
   "paywallContinueAction": "Continue",

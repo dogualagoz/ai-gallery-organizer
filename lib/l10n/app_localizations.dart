@@ -320,18 +320,6 @@ abstract class AppLocalizations {
   /// **'Couldn\'t sync your library. Please try again.'**
   String get gallerySyncFailed;
 
-  /// No description provided for @galleryPermissionTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Snaply can\'t see your library'**
-  String get galleryPermissionTitle;
-
-  /// No description provided for @galleryPermissionBody.
-  ///
-  /// In en, this message translates to:
-  /// **'Photo access is off. Enable it in Settings to organize your screenshots.'**
-  String get galleryPermissionBody;
-
   /// No description provided for @galleryCount.
   ///
   /// In en, this message translates to:
@@ -884,42 +872,6 @@ abstract class AppLocalizations {
   /// **'one-time'**
   String get paywallUnitOnce;
 
-  /// No description provided for @paywallFreeLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Free'**
-  String get paywallFreeLabel;
-
-  /// No description provided for @paywallProLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Pro'**
-  String get paywallProLabel;
-
-  /// No description provided for @paywallLimitedValue.
-  ///
-  /// In en, this message translates to:
-  /// **'{count}'**
-  String paywallLimitedValue(int count);
-
-  /// No description provided for @paywallUnlimitedValue.
-  ///
-  /// In en, this message translates to:
-  /// **'Unlimited'**
-  String get paywallUnlimitedValue;
-
-  /// No description provided for @paywallLockedValue.
-  ///
-  /// In en, this message translates to:
-  /// **'Locked'**
-  String get paywallLockedValue;
-
-  /// No description provided for @paywallUnlockedValue.
-  ///
-  /// In en, this message translates to:
-  /// **'Unlocked'**
-  String get paywallUnlockedValue;
-
   /// No description provided for @paywallPlanMonthly.
   ///
   /// In en, this message translates to:
@@ -937,12 +889,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Lifetime'**
   String get paywallPlanLifetime;
-
-  /// No description provided for @paywallYearlyBadge.
-  ///
-  /// In en, this message translates to:
-  /// **'Best value'**
-  String get paywallYearlyBadge;
 
   /// No description provided for @paywallSavingsBadge.
   ///
@@ -1033,24 +979,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count} analyses added to your account!'**
   String paywallPackPurchased(int count);
-
-  /// No description provided for @paywallPerMonth.
-  ///
-  /// In en, this message translates to:
-  /// **'{price} / month'**
-  String paywallPerMonth(String price);
-
-  /// No description provided for @paywallPerYear.
-  ///
-  /// In en, this message translates to:
-  /// **'{price} / year'**
-  String paywallPerYear(String price);
-
-  /// No description provided for @paywallOneTime.
-  ///
-  /// In en, this message translates to:
-  /// **'{price} one-time'**
-  String paywallOneTime(String price);
 
   /// No description provided for @paywallContinueAction.
   ///

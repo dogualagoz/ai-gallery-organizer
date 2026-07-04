@@ -128,13 +128,6 @@ class AppLocalizationsTr extends AppLocalizations {
   String get gallerySyncFailed => 'Kütüphane eşitlenemedi. Lütfen tekrar dene.';
 
   @override
-  String get galleryPermissionTitle => 'Snaply kütüphaneni göremiyor';
-
-  @override
-  String get galleryPermissionBody =>
-      'Fotoğraf erişimi kapalı. Ekran görüntülerini düzenlemek için Ayarlar\'dan aç.';
-
-  @override
   String galleryCount(int count) {
     return '$count ekran görüntüsü';
   }
@@ -439,26 +432,6 @@ class AppLocalizationsTr extends AppLocalizations {
   String get paywallUnitOnce => 'tek seferlik';
 
   @override
-  String get paywallFreeLabel => 'Ücretsiz';
-
-  @override
-  String get paywallProLabel => 'Pro';
-
-  @override
-  String paywallLimitedValue(int count) {
-    return '$count adet';
-  }
-
-  @override
-  String get paywallUnlimitedValue => 'Sınırsız';
-
-  @override
-  String get paywallLockedValue => 'Kilitli';
-
-  @override
-  String get paywallUnlockedValue => 'Açık';
-
-  @override
   String get paywallPlanMonthly => 'Aylık';
 
   @override
@@ -466,9 +439,6 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get paywallPlanLifetime => 'Ömür boyu';
-
-  @override
-  String get paywallYearlyBadge => 'En avantajlı';
 
   @override
   String paywallSavingsBadge(int percent) {
@@ -526,21 +496,6 @@ class AppLocalizationsTr extends AppLocalizations {
   @override
   String paywallPackPurchased(int count) {
     return '$count analiz hesabına eklendi!';
-  }
-
-  @override
-  String paywallPerMonth(String price) {
-    return '$price / ay';
-  }
-
-  @override
-  String paywallPerYear(String price) {
-    return '$price / yıl';
-  }
-
-  @override
-  String paywallOneTime(String price) {
-    return '$price tek seferlik';
   }
 
   @override

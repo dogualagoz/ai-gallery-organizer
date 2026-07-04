@@ -37,8 +37,6 @@
   "galleryEmptyBody": "Bir ekran görüntüsü al ya da mevcut olanları getirmek için kütüphaneni eşitle.",
   "gallerySyncAction": "Şimdi eşitle",
   "gallerySyncFailed": "Kütüphane eşitlenemedi. Lütfen tekrar dene.",
-  "galleryPermissionTitle": "Snaply kütüphaneni göremiyor",
-  "galleryPermissionBody": "Fotoğraf erişimi kapalı. Ekran görüntülerini düzenlemek için Ayarlar'dan aç.",
   "galleryCount": "{count} ekran görüntüsü",
   "@galleryCount": {
     "placeholders": {
@@ -173,21 +171,9 @@
   "paywallUnitMonth": "/ay",
   "paywallUnitYear": "/yıl",
   "paywallUnitOnce": "tek seferlik",
-  "paywallFreeLabel": "Ücretsiz",
-  "paywallProLabel": "Pro",
-  "paywallLimitedValue": "{count} adet",
-  "@paywallLimitedValue": {
-    "placeholders": {
-      "count": {"type": "int"}
-    }
-  },
-  "paywallUnlimitedValue": "Sınırsız",
-  "paywallLockedValue": "Kilitli",
-  "paywallUnlockedValue": "Açık",
   "paywallPlanMonthly": "Aylık",
   "paywallPlanYearly": "Yıllık",
   "paywallPlanLifetime": "Ömür boyu",
-  "paywallYearlyBadge": "En avantajlı",
   "paywallSavingsBadge": "%{percent} tasarruf",
   "@paywallSavingsBadge": {
     "placeholders": {
@@ -226,24 +212,6 @@
   "@paywallPackPurchased": {
     "placeholders": {
       "count": {"type": "int"}
-    }
-  },
-  "paywallPerMonth": "{price} / ay",
-  "@paywallPerMonth": {
-    "placeholders": {
-      "price": {"type": "String"}
-    }
-  },
-  "paywallPerYear": "{price} / yıl",
-  "@paywallPerYear": {
-    "placeholders": {
-      "price": {"type": "String"}
-    }
-  },
-  "paywallOneTime": "{price} tek seferlik",
-  "@paywallOneTime": {
-    "placeholders": {
-      "price": {"type": "String"}
     }
   },
   "paywallContinueAction": "Devam Et",
