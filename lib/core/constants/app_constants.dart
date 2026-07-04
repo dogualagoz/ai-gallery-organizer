@@ -25,7 +25,20 @@ abstract final class ProductIds {
   static const String yearly = 'snaply_pro_yearly';
   static const String lifetime = 'snaply_pro_lifetime';
 
-  static const Set<String> all = {monthly, yearly, lifetime};
+  /// Tüketilebilir analiz paketleri (Pro değil, yalnız kredi verir).
+  static const String pack500 = 'snaply_pack_500';
+  static const String pack1000 = 'snaply_pack_1000';
+
+  static const Set<String> subscriptions = {monthly, yearly, lifetime};
+  static const Set<String> packs = {pack500, pack1000};
+  static const Set<String> all = {...subscriptions, ...packs};
+
+  /// [productId] bir analiz paketiyse verdiği kredi miktarı, değilse null.
+  static int? creditsFor(String productId) => switch (productId) {
+    pack500 => 500,
+    pack1000 => 1000,
+    _ => null,
+  };
 }
 
 /// Yasal doküman linkleri (yayın öncesi gerçek URL'lerle değiştirilecek).

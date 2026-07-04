@@ -9,9 +9,14 @@ final purchaseRepositoryProvider = Provider<PurchaseRepository>((ref) {
 });
 
 class PurchaseRepository {
-  PurchaseRepository(this._iap);
+  /// [iap] tembel çözülür — böylece test'te alt sınıflar gerçek platform
+  /// singleton'ına hiç dokunmadan `purchaseStream`/`completePurchase` gibi
+  /// metotları override edebilir.
+  PurchaseRepository([InAppPurchase? iap]) : _injectedIap = iap;
 
-  final InAppPurchase _iap;
+  final InAppPurchase? _injectedIap;
+
+  InAppPurchase get _iap => _injectedIap ?? InAppPurchase.instance;
 
   Future<bool> isAvailable() => _iap.isAvailable();
 
@@ -20,9 +25,14 @@ class PurchaseRepository {
 
   Stream<List<PurchaseDetails>> get purchaseStream => _iap.purchaseStream;
 
-  /// Aboneliklerde de StoreKit tarafında ayrım olmadığı için tüm ürünler
-  /// (aylık/yıllık/ömür boyu) `buyNonConsumable` ile satın alınır.
+  /// Abonelik/ömür boyu ürünler `buyNonConsumable`; analiz paketleri
+  /// tüketilebilir olduğu için `buyConsumable` (iOS'ta autoConsume zorunlu).
   Future<void> buy(ProductDetails product) {
+    if (ProductIds.packs.contains(product.id)) {
+      return _iap.buyConsumable(
+        purchaseParam: PurchaseParam(productDetails: product),
+      );
+    }
     return _iap.buyNonConsumable(
       purchaseParam: PurchaseParam(productDetails: product),
     );

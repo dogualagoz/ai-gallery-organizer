@@ -5,14 +5,20 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 
+import '../../../core/constants/app_constants.dart';
 import '../../../core/services/entitlement_service.dart';
+import '../../../core/services/preferences_service.dart';
 import '../data/purchase_repository.dart';
 
 /// Satın alma/restore akışının anlık UI durumu.
 enum PurchaseFlowStatus { idle, pending, success, error }
 
 class PurchaseFlowState {
-  const PurchaseFlowState({required this.status, this.errorMessage});
+  const PurchaseFlowState({
+    required this.status,
+    this.errorMessage,
+    this.productId,
+  });
 
   static const PurchaseFlowState initial = PurchaseFlowState(
     status: PurchaseFlowStatus.idle,
@@ -20,7 +26,14 @@ class PurchaseFlowState {
 
   final PurchaseFlowStatus status;
   final String? errorMessage;
+
+  /// Başarılı satın almanın ürün kimliği — UI paket/abonelik ayrımı yapar
+  /// (ör. paket alımı paywall'u kapatmaz, snackbar gösterir).
+  final String? productId;
 }
+
+/// Çifte teslimatı önlemek için hatırlanan işlem sayısı üst sınırı.
+const int _maxRememberedTransactions = 50;
 
 /// Ürün listesi — paywall açıldığında sorgulanır.
 final purchaseProductsProvider = FutureProvider<List<ProductDetails>>((
@@ -92,10 +105,13 @@ class PurchaseFlowNotifier extends Notifier<PurchaseFlowState> {
           state = const PurchaseFlowState(status: PurchaseFlowStatus.pending);
         case PurchaseStatus.purchased:
         case PurchaseStatus.restored:
-          // Önce yetki + başarı durumu: completePurchase (aşağıda) restore
-          // yolunda hata fırlatabiliyor; UI bu yüzden askıda kalmamalı.
-          await ref.read(entitlementProvider.notifier).setPro(true);
-          state = const PurchaseFlowState(status: PurchaseFlowStatus.success);
+          // Önce yetki/kredi + başarı durumu: completePurchase (aşağıda)
+          // restore yolunda hata fırlatabiliyor; UI bu yüzden askıda kalmamalı.
+          await _grantEntitlement(purchase);
+          state = PurchaseFlowState(
+            status: PurchaseFlowStatus.success,
+            productId: purchase.productID,
+          );
           await _completeSafely(repo, purchase);
         case PurchaseStatus.error:
           state = PurchaseFlowState(
@@ -107,6 +123,43 @@ class PurchaseFlowNotifier extends Notifier<PurchaseFlowState> {
           state = PurchaseFlowState.initial;
       }
     }
+  }
+
+  /// Ürün kimliğine göre yetki verir: abonelik/lifetime → Pro, analiz paketi
+  /// → kredi. Paketler `restored` olayıyla asla gelmemeli (consumable) ama
+  /// güvenlik payı olarak yalnız `purchased`'de kredi verilir.
+  Future<void> _grantEntitlement(PurchaseDetails purchase) async {
+    final int? credits = ProductIds.creditsFor(purchase.productID);
+    if (credits == null) {
+      await ref.read(entitlementProvider.notifier).setPro(true);
+      return;
+    }
+    if (purchase.status != PurchaseStatus.purchased) return;
+    if (await _alreadyDelivered(purchase.purchaseID)) return;
+    await ref.read(entitlementProvider.notifier).addCredits(credits);
+    await _markDelivered(purchase.purchaseID);
+  }
+
+  Future<bool> _alreadyDelivered(String? purchaseId) async {
+    if (purchaseId == null) return false;
+    final prefs = ref.read(sharedPreferencesProvider);
+    final List<String> delivered =
+        prefs.getStringList(PrefKeys.deliveredPackTxIds) ?? const [];
+    return delivered.contains(purchaseId);
+  }
+
+  Future<void> _markDelivered(String? purchaseId) async {
+    if (purchaseId == null) return;
+    final prefs = ref.read(sharedPreferencesProvider);
+    final List<String> delivered = [
+      ...prefs.getStringList(PrefKeys.deliveredPackTxIds) ?? const [],
+      purchaseId,
+    ];
+    final int overflow = delivered.length - _maxRememberedTransactions;
+    final List<String> bounded = overflow > 0
+        ? delivered.sublist(overflow)
+        : delivered;
+    await prefs.setStringList(PrefKeys.deliveredPackTxIds, bounded);
   }
 
   /// İşlemi bitirmeyi dener; hata akışı kilitlemesin diye yutulmaz ama loglanır.
