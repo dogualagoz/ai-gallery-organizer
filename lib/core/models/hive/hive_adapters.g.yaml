@@ -33,7 +33,7 @@ types:
         index: 2
   ScreenshotCategory:
     typeId: 2
-    nextIndex: 7
+    nextIndex: 21
     fields:
       lockScreen:
         index: 0
@@ -49,3 +49,31 @@ types:
         index: 5
       other:
         index: 6
+      qrCodes:
+        index: 7
+      recipes:
+        index: 8
+      places:
+        index: 9
+      inspiration:
+        index: 10
+      memes:
+        index: 11
+      outfits:
+        index: 12
+      health:
+        index: 13
+      tickets:
+        index: 14
+      travel:
+        index: 15
+      food:
+        index: 16
+      finance:
+        index: 17
+      documents:
+        index: 18
+      education:
+        index: 19
+      entertainment:
+        index: 20

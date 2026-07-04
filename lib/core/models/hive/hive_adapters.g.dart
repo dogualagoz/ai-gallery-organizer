@@ -119,6 +119,34 @@ class ScreenshotCategoryAdapter extends TypeAdapter<ScreenshotCategory> {
         return ScreenshotCategory.receipts;
       case 6:
         return ScreenshotCategory.other;
+      case 7:
+        return ScreenshotCategory.qrCodes;
+      case 8:
+        return ScreenshotCategory.recipes;
+      case 9:
+        return ScreenshotCategory.places;
+      case 10:
+        return ScreenshotCategory.inspiration;
+      case 11:
+        return ScreenshotCategory.memes;
+      case 12:
+        return ScreenshotCategory.outfits;
+      case 13:
+        return ScreenshotCategory.health;
+      case 14:
+        return ScreenshotCategory.tickets;
+      case 15:
+        return ScreenshotCategory.travel;
+      case 16:
+        return ScreenshotCategory.food;
+      case 17:
+        return ScreenshotCategory.finance;
+      case 18:
+        return ScreenshotCategory.documents;
+      case 19:
+        return ScreenshotCategory.education;
+      case 20:
+        return ScreenshotCategory.entertainment;
       default:
         return ScreenshotCategory.lockScreen;
     }
@@ -141,6 +169,34 @@ class ScreenshotCategoryAdapter extends TypeAdapter<ScreenshotCategory> {
         writer.writeByte(5);
       case ScreenshotCategory.other:
         writer.writeByte(6);
+      case ScreenshotCategory.qrCodes:
+        writer.writeByte(7);
+      case ScreenshotCategory.recipes:
+        writer.writeByte(8);
+      case ScreenshotCategory.places:
+        writer.writeByte(9);
+      case ScreenshotCategory.inspiration:
+        writer.writeByte(10);
+      case ScreenshotCategory.memes:
+        writer.writeByte(11);
+      case ScreenshotCategory.outfits:
+        writer.writeByte(12);
+      case ScreenshotCategory.health:
+        writer.writeByte(13);
+      case ScreenshotCategory.tickets:
+        writer.writeByte(14);
+      case ScreenshotCategory.travel:
+        writer.writeByte(15);
+      case ScreenshotCategory.food:
+        writer.writeByte(16);
+      case ScreenshotCategory.finance:
+        writer.writeByte(17);
+      case ScreenshotCategory.documents:
+        writer.writeByte(18);
+      case ScreenshotCategory.education:
+        writer.writeByte(19);
+      case ScreenshotCategory.entertainment:
+        writer.writeByte(20);
     }
   }
 

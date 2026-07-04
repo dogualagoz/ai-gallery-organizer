@@ -434,12 +434,6 @@ abstract class AppLocalizations {
   /// **'Social'**
   String get categorySocial;
 
-  /// No description provided for @categoryShopping.
-  ///
-  /// In en, this message translates to:
-  /// **'Shopping'**
-  String get categoryShopping;
-
   /// No description provided for @categoryNotesPasswords.
   ///
   /// In en, this message translates to:
@@ -449,8 +443,98 @@ abstract class AppLocalizations {
   /// No description provided for @categoryMessages.
   ///
   /// In en, this message translates to:
-  /// **'Messages'**
+  /// **'Chats'**
   String get categoryMessages;
+
+  /// No description provided for @categoryShopping.
+  ///
+  /// In en, this message translates to:
+  /// **'Products'**
+  String get categoryShopping;
+
+  /// No description provided for @categoryQrCodes.
+  ///
+  /// In en, this message translates to:
+  /// **'QR codes'**
+  String get categoryQrCodes;
+
+  /// No description provided for @categoryRecipes.
+  ///
+  /// In en, this message translates to:
+  /// **'Recipes'**
+  String get categoryRecipes;
+
+  /// No description provided for @categoryPlaces.
+  ///
+  /// In en, this message translates to:
+  /// **'Places'**
+  String get categoryPlaces;
+
+  /// No description provided for @categoryInspiration.
+  ///
+  /// In en, this message translates to:
+  /// **'Inspiration'**
+  String get categoryInspiration;
+
+  /// No description provided for @categoryMemes.
+  ///
+  /// In en, this message translates to:
+  /// **'Memes'**
+  String get categoryMemes;
+
+  /// No description provided for @categoryOutfits.
+  ///
+  /// In en, this message translates to:
+  /// **'Outfits'**
+  String get categoryOutfits;
+
+  /// No description provided for @categoryHealth.
+  ///
+  /// In en, this message translates to:
+  /// **'Health'**
+  String get categoryHealth;
+
+  /// No description provided for @categoryTickets.
+  ///
+  /// In en, this message translates to:
+  /// **'Tickets'**
+  String get categoryTickets;
+
+  /// No description provided for @categoryTravel.
+  ///
+  /// In en, this message translates to:
+  /// **'Travel'**
+  String get categoryTravel;
+
+  /// No description provided for @categoryFood.
+  ///
+  /// In en, this message translates to:
+  /// **'Food'**
+  String get categoryFood;
+
+  /// No description provided for @categoryFinance.
+  ///
+  /// In en, this message translates to:
+  /// **'Finance'**
+  String get categoryFinance;
+
+  /// No description provided for @categoryDocuments.
+  ///
+  /// In en, this message translates to:
+  /// **'Documents'**
+  String get categoryDocuments;
+
+  /// No description provided for @categoryEducation.
+  ///
+  /// In en, this message translates to:
+  /// **'Education'**
+  String get categoryEducation;
+
+  /// No description provided for @categoryEntertainment.
+  ///
+  /// In en, this message translates to:
+  /// **'Entertainment'**
+  String get categoryEntertainment;
 
   /// No description provided for @categoryReceipts.
   ///

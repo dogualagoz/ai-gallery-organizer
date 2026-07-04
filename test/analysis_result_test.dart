@@ -17,7 +17,7 @@ void main() {
 
     test('bilinmeyen kategori other kategorisine düşer', () {
       final result = AnalysisResult.fromJsonString(
-        '{"category":"memes","tags":[],"ocr_text":""}',
+        '{"category":"unknown_category","tags":[],"ocr_text":""}',
       );
       expect(result.category, ScreenshotCategory.other);
     });

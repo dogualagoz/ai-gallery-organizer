@@ -20,6 +20,10 @@ abstract final class AiConfig {
   /// Modele gönderilen talimat. Şema `responseSchema` ile ayrıca zorlanır.
   static const String prompt =
       'Label this phone screenshot. Pick the single best matching category. '
+      'Prefer the most specific category; use other only when nothing fits. '
+      'receipts = purchase/payment confirmations, finance = banking or '
+      'investing apps, recipes = cooking instructions, food = food photos or '
+      'menus, places = maps and locations, travel = trips/hotels/flights. '
       'Give exactly $maxTags short lowercase tags describing the content, in '
       'the same language as the text in the screenshot (English if there is '
       'no text). Put all clearly readable text into ocr_text, or an empty '

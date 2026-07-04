@@ -195,13 +195,55 @@ class AppLocalizationsTr extends AppLocalizations {
   String get categorySocial => 'Sosyal medya';
 
   @override
-  String get categoryShopping => 'Alışveriş';
-
-  @override
   String get categoryNotesPasswords => 'Not ve şifreler';
 
   @override
-  String get categoryMessages => 'Mesajlar';
+  String get categoryMessages => 'Sohbetler';
+
+  @override
+  String get categoryShopping => 'Ürünler';
+
+  @override
+  String get categoryQrCodes => 'QR kodlar';
+
+  @override
+  String get categoryRecipes => 'Tarifler';
+
+  @override
+  String get categoryPlaces => 'Mekanlar';
+
+  @override
+  String get categoryInspiration => 'İlham';
+
+  @override
+  String get categoryMemes => 'Capsler';
+
+  @override
+  String get categoryOutfits => 'Kombinler';
+
+  @override
+  String get categoryHealth => 'Sağlık';
+
+  @override
+  String get categoryTickets => 'Biletler';
+
+  @override
+  String get categoryTravel => 'Seyahat';
+
+  @override
+  String get categoryFood => 'Yemek';
+
+  @override
+  String get categoryFinance => 'Finans';
+
+  @override
+  String get categoryDocuments => 'Belgeler';
+
+  @override
+  String get categoryEducation => 'Eğitim';
+
+  @override
+  String get categoryEntertainment => 'Eğlence';
 
   @override
   String get categoryReceipts => 'Fatura ve makbuzlar';

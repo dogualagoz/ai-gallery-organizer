@@ -3,13 +3,29 @@
 /// Gemini'nin döndürebileceği kategori seti.
 /// [wireName] structured output şemasındaki enum değerleriyle eşleşir.
 enum ScreenshotCategory {
+  // DİKKAT: Hive adapter enum'u bildirim sırası index'iyle saklar.
+  // Mevcut değerlerin sırası ASLA değişmez; yeni değerler SONA eklenir.
   lockScreen('lock_screen'),
   social('social'),
   shopping('shopping'),
   notesPasswords('notes_passwords'),
   messages('messages'),
   receipts('receipts'),
-  other('other');
+  other('other'),
+  qrCodes('qr_codes'),
+  recipes('recipes'),
+  places('places'),
+  inspiration('inspiration'),
+  memes('memes'),
+  outfits('outfits'),
+  health('health'),
+  tickets('tickets'),
+  travel('travel'),
+  food('food'),
+  finance('finance'),
+  documents('documents'),
+  education('education'),
+  entertainment('entertainment');
 
   const ScreenshotCategory(this.wireName);
 

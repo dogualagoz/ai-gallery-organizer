@@ -197,13 +197,55 @@ class AppLocalizationsEn extends AppLocalizations {
   String get categorySocial => 'Social';
 
   @override
-  String get categoryShopping => 'Shopping';
-
-  @override
   String get categoryNotesPasswords => 'Notes & passwords';
 
   @override
-  String get categoryMessages => 'Messages';
+  String get categoryMessages => 'Chats';
+
+  @override
+  String get categoryShopping => 'Products';
+
+  @override
+  String get categoryQrCodes => 'QR codes';
+
+  @override
+  String get categoryRecipes => 'Recipes';
+
+  @override
+  String get categoryPlaces => 'Places';
+
+  @override
+  String get categoryInspiration => 'Inspiration';
+
+  @override
+  String get categoryMemes => 'Memes';
+
+  @override
+  String get categoryOutfits => 'Outfits';
+
+  @override
+  String get categoryHealth => 'Health';
+
+  @override
+  String get categoryTickets => 'Tickets';
+
+  @override
+  String get categoryTravel => 'Travel';
+
+  @override
+  String get categoryFood => 'Food';
+
+  @override
+  String get categoryFinance => 'Finance';
+
+  @override
+  String get categoryDocuments => 'Documents';
+
+  @override
+  String get categoryEducation => 'Education';
+
+  @override
+  String get categoryEntertainment => 'Entertainment';
 
   @override
   String get categoryReceipts => 'Receipts';
