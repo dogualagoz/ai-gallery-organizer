@@ -7,7 +7,9 @@ import 'package:photo_manager/photo_manager.dart';
 
 import '../../../core/constants/ai_constants.dart';
 import '../../../core/models/screenshot_category.dart';
+import 'analysis_exceptions.dart';
 import 'analysis_result.dart';
+import 'retry_policy.dart';
 
 final screenshotAnalyzerProvider = Provider<ScreenshotAnalyzer>((ref) {
   return ScreenshotAnalyzer();
@@ -49,8 +51,14 @@ class ScreenshotAnalyzer {
     },
   );
 
-  /// [asset] görselini analiz eder; model şema dışına çıkarsa bir kez yeniden
-  /// dener. Ağ/kota hataları çağırana fırlar (kuyruk katmanı ele alır).
+  static const RetryPolicy _retryPolicy = RetryPolicy(
+    maxAttempts: AiConfig.maxAttempts,
+    baseDelay: AiConfig.retryBaseDelay,
+  );
+
+  /// [asset] görselini analiz eder; geçici hatalarda backoff'la yeniden
+  /// dener. Denemeler biterse hata çağırana fırlar (kuyruk katmanı ele alır);
+  /// kalıcı 429 [AnalysisRateLimitException] olarak tiplenir.
   Future<AnalysisResult> analyze(AssetEntity asset) async {
     final Uint8List? bytes = await asset.thumbnailDataWithSize(
       const ThumbnailSize(AiConfig.imageWidth, AiConfig.imageHeight),
@@ -65,17 +73,27 @@ class ScreenshotAnalyzer {
       TextPart(AiConfig.prompt),
     ]);
 
-    try {
-      return await _request(content);
-    } on FormatException {
-      // Structured output'a rağmen bozuk JSON gelirse tek retry hakkı tanınır.
-      return _request(content);
+    int attempt = 0;
+    while (true) {
+      attempt++;
+      try {
+        return await _request(content);
+      } catch (error) {
+        if (!_retryPolicy.shouldRetry(error, attempt)) {
+          if (error is QuotaExceeded) {
+            throw AnalysisRateLimitException(error.message);
+          }
+          rethrow;
+        }
+        await Future<void>.delayed(_retryPolicy.delayFor(attempt));
+      }
     }
   }
 
   Future<AnalysisResult> _request(Content content) async {
     final GenerateContentResponse response = await _generativeModel
-        .generateContent([content]);
+        .generateContent([content])
+        .timeout(AiConfig.requestTimeout);
     final String? text = response.text;
     if (text == null || text.isEmpty) {
       throw const FormatException('Model boş yanıt döndürdü');

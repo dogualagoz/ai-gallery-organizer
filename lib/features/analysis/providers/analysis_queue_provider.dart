@@ -116,7 +116,7 @@ class AnalysisQueueNotifier extends Notifier<AnalysisQueueState> {
       await _analyzeEntry(repo, entry);
       // Son öğeden sonra beklemeye gerek yok; aradakiler rate limit için yavaşlar.
       if (state.done + state.failed < budget && !_cancelRequested) {
-        await Future<void>.delayed(AiConfig.requestGap);
+        await Future<void>.delayed(AiConfig.activeProfile.minRequestGap);
       }
     }
 

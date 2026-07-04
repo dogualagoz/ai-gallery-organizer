@@ -1,8 +1,22 @@
 // Gemini analiz pipeline'ının yapılandırma sabitleri.
+import 'ai_rate_profile.dart';
 
 /// AI analiz ayarları (model, görsel boyutu, istek temposu).
 abstract final class AiConfig {
-  static const String modelName = 'gemini-2.5-flash';
+  static const String modelName = 'gemini-2.5-flash-lite';
+
+  /// Aktif API katmanı profili — ücretli katmana geçişte tek değişiklik
+  /// burası: [AiRateProfile.paid].
+  static const AiRateProfile activeProfile = AiRateProfile.free;
+
+  /// Tek isteğin tavan süresi; asılı kalan istek kuyruğu kilitlemesin.
+  static const Duration requestTimeout = Duration(seconds: 30);
+
+  /// Görsel başına toplam deneme hakkı (ilk istek dahil).
+  static const int maxAttempts = 3;
+
+  /// Backoff taban süresi; her denemede katlanarak artar.
+  static const Duration retryBaseDelay = Duration(seconds: 2);
 
   /// Analize gönderilen thumbnail boyutu — orijinal görsel yerine küçültülmüş
   /// kopya gönderilir: token maliyeti düşer, OCR için çözünürlük yeterli kalır.
@@ -12,10 +26,6 @@ abstract final class AiConfig {
 
   /// Screenshot başına istenen etiket sayısı.
   static const int maxTags = 3;
-
-  /// Ardışık istekler arası bekleme. gemini-2.5-flash'ın ücretsiz katmanı
-  /// dakikada 5 istekle sınırlı (12s/istek); güvenlik payıyla 13s kullanılır.
-  static const Duration requestGap = Duration(seconds: 13);
 
   /// Modele gönderilen talimat. Şema `responseSchema` ile ayrıca zorlanır.
   static const String prompt =
