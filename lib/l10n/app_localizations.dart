@@ -104,17 +104,17 @@ abstract class AppLocalizations {
   /// **'Snaply'**
   String get appTitle;
 
-  /// No description provided for @tabGallery.
+  /// No description provided for @tabHome.
   ///
   /// In en, this message translates to:
-  /// **'Gallery'**
-  String get tabGallery;
+  /// **'Home'**
+  String get tabHome;
 
-  /// No description provided for @tabBoards.
+  /// No description provided for @tabSort.
   ///
   /// In en, this message translates to:
-  /// **'Boards'**
-  String get tabBoards;
+  /// **'Sort'**
+  String get tabSort;
 
   /// No description provided for @tabSettings.
   ///
@@ -596,11 +596,23 @@ abstract class AppLocalizations {
   /// **'Categories'**
   String get boardsSystemSection;
 
+  /// No description provided for @boardsEmptyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Categorized screenshots will appear here once analyzed'**
+  String get boardsEmptyHint;
+
   /// No description provided for @boardsCustomSection.
   ///
   /// In en, this message translates to:
   /// **'My boards'**
   String get boardsCustomSection;
+
+  /// No description provided for @homeRecentsSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Recents'**
+  String get homeRecentsSection;
 
   /// No description provided for @boardsNewBoardAction.
   ///

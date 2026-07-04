@@ -12,10 +12,10 @@ class AppLocalizationsTr extends AppLocalizations {
   String get appTitle => 'Snaply';
 
   @override
-  String get tabGallery => 'Galeri';
+  String get tabHome => 'Ana Sayfa';
 
   @override
-  String get tabBoards => 'Panolar';
+  String get tabSort => 'Sırala';
 
   @override
   String get tabSettings => 'Ayarlar';
@@ -282,7 +282,14 @@ class AppLocalizationsTr extends AppLocalizations {
   String get boardsSystemSection => 'Kategoriler';
 
   @override
+  String get boardsEmptyHint =>
+      'Analiz edilen ekran görüntüleri kategorilerine ayrıldıkça burada görünür';
+
+  @override
   String get boardsCustomSection => 'Panolarım';
+
+  @override
+  String get homeRecentsSection => 'Son Görüntüler';
 
   @override
   String get boardsNewBoardAction => 'Yeni pano';

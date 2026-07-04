@@ -158,7 +158,14 @@ class _SortingDeck extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(AppSpacing.lg),
+      // Alt kabuk sekmesi olarak yüzen navbar'ın arkasına uzanır (extendBody);
+      // deck kart+ipuçları navbar'ın altında kalmasın diye ekstra pay bırakılır.
+      padding: EdgeInsets.fromLTRB(
+        AppSpacing.lg,
+        AppSpacing.lg,
+        AppSpacing.lg,
+        AppSpacing.lg + AppSizes.navBarHeight + MediaQuery.paddingOf(context).bottom,
+      ),
       child: Column(
         children: [
           Text(

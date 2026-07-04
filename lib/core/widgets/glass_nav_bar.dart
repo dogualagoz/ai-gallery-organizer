@@ -37,63 +37,55 @@ class GlassNavBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ColorScheme scheme = Theme.of(context).colorScheme;
-    final double bottomInset = MediaQuery.paddingOf(context).bottom;
 
-    return Padding(
-      // Home indicator varsa onun üstünde, yoksa kenardan sabit boşlukla yüzer.
-      padding: EdgeInsets.fromLTRB(
-        AppSpacing.lg,
-        AppSpacing.sm,
-        AppSpacing.lg,
-        bottomInset > 0 ? bottomInset : AppSpacing.md,
+    // Dış boşluk artık paylaşılan tek bir inset olarak _MainShell'de
+    // uygulanıyor (pil + ayrık aksiyon butonu aynı hizada yüzsün diye).
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(AppRadius.pill),
+        boxShadow: [
+          BoxShadow(
+            color: scheme.inverseSurface.withValues(alpha: 0.10),
+            blurRadius: 24,
+            offset: const Offset(0, 8),
+          ),
+        ],
       ),
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(AppRadius.pill),
-          boxShadow: [
-            BoxShadow(
-              color: scheme.inverseSurface.withValues(alpha: 0.10),
-              blurRadius: 24,
-              offset: const Offset(0, 8),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(AppRadius.pill),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
+          child: Container(
+            height: AppSizes.navBarHeight,
+            decoration: BoxDecoration(
+              color: scheme.surface.withValues(alpha: 0.55),
+              borderRadius: BorderRadius.circular(AppRadius.pill),
+              border: Border.all(
+                color: scheme.outline.withValues(alpha: 0.35),
+              ),
             ),
-          ],
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(AppRadius.pill),
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
-            child: Container(
-              height: AppSizes.navBarHeight,
-              decoration: BoxDecoration(
-                color: scheme.surface.withValues(alpha: 0.55),
-                borderRadius: BorderRadius.circular(AppRadius.pill),
-                border: Border.all(
-                  color: scheme.outline.withValues(alpha: 0.35),
+            child: Stack(
+              children: [
+                _SlidingIndicator(
+                  itemCount: destinations.length,
+                  selectedIndex: selectedIndex,
                 ),
-              ),
-              child: Stack(
-                children: [
-                  _SlidingIndicator(
-                    itemCount: destinations.length,
-                    selectedIndex: selectedIndex,
-                  ),
-                  Row(
-                    children: [
-                      for (int i = 0; i < destinations.length; i++)
-                        Expanded(
-                          child: _NavItem(
-                            destination: destinations[i],
-                            selected: i == selectedIndex,
-                            onTap: () {
-                              HapticFeedback.selectionClick();
-                              onSelected(i);
-                            },
-                          ),
+                Row(
+                  children: [
+                    for (int i = 0; i < destinations.length; i++)
+                      Expanded(
+                        child: _NavItem(
+                          destination: destinations[i],
+                          selected: i == selectedIndex,
+                          onTap: () {
+                            HapticFeedback.selectionClick();
+                            onSelected(i);
+                          },
                         ),
-                    ],
-                  ),
-                ],
-              ),
+                      ),
+                  ],
+                ),
+              ],
             ),
           ),
         ),

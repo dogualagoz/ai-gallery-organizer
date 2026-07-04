@@ -27,6 +27,9 @@ abstract final class AppSizes {
   static const double navBarHeight = 64;
   static const double navBarIcon = 24;
 
+  /// Navbar pili yanındaki ayrık dairesel aksiyon butonunun kenar uzunluğu.
+  static const double navBarActionSize = 64;
+
   /// Board kartlarındaki kapak şeridi yüksekliği referansı.
   static const double boardCoverMin = 72;
 }

@@ -12,10 +12,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get appTitle => 'Snaply';
 
   @override
-  String get tabGallery => 'Gallery';
+  String get tabHome => 'Home';
 
   @override
-  String get tabBoards => 'Boards';
+  String get tabSort => 'Sort';
 
   @override
   String get tabSettings => 'Settings';
@@ -282,7 +282,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get boardsSystemSection => 'Categories';
 
   @override
+  String get boardsEmptyHint =>
+      'Categorized screenshots will appear here once analyzed';
+
+  @override
   String get boardsCustomSection => 'My boards';
+
+  @override
+  String get homeRecentsSection => 'Recents';
 
   @override
   String get boardsNewBoardAction => 'New board';

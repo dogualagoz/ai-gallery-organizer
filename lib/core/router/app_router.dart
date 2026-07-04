@@ -4,24 +4,24 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../features/boards/board_detail_screen.dart';
-import '../../features/boards/boards_screen.dart';
 import '../../features/detail/detail_screen.dart';
-import '../../features/gallery/gallery_screen.dart';
+import '../../features/home/home_screen.dart';
 import '../../features/onboarding/onboarding_screen.dart';
 import '../../features/paywall/paywall_screen.dart';
 import '../../features/search/search_screen.dart';
 import '../../features/settings/settings_screen.dart';
 import '../../features/sorting/sorting_screen.dart';
+import '../constants/ui_constants.dart';
 import '../l10n/l10n_extension.dart';
 import '../models/screenshot_category.dart';
 import '../services/preferences_service.dart';
+import '../widgets/glass_action_button.dart';
 import '../widgets/glass_nav_bar.dart';
 
 /// Rota yolları — string tekrarını önlemek için tek yerde.
 abstract final class AppRoutes {
   static const String onboarding = '/onboarding';
   static const String gallery = '/gallery';
-  static const String boards = '/boards';
   static const String settings = '/settings';
   static const String search = '/search';
   static const String sorting = '/sorting';
@@ -64,15 +64,15 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             routes: [
               GoRoute(
                 path: AppRoutes.gallery,
-                builder: (context, state) => const GalleryScreen(),
+                builder: (context, state) => const HomeScreen(),
               ),
             ],
           ),
           StatefulShellBranch(
             routes: [
               GoRoute(
-                path: AppRoutes.boards,
-                builder: (context, state) => const BoardsScreen(),
+                path: AppRoutes.sorting,
+                builder: (context, state) => const SortingScreen(),
               ),
             ],
           ),
@@ -110,10 +110,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const SearchScreen(),
       ),
       GoRoute(
-        path: AppRoutes.sorting,
-        builder: (context, state) => const SortingScreen(),
-      ),
-      GoRoute(
         path: AppRoutes.paywall,
         // Paywall alttan tam sayfa modal olarak açılır (iOS alışkanlığı).
         pageBuilder: (context, state) =>
@@ -123,7 +119,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
   );
 });
 
-/// Alt sekme çubuğunu barındıran ana kabuk.
+/// Alt sekme çubuğunu barındıran ana kabuk: yüzen pil (3 sekme) + sağında
+/// ayrık dairesel Arama butonu, iOS 26 tarzı gezinme deseni.
 class _MainShell extends StatelessWidget {
   const _MainShell({required this.navigationShell});
 
@@ -131,34 +128,57 @@ class _MainShell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final double bottomInset = MediaQuery.paddingOf(context).bottom;
+
     return Scaffold(
       // İçerik camın arkasından aksın diye gövde navbar'ın altına uzatılır.
       extendBody: true,
       body: navigationShell,
-      bottomNavigationBar: GlassNavBar(
-        selectedIndex: navigationShell.currentIndex,
-        onSelected: (index) => navigationShell.goBranch(
-          index,
-          // Aynı sekmeye tekrar basınca kök ekrana döner (iOS davranışı).
-          initialLocation: index == navigationShell.currentIndex,
+      bottomNavigationBar: Padding(
+        // Home indicator varsa onun üstünde, yoksa kenardan sabit boşlukla yüzer.
+        padding: EdgeInsets.fromLTRB(
+          AppSpacing.lg,
+          AppSpacing.sm,
+          AppSpacing.lg,
+          bottomInset > 0 ? bottomInset : AppSpacing.md,
         ),
-        destinations: [
-          GlassNavDestination(
-            icon: Icons.grid_view_outlined,
-            selectedIcon: Icons.grid_view_rounded,
-            label: context.l10n.tabGallery,
-          ),
-          GlassNavDestination(
-            icon: Icons.folder_outlined,
-            selectedIcon: Icons.folder_rounded,
-            label: context.l10n.tabBoards,
-          ),
-          GlassNavDestination(
-            icon: Icons.settings_outlined,
-            selectedIcon: Icons.settings_rounded,
-            label: context.l10n.tabSettings,
-          ),
-        ],
+        child: Row(
+          children: [
+            Expanded(
+              child: GlassNavBar(
+                selectedIndex: navigationShell.currentIndex,
+                onSelected: (index) => navigationShell.goBranch(
+                  index,
+                  // Aynı sekmeye tekrar basınca kök ekrana döner (iOS davranışı).
+                  initialLocation: index == navigationShell.currentIndex,
+                ),
+                destinations: [
+                  GlassNavDestination(
+                    icon: Icons.home_outlined,
+                    selectedIcon: Icons.home_rounded,
+                    label: context.l10n.tabHome,
+                  ),
+                  GlassNavDestination(
+                    icon: Icons.swipe_outlined,
+                    selectedIcon: Icons.swipe,
+                    label: context.l10n.tabSort,
+                  ),
+                  GlassNavDestination(
+                    icon: Icons.settings_outlined,
+                    selectedIcon: Icons.settings_rounded,
+                    label: context.l10n.tabSettings,
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: AppSpacing.sm),
+            GlassActionButton(
+              icon: Icons.search,
+              tooltip: context.l10n.searchTitle,
+              onPressed: () => context.push(AppRoutes.search),
+            ),
+          ],
+        ),
       ),
     );
   }
