@@ -186,6 +186,10 @@ class AppLocalizationsTr extends AppLocalizations {
   String get analysisLimitBanner => 'Ücretsiz analiz hakkın doldu.';
 
   @override
+  String get analysisDailyCapBanner =>
+      'Günlük analiz limiti doldu. Yarın kaldığı yerden devam eder.';
+
+  @override
   String get dismissAction => 'Kapat';
 
   @override

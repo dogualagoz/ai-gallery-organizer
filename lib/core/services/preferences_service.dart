@@ -16,6 +16,8 @@ abstract final class PrefKeys {
   static const String aiAnalysisUsed = 'ai_analysis_used';
   static const String swipesUsed = 'swipes_used';
   static const String isPro = 'is_pro';
+  static const String aiDailyCount = 'ai_daily_count';
+  static const String aiDailyDate = 'ai_daily_date';
 }
 
 /// Onboarding tamamlandı bilgisi (router redirect bunu izler).

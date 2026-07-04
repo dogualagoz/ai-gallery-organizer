@@ -80,6 +80,7 @@
   "analysisFailedBanner": "Analiz başarısız oldu. Bağlantını kontrol edip tekrar dene.",
   "analysisRetryAction": "Tekrar dene",
   "analysisLimitBanner": "Ücretsiz analiz hakkın doldu.",
+  "analysisDailyCapBanner": "Günlük analiz limiti doldu. Yarın kaldığı yerden devam eder.",
   "dismissAction": "Kapat",
   "categoryLockScreen": "Kilit ekranı",
   "categorySocial": "Sosyal medya",

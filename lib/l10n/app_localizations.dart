@@ -416,6 +416,12 @@ abstract class AppLocalizations {
   /// **'Your free analysis quota is used up.'**
   String get analysisLimitBanner;
 
+  /// No description provided for @analysisDailyCapBanner.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily analysis limit reached. It will continue tomorrow.'**
+  String get analysisDailyCapBanner;
+
   /// No description provided for @dismissAction.
   ///
   /// In en, this message translates to:

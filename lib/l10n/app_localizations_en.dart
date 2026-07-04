@@ -188,6 +188,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get analysisLimitBanner => 'Your free analysis quota is used up.';
 
   @override
+  String get analysisDailyCapBanner =>
+      'Daily analysis limit reached. It will continue tomorrow.';
+
+  @override
   String get dismissAction => 'Dismiss';
 
   @override

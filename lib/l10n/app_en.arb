@@ -80,6 +80,7 @@
   "analysisFailedBanner": "Analysis failed. Check your connection and try again.",
   "analysisRetryAction": "Retry",
   "analysisLimitBanner": "Your free analysis quota is used up.",
+  "analysisDailyCapBanner": "Daily analysis limit reached. It will continue tomorrow.",
   "dismissAction": "Dismiss",
   "categoryLockScreen": "Lock screen",
   "categorySocial": "Social",

@@ -27,6 +27,7 @@ class AnalysisBanner extends ConsumerWidget {
       AnalysisQueueStatus.completed => _CompletedContent(queue: queue),
       AnalysisQueueStatus.failed => const _FailedContent(),
       AnalysisQueueStatus.limitReached => const _LimitContent(),
+      AnalysisQueueStatus.dailyCapReached => const _DailyCapContent(),
     };
     if (content == null) return const SizedBox.shrink();
 
@@ -198,6 +199,20 @@ class _LimitContent extends ConsumerWidget {
           onPressed: () => ref.read(analysisQueueProvider.notifier).dismiss(),
         ),
       ],
+    );
+  }
+}
+
+/// Ücretsiz katmanın günlük istek tavanı dolduğunda gösterilir.
+class _DailyCapContent extends ConsumerWidget {
+  const _DailyCapContent();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return _ResultRow(
+      icon: Icons.schedule_outlined,
+      text: context.l10n.analysisDailyCapBanner,
+      onDismiss: () => ref.read(analysisQueueProvider.notifier).dismiss(),
     );
   }
 }
