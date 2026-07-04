@@ -152,13 +152,21 @@
   },
   "bulkDeleteAction": "Delete selected",
   "bulkDeleteFailed": "Couldn't delete the selected screenshots. Please try again.",
-  "paywallWelcomeTitle": "Snaply Pro",
-  "paywallSubtitle": "Unlimited analysis, unlimited boards, and more",
+  "paywallWelcomeTitle": "Never lose a screenshot again",
+  "paywallSubtitle": "Snaply Pro sorts every screenshot for you, automatically",
   "paywallFeatureAnalysis": "Automatic AI analysis",
+  "paywallFeatureAnalysisBody": "Every screenshot is categorized the moment it appears",
   "paywallFeatureBoards": "Custom boards",
+  "paywallFeatureBoardsBody": "Create your own boards beyond the smart ones",
   "paywallFeatureSwipe": "Swipe sorting",
+  "paywallFeatureSwipeBody": "Sort the stragglers with quick, satisfying swipes",
   "paywallFeatureSearch": "Tag and text search",
+  "paywallFeatureSearchBody": "Find anything by its text, tag, or category",
   "paywallFeatureBulkDelete": "Bulk delete",
+  "paywallFeatureBulkDeleteBody": "Clear out hundreds of screenshots in one go",
+  "paywallUnitMonth": "/month",
+  "paywallUnitYear": "/year",
+  "paywallUnitOnce": "one-time",
   "paywallFreeLabel": "Free",
   "paywallProLabel": "Pro",
   "paywallLimitedValue": "{count}",
@@ -174,7 +182,46 @@
   "paywallPlanYearly": "Yearly",
   "paywallPlanLifetime": "Lifetime",
   "paywallYearlyBadge": "Best value",
-  "paywallYearlyTrial": "Try 14 days free",
+  "paywallSavingsBadge": "Save {percent}%",
+  "@paywallSavingsBadge": {
+    "placeholders": {
+      "percent": {"type": "int"}
+    }
+  },
+  "paywallPerMonthEquivalent": "≈ {price}/mo",
+  "@paywallPerMonthEquivalent": {
+    "placeholders": {
+      "price": {"type": "String"}
+    }
+  },
+  "paywallYearlyTrial": "Try 7 days free",
+  "paywallCtaTrial": "Try 7 days free",
+  "paywallThenPerYear": "Then {price}/year. Cancel anytime.",
+  "@paywallThenPerYear": {
+    "placeholders": {
+      "price": {"type": "String"}
+    }
+  },
+  "paywallTimelineDay1Title": "Day 1 — Today",
+  "paywallTimelineDay1Body": "Full Pro access unlocks immediately.",
+  "paywallTimelineDay5Title": "Day 5 — Reminder",
+  "paywallTimelineDay5Body": "We'll email you before your trial ends.",
+  "paywallTimelineDay7Title": "Day 7 — Trial ends",
+  "paywallTimelineDay7Body": "Your subscription starts. Cancel anytime before.",
+  "paywallPacksTitle": "Just need more analyses?",
+  "paywallPacksSubtitle": "One-time credit packs, no subscription needed.",
+  "paywallPackCredits": "{count} analyses",
+  "@paywallPackCredits": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "paywallPackPurchased": "{count} analyses added to your account!",
+  "@paywallPackPurchased": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
   "paywallPerMonth": "{price} / month",
   "@paywallPerMonth": {
     "placeholders": {

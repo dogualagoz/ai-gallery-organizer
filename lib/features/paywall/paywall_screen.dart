@@ -1,4 +1,5 @@
-// Paywall ekranı: özellik karşılaştırması + 3 plan kartı + IAP satın alma/restore.
+// Paywall ekranı: gradient hero, açıklamalı özellikler, plan kartları,
+// deneme zaman çizelgesi, analiz paketleri ve alta sabit CTA.
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -9,6 +10,10 @@ import '../../core/constants/ui_constants.dart';
 import '../../core/l10n/l10n_extension.dart';
 import '../../core/utils/link_opener.dart';
 import 'providers/purchase_provider.dart';
+import 'widgets/feature_list.dart';
+import 'widgets/pack_section.dart';
+import 'widgets/plan_card.dart';
+import 'widgets/trial_timeline.dart';
 
 class PaywallScreen extends ConsumerWidget {
   const PaywallScreen({super.key});
@@ -24,7 +29,17 @@ class PaywallScreen extends ConsumerWidget {
       if (next.status == PurchaseFlowStatus.success) {
         HapticFeedback.mediumImpact();
         ref.read(purchaseFlowProvider.notifier).dismissError();
-        if (context.mounted) Navigator.of(context).pop();
+        final int? credits = ProductIds.creditsFor(next.productId ?? '');
+        if (credits != null) {
+          // Paket alımı Pro açmaz — ekranı kapatmadan kredi eklendiğini bildir.
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(l10n.paywallPackPurchased(credits))),
+            );
+          }
+        } else if (context.mounted) {
+          Navigator.of(context).pop();
+        }
       } else if (next.status == PurchaseFlowStatus.error) {
         final String message = next.errorMessage ?? l10n.paywallPurchaseFailed;
         ScaffoldMessenger.of(
@@ -35,20 +50,13 @@ class PaywallScreen extends ConsumerWidget {
     });
 
     return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.close),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-      ),
-      body: SafeArea(
-        child: products.when(
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error: (_, _) => _ProductsUnavailable(text: l10n.paywallProductsUnavailable),
-          data: (items) => items.isEmpty
-              ? _ProductsUnavailable(text: l10n.paywallProductsUnavailable)
-              : _PaywallContent(products: items),
-        ),
+      body: products.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (_, _) =>
+            _ProductsUnavailable(text: l10n.paywallProductsUnavailable),
+        data: (items) => items.isEmpty
+            ? _ProductsUnavailable(text: l10n.paywallProductsUnavailable)
+            : _PaywallContent(products: items),
       ),
     );
   }
@@ -61,14 +69,41 @@ class _ProductsUnavailable extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.xl),
-        child: Text(
-          text,
-          textAlign: TextAlign.center,
-          style: Theme.of(context).textTheme.bodyMedium,
-        ),
+    return SafeArea(
+      child: Stack(
+        children: [
+          Center(
+            child: Padding(
+              padding: const EdgeInsets.all(AppSpacing.xl),
+              child: Text(
+                text,
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+            ),
+          ),
+          const Positioned(top: 0, right: AppSpacing.md, child: _CloseButton()),
+        ],
+      ),
+    );
+  }
+}
+
+/// Hero'nun üstünde yüzen yarı saydam kapatma düğmesi.
+class _CloseButton extends StatelessWidget {
+  const _CloseButton();
+
+  @override
+  Widget build(BuildContext context) {
+    final ColorScheme scheme = Theme.of(context).colorScheme;
+    return Material(
+      color: scheme.surface.withValues(alpha: 0.7),
+      shape: const CircleBorder(),
+      clipBehavior: Clip.antiAlias,
+      child: IconButton(
+        icon: const Icon(Icons.close, size: 20),
+        color: scheme.onSurface,
+        onPressed: () => Navigator.of(context).pop(),
       ),
     );
   }
@@ -89,52 +124,109 @@ class _PaywallContentState extends ConsumerState<_PaywallContent> {
   // orElse closure'ı kovaryans nedeniyle tip hatası fırlatıyor.
   late String _selectedProductId = _defaultProductId();
 
-  String _defaultProductId() {
-    for (final ProductDetails product in widget.products) {
-      if (product.id == ProductIds.yearly) return product.id;
+  /// Önerilen plan üstte olacak şekilde sabit sırada: yıllık, aylık, lifetime.
+  static const List<String> _planOrder = [
+    ProductIds.yearly,
+    ProductIds.monthly,
+    ProductIds.lifetime,
+  ];
+
+  List<ProductDetails> get _subscriptionProducts {
+    final List<ProductDetails> subs = [
+      for (final ProductDetails product in widget.products)
+        if (ProductIds.subscriptions.contains(product.id)) product,
+    ];
+    subs.sort(
+      (a, b) => _planOrder.indexOf(a.id).compareTo(_planOrder.indexOf(b.id)),
+    );
+    return subs;
+  }
+
+  List<ProductDetails> get _packProducts => [
+    for (final ProductDetails product in widget.products)
+      if (ProductIds.packs.contains(product.id)) product,
+  ];
+
+  ProductDetails? _findProduct(String id) {
+    for (final ProductDetails product in _subscriptionProducts) {
+      if (product.id == id) return product;
     }
-    return widget.products.first.id;
+    return null;
+  }
+
+  String _defaultProductId() {
+    return _findProduct(ProductIds.yearly)?.id ??
+        (_subscriptionProducts.isNotEmpty
+            ? _subscriptionProducts.first.id
+            : widget.products.first.id);
   }
 
   @override
   Widget build(BuildContext context) {
-    final l10n = context.l10n;
     final PurchaseFlowStatus status = ref.watch(purchaseFlowProvider).status;
     final bool busy = status == PurchaseFlowStatus.pending;
+    final bool yearlySelected = _selectedProductId == ProductIds.yearly;
+    final ProductDetails? monthly = _findProduct(ProductIds.monthly);
+    final ProductDetails? selected = _findProduct(_selectedProductId);
 
-    return ListView(
-      padding: const EdgeInsets.fromLTRB(
-        AppSpacing.md,
-        AppSpacing.sm,
-        AppSpacing.md,
-        AppSpacing.xl,
-      ),
-      children: [
-        const _PaywallHeader(),
-        const SizedBox(height: AppSpacing.lg),
-        const _FeatureComparison(),
-        const SizedBox(height: AppSpacing.lg),
-        for (final ProductDetails product in widget.products)
-          Padding(
-            padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-            child: _PlanCard(
-              product: product,
-              selected: product.id == _selectedProductId,
-              onTap: () => setState(() => _selectedProductId = product.id),
+    return SafeArea(
+      bottom: false,
+      child: Column(
+        children: [
+          Expanded(
+            child: Stack(
+              children: [
+                ListView(
+                  padding: const EdgeInsets.fromLTRB(
+                    AppSpacing.md,
+                    0,
+                    AppSpacing.md,
+                    AppSpacing.lg,
+                  ),
+                  children: [
+                    const _PaywallHero(),
+                    const SizedBox(height: AppSpacing.lg),
+                    const PaywallFeatureList(),
+                    const SizedBox(height: AppSpacing.lg),
+                    for (final ProductDetails product in _subscriptionProducts)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+                        child: PlanCard(
+                          product: product,
+                          selected: product.id == _selectedProductId,
+                          monthlyProduct: product.id == ProductIds.yearly
+                              ? monthly
+                              : null,
+                          onTap: () {
+                            HapticFeedback.selectionClick();
+                            setState(() => _selectedProductId = product.id);
+                          },
+                        ),
+                      ),
+                    if (yearlySelected) ...[
+                      const SizedBox(height: AppSpacing.sm),
+                      const TrialTimeline(),
+                    ],
+                    PackSection(packs: _packProducts, busy: busy),
+                    _PaywallFooter(busy: busy),
+                  ],
+                ),
+                const Positioned(
+                  top: AppSpacing.sm,
+                  right: AppSpacing.sm,
+                  child: _CloseButton(),
+                ),
+              ],
             ),
           ),
-        const SizedBox(height: AppSpacing.md),
-        FilledButton(
-          onPressed: busy ? null : _buy,
-          child: busy
-              ? const SizedBox.square(
-                  dimension: 20,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-              : Text(l10n.paywallContinueAction),
-        ),
-        _PaywallFooter(busy: busy),
-      ],
+          _BottomCtaBar(
+            busy: busy,
+            yearlySelected: yearlySelected,
+            selectedPrice: selected?.price,
+            onPressed: busy ? null : _buy,
+          ),
+        ],
+      ),
     );
   }
 
@@ -146,32 +238,142 @@ class _PaywallContentState extends ConsumerState<_PaywallContent> {
   }
 }
 
-/// Üst kısım: rozet ikonu, başlık ve alt başlık.
-class _PaywallHeader extends StatelessWidget {
-  const _PaywallHeader();
+/// Üst kısım: gradient zemin üzerinde rozet, başlık ve alt başlık.
+class _PaywallHero extends StatelessWidget {
+  const _PaywallHero();
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final ColorScheme scheme = Theme.of(context).colorScheme;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Icon(Icons.workspace_premium_outlined, size: 48, color: scheme.primary),
-        const SizedBox(height: AppSpacing.sm),
-        Text(
-          l10n.paywallWelcomeTitle,
-          style: Theme.of(context).textTheme.headlineSmall,
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.only(top: AppSpacing.sm),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.lg,
+        vertical: AppSpacing.xl,
+      ),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(AppRadius.xl),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            scheme.primary.withValues(alpha: 0.14),
+            scheme.secondary.withValues(alpha: 0.10),
+          ],
         ),
-        const SizedBox(height: AppSpacing.xs),
-        Text(
-          l10n.paywallSubtitle,
-          style: Theme.of(
-            context,
-          ).textTheme.bodyMedium?.copyWith(color: scheme.onSurfaceVariant),
+      ),
+      child: Column(
+        children: [
+          Container(
+            width: 64,
+            height: 64,
+            decoration: BoxDecoration(
+              color: scheme.primary.withValues(alpha: 0.14),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.workspace_premium_outlined,
+              size: 34,
+              color: scheme.primary,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.md),
+          Text(
+            l10n.paywallWelcomeTitle,
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.xs),
+          Text(
+            l10n.paywallSubtitle,
+            textAlign: TextAlign.center,
+            style: Theme.of(
+              context,
+            ).textTheme.bodyMedium?.copyWith(color: scheme.onSurfaceVariant),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Alta sabitlenen satın alma çubuğu: büyük CTA + şeffaf fiyat notu.
+class _BottomCtaBar extends StatelessWidget {
+  const _BottomCtaBar({
+    required this.busy,
+    required this.yearlySelected,
+    required this.selectedPrice,
+    required this.onPressed,
+  });
+
+  final bool busy;
+  final bool yearlySelected;
+  final String? selectedPrice;
+  final VoidCallback? onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final ColorScheme scheme = Theme.of(context).colorScheme;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: scheme.surface,
+        border: Border(top: BorderSide(color: scheme.outlineVariant)),
+      ),
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.md,
+        AppSpacing.sm,
+        AppSpacing.md,
+        0,
+      ),
+      child: SafeArea(
+        top: false,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            FilledButton(
+              style: FilledButton.styleFrom(
+                minimumSize: const Size.fromHeight(56),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(AppRadius.lg),
+                ),
+                textStyle: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              onPressed: onPressed,
+              child: busy
+                  ? const SizedBox.square(
+                      dimension: 22,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : Text(
+                      yearlySelected
+                          ? l10n.paywallCtaTrial
+                          : l10n.paywallContinueAction,
+                    ),
+            ),
+            if (yearlySelected && selectedPrice != null)
+              Padding(
+                padding: const EdgeInsets.only(top: AppSpacing.xs),
+                child: Text(
+                  l10n.paywallThenPerYear(selectedPrice!),
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: scheme.onSurfaceVariant,
+                  ),
+                ),
+              ),
+            const SizedBox(height: AppSpacing.xs),
+          ],
         ),
-      ],
+      ),
     );
   }
 }
@@ -196,7 +398,7 @@ class _PaywallFooter extends ConsumerWidget {
               : () => ref.read(purchaseFlowProvider.notifier).restore(),
           child: Text(l10n.paywallRestoreAction),
         ),
-        const SizedBox(height: AppSpacing.md),
+        const SizedBox(height: AppSpacing.sm),
         Text(
           l10n.paywallAutoRenewNote,
           textAlign: TextAlign.center,
@@ -204,7 +406,7 @@ class _PaywallFooter extends ConsumerWidget {
             context,
           ).textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant),
         ),
-        const SizedBox(height: AppSpacing.sm),
+        const SizedBox(height: AppSpacing.xs),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -226,219 +428,6 @@ class _PaywallFooter extends ConsumerWidget {
           ],
         ),
       ],
-    );
-  }
-}
-
-/// Free/Pro özellik karşılaştırma tablosu.
-class _FeatureComparison extends StatelessWidget {
-  const _FeatureComparison();
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = context.l10n;
-    final ColorScheme scheme = Theme.of(context).colorScheme;
-    final List<(String, String, String)> rows = [
-      (
-        l10n.paywallFeatureAnalysis,
-        l10n.paywallLimitedValue(FreeLimits.aiAnalysis),
-        l10n.paywallUnlimitedValue,
-      ),
-      (
-        l10n.paywallFeatureBoards,
-        l10n.paywallLockedValue,
-        l10n.paywallUnlockedValue,
-      ),
-      (
-        l10n.paywallFeatureSwipe,
-        l10n.paywallLimitedValue(FreeLimits.swipeSorts),
-        l10n.paywallUnlimitedValue,
-      ),
-      (
-        l10n.paywallFeatureSearch,
-        l10n.paywallLockedValue,
-        l10n.paywallUnlockedValue,
-      ),
-      (
-        l10n.paywallFeatureBulkDelete,
-        l10n.paywallLockedValue,
-        l10n.paywallUnlockedValue,
-      ),
-    ];
-
-    return Container(
-      padding: const EdgeInsets.all(AppSpacing.md),
-      decoration: BoxDecoration(
-        color: scheme.surfaceContainerHighest.withValues(alpha: 0.4),
-        borderRadius: BorderRadius.circular(AppRadius.md),
-      ),
-      child: Column(
-        children: [
-          Row(
-            children: [
-              const Expanded(flex: 3, child: SizedBox.shrink()),
-              Expanded(
-                flex: 2,
-                child: Text(
-                  l10n.paywallFreeLabel,
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.labelMedium,
-                ),
-              ),
-              Expanded(
-                flex: 2,
-                child: Text(
-                  l10n.paywallProLabel,
-                  textAlign: TextAlign.center,
-                  style: Theme.of(
-                    context,
-                  ).textTheme.labelMedium?.copyWith(color: scheme.primary),
-                ),
-              ),
-            ],
-          ),
-          const Divider(height: AppSpacing.lg),
-          for (final (label, free, pro) in rows)
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
-              child: Row(
-                children: [
-                  Expanded(
-                    flex: 3,
-                    child: Text(
-                      label,
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
-                  ),
-                  Expanded(
-                    flex: 2,
-                    child: Text(
-                      free,
-                      textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: scheme.onSurfaceVariant,
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    flex: 2,
-                    child: Text(
-                      pro,
-                      textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: scheme.primary,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-}
-
-/// Tek bir plan seçim kartı (aylık/yıllık/ömür boyu).
-class _PlanCard extends StatelessWidget {
-  const _PlanCard({
-    required this.product,
-    required this.selected,
-    required this.onTap,
-  });
-
-  final ProductDetails product;
-  final bool selected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = context.l10n;
-    final ColorScheme scheme = Theme.of(context).colorScheme;
-    final bool isYearly = product.id == ProductIds.yearly;
-    final bool isLifetime = product.id == ProductIds.lifetime;
-
-    final String title = switch (product.id) {
-      ProductIds.monthly => l10n.paywallPlanMonthly,
-      ProductIds.yearly => l10n.paywallPlanYearly,
-      ProductIds.lifetime => l10n.paywallPlanLifetime,
-      _ => product.title,
-    };
-    final String priceLine = isLifetime
-        ? l10n.paywallOneTime(product.price)
-        : isYearly
-        ? l10n.paywallPerYear(product.price)
-        : l10n.paywallPerMonth(product.price);
-
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(AppRadius.md),
-      child: Container(
-        padding: const EdgeInsets.all(AppSpacing.md),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(AppRadius.md),
-          border: Border.all(
-            color: selected ? scheme.primary : scheme.outlineVariant,
-            width: selected ? 2 : 1,
-          ),
-          color: selected
-              ? scheme.primary.withValues(alpha: 0.06)
-              : Colors.transparent,
-        ),
-        child: Row(
-          children: [
-            Icon(
-              selected
-                  ? Icons.radio_button_checked
-                  : Icons.radio_button_unchecked,
-              color: selected ? scheme.primary : scheme.onSurfaceVariant,
-            ),
-            const SizedBox(width: AppSpacing.sm),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Text(
-                        title,
-                        style: Theme.of(context).textTheme.titleMedium,
-                      ),
-                      if (isYearly) ...[
-                        const SizedBox(width: AppSpacing.xs),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: AppSpacing.xs,
-                            vertical: 2,
-                          ),
-                          decoration: BoxDecoration(
-                            color: scheme.primary,
-                            borderRadius: BorderRadius.circular(AppRadius.sm),
-                          ),
-                          child: Text(
-                            l10n.paywallYearlyBadge,
-                            style: Theme.of(context).textTheme.labelSmall
-                                ?.copyWith(color: scheme.onPrimary),
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
-                  if (isYearly)
-                    Text(
-                      l10n.paywallYearlyTrial,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: scheme.onSurfaceVariant,
-                      ),
-                    ),
-                ],
-              ),
-            ),
-            Text(priceLine, style: Theme.of(context).textTheme.titleMedium),
-          ],
-        ),
-      ),
     );
   }
 }

@@ -114,4 +114,18 @@ class EntitlementNotifier extends Notifier<EntitlementState> {
         .read(sharedPreferencesProvider)
         .setInt(PrefKeys.swipesUsed, state.swipesUsed);
   }
+
+  /// Yalnız debug ayarlar ekranından çağrılır: free limit/paywall akışlarını
+  /// baştan test edebilmek için kullanım sayaçlarını sıfırlar.
+  Future<void> resetUsageForDebug() async {
+    state = state.copyWith(
+      aiAnalysisUsed: 0,
+      swipesUsed: 0,
+      analysisCredits: 0,
+    );
+    final prefs = ref.read(sharedPreferencesProvider);
+    await prefs.setInt(PrefKeys.aiAnalysisUsed, 0);
+    await prefs.setInt(PrefKeys.swipesUsed, 0);
+    await prefs.setInt(PrefKeys.analysisCredits, 0);
+  }
 }

@@ -1,4 +1,5 @@
 // Ayarlar ekranı: Pro durumu, görünüm, satın alım geri yükleme, yasal linkler, sürüm.
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -62,6 +63,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               ref.read(purchaseFlowProvider.notifier).restore();
             },
           ),
+          if (kDebugMode) ...[
+            const SizedBox(height: AppSpacing.lg),
+            const _DebugSection(),
+          ],
           const SizedBox(height: AppSpacing.lg),
           const _AboutSection(),
         ],
@@ -244,6 +249,39 @@ class _PurchasesSection extends StatelessWidget {
                     )
                   : null,
               onTap: pending ? null : onRestore,
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+/// Yalnız debug derlemede görünür: paywall/limit akışlarını test etmek için
+/// yetki durumunu sıfırlar. Release build'e hiç girmez (kDebugMode guard'lı).
+class _DebugSection extends ConsumerWidget {
+  const _DebugSection();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Debug', style: Theme.of(context).textTheme.titleMedium),
+        const SizedBox(height: AppSpacing.sm),
+        _SettingsGroup(
+          children: [
+            _SettingsTile(
+              icon: Icons.logout,
+              label: 'Exit Pro (debug)',
+              onTap: () =>
+                  ref.read(entitlementProvider.notifier).setPro(false),
+            ),
+            _SettingsTile(
+              icon: Icons.restart_alt,
+              label: 'Reset analysis usage & credits (debug)',
+              onTap: () =>
+                  ref.read(entitlementProvider.notifier).resetUsageForDebug(),
             ),
           ],
         ),

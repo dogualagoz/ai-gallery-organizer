@@ -30,7 +30,7 @@ class PurchaseFlowState {
   /// Başarılı satın almanın ürün kimliği — UI paket/abonelik ayrımı yapar
   /// (ör. paket alımı paywall'u kapatmaz, snackbar gösterir).
   final String? productId;
-}
+} 
 
 /// Çifte teslimatı önlemek için hatırlanan işlem sayısı üst sınırı.
 const int _maxRememberedTransactions = 50;

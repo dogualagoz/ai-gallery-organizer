@@ -761,13 +761,13 @@ abstract class AppLocalizations {
   /// No description provided for @paywallWelcomeTitle.
   ///
   /// In en, this message translates to:
-  /// **'Snaply Pro'**
+  /// **'Never lose a screenshot again'**
   String get paywallWelcomeTitle;
 
   /// No description provided for @paywallSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Unlimited analysis, unlimited boards, and more'**
+  /// **'Snaply Pro sorts every screenshot for you, automatically'**
   String get paywallSubtitle;
 
   /// No description provided for @paywallFeatureAnalysis.
@@ -776,11 +776,23 @@ abstract class AppLocalizations {
   /// **'Automatic AI analysis'**
   String get paywallFeatureAnalysis;
 
+  /// No description provided for @paywallFeatureAnalysisBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Every screenshot is categorized the moment it appears'**
+  String get paywallFeatureAnalysisBody;
+
   /// No description provided for @paywallFeatureBoards.
   ///
   /// In en, this message translates to:
   /// **'Custom boards'**
   String get paywallFeatureBoards;
+
+  /// No description provided for @paywallFeatureBoardsBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Create your own boards beyond the smart ones'**
+  String get paywallFeatureBoardsBody;
 
   /// No description provided for @paywallFeatureSwipe.
   ///
@@ -788,17 +800,53 @@ abstract class AppLocalizations {
   /// **'Swipe sorting'**
   String get paywallFeatureSwipe;
 
+  /// No description provided for @paywallFeatureSwipeBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Sort the stragglers with quick, satisfying swipes'**
+  String get paywallFeatureSwipeBody;
+
   /// No description provided for @paywallFeatureSearch.
   ///
   /// In en, this message translates to:
   /// **'Tag and text search'**
   String get paywallFeatureSearch;
 
+  /// No description provided for @paywallFeatureSearchBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Find anything by its text, tag, or category'**
+  String get paywallFeatureSearchBody;
+
   /// No description provided for @paywallFeatureBulkDelete.
   ///
   /// In en, this message translates to:
   /// **'Bulk delete'**
   String get paywallFeatureBulkDelete;
+
+  /// No description provided for @paywallFeatureBulkDeleteBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear out hundreds of screenshots in one go'**
+  String get paywallFeatureBulkDeleteBody;
+
+  /// No description provided for @paywallUnitMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'/month'**
+  String get paywallUnitMonth;
+
+  /// No description provided for @paywallUnitYear.
+  ///
+  /// In en, this message translates to:
+  /// **'/year'**
+  String get paywallUnitYear;
+
+  /// No description provided for @paywallUnitOnce.
+  ///
+  /// In en, this message translates to:
+  /// **'one-time'**
+  String get paywallUnitOnce;
 
   /// No description provided for @paywallFreeLabel.
   ///
@@ -860,11 +908,95 @@ abstract class AppLocalizations {
   /// **'Best value'**
   String get paywallYearlyBadge;
 
+  /// No description provided for @paywallSavingsBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Save {percent}%'**
+  String paywallSavingsBadge(int percent);
+
+  /// No description provided for @paywallPerMonthEquivalent.
+  ///
+  /// In en, this message translates to:
+  /// **'≈ {price}/mo'**
+  String paywallPerMonthEquivalent(String price);
+
   /// No description provided for @paywallYearlyTrial.
   ///
   /// In en, this message translates to:
-  /// **'Try 14 days free'**
+  /// **'Try 7 days free'**
   String get paywallYearlyTrial;
+
+  /// No description provided for @paywallCtaTrial.
+  ///
+  /// In en, this message translates to:
+  /// **'Try 7 days free'**
+  String get paywallCtaTrial;
+
+  /// No description provided for @paywallThenPerYear.
+  ///
+  /// In en, this message translates to:
+  /// **'Then {price}/year. Cancel anytime.'**
+  String paywallThenPerYear(String price);
+
+  /// No description provided for @paywallTimelineDay1Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Day 1 — Today'**
+  String get paywallTimelineDay1Title;
+
+  /// No description provided for @paywallTimelineDay1Body.
+  ///
+  /// In en, this message translates to:
+  /// **'Full Pro access unlocks immediately.'**
+  String get paywallTimelineDay1Body;
+
+  /// No description provided for @paywallTimelineDay5Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Day 5 — Reminder'**
+  String get paywallTimelineDay5Title;
+
+  /// No description provided for @paywallTimelineDay5Body.
+  ///
+  /// In en, this message translates to:
+  /// **'We\'ll email you before your trial ends.'**
+  String get paywallTimelineDay5Body;
+
+  /// No description provided for @paywallTimelineDay7Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Day 7 — Trial ends'**
+  String get paywallTimelineDay7Title;
+
+  /// No description provided for @paywallTimelineDay7Body.
+  ///
+  /// In en, this message translates to:
+  /// **'Your subscription starts. Cancel anytime before.'**
+  String get paywallTimelineDay7Body;
+
+  /// No description provided for @paywallPacksTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Just need more analyses?'**
+  String get paywallPacksTitle;
+
+  /// No description provided for @paywallPacksSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'One-time credit packs, no subscription needed.'**
+  String get paywallPacksSubtitle;
+
+  /// No description provided for @paywallPackCredits.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} analyses'**
+  String paywallPackCredits(int count);
+
+  /// No description provided for @paywallPackPurchased.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} analyses added to your account!'**
+  String paywallPackPurchased(int count);
 
   /// No description provided for @paywallPerMonth.
   ///

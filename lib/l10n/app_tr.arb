@@ -152,13 +152,21 @@
   },
   "bulkDeleteAction": "Seçilenleri sil",
   "bulkDeleteFailed": "Seçilenler silinemedi. Lütfen tekrar dene.",
-  "paywallWelcomeTitle": "Snaply Pro",
-  "paywallSubtitle": "Sınırsız analiz, sınırsız pano ve daha fazlası",
+  "paywallWelcomeTitle": "Bir daha ekran görüntüsü kaybolmasın",
+  "paywallSubtitle": "Snaply Pro tüm ekran görüntülerini otomatik olarak gruplandırır",
   "paywallFeatureAnalysis": "Otomatik AI analizi",
-  "paywallFeatureBoards": "Özel pano sayısı",
+  "paywallFeatureAnalysisBody": "Her ekran görüntüsü çekildiği anda kategorisine ayrılır",
+  "paywallFeatureBoards": "Özel panolar",
+  "paywallFeatureBoardsBody": "Akıllı panoların yanına kendi panolarını ekle",
   "paywallFeatureSwipe": "Swipe ile sıralama",
+  "paywallFeatureSwipeBody": "Kalanları hızlı kaydırmalarla keyifle ayıkla",
   "paywallFeatureSearch": "Etiket ve metin araması",
+  "paywallFeatureSearchBody": "Metin, etiket veya kategoriyle her şeyi bul",
   "paywallFeatureBulkDelete": "Toplu silme",
+  "paywallFeatureBulkDeleteBody": "Yüzlerce ekran görüntüsünü tek seferde temizle",
+  "paywallUnitMonth": "/ay",
+  "paywallUnitYear": "/yıl",
+  "paywallUnitOnce": "tek seferlik",
   "paywallFreeLabel": "Ücretsiz",
   "paywallProLabel": "Pro",
   "paywallLimitedValue": "{count} adet",
@@ -174,7 +182,46 @@
   "paywallPlanYearly": "Yıllık",
   "paywallPlanLifetime": "Ömür boyu",
   "paywallYearlyBadge": "En avantajlı",
-  "paywallYearlyTrial": "14 gün ücretsiz dene",
+  "paywallSavingsBadge": "%{percent} tasarruf",
+  "@paywallSavingsBadge": {
+    "placeholders": {
+      "percent": {"type": "int"}
+    }
+  },
+  "paywallPerMonthEquivalent": "≈ {price}/ay",
+  "@paywallPerMonthEquivalent": {
+    "placeholders": {
+      "price": {"type": "String"}
+    }
+  },
+  "paywallYearlyTrial": "7 gün ücretsiz dene",
+  "paywallCtaTrial": "7 gün ücretsiz dene",
+  "paywallThenPerYear": "Sonra {price}/yıl. İstediğin zaman iptal et.",
+  "@paywallThenPerYear": {
+    "placeholders": {
+      "price": {"type": "String"}
+    }
+  },
+  "paywallTimelineDay1Title": "1. gün — Bugün",
+  "paywallTimelineDay1Body": "Tüm Pro özellikleri hemen açılır.",
+  "paywallTimelineDay5Title": "5. gün — Hatırlatma",
+  "paywallTimelineDay5Body": "Deneme süren bitmeden e-posta ile hatırlatırız.",
+  "paywallTimelineDay7Title": "7. gün — Deneme biter",
+  "paywallTimelineDay7Body": "Aboneliğin başlar. Öncesinde istediğin zaman iptal edebilirsin.",
+  "paywallPacksTitle": "Sadece daha fazla analiz mi lazım?",
+  "paywallPacksSubtitle": "Aboneliğe gerek yok — tek seferlik kredi paketleri.",
+  "paywallPackCredits": "{count} analiz",
+  "@paywallPackCredits": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "paywallPackPurchased": "{count} analiz hesabına eklendi!",
+  "@paywallPackPurchased": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
   "paywallPerMonth": "{price} / ay",
   "@paywallPerMonth": {
     "placeholders": {

@@ -369,26 +369,55 @@ class AppLocalizationsEn extends AppLocalizations {
       'Couldn\'t delete the selected screenshots. Please try again.';
 
   @override
-  String get paywallWelcomeTitle => 'Snaply Pro';
+  String get paywallWelcomeTitle => 'Never lose a screenshot again';
 
   @override
   String get paywallSubtitle =>
-      'Unlimited analysis, unlimited boards, and more';
+      'Snaply Pro sorts every screenshot for you, automatically';
 
   @override
   String get paywallFeatureAnalysis => 'Automatic AI analysis';
 
   @override
+  String get paywallFeatureAnalysisBody =>
+      'Every screenshot is categorized the moment it appears';
+
+  @override
   String get paywallFeatureBoards => 'Custom boards';
+
+  @override
+  String get paywallFeatureBoardsBody =>
+      'Create your own boards beyond the smart ones';
 
   @override
   String get paywallFeatureSwipe => 'Swipe sorting';
 
   @override
+  String get paywallFeatureSwipeBody =>
+      'Sort the stragglers with quick, satisfying swipes';
+
+  @override
   String get paywallFeatureSearch => 'Tag and text search';
 
   @override
+  String get paywallFeatureSearchBody =>
+      'Find anything by its text, tag, or category';
+
+  @override
   String get paywallFeatureBulkDelete => 'Bulk delete';
+
+  @override
+  String get paywallFeatureBulkDeleteBody =>
+      'Clear out hundreds of screenshots in one go';
+
+  @override
+  String get paywallUnitMonth => '/month';
+
+  @override
+  String get paywallUnitYear => '/year';
+
+  @override
+  String get paywallUnitOnce => 'one-time';
 
   @override
   String get paywallFreeLabel => 'Free';
@@ -423,7 +452,62 @@ class AppLocalizationsEn extends AppLocalizations {
   String get paywallYearlyBadge => 'Best value';
 
   @override
-  String get paywallYearlyTrial => 'Try 14 days free';
+  String paywallSavingsBadge(int percent) {
+    return 'Save $percent%';
+  }
+
+  @override
+  String paywallPerMonthEquivalent(String price) {
+    return '≈ $price/mo';
+  }
+
+  @override
+  String get paywallYearlyTrial => 'Try 7 days free';
+
+  @override
+  String get paywallCtaTrial => 'Try 7 days free';
+
+  @override
+  String paywallThenPerYear(String price) {
+    return 'Then $price/year. Cancel anytime.';
+  }
+
+  @override
+  String get paywallTimelineDay1Title => 'Day 1 — Today';
+
+  @override
+  String get paywallTimelineDay1Body => 'Full Pro access unlocks immediately.';
+
+  @override
+  String get paywallTimelineDay5Title => 'Day 5 — Reminder';
+
+  @override
+  String get paywallTimelineDay5Body =>
+      'We\'ll email you before your trial ends.';
+
+  @override
+  String get paywallTimelineDay7Title => 'Day 7 — Trial ends';
+
+  @override
+  String get paywallTimelineDay7Body =>
+      'Your subscription starts. Cancel anytime before.';
+
+  @override
+  String get paywallPacksTitle => 'Just need more analyses?';
+
+  @override
+  String get paywallPacksSubtitle =>
+      'One-time credit packs, no subscription needed.';
+
+  @override
+  String paywallPackCredits(int count) {
+    return '$count analyses';
+  }
+
+  @override
+  String paywallPackPurchased(int count) {
+    return '$count analyses added to your account!';
+  }
 
   @override
   String paywallPerMonth(String price) {

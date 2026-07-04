@@ -366,26 +366,55 @@ class AppLocalizationsTr extends AppLocalizations {
   String get bulkDeleteFailed => 'Seçilenler silinemedi. Lütfen tekrar dene.';
 
   @override
-  String get paywallWelcomeTitle => 'Snaply Pro';
+  String get paywallWelcomeTitle => 'Bir daha ekran görüntüsü kaybolmasın';
 
   @override
   String get paywallSubtitle =>
-      'Sınırsız analiz, sınırsız pano ve daha fazlası';
+      'Snaply Pro tüm ekran görüntülerini otomatik olarak gruplandırır';
 
   @override
   String get paywallFeatureAnalysis => 'Otomatik AI analizi';
 
   @override
-  String get paywallFeatureBoards => 'Özel pano sayısı';
+  String get paywallFeatureAnalysisBody =>
+      'Her ekran görüntüsü çekildiği anda kategorisine ayrılır';
+
+  @override
+  String get paywallFeatureBoards => 'Özel panolar';
+
+  @override
+  String get paywallFeatureBoardsBody =>
+      'Akıllı panoların yanına kendi panolarını ekle';
 
   @override
   String get paywallFeatureSwipe => 'Swipe ile sıralama';
 
   @override
+  String get paywallFeatureSwipeBody =>
+      'Kalanları hızlı kaydırmalarla keyifle ayıkla';
+
+  @override
   String get paywallFeatureSearch => 'Etiket ve metin araması';
 
   @override
+  String get paywallFeatureSearchBody =>
+      'Metin, etiket veya kategoriyle her şeyi bul';
+
+  @override
   String get paywallFeatureBulkDelete => 'Toplu silme';
+
+  @override
+  String get paywallFeatureBulkDeleteBody =>
+      'Yüzlerce ekran görüntüsünü tek seferde temizle';
+
+  @override
+  String get paywallUnitMonth => '/ay';
+
+  @override
+  String get paywallUnitYear => '/yıl';
+
+  @override
+  String get paywallUnitOnce => 'tek seferlik';
 
   @override
   String get paywallFreeLabel => 'Ücretsiz';
@@ -420,7 +449,62 @@ class AppLocalizationsTr extends AppLocalizations {
   String get paywallYearlyBadge => 'En avantajlı';
 
   @override
-  String get paywallYearlyTrial => '14 gün ücretsiz dene';
+  String paywallSavingsBadge(int percent) {
+    return '%$percent tasarruf';
+  }
+
+  @override
+  String paywallPerMonthEquivalent(String price) {
+    return '≈ $price/ay';
+  }
+
+  @override
+  String get paywallYearlyTrial => '7 gün ücretsiz dene';
+
+  @override
+  String get paywallCtaTrial => '7 gün ücretsiz dene';
+
+  @override
+  String paywallThenPerYear(String price) {
+    return 'Sonra $price/yıl. İstediğin zaman iptal et.';
+  }
+
+  @override
+  String get paywallTimelineDay1Title => '1. gün — Bugün';
+
+  @override
+  String get paywallTimelineDay1Body => 'Tüm Pro özellikleri hemen açılır.';
+
+  @override
+  String get paywallTimelineDay5Title => '5. gün — Hatırlatma';
+
+  @override
+  String get paywallTimelineDay5Body =>
+      'Deneme süren bitmeden e-posta ile hatırlatırız.';
+
+  @override
+  String get paywallTimelineDay7Title => '7. gün — Deneme biter';
+
+  @override
+  String get paywallTimelineDay7Body =>
+      'Aboneliğin başlar. Öncesinde istediğin zaman iptal edebilirsin.';
+
+  @override
+  String get paywallPacksTitle => 'Sadece daha fazla analiz mi lazım?';
+
+  @override
+  String get paywallPacksSubtitle =>
+      'Aboneliğe gerek yok — tek seferlik kredi paketleri.';
+
+  @override
+  String paywallPackCredits(int count) {
+    return '$count analiz';
+  }
+
+  @override
+  String paywallPackPurchased(int count) {
+    return '$count analiz hesabına eklendi!';
+  }
 
   @override
   String paywallPerMonth(String price) {
