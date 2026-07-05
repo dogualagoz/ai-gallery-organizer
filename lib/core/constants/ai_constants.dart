@@ -27,13 +27,27 @@ abstract final class AiConfig {
   /// Screenshot başına istenen etiket sayısı.
   static const int maxTags = 3;
 
+  /// Sınıflandırma tutarlılığı için düşük sıcaklık — aynı screenshot her
+  /// çalıştırmada aynı kategoriye düşmeli.
+  static const double temperature = 0.1;
+
+  /// Çıktı tavanı: ocr_text metin yoğun ekranlarda uzayabilir ama model
+  /// loop'a girerse maliyet sınırsız büyümesin (çıktı, girdinin 4 katı fiyat).
+  static const int maxOutputTokens = 2048;
+
   /// Modele gönderilen talimat. Şema `responseSchema` ile ayrıca zorlanır.
+  /// Karışması muhtemel kategoriler kısa tanımlarla ayrıştırılır.
   static const String prompt =
       'Label this phone screenshot. Pick the single best matching category. '
       'Prefer the most specific category; use other only when nothing fits. '
       'receipts = purchase/payment confirmations, finance = banking or '
       'investing apps, recipes = cooking instructions, food = food photos or '
-      'menus, places = maps and locations, travel = trips/hotels/flights. '
+      'menus, places = maps and locations, travel = trips/hotels/flights, '
+      'social = social media posts/profiles/feeds, messages = chat or email '
+      'conversations, memes = humor images and jokes, inspiration = ideas, '
+      'quotes or aesthetics saved for later, outfits = clothing and style '
+      'looks, notes_passwords = notes, credentials or wifi codes, documents = '
+      'official documents/forms/IDs. '
       'Give exactly $maxTags short lowercase tags describing the content, in '
       'the same language as the text in the screenshot (English if there is '
       'no text). Put all clearly readable text into ocr_text, or an empty '

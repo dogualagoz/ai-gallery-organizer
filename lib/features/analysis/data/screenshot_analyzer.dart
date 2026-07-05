@@ -26,6 +26,8 @@ class ScreenshotAnalyzer {
       generationConfig: GenerationConfig(
         responseMimeType: 'application/json',
         responseSchema: _responseSchema,
+        temperature: AiConfig.temperature,
+        maxOutputTokens: AiConfig.maxOutputTokens,
       ),
     );
   }
