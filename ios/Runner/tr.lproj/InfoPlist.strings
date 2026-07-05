@@ -1,2 +1,2 @@
 /* İzin metinlerinin Türkçe karşılıkları. */
-"NSPhotoLibraryUsageDescription" = "Snaply, ekran görüntülerini bulup düzenlemek için fotoğraf arşivine erişmeye ihtiyaç duyar. Ekran görüntüleri yalnızca AI etiketlemesi için güvenli şekilde gönderilir, başka hiçbir yerde saklanmaz.";
+"NSPhotoLibraryUsageDescription" = "Snaply, ekran görüntülerini bulup düzenlemek için fotoğraf arşivine erişmeye ihtiyaç duyar. Ekran görüntüleri yalnızca AI etiketlemesi için kısa süreliğine gönderilir, hiçbir sunucuda saklanmaz; etiketler ve algılanan metin cihazında şifreli olarak kalır.";

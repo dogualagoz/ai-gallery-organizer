@@ -1,2 +1,2 @@
 /* İzin metinlerinin İngilizce karşılıkları. */
-"NSPhotoLibraryUsageDescription" = "Snaply needs access to your photo library to find and organize your screenshots. Screenshots are sent securely for AI labeling only and are never stored anywhere else.";
+"NSPhotoLibraryUsageDescription" = "Snaply needs access to your photo library to find and organize your screenshots. Each screenshot is sent briefly for AI labeling only and is never stored on any server; labels and detected text stay encrypted on your device.";

@@ -17,6 +17,9 @@ abstract final class HiveBoxes {
   static const String screenshots = 'screenshots';
   static const String boards = 'boards';
   static const String settings = 'settings';
+
+  /// Box şifreleme anahtarının iOS Keychain'deki kaydının adı.
+  static const String encryptionKeyName = 'snaply_hive_encryption_key';
 }
 
 /// IAP ürün kimlikleri — App Store Connect tanımlarıyla birebir eşleşmeli.
