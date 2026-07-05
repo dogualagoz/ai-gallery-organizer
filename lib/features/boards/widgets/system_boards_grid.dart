@@ -1,15 +1,14 @@
 // Sistem kategorileri (içerik içerenler) ızgarası — Home ekranında kullanılır.
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../../core/constants/ui_constants.dart';
 import '../../../core/l10n/category_labels.dart';
 import '../../../core/l10n/l10n_extension.dart';
 import '../../../core/models/screenshot_category.dart';
 import '../../../core/models/screenshot_entry.dart';
-import '../../../core/router/app_router.dart';
 import '../../../core/widgets/fade_in_up.dart';
 import '../../gallery/data/screenshot_repository.dart';
+import '../board_detail_screen.dart';
 import 'board_covers.dart';
 import 'board_tile.dart';
 
@@ -58,7 +57,8 @@ class SystemBoardsGrid extends StatelessWidget {
             label: category.label(l10n),
             count: categoryEntries.length,
             covers: boardCovers(repo, categoryEntries),
-            onTap: () => context.push(AppRoutes.boardCategory(category)),
+            openBuilder: (context) =>
+                BoardDetailScreen.category(category: category),
           ),
         );
       },

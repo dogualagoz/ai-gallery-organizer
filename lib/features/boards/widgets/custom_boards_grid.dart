@@ -10,6 +10,7 @@ import '../../../core/models/screenshot_entry.dart';
 import '../../../core/router/app_router.dart';
 import '../../../core/widgets/fade_in_up.dart';
 import '../../gallery/data/screenshot_repository.dart';
+import '../board_detail_screen.dart';
 import '../providers/board_provider.dart';
 import 'board_covers.dart';
 import 'board_name_dialog.dart';
@@ -61,7 +62,8 @@ class CustomBoardsGrid extends ConsumerWidget {
             label: board.name,
             count: boardEntries.length,
             covers: boardCovers(repo, boardEntries),
-            onTap: () => context.push(AppRoutes.boardCustom(board.id)),
+            openBuilder: (context) =>
+                BoardDetailScreen.custom(boardId: board.id),
           ),
         );
       },

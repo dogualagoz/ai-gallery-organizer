@@ -1,4 +1,6 @@
 // Board görünümündeki tek kart: kapak thumbnail şeridi + ikon, ad ve sayaç.
+// Dokununca Material container transform ile hedef ekrana büyüyerek açılır.
+import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:photo_manager_image_provider/photo_manager_image_provider.dart';
@@ -16,7 +18,7 @@ class BoardTile extends StatelessWidget {
     required this.label,
     required this.count,
     required this.covers,
-    required this.onTap,
+    required this.openBuilder,
   });
 
   final IconData icon;
@@ -26,53 +28,56 @@ class BoardTile extends StatelessWidget {
   /// Board içeriğinden örnek thumbnail'lar (en fazla [kBoardCoverCount]).
   final List<AssetEntity> covers;
 
-  final VoidCallback onTap;
+  /// Kartın büyüyerek açılacağı hedef ekranı üretir.
+  final WidgetBuilder openBuilder;
 
   @override
   Widget build(BuildContext context) {
     final ColorScheme scheme = Theme.of(context).colorScheme;
 
-    return Material(
-      color: scheme.surface,
-      shape: RoundedRectangleBorder(
+    return OpenContainer(
+      transitionDuration: AppDurations.slow,
+      transitionType: ContainerTransitionType.fadeThrough,
+      closedElevation: 0,
+      openElevation: 0,
+      closedColor: scheme.surface,
+      openColor: scheme.surface,
+      closedShape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppRadius.lg),
         side: BorderSide(color: scheme.outlineVariant),
       ),
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.sm + AppSpacing.xs),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(child: _CoverStrip(covers: covers, icon: icon)),
-              const SizedBox(height: AppSpacing.sm),
-              Row(
-                children: [
-                  Icon(icon, size: 16, color: scheme.primary),
-                  const SizedBox(width: AppSpacing.xs + 2),
-                  Expanded(
-                    child: Text(
-                      label,
-                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+      openBuilder: (context, _) => openBuilder(context),
+      closedBuilder: (context, _) => Padding(
+        padding: const EdgeInsets.all(AppSpacing.sm + AppSpacing.xs),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(child: _CoverStrip(covers: covers, icon: icon)),
+            const SizedBox(height: AppSpacing.sm),
+            Row(
+              children: [
+                Icon(icon, size: 16, color: scheme.primary),
+                const SizedBox(width: AppSpacing.xs + 2),
+                Expanded(
+                  child: Text(
+                    label,
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.w600,
                     ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                ],
-              ),
-              const SizedBox(height: 2),
-              Text(
-                context.l10n.galleryCount(count),
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: scheme.onSurfaceVariant,
                 ),
+              ],
+            ),
+            const SizedBox(height: 2),
+            Text(
+              context.l10n.galleryCount(count),
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: scheme.onSurfaceVariant,
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

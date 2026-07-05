@@ -33,6 +33,9 @@ class _SortingScreenState extends ConsumerState<SortingScreen> {
   /// Bu oturumda "atla" denen kartlar — kalıcı değil, ekran kapanınca sıfırlanır.
   final Set<String> _skippedIds = {};
 
+  /// Alttaki aksiyon butonlarının üstteki karta jest gönderebilmesi için.
+  final SwipeCardController _cardController = SwipeCardController();
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
@@ -61,6 +64,7 @@ class _SortingScreenState extends ConsumerState<SortingScreen> {
               next: queue.length > 1 ? queue[1] : null,
               remaining: queue.length,
               asset: repo.assetFor(queue.first.assetId),
+              controller: _cardController,
               onDelete: () => _handleDelete(queue.first.assetId),
               onSkip: () {
                 HapticFeedback.selectionClick();
@@ -135,13 +139,15 @@ class _SortingScreenState extends ConsumerState<SortingScreen> {
   }
 }
 
-/// Üstteki (etkileşimli) kart + arkada beliren bir sonraki kartın önizlemesi.
+/// Üstteki (etkileşimli) kart + arkada beliren bir sonraki kartın önizlemesi
+/// + altta her zaman görünen, jestin anlamını açıklayan aksiyon butonları.
 class _SortingDeck extends StatelessWidget {
   const _SortingDeck({
     required this.top,
     required this.next,
     required this.remaining,
     required this.asset,
+    required this.controller,
     required this.onDelete,
     required this.onSkip,
     required this.onAssign,
@@ -151,6 +157,7 @@ class _SortingDeck extends StatelessWidget {
   final ScreenshotEntry? next;
   final int remaining;
   final AssetEntity? asset;
+  final SwipeCardController controller;
   final Future<bool> Function() onDelete;
   final VoidCallback onSkip;
   final VoidCallback onAssign;
@@ -183,39 +190,149 @@ class _SortingDeck extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.md),
           Expanded(
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                if (next != null)
-                  Transform.scale(
-                    scale: 0.94,
-                    child: Opacity(
-                      opacity: 0.6,
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(AppRadius.lg),
-                        child: AspectRatio(
-                          aspectRatio: 9 / 16,
-                          child: ColoredBox(
-                            color: Theme.of(
-                              context,
-                            ).colorScheme.surfaceContainerHighest,
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                // 9:16 kartın sığdığı en büyük dikdörtgen — Center yerine
+                // kesin genişlik/yükseklik vererek Stack'in kendi boyutuna
+                // göre içeriği kısıp kartı sola yaslamasının önüne geçer.
+                double cardHeight = constraints.maxHeight;
+                double cardWidth = cardHeight * 9 / 16;
+                if (cardWidth > constraints.maxWidth) {
+                  cardWidth = constraints.maxWidth;
+                  cardHeight = cardWidth * 16 / 9;
+                }
+                return Center(
+                  child: SizedBox(
+                    width: cardWidth,
+                    height: cardHeight,
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        if (next != null)
+                          Transform.scale(
+                            scale: 0.94,
+                            child: Opacity(
+                              opacity: 0.6,
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(
+                                  AppRadius.lg,
+                                ),
+                                child: ColoredBox(
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.surfaceContainerHighest,
+                                ),
+                              ),
+                            ),
                           ),
+                        SwipeCard(
+                          key: ValueKey(top.assetId),
+                          asset: asset,
+                          controller: controller,
+                          onDelete: onDelete,
+                          onSkip: onSkip,
+                          onAssign: onAssign,
                         ),
-                      ),
+                      ],
                     ),
                   ),
-                SwipeCard(
-                  key: ValueKey(top.assetId),
-                  asset: asset,
-                  onDelete: onDelete,
-                  onSkip: onSkip,
-                  onAssign: onAssign,
-                ),
-              ],
+                );
+              },
             ),
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          _SortingActionRow(
+            onDelete: controller.triggerDelete,
+            onSkip: controller.triggerSkip,
+            onAssign: controller.triggerAssign,
           ),
         ],
       ),
+    );
+  }
+}
+
+/// Her zaman görünen aksiyon satırı: sol/orta/sağ konumu ilgili jest yönüyle
+/// eşleşir (sil-sol, atla-yukarı, panoya ekle-sağ), böylece kullanıcı jesti
+/// denemeden önce ne işe yaradığını görür; dokunarak da tetiklenebilir.
+class _SortingActionRow extends StatelessWidget {
+  const _SortingActionRow({
+    required this.onDelete,
+    required this.onSkip,
+    required this.onAssign,
+  });
+
+  final VoidCallback onDelete;
+  final VoidCallback onSkip;
+  final VoidCallback onAssign;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: [
+        _SortingActionButton(
+          icon: Icons.delete_outline,
+          label: l10n.sortingHintDelete,
+          color: Colors.red,
+          onTap: onDelete,
+        ),
+        _SortingActionButton(
+          icon: Icons.arrow_upward,
+          label: l10n.sortingHintSkip,
+          color: Colors.blueGrey,
+          onTap: onSkip,
+        ),
+        _SortingActionButton(
+          icon: Icons.bookmark_add_outlined,
+          label: l10n.sortingHintAssign,
+          color: Colors.green,
+          onTap: onAssign,
+        ),
+      ],
+    );
+  }
+}
+
+class _SortingActionButton extends StatelessWidget {
+  const _SortingActionButton({
+    required this.icon,
+    required this.label,
+    required this.color,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String label;
+  final Color color;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Material(
+          color: color.withValues(alpha: 0.12),
+          shape: const CircleBorder(),
+          child: InkWell(
+            customBorder: const CircleBorder(),
+            onTap: onTap,
+            child: Padding(
+              padding: const EdgeInsets.all(AppSpacing.md),
+              child: Icon(icon, color: color, size: 26),
+            ),
+          ),
+        ),
+        const SizedBox(height: AppSpacing.xs),
+        Text(
+          label,
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
+        ),
+      ],
     );
   }
 }

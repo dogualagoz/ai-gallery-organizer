@@ -9,6 +9,34 @@ import '../../../core/l10n/l10n_extension.dart';
 /// Eşik değeri aşıldığında tetiklenecek yön.
 enum SwipeDirection { left, right, up }
 
+/// [SwipeCard]'ı buton dokunuşuyla dışarıdan tetiklemek için köprü.
+/// Aynı kart görünür kaldığı sürece tek örnek kullanılır (bkz. [SortingScreen]).
+class SwipeCardController {
+  VoidCallback? _delete;
+  VoidCallback? _assign;
+  VoidCallback? _skip;
+
+  void _attach({
+    required VoidCallback delete,
+    required VoidCallback assign,
+    required VoidCallback skip,
+  }) {
+    _delete = delete;
+    _assign = assign;
+    _skip = skip;
+  }
+
+  void _detach() {
+    _delete = null;
+    _assign = null;
+    _skip = null;
+  }
+
+  void triggerDelete() => _delete?.call();
+  void triggerAssign() => _assign?.call();
+  void triggerSkip() => _skip?.call();
+}
+
 class SwipeCard extends StatefulWidget {
   const SwipeCard({
     super.key,
@@ -16,6 +44,7 @@ class SwipeCard extends StatefulWidget {
     required this.onDelete,
     required this.onSkip,
     required this.onAssign,
+    this.controller,
   });
 
   final AssetEntity? asset;
@@ -29,6 +58,9 @@ class SwipeCard extends StatefulWidget {
   /// Panoya atama akışını başlatır (board seçici); kart her koşulda merkeze
   /// döner, gerçek atama tamamlandığında kart üst sıradan zaten düşer.
   final VoidCallback onAssign;
+
+  /// Alttaki aksiyon butonlarının aynı jestleri tetikleyebilmesi için.
+  final SwipeCardController? controller;
 
   @override
   State<SwipeCard> createState() => _SwipeCardState();
@@ -47,7 +79,37 @@ class _SwipeCardState extends State<SwipeCard>
   bool _animating = false;
 
   @override
+  void initState() {
+    super.initState();
+    _attachController();
+  }
+
+  @override
+  void didUpdateWidget(covariant SwipeCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.controller != widget.controller) {
+      oldWidget.controller?._detach();
+      _attachController();
+    }
+  }
+
+  void _attachController() {
+    widget.controller?._attach(
+      delete: () {
+        if (!_animating) _performDelete();
+      },
+      assign: () {
+        if (!_animating) _performAssign();
+      },
+      skip: () {
+        if (!_animating) _performSkip();
+      },
+    );
+  }
+
+  @override
   void dispose() {
+    widget.controller?._detach();
     _controller.dispose();
     super.dispose();
   }
@@ -61,18 +123,30 @@ class _SwipeCardState extends State<SwipeCard>
     if (_animating) return;
     final Offset offset = _dragOffset;
     if (offset.dx > _threshold) {
-      await _animateTo(Offset.zero);
-      widget.onAssign();
+      await _performAssign();
     } else if (offset.dx < -_threshold) {
-      await _animateTo(const Offset(-700, 0));
-      final bool removed = await widget.onDelete();
-      if (!removed && mounted) await _animateTo(Offset.zero);
+      await _performDelete();
     } else if (offset.dy < -_threshold && offset.dx.abs() < _threshold) {
-      await _animateTo(const Offset(0, -900));
-      widget.onSkip();
+      await _performSkip();
     } else {
       await _animateTo(Offset.zero);
     }
+  }
+
+  Future<void> _performAssign() async {
+    await _animateTo(Offset.zero);
+    widget.onAssign();
+  }
+
+  Future<void> _performDelete() async {
+    await _animateTo(const Offset(-700, 0));
+    final bool removed = await widget.onDelete();
+    if (!removed && mounted) await _animateTo(Offset.zero);
+  }
+
+  Future<void> _performSkip() async {
+    await _animateTo(const Offset(0, -900));
+    widget.onSkip();
   }
 
   Future<void> _animateTo(Offset target) async {
@@ -104,10 +178,19 @@ class _SwipeCardState extends State<SwipeCard>
         offset: _dragOffset,
         child: Transform.rotate(
           angle: angle,
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(AppRadius.lg),
-            child: AspectRatio(
-              aspectRatio: 9 / 16,
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(AppRadius.lg),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.18),
+                  blurRadius: 24,
+                  offset: const Offset(0, 10),
+                ),
+              ],
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(AppRadius.lg),
               child: Stack(
                 fit: StackFit.expand,
                 children: [
