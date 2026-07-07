@@ -10,8 +10,12 @@ Son güncelleme: 2026-07-05 (monetizasyon v2 sonrası — consumable pack'ler,
 ## 1. Uygulama Kaydı
 
 - **Bundle ID:** `com.dogualagoz.snaply` (Apple Developer > Identifiers'da açılacak)
-- **Ad:** "Snaply" placeholder — yayın öncesi kesinleşirse tek noktadan değişir:
-  `lib/core/constants/app_constants.dart` (`kAppName`) + `ios/Runner/Info.plist` (`CFBundleDisplayName`)
+- **Ad kesinleşti (2026-07-07):** İki ayrı alan var, karıştırma:
+  - **Home screen etiketi / uygulama içi metinler:** "Snaply" — kod tarafında zaten
+    bu (`lib/core/constants/app_constants.dart` `kAppName` + `ios/Runner/Info.plist`
+    `CFBundleDisplayName`), değişiklik gerekmiyor.
+  - **App Store Connect "Name" alanı (App Information, dashboard'da elle girilir,
+    kodla ilgisi yok):** "Snaply | AI Gallery Organizer"
 - **Kategori:** Productivity (ikincil: Utilities)
 - **Yaş:** 4+ (kullanıcı içeriği yalnızca kendi galerisi; paylaşım/UGC yok)
 - **Sürüm:** 1.0.0 (build 1) — `pubspec.yaml > version`
@@ -184,3 +188,16 @@ Güvenlik incelemesi (2026-07-05) sonucu, v1 için bilinçli kabul edilenler:
 - Düzeltilenler (artık risk değil): OCR metinleri dahil yerel veritabanı **AES
   şifreli** (anahtar iOS Keychain'de); izin metni gerçeği yansıtıyor; loglara
   hassas veri yazılmıyor; debug araçları `kDebugMode` korumalı; ATS varsayılan.
+
+
+
+1. Firebase API anahtarı rotasyonu — sızan anahtar hâlâ aktif (API kısıtlı ama rotasyon yapılmadı). Cloud Console'da regenerate + bundle ID kısıtı, sonra flutterfire configure, sonra GitHub alert'ini kapat.
+2. Blaze planına geçiş + budget alert — yayında free kota (~1000 istek/gün, tüm kullanıcılar ortak) yetmez. Geçince bana söyle, kodda AiRateProfile.paid'e geçişi ben yaparım.
+3. App Check enforcement — Console'da şu an "Unenforced"; birkaç gün Monitor'da izleyip Gemini API için Enforce aç. API anahtarının suistimaline karşı asıl koruma bu.
+4. Xcode: Team signing + App Attest capability + bekleyen Apple PLA onayı (developer.apple.com).
+5. Gerçek Privacy Policy / Terms sayfaları — koddaki tek yayın blokeri; URL'leri verirsen LegalUrls'ü ben güncellerim. İstersen sayfa metinlerini de hazırlayabilirim (GitHub Pages'e koymak yeterli).
+6. App Store Connect: uygulama kaydı, 5 IAP ürünü (yıllıkta 7 gün trial tanımıyla), App Privacy formu, mağaza metinleri — hepsi dokümanda kopyala-yapıştır hazır.
+7. Uygulama adının kesinleşmesi — "Snaply" placeholder; değişirse kAppName + CFBundleDisplayName iki noktadan güncellenir.
+8. Gerçek cihazda uçtan uca test (özellikle App Check enforce açıkken analiz + sandbox satın alma), sonra TestFlight → review.
+
+Benim yapabileceğim iki küçük şey bekliyor: legal sayfa metinlerini hazırlamak (istersen) ve commit-convention skill'indeki eski "firebase_options.dart commit'lenir" satırını düzeltmek. Onun dışında top sende — 1. ve 5. adımlar en kritik olanlar.
