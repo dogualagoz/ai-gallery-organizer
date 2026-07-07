@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Snaply — Gizlilik Politikası / Privacy Policy</title>
+<style>
+  :root {
+    --iris: #5457D6;
+    --violet: #7E6BD9;
+    --bg: #F5F5FB;
+    --text: #1C1B29;
+    --muted: #5B5A6E;
+    --card: #FFFFFF;
+    --border: #E4E3F1;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #14131E;
+      --text: #EDEDF5;
+      --muted: #A6A4BE;
+      --card: #1D1C2B;
+      --border: #2C2B3E;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    line-height: 1.6;
+  }
+  .wrap {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 2.5rem 1.25rem 4rem;
+  }
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-weight: 700;
+    font-size: 1.15rem;
+  }
+  .brand .dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--iris), var(--violet));
+  }
+  .lang-toggle {
+    display: flex;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 4px;
+    gap: 4px;
+  }
+  .lang-toggle button {
+    border: none;
+    background: transparent;
+    padding: 0.4rem 0.9rem;
+    border-radius: 999px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--muted);
+    cursor: pointer;
+  }
+  .lang-toggle button.active {
+    background: linear-gradient(135deg, var(--iris), var(--violet));
+    color: white;
+  }
+  h1 {
+    font-size: 1.6rem;
+    margin-bottom: 0.25rem;
+  }
+  .updated {
+    color: var(--muted);
+    font-size: 0.85rem;
+    margin-bottom: 2rem;
+  }
+  section {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 1rem;
+  }
+  h2 {
+    font-size: 1.05rem;
+    margin-top: 0;
+    margin-bottom: 0.6rem;
+    color: var(--iris);
+  }
+  p, li { color: var(--text); font-size: 0.95rem; }
+  ul { margin: 0.4rem 0; padding-left: 1.2rem; }
+  a { color: var(--iris); }
+  .lang-block[hidden] { display: none; }
+  footer {
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.8rem;
+    margin-top: 2.5rem;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand"><span class="dot"></span> Snaply</div>
+    <div class="lang-toggle">
+      <button id="btn-tr" class="active" onclick="setLang('tr')">Türkçe</button>
+      <button id="btn-en" onclick="setLang('en')">English</button>
+    </div>
+  </header>
+
+  <div id="lang-tr" class="lang-block">
+    <h1>Gizlilik Politikası</h1>
+    <p class="updated">Son güncelleme: 7 Temmuz 2026</p>
+
+    <section>
+      <h2>Genel Bakış</h2>
+      <p>Snaply, iOS galerinizdeki ekran görüntülerini yapay zeka ile kategorize eden, aratılabilir ve düzenlenebilir hale getiren bir uygulamadır. Bu politika, uygulamayı kullanırken hangi verilerin işlendiğini açıklar. Snaply hesap sistemi kullanmaz; kimliğinizi belirleyen herhangi bir bilgi toplamaz.</p>
+    </section>
+
+    <section>
+      <h2>Toplanan Veriler</h2>
+      <p>Snaply yalnızca <strong>ekran görüntüleri</strong> (Fotoğraflar/Videolar) ile çalışır:</p>
+      <ul>
+        <li>Senkronize ettiğiniz her ekran görüntüsü, kategori/etiket/metin (OCR) çıkarımı için Google'ın Gemini API'sine (Firebase AI Logic üzerinden) gönderilir.</li>
+        <li>Snaply'nin kendi sunucusu yoktur; görselleriniz cihazınız dışında hiçbir yerde saklanmaz. Görsel, yalnızca analiz için işlenip sonucun cihazınıza dönmesiyle amacını tamamlar.</li>
+        <li>Analiz sonuçları (kategori, etiketler, OCR metni) yalnızca cihazınızda, <strong>AES ile şifrelenmiş</strong> yerel bir veritabanında saklanır. Şifreleme anahtarı iOS Keychain'de tutulur.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Hesap ve Kimlik Bilgisi</h2>
+      <p>Snaply'de kullanıcı hesabı, giriş ekranı veya kimlik doğrulama yoktur. Toplanan hiçbir veri kimliğinizle ilişkilendirilmez.</p>
+    </section>
+
+    <section>
+      <h2>Takip, Reklam ve Analitik</h2>
+      <p>Uygulamada reklam SDK'sı, üçüncü taraf analitik veya kullanıcı takip mekanizması bulunmaz. Cihazlar arası takip yapılmaz.</p>
+    </section>
+
+    <section>
+      <h2>Güvenlik Doğrulaması (App Check)</h2>
+      <p>Snaply, sunucu isteklerinin gerçek uygulamadan geldiğini doğrulamak için Apple'ın App Attest / DeviceCheck teknolojisini (Firebase App Check aracılığıyla) kullanır. Bu mekanizma kişisel veri toplamaz; yalnızca isteğin meşru bir Snaply kurulumundan geldiğini doğrular.</p>
+    </section>
+
+    <section>
+      <h2>Satın Almalar</h2>
+      <p>Uygulama içi satın almalar (abonelik, ömür boyu erişim, analiz paketleri) tamamen Apple'ın StoreKit altyapısı üzerinden işlenir. Snaply ödeme bilgilerinizi görmez veya saklamaz.</p>
+    </section>
+
+    <section>
+      <h2>Üçüncü Taraf Hizmetler</h2>
+      <p>Ekran görüntüsü analizi için Google'ın Gemini API'si (Firebase AI Logic, Google LLC tarafından işletilir) kullanılır. Google'ın veri işleme uygulamaları için <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Google Gizlilik Politikası</a>'na bakabilirsiniz.</p>
+    </section>
+
+    <section>
+      <h2>Verilerin Saklanması ve Silinmesi</h2>
+      <p>Tüm analiz sonuçları yalnızca cihazınızda tutulur. Uygulamayı silmeniz veya ilgili ekran görüntülerini galeriden kaldırmanız, bu verileri de cihazınızdan siler. Sunucu tarafında saklanan hiçbir kayıt yoktur.</p>
+    </section>
+
+    <section>
+      <h2>Çocukların Gizliliği</h2>
+      <p>Snaply belirli bir yaş grubunu hedeflemez ve kullanıcıdan kişisel bilgi toplamaz. Uygulama kendi galerinizdeki içerikle çalışır; paylaşım veya kullanıcı tarafından üretilen genel içerik (UGC) barındırmaz.</p>
+    </section>
+
+    <section>
+      <h2>Bu Politikadaki Değişiklikler</h2>
+      <p>Bu politika güncellenebilir. Önemli değişiklikler bu sayfada "Son güncelleme" tarihiyle yayınlanır.</p>
+    </section>
+
+    <section>
+      <h2>İletişim</h2>
+      <p>Sorularınız için: <a href="mailto:dogualagoz@icloud.com">dogualagoz@icloud.com</a></p>
+    </section>
+  </div>
+
+  <div id="lang-en" class="lang-block" hidden>
+    <h1>Privacy Policy</h1>
+    <p class="updated">Last updated: July 7, 2026</p>
+
+    <section>
+      <h2>Overview</h2>
+      <p>Snaply is an app that organizes screenshots in your iOS photo library using AI, making them searchable and easy to manage. This policy explains what data is processed while you use the app. Snaply has no account system and does not collect any information that identifies you.</p>
+    </section>
+
+    <section>
+      <h2>Data We Collect</h2>
+      <p>Snaply only works with <strong>screenshots</strong> (Photos/Videos):</p>
+      <ul>
+        <li>Each screenshot you sync is sent to Google's Gemini API (via Firebase AI Logic) solely to generate a category, tags, and extracted text (OCR).</li>
+        <li>Snaply does not operate its own servers, and your images are never stored anywhere outside your device. An image is processed only long enough to return the analysis result to your device.</li>
+        <li>Analysis results (category, tags, OCR text) are stored only on your device, in a local database <strong>encrypted with AES</strong>. The encryption key is kept in the iOS Keychain.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Account &amp; Identity Data</h2>
+      <p>Snaply has no user accounts, sign-in screens, or authentication. None of the data collected is linked to your identity.</p>
+    </section>
+
+    <section>
+      <h2>Tracking, Advertising &amp; Analytics</h2>
+      <p>The app contains no advertising SDKs, third-party analytics, or user tracking mechanisms. There is no cross-app or cross-site tracking.</p>
+    </section>
+
+    <section>
+      <h2>Security Verification (App Check)</h2>
+      <p>Snaply uses Apple's App Attest / DeviceCheck technology (via Firebase App Check) to verify that server requests genuinely originate from the app. This mechanism does not collect personal data — it only confirms the request comes from a legitimate Snaply installation.</p>
+    </section>
+
+    <section>
+      <h2>Purchases</h2>
+      <p>In-app purchases (subscriptions, lifetime access, analysis packs) are processed entirely through Apple's StoreKit. Snaply never sees or stores your payment information.</p>
+    </section>
+
+    <section>
+      <h2>Third-Party Services</h2>
+      <p>Screenshot analysis uses Google's Gemini API (Firebase AI Logic, operated by Google LLC). See <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Google's Privacy Policy</a> for how Google handles data.</p>
+    </section>
+
+    <section>
+      <h2>Data Retention &amp; Deletion</h2>
+      <p>All analysis results are kept only on your device. Deleting the app, or removing the corresponding screenshots from your library, removes this data as well. No records are retained on any server.</p>
+    </section>
+
+    <section>
+      <h2>Children's Privacy</h2>
+      <p>Snaply does not target a specific age group and does not collect personal information from users. The app only works with content in your own photo library and does not include sharing or user-generated content features.</p>
+    </section>
+
+    <section>
+      <h2>Changes to This Policy</h2>
+      <p>This policy may be updated from time to time. Material changes will be reflected on this page with an updated "Last updated" date.</p>
+    </section>
+
+    <section>
+      <h2>Contact</h2>
+      <p>Questions? <a href="mailto:dogualagoz@icloud.com">dogualagoz@icloud.com</a></p>
+    </section>
+  </div>
+
+  <footer>© 2026 Snaply</footer>
+</div>
+
+<script>
+  function setLang(lang) {
+    document.getElementById('lang-tr').hidden = lang !== 'tr';
+    document.getElementById('lang-en').hidden = lang !== 'en';
+    document.getElementById('btn-tr').classList.toggle('active', lang === 'tr');
+    document.getElementById('btn-en').classList.toggle('active', lang === 'en');
+    document.documentElement.lang = lang;
+  }
+</script>
+</body>
+</html>

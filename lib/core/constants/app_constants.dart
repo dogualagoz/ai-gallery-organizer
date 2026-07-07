@@ -44,9 +44,10 @@ abstract final class ProductIds {
   };
 }
 
-/// Yasal doküman linkleri (yayın öncesi gerçek URL'lerle değiştirilecek).
+/// Yasal doküman linkleri.
 abstract final class LegalUrls {
-  // TODO(release): Gerçek privacy/terms URL'leri yayınlanınca güncelle.
-  static const String privacyPolicy = 'https://example.com/privacy';
+  static const String privacyPolicy =
+      'https://dogualagoz.github.io/ai-gallery-organizer/privacy.html';
+  // TODO(release): Terms of Use App Store başvurusundan önce yayınlanacak.
   static const String termsOfUse = 'https://example.com/terms';
 }
