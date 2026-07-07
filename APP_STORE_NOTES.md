@@ -69,6 +69,12 @@ güncellenmeli (`app_constants.dart`, `TODO(release)`). Politika metninde şunla
 almalı: görseller yalnız etiketleme için Google Gemini API'sine gönderilir ve sunucuda
 saklanmaz; etiket/OCR sonuçları cihazda şifreli (AES) veritabanında tutulur.
 
+**Export Compliance (2026-07-07, build 1.0.0(1) için cevaplandı):** Hive DB'nin AES
+şifrelemesi nedeniyle "Standard encryption algorithms in addition to Apple's OS"
+seçildi. **Fransa sorusuna "No" dendi** (ANSSI beyanından kaçınmak için) — bu yüzden
+App Store yayınında **Pricing and Availability'den Fransa çıkarılmalı**. İleride Fransa
+istenirse compliance cevabı güncellenip ANSSI beyanı yapılır.
+
 ## 4. Review Notu (App Review Information > Notes alanına, İngilizce)
 
 ```
