@@ -1,8 +1,7 @@
-// Buzlu cam (glassmorphism) yüzen alt gezinme çubuğu; seçim kayarak taşınır.
-import 'dart:ui';
-
+// iOS 26 liquid glass yüzen alt gezinme çubuğu; seçim kayarak taşınır.
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:liquid_glass_renderer/liquid_glass_renderer.dart';
 
 import '../constants/ui_constants.dart';
 
@@ -19,10 +18,14 @@ class GlassNavDestination {
   final String label;
 }
 
-/// Modern iOS dilinde yüzen, arkasını blur'layan gezinme çubuğu.
+/// Modern iOS 26 dilinde yüzen, gerçek shader tabanlı liquid glass pil.
 /// Scaffold'a `extendBody: true` ile birlikte verilmelidir; içerik
-/// çubuğun arkasından akar ve cam etkisi görünür olur.
-class GlassNavBar extends StatelessWidget {
+/// çubuğun arkasından akar ve kırılma/parlama efekti görünür olur.
+/// Bir ata `LiquidGlassLayer` + `LiquidGlassBlendGroup` içinde
+/// kullanılmalıdır (bkz. `_MainShell`) — cam ayarları oradan miras alınır.
+/// Dokunmanın yanı sıra parmakla yatay kaydırarak sekme değiştirmeyi de
+/// destekler (iOS 26 liquid glass tab bar davranışı).
+class GlassNavBar extends StatefulWidget {
   const GlassNavBar({
     super.key,
     required this.destinations,
@@ -35,14 +38,49 @@ class GlassNavBar extends StatelessWidget {
   final ValueChanged<int> onSelected;
 
   @override
-  Widget build(BuildContext context) {
-    final ColorScheme scheme = Theme.of(context).colorScheme;
+  State<GlassNavBar> createState() => _GlassNavBarState();
+}
 
+class _GlassNavBarState extends State<GlassNavBar> {
+  int? _dragIndex;
+
+  int _indexForDx(double dx, double width) {
+    final double itemWidth = width / widget.destinations.length;
+    return (dx / itemWidth).floor().clamp(0, widget.destinations.length - 1);
+  }
+
+  void _handleDragUpdate(DragUpdateDetails details, double width) {
+    final int index = _indexForDx(details.localPosition.dx, width);
+    if (index == (_dragIndex ?? widget.selectedIndex)) return;
+    _dragIndex = index;
+    HapticFeedback.selectionClick();
+    widget.onSelected(index);
+  }
+
+  @override
+  Widget build(BuildContext context) {
     // Dış boşluk artık paylaşılan tek bir inset olarak _MainShell'de
     // uygulanıyor (pil + ayrık aksiyon butonu aynı hizada yüzsün diye).
+    return LayoutBuilder(
+      builder: (context, constraints) => GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onHorizontalDragStart: (_) => _dragIndex = widget.selectedIndex,
+        onHorizontalDragUpdate: (details) =>
+            _handleDragUpdate(details, constraints.maxWidth),
+        onHorizontalDragEnd: (_) => _dragIndex = null,
+        child: _buildGlassPill(context),
+      ),
+    );
+  }
+
+  /// Kurulu paket sürümünde `shadows` parametresi henüz yok; gölge dıştan
+  /// sarmalanan bir DecoratedBox ile veriliyor.
+  Widget _buildGlassPill(BuildContext context) {
+    final ColorScheme scheme = Theme.of(context).colorScheme;
+
     return DecoratedBox(
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(AppRadius.pill),
+        borderRadius: BorderRadius.circular(AppSizes.navBarHeight / 2),
         boxShadow: [
           BoxShadow(
             color: scheme.inverseSurface.withValues(alpha: 0.10),
@@ -51,42 +89,34 @@ class GlassNavBar extends StatelessWidget {
           ),
         ],
       ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(AppRadius.pill),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
-          child: Container(
-            height: AppSizes.navBarHeight,
-            decoration: BoxDecoration(
-              color: scheme.surface.withValues(alpha: 0.55),
-              borderRadius: BorderRadius.circular(AppRadius.pill),
-              border: Border.all(
-                color: scheme.outline.withValues(alpha: 0.35),
+      child: LiquidGlass.grouped(
+        shape: LiquidRoundedSuperellipse(
+          borderRadius: AppSizes.navBarHeight / 2,
+        ),
+        child: SizedBox(
+          height: AppSizes.navBarHeight,
+          child: Stack(
+            children: [
+              _SlidingIndicator(
+                itemCount: widget.destinations.length,
+                selectedIndex: widget.selectedIndex,
               ),
-            ),
-            child: Stack(
-              children: [
-                _SlidingIndicator(
-                  itemCount: destinations.length,
-                  selectedIndex: selectedIndex,
-                ),
-                Row(
-                  children: [
-                    for (int i = 0; i < destinations.length; i++)
-                      Expanded(
-                        child: _NavItem(
-                          destination: destinations[i],
-                          selected: i == selectedIndex,
-                          onTap: () {
-                            HapticFeedback.selectionClick();
-                            onSelected(i);
-                          },
-                        ),
+              Row(
+                children: [
+                  for (int i = 0; i < widget.destinations.length; i++)
+                    Expanded(
+                      child: _NavItem(
+                        destination: widget.destinations[i],
+                        selected: i == widget.selectedIndex,
+                        onTap: () {
+                          HapticFeedback.selectionClick();
+                          widget.onSelected(i);
+                        },
                       ),
-                  ],
-                ),
-              ],
-            ),
+                    ),
+                ],
+              ),
+            ],
           ),
         ),
       ),

@@ -33,7 +33,7 @@ kullanıcı planlar arasında upgrade/downgrade yapabilsin).
 |---|---|---|---|---|
 | `snaply_pro_monthly` | Auto-Renewable Subscription | 1 ay | 199,99 | — |
 | `snaply_pro_yearly` | Auto-Renewable Subscription | 1 yıl | 1.299,99 | **Introductory Offer: 7 gün ücretsiz (Free Trial)** — Connect'te ürünün "Subscription Prices > Introductory Offers" bölümünden tanımlanır, kodda değil. Yalnız yıllıkta trial var |
-| `snaply_pro_lifetime` | **Non-Consumable** | — | 3.499,99 | Tek seferlik |
+| `snaply_pro_lifetime` | **Non-Consumable** | — | 2.999,99 | Tek seferlik. 2026-07-07'de Connect'te 3.499,99'dan 2.999,99'a düşürüldü |
 | `snaply_pack_500` | **Consumable** | — | 99,99 | 500 AI analiz kredisi (Pro açmaz) |
 | `snaply_pack_1000` | **Consumable** | — | 149,99 | 1000 AI analiz kredisi (Pro açmaz) |
 

@@ -1,12 +1,13 @@
-// Navbar pilinin yanında yüzen, aynı cam stilini paylaşan dairesel aksiyon butonu.
-import 'dart:ui';
-
+// Navbar pilinin yanında yüzen, aynı liquid glass stilini paylaşan dairesel aksiyon butonu.
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:liquid_glass_renderer/liquid_glass_renderer.dart';
 
 import '../constants/ui_constants.dart';
 
 /// [GlassNavBar] ile aynı hizada, ayrı bir dairesel buton (ör. Arama).
+/// Bir ata `LiquidGlassLayer` + `LiquidGlassBlendGroup` içinde
+/// kullanılmalıdır (bkz. `_MainShell`) — cam ayarları oradan miras alınır.
 class GlassActionButton extends StatelessWidget {
   const GlassActionButton({
     super.key,
@@ -23,6 +24,8 @@ class GlassActionButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final ColorScheme scheme = Theme.of(context).colorScheme;
 
+    // Kurulu paket sürümünde `shadows` parametresi henüz yok; gölge dıştan
+    // sarmalanan bir DecoratedBox ile veriliyor.
     return DecoratedBox(
       decoration: BoxDecoration(
         shape: BoxShape.circle,
@@ -34,28 +37,21 @@ class GlassActionButton extends StatelessWidget {
           ),
         ],
       ),
-      child: ClipOval(
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
-          child: Container(
-            width: AppSizes.navBarActionSize,
-            height: AppSizes.navBarHeight,
-            decoration: BoxDecoration(
-              color: scheme.surface.withValues(alpha: 0.55),
-              shape: BoxShape.circle,
-              border: Border.all(color: scheme.outline.withValues(alpha: 0.35)),
-            ),
-            child: Semantics(
-              button: true,
-              label: tooltip,
-              child: InkWell(
-                customBorder: const CircleBorder(),
-                onTap: () {
-                  HapticFeedback.selectionClick();
-                  onPressed();
-                },
-                child: Icon(icon, color: scheme.primary, size: AppSizes.navBarIcon),
-              ),
+      child: LiquidGlass.grouped(
+        shape: const LiquidOval(),
+        child: SizedBox(
+          width: AppSizes.navBarActionSize,
+          height: AppSizes.navBarHeight,
+          child: Semantics(
+            button: true,
+            label: tooltip,
+            child: InkWell(
+              customBorder: const CircleBorder(),
+              onTap: () {
+                HapticFeedback.selectionClick();
+                onPressed();
+              },
+              child: Icon(icon, color: scheme.primary, size: AppSizes.navBarIcon),
             ),
           ),
         ),
