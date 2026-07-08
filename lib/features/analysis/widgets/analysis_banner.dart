@@ -193,7 +193,7 @@ class _LimitContent extends ConsumerWidget {
         ),
         FilledButton.tonal(
           style: FilledButton.styleFrom(minimumSize: Size.zero),
-          onPressed: () => context.push(AppRoutes.paywall),
+          onPressed: () => context.push(AppRoutes.paywallPacks),
           child: Text(context.l10n.paywallTitle),
         ),
         IconButton(

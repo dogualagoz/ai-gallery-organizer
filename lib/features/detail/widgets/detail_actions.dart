@@ -86,7 +86,7 @@ class _DetailActionsState extends ConsumerState<DetailActions> {
       case SingleAnalysisOutcome.success:
         break; // Box değişimi galeri/detayı zaten tazeler.
       case SingleAnalysisOutcome.limitReached:
-        context.push(AppRoutes.paywall);
+        context.push(AppRoutes.paywallPacks);
       case SingleAnalysisOutcome.failed:
         _showSnack(context.l10n.analysisFailedBanner);
     }

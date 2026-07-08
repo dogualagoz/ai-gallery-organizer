@@ -16,7 +16,10 @@ import 'widgets/plan_card.dart';
 import 'widgets/trial_timeline.dart';
 
 class PaywallScreen extends ConsumerWidget {
-  const PaywallScreen({super.key});
+  const PaywallScreen({super.key, this.scrollToPacks = false});
+
+  /// Açılışta paket bölümüne kaydır (analiz limiti akışından gelindiğinde).
+  final bool scrollToPacks;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -56,7 +59,7 @@ class PaywallScreen extends ConsumerWidget {
             _ProductsUnavailable(text: l10n.paywallProductsUnavailable),
         data: (items) => items.isEmpty
             ? _ProductsUnavailable(text: l10n.paywallProductsUnavailable)
-            : _PaywallContent(products: items),
+            : _PaywallContent(products: items, scrollToPacks: scrollToPacks),
       ),
     );
   }
@@ -110,9 +113,10 @@ class _CloseButton extends StatelessWidget {
 }
 
 class _PaywallContent extends ConsumerStatefulWidget {
-  const _PaywallContent({required this.products});
+  const _PaywallContent({required this.products, this.scrollToPacks = false});
 
   final List<ProductDetails> products;
+  final bool scrollToPacks;
 
   @override
   ConsumerState<_PaywallContent> createState() => _PaywallContentState();
@@ -123,6 +127,44 @@ class _PaywallContentState extends ConsumerState<_PaywallContent> {
   // platforma özgü alt tiple (AppStoreProduct2Details) geldiği için
   // orElse closure'ı kovaryans nedeniyle tip hatası fırlatıyor.
   late String _selectedProductId = _defaultProductId();
+
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.scrollToPacks) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _revealPacks());
+    }
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  /// Listeyi sona kaydırarak paket bölümünü görünür yapar (paketler ve footer
+  /// birlikte viewport'a sığar). İlk animasyon sırasında lazily build edilen
+  /// satırlar maxScrollExtent'i büyütebildiği için sonda küçük bir düzeltme
+  /// kaydırması yapılır.
+  Future<void> _revealPacks() async {
+    if (!_scrollController.hasClients) return;
+    await _scrollController.animateTo(
+      _scrollController.position.maxScrollExtent,
+      duration: const Duration(milliseconds: 500),
+      curve: Curves.easeOutCubic,
+    );
+    if (!mounted || !_scrollController.hasClients) return;
+    final double target = _scrollController.position.maxScrollExtent;
+    if ((target - _scrollController.offset).abs() > 1) {
+      await _scrollController.animateTo(
+        target,
+        duration: const Duration(milliseconds: 150),
+        curve: Curves.easeOut,
+      );
+    }
+  }
 
   /// Önerilen plan üstte olacak şekilde sabit sırada: yıllık, aylık, lifetime.
   static const List<String> _planOrder = [
@@ -177,6 +219,7 @@ class _PaywallContentState extends ConsumerState<_PaywallContent> {
             child: Stack(
               children: [
                 ListView(
+                  controller: _scrollController,
                   padding: const EdgeInsets.fromLTRB(
                     AppSpacing.md,
                     0,

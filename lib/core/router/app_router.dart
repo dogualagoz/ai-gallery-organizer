@@ -26,6 +26,14 @@ abstract final class AppRoutes {
   static const String sorting = '/sorting';
   static const String paywall = '/paywall';
 
+  /// Paywall query parametresi: açılışta paket bölümüne kaydır.
+  static const String paywallFocusQuery = 'focus';
+  static const String paywallFocusPacks = 'packs';
+
+  /// Analiz limiti akışları için: paywall'ı paket bölümünde açar.
+  static const String paywallPacks =
+      '$paywall?$paywallFocusQuery=$paywallFocusPacks';
+
   /// Detay rotası assetId parametresi alır.
   static String detail(String assetId) => '/detail/$assetId';
 }
@@ -90,8 +98,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.paywall,
         // Paywall alttan tam sayfa modal olarak açılır (iOS alışkanlığı).
-        pageBuilder: (context, state) =>
-            const MaterialPage(fullscreenDialog: true, child: PaywallScreen()),
+        pageBuilder: (context, state) => MaterialPage(
+          fullscreenDialog: true,
+          child: PaywallScreen(
+            scrollToPacks:
+                state.uri.queryParameters[AppRoutes.paywallFocusQuery] ==
+                AppRoutes.paywallFocusPacks,
+          ),
+        ),
       ),
     ],
   );
