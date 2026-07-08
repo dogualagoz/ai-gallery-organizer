@@ -48,6 +48,6 @@ abstract final class ProductIds {
 abstract final class LegalUrls {
   static const String privacyPolicy =
       'https://dogualagoz.github.io/ai-gallery-organizer/privacy.html';
-  // TODO(release): Terms of Use App Store başvurusundan önce yayınlanacak.
-  static const String termsOfUse = 'https://example.com/terms';
+  static const String termsOfUse =
+      'https://dogualagoz.github.io/ai-gallery-organizer/terms.html';
 }
