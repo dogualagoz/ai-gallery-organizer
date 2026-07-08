@@ -81,8 +81,8 @@
   },
   "analysisFailedBanner": "Analiz başarısız oldu. Bağlantını kontrol edip tekrar dene.",
   "analysisRetryAction": "Tekrar dene",
-  "analysisLimitBanner": "Ücretsiz analiz hakkın doldu.",
-  "analysisLimitCompleted": "{count} ekran görüntüsü gruplandırıldı. Devam etmek için Pro'ya geç.",
+  "analysisLimitBanner": "Ücretsiz analiz hakkın doldu. Pro'ya geç ya da analiz paketi al.",
+  "analysisLimitCompleted": "{count} ekran görüntüsü gruplandırıldı. Devam etmek için Pro'ya geç ya da analiz paketi al.",
   "@analysisLimitCompleted": {
     "placeholders": {
       "count": {"type": "int"}
@@ -208,6 +208,12 @@
       "count": {"type": "int"}
     }
   },
+  "paywallPackDescription": "Son {count} ekran görüntünü analiz edip gruplar.",
+  "@paywallPackDescription": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
   "paywallPackPurchased": "{count} analiz hesabına eklendi!",
   "@paywallPackPurchased": {
     "placeholders": {
@@ -226,6 +232,7 @@
   "settingsGoPro": "Snaply Pro'ya geç",
   "settingsGoProBody": "Sınırsız analiz, pano ve arama seni bekliyor.",
   "settingsPurchasesSection": "Satın alımlar",
+  "settingsRemainingAnalyses": "Kalan analiz hakkı",
   "settingsRestoreSuccess": "Satın alımlar geri yüklendi.",
   "settingsAboutSection": "Hakkında",
   "settingsVersion": "Sürüm {version}",

@@ -192,11 +192,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get analysisRetryAction => 'Retry';
 
   @override
-  String get analysisLimitBanner => 'Your free analysis quota is used up.';
+  String get analysisLimitBanner =>
+      'Your free analysis quota is used up. Go Pro or grab an analysis pack.';
 
   @override
   String analysisLimitCompleted(int count) {
-    return '$count screenshots organized. Go Pro to keep going.';
+    return '$count screenshots organized. Go Pro or grab an analysis pack to keep going.';
   }
 
   @override
@@ -496,6 +497,11 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String paywallPackDescription(int count) {
+    return 'Analyzes and organizes your last $count screenshots.';
+  }
+
+  @override
   String paywallPackPurchased(int count) {
     return '$count analyses added to your account!';
   }
@@ -539,6 +545,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsPurchasesSection => 'Purchases';
+
+  @override
+  String get settingsRemainingAnalyses => 'Remaining analyses';
 
   @override
   String get settingsRestoreSuccess => 'Purchases restored.';

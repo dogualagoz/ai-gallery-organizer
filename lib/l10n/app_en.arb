@@ -81,8 +81,8 @@
   },
   "analysisFailedBanner": "Analysis failed. Check your connection and try again.",
   "analysisRetryAction": "Retry",
-  "analysisLimitBanner": "Your free analysis quota is used up.",
-  "analysisLimitCompleted": "{count} screenshots organized. Go Pro to keep going.",
+  "analysisLimitBanner": "Your free analysis quota is used up. Go Pro or grab an analysis pack.",
+  "analysisLimitCompleted": "{count} screenshots organized. Go Pro or grab an analysis pack to keep going.",
   "@analysisLimitCompleted": {
     "placeholders": {
       "count": {"type": "int"}
@@ -208,6 +208,12 @@
       "count": {"type": "int"}
     }
   },
+  "paywallPackDescription": "Analyzes and organizes your last {count} screenshots.",
+  "@paywallPackDescription": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
   "paywallPackPurchased": "{count} analyses added to your account!",
   "@paywallPackPurchased": {
     "placeholders": {
@@ -226,6 +232,7 @@
   "settingsGoPro": "Upgrade to Snaply Pro",
   "settingsGoProBody": "Unlimited analysis, boards and search await.",
   "settingsPurchasesSection": "Purchases",
+  "settingsRemainingAnalyses": "Remaining analyses",
   "settingsRestoreSuccess": "Purchases restored.",
   "settingsAboutSection": "About",
   "settingsVersion": "Version {version}",

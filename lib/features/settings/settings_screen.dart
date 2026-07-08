@@ -286,16 +286,17 @@ class _AutoSortSwitchTile extends ConsumerWidget {
   }
 }
 
-/// Satın alımlar bölümü: geri yükleme satırı.
-class _PurchasesSection extends StatelessWidget {
+/// Satın alımlar bölümü: kalan analiz hakkı (free) + geri yükleme satırı.
+class _PurchasesSection extends ConsumerWidget {
   const _PurchasesSection({required this.pending, required this.onRestore});
 
   final bool pending;
   final VoidCallback onRestore;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
+    final EntitlementState entitlement = ref.watch(entitlementProvider);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -307,6 +308,15 @@ class _PurchasesSection extends StatelessWidget {
         const SizedBox(height: AppSpacing.sm),
         _SettingsGroup(
           children: [
+            if (!entitlement.isPro)
+              _SettingsTile(
+                icon: Icons.bolt_outlined,
+                label: l10n.settingsRemainingAnalyses,
+                trailing: Text(
+                  '${entitlement.totalRemainingAnalysis}',
+                  style: Theme.of(context).textTheme.titleSmall,
+                ),
+              ),
             _SettingsTile(
               icon: Icons.restore,
               label: l10n.paywallRestoreAction,

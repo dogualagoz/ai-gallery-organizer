@@ -425,13 +425,13 @@ abstract class AppLocalizations {
   /// No description provided for @analysisLimitBanner.
   ///
   /// In en, this message translates to:
-  /// **'Your free analysis quota is used up.'**
+  /// **'Your free analysis quota is used up. Go Pro or grab an analysis pack.'**
   String get analysisLimitBanner;
 
   /// No description provided for @analysisLimitCompleted.
   ///
   /// In en, this message translates to:
-  /// **'{count} screenshots organized. Go Pro to keep going.'**
+  /// **'{count} screenshots organized. Go Pro or grab an analysis pack to keep going.'**
   String analysisLimitCompleted(int count);
 
   /// No description provided for @analysisDailyCapBanner.
@@ -974,6 +974,12 @@ abstract class AppLocalizations {
   /// **'{count} analyses'**
   String paywallPackCredits(int count);
 
+  /// No description provided for @paywallPackDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Analyzes and organizes your last {count} screenshots.'**
+  String paywallPackDescription(int count);
+
   /// No description provided for @paywallPackPurchased.
   ///
   /// In en, this message translates to:
@@ -1051,6 +1057,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Purchases'**
   String get settingsPurchasesSection;
+
+  /// No description provided for @settingsRemainingAnalyses.
+  ///
+  /// In en, this message translates to:
+  /// **'Remaining analyses'**
+  String get settingsRemainingAnalyses;
 
   /// No description provided for @settingsRestoreSuccess.
   ///

@@ -192,11 +192,12 @@ class AppLocalizationsTr extends AppLocalizations {
   String get analysisRetryAction => 'Tekrar dene';
 
   @override
-  String get analysisLimitBanner => 'Ücretsiz analiz hakkın doldu.';
+  String get analysisLimitBanner =>
+      'Ücretsiz analiz hakkın doldu. Pro\'ya geç ya da analiz paketi al.';
 
   @override
   String analysisLimitCompleted(int count) {
-    return '$count ekran görüntüsü gruplandırıldı. Devam etmek için Pro\'ya geç.';
+    return '$count ekran görüntüsü gruplandırıldı. Devam etmek için Pro\'ya geç ya da analiz paketi al.';
   }
 
   @override
@@ -495,6 +496,11 @@ class AppLocalizationsTr extends AppLocalizations {
   }
 
   @override
+  String paywallPackDescription(int count) {
+    return 'Son $count ekran görüntünü analiz edip gruplar.';
+  }
+
+  @override
   String paywallPackPurchased(int count) {
     return '$count analiz hesabına eklendi!';
   }
@@ -538,6 +544,9 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get settingsPurchasesSection => 'Satın alımlar';
+
+  @override
+  String get settingsRemainingAnalyses => 'Kalan analiz hakkı';
 
   @override
   String get settingsRestoreSuccess => 'Satın alımlar geri yüklendi.';

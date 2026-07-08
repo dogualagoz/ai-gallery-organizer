@@ -97,6 +97,15 @@ class _PackCard extends StatelessWidget {
               context,
             ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
           ),
+          if (credits != null) ...[
+            const SizedBox(height: AppSpacing.xs),
+            Text(
+              l10n.paywallPackDescription(credits),
+              style: Theme.of(
+                context,
+              ).textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant),
+            ),
+          ],
           const SizedBox(height: AppSpacing.sm),
           SizedBox(
             width: double.infinity,
