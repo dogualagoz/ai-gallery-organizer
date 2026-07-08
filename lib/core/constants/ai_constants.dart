@@ -7,7 +7,7 @@ abstract final class AiConfig {
 
   /// Aktif API katmanı profili — ücretli katmana geçişte tek değişiklik
   /// burası: [AiRateProfile.paid].
-  static const AiRateProfile activeProfile = AiRateProfile.free;
+  static const AiRateProfile activeProfile = AiRateProfile.paid;
 
   /// Tek isteğin tavan süresi; asılı kalan istek kuyruğu kilitlemesin.
   static const Duration requestTimeout = Duration(seconds: 30);
