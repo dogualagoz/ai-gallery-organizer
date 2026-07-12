@@ -17,6 +17,9 @@ abstract final class PrefKeys {
   static const String aiWeekStart = 'ai_week_start';
   static const String swipesUsed = 'swipes_used';
   static const String isPro = 'is_pro';
+  static const String proPurchaseMs = 'pro_purchase_ms';
+  static const String proProductId = 'pro_product_id';
+  static const String trialAnalysisUsed = 'trial_analysis_used';
   static const String aiDailyCount = 'ai_daily_count';
   static const String aiDailyDate = 'ai_daily_date';
   static const String analysisCredits = 'analysis_credits';

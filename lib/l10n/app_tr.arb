@@ -81,7 +81,8 @@
   },
   "analysisFailedBanner": "Analiz başarısız oldu. Bağlantını kontrol edip tekrar dene.",
   "analysisRetryAction": "Tekrar dene",
-  "analysisLimitBanner": "Ücretsiz analiz hakkın doldu. Pro'ya geç ya da analiz paketi al.",
+  "analysisLimitBanner": "Bu haftanın ücretsiz analiz hakkı doldu. Pro'ya geç ya da analiz paketi al.",
+  "analysisTrialLimitBanner": "Deneme dönemi analiz sınırına ulaştın. Analiz paketi alabilirsin; deneme tamamlanınca sınırsıza geçer.",
   "analysisLimitCompleted": "{count} ekran görüntüsü gruplandırıldı. Devam etmek için Pro'ya geç ya da analiz paketi al.",
   "@analysisLimitCompleted": {
     "placeholders": {
@@ -195,7 +196,12 @@
     }
   },
   "paywallTimelineDay1Title": "1. gün — Bugün",
-  "paywallTimelineDay1Body": "Tüm Pro özellikleri hemen açılır.",
+  "paywallTimelineDay1Body": "Pro özellikleri hemen açılır; deneme boyunca {count} AI analizi dahildir.",
+  "@paywallTimelineDay1Body": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
   "paywallTimelineDay5Title": "5. gün — Hatırlatma",
   "paywallTimelineDay5Body": "Deneme süren bitmeden e-posta ile hatırlatırız.",
   "paywallTimelineDay7Title": "7. gün — Deneme biter",

@@ -193,7 +193,11 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get analysisLimitBanner =>
-      'Ücretsiz analiz hakkın doldu. Pro\'ya geç ya da analiz paketi al.';
+      'Bu haftanın ücretsiz analiz hakkı doldu. Pro\'ya geç ya da analiz paketi al.';
+
+  @override
+  String get analysisTrialLimitBanner =>
+      'Deneme dönemi analiz sınırına ulaştın. Analiz paketi alabilirsin; deneme tamamlanınca sınırsıza geçer.';
 
   @override
   String analysisLimitCompleted(int count) {
@@ -467,7 +471,9 @@ class AppLocalizationsTr extends AppLocalizations {
   String get paywallTimelineDay1Title => '1. gün — Bugün';
 
   @override
-  String get paywallTimelineDay1Body => 'Tüm Pro özellikleri hemen açılır.';
+  String paywallTimelineDay1Body(int count) {
+    return 'Pro özellikleri hemen açılır; deneme boyunca $count AI analizi dahildir.';
+  }
 
   @override
   String get paywallTimelineDay5Title => '5. gün — Hatırlatma';

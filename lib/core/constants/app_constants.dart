@@ -17,6 +17,17 @@ abstract final class FreeLimits {
   static const int swipeSorts = 100;
 }
 
+/// Ücretsiz deneme (yıllık plan intro offer) dönemindeki sınırlar.
+/// Amaç: trial'da tüm galeriyi analiz ettirip iptal ederek sistemin
+/// boşluğundan yararlanmayı önlemek. Diğer Pro özellikler trial'da sınırsız.
+abstract final class TrialLimits {
+  /// Deneme süresi boyunca izin verilen AI analizi sayısı.
+  static const int aiAnalysis = 250;
+
+  /// Deneme penceresi — StoreKit'teki 7 günlük intro offer ile eşleşir.
+  static const Duration window = Duration(days: 7);
+}
+
 /// Hive box isimleri — tek yerden yönetilir, string tekrarını önler.
 abstract final class HiveBoxes {
   static const String screenshots = 'screenshots';

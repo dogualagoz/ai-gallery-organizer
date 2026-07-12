@@ -193,7 +193,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get analysisLimitBanner =>
-      'Your free analysis quota is used up. Go Pro or grab an analysis pack.';
+      'Your free weekly analysis quota is used up. Go Pro or grab an analysis pack.';
+
+  @override
+  String get analysisTrialLimitBanner =>
+      'You\'ve reached the trial analysis limit. Grab an analysis pack, or unlimited unlocks when your trial converts.';
 
   @override
   String analysisLimitCompleted(int count) {
@@ -468,7 +472,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get paywallTimelineDay1Title => 'Day 1 — Today';
 
   @override
-  String get paywallTimelineDay1Body => 'Full Pro access unlocks immediately.';
+  String paywallTimelineDay1Body(int count) {
+    return 'Pro features unlock immediately, including $count AI analyses during the trial.';
+  }
 
   @override
   String get paywallTimelineDay5Title => 'Day 5 — Reminder';

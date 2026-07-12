@@ -131,7 +131,12 @@ class PurchaseFlowNotifier extends Notifier<PurchaseFlowState> {
   Future<void> _grantEntitlement(PurchaseDetails purchase) async {
     final int? credits = ProductIds.creditsFor(purchase.productID);
     if (credits == null) {
-      await ref.read(entitlementProvider.notifier).setPro(true);
+      // İşlem zamanı trial penceresi hesabında kullanılır; restore orijinal
+      // tarihi getirdiği için pencere reinstall sonrası da doğru kalır.
+      await ref.read(entitlementProvider.notifier).setProFromPurchase(
+        productId: purchase.productID,
+        purchaseMs: int.tryParse(purchase.transactionDate ?? ''),
+      );
       return;
     }
     if (purchase.status != PurchaseStatus.purchased) return;

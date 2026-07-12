@@ -425,8 +425,14 @@ abstract class AppLocalizations {
   /// No description provided for @analysisLimitBanner.
   ///
   /// In en, this message translates to:
-  /// **'Your free analysis quota is used up. Go Pro or grab an analysis pack.'**
+  /// **'Your free weekly analysis quota is used up. Go Pro or grab an analysis pack.'**
   String get analysisLimitBanner;
+
+  /// No description provided for @analysisTrialLimitBanner.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ve reached the trial analysis limit. Grab an analysis pack, or unlimited unlocks when your trial converts.'**
+  String get analysisTrialLimitBanner;
 
   /// No description provided for @analysisLimitCompleted.
   ///
@@ -929,8 +935,8 @@ abstract class AppLocalizations {
   /// No description provided for @paywallTimelineDay1Body.
   ///
   /// In en, this message translates to:
-  /// **'Full Pro access unlocks immediately.'**
-  String get paywallTimelineDay1Body;
+  /// **'Pro features unlock immediately, including {count} AI analyses during the trial.'**
+  String paywallTimelineDay1Body(int count);
 
   /// No description provided for @paywallTimelineDay5Title.
   ///

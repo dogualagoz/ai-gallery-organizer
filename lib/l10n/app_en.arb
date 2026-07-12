@@ -81,7 +81,8 @@
   },
   "analysisFailedBanner": "Analysis failed. Check your connection and try again.",
   "analysisRetryAction": "Retry",
-  "analysisLimitBanner": "Your free analysis quota is used up. Go Pro or grab an analysis pack.",
+  "analysisLimitBanner": "Your free weekly analysis quota is used up. Go Pro or grab an analysis pack.",
+  "analysisTrialLimitBanner": "You've reached the trial analysis limit. Grab an analysis pack, or unlimited unlocks when your trial converts.",
   "analysisLimitCompleted": "{count} screenshots organized. Go Pro or grab an analysis pack to keep going.",
   "@analysisLimitCompleted": {
     "placeholders": {
@@ -195,7 +196,12 @@
     }
   },
   "paywallTimelineDay1Title": "Day 1 — Today",
-  "paywallTimelineDay1Body": "Full Pro access unlocks immediately.",
+  "paywallTimelineDay1Body": "Pro features unlock immediately, including {count} AI analyses during the trial.",
+  "@paywallTimelineDay1Body": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
   "paywallTimelineDay5Title": "Day 5 — Reminder",
   "paywallTimelineDay5Body": "We'll email you before your trial ends.",
   "paywallTimelineDay7Title": "Day 7 — Trial ends",

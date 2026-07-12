@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/constants/ui_constants.dart';
 import '../../../core/l10n/l10n_extension.dart';
 import '../../../core/router/app_router.dart';
+import '../../../core/services/entitlement_service.dart';
 import '../providers/analysis_queue_provider.dart';
 
 class AnalysisBanner extends ConsumerWidget {
@@ -168,8 +169,9 @@ class _FailedContent extends ConsumerWidget {
   }
 }
 
-/// Free limit dolduğunda paywall çağrısı. Bu turda başarı varsa "{count}
-/// gruplandırıldı" özetiyle gösterilir, yoksa genel limit mesajıyla.
+/// Analiz hakkı dolduğunda paywall çağrısı. Trial penceresindeki Pro'ya
+/// trial sınırı mesajı; free kullanıcıya bu turda başarı varsa "{count}
+/// gruplandırıldı" özeti, yoksa genel haftalık limit mesajı gösterilir.
 class _LimitContent extends ConsumerWidget {
   const _LimitContent({required this.done});
 
@@ -177,7 +179,12 @@ class _LimitContent extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final String message = done > 0
+    final bool inTrial = ref.watch(
+      entitlementProvider.select((state) => state.isInTrialWindow),
+    );
+    final String message = inTrial
+        ? context.l10n.analysisTrialLimitBanner
+        : done > 0
         ? context.l10n.analysisLimitCompleted(done)
         : context.l10n.analysisLimitBanner;
     return Row(

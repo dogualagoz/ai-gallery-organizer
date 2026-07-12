@@ -16,9 +16,22 @@ class EntitlementState {
     required this.swipesUsed,
     required this.weekStartMs,
     this.analysisCredits = 0,
+    this.proPurchaseMs,
+    this.proProductId,
+    this.trialAnalysisUsed = 0,
   });
 
   final bool isPro;
+
+  /// Pro satın almasının işlem zamanı (epoch ms) — trial penceresi hesabı için.
+  final int? proPurchaseMs;
+
+  /// Pro yetkisini veren ürün kimliği (trial yalnız yıllık planda var).
+  final String? proProductId;
+
+  /// Deneme penceresinde kullanılan analiz sayısı. Haftalık free sayaçtan
+  /// bilinçli olarak ayrı: trial iptalinde kullanıcının free haftası bozulmaz.
+  final int trialAnalysisUsed;
 
   /// Bu haftalık pencerede kullanılan otomatik AI analizi sayısı.
   final int aiAnalysisUsed;
@@ -32,7 +45,32 @@ class EntitlementState {
   /// Satın alınan analiz paketlerinden kalan kredi (free kota bitince kullanılır).
   final int analysisCredits;
 
-  bool get canAnalyze => isPro || totalRemainingAnalysis > 0;
+  /// Deneme penceresi aktif mi: yıllık plan + satın almadan sonraki 7 gün.
+  /// Bilinen trade-off: yeniden abone olan (Apple ikinci trial vermez) ilk
+  /// 7 gün yine sınıra tabi olur — StoreKit intro-offer sorgusu için ek
+  /// platform bağımlılığına değmeyecek kadar nadir bir durum.
+  bool get isInTrialWindow {
+    if (!isPro || proProductId != ProductIds.yearly) return false;
+    final int? purchaseMs = proPurchaseMs;
+    if (purchaseMs == null) return false;
+    return DateTime.now().millisecondsSinceEpoch - purchaseMs <
+        TrialLimits.window.inMilliseconds;
+  }
+
+  /// Deneme penceresinde kalan analiz hakkı.
+  int get remainingTrialAnalysis =>
+      (TrialLimits.aiAnalysis - trialAnalysisUsed).clamp(
+        0,
+        TrialLimits.aiAnalysis,
+      );
+
+  bool get canAnalyze {
+    if (isPro) {
+      return !isInTrialWindow ||
+          remainingTrialAnalysis + analysisCredits > 0;
+    }
+    return totalRemainingAnalysis > 0;
+  }
 
   bool get canSwipe => isPro || swipesUsed < FreeLimits.swipeSorts;
 
@@ -61,6 +99,9 @@ class EntitlementState {
     int? swipesUsed,
     int? weekStartMs,
     int? analysisCredits,
+    int? proPurchaseMs,
+    String? proProductId,
+    int? trialAnalysisUsed,
   }) {
     return EntitlementState(
       isPro: isPro ?? this.isPro,
@@ -68,6 +109,9 @@ class EntitlementState {
       swipesUsed: swipesUsed ?? this.swipesUsed,
       weekStartMs: weekStartMs ?? this.weekStartMs,
       analysisCredits: analysisCredits ?? this.analysisCredits,
+      proPurchaseMs: proPurchaseMs ?? this.proPurchaseMs,
+      proProductId: proProductId ?? this.proProductId,
+      trialAnalysisUsed: trialAnalysisUsed ?? this.trialAnalysisUsed,
     );
   }
 }
@@ -103,6 +147,9 @@ class EntitlementNotifier extends Notifier<EntitlementState> {
       swipesUsed: prefs.getInt(PrefKeys.swipesUsed) ?? 0,
       weekStartMs: weekStartMs,
       analysisCredits: prefs.getInt(PrefKeys.analysisCredits) ?? 0,
+      proPurchaseMs: prefs.getInt(PrefKeys.proPurchaseMs),
+      proProductId: prefs.getString(PrefKeys.proProductId),
+      trialAnalysisUsed: prefs.getInt(PrefKeys.trialAnalysisUsed) ?? 0,
     );
   }
 
@@ -121,13 +168,64 @@ class EntitlementNotifier extends Notifier<EntitlementState> {
   }
 
   /// IAP doğrulaması sonrası çağrılır (satın alma / restore / iptal).
+  /// Pro kaldırılırken trial izleri de temizlenir — free haftası etkilenmez.
   Future<void> setPro(bool isPro) async {
-    state = state.copyWith(isPro: isPro);
-    await ref.read(sharedPreferencesProvider).setBool(PrefKeys.isPro, isPro);
+    final prefs = ref.read(sharedPreferencesProvider);
+    if (!isPro) {
+      state = EntitlementState(
+        isPro: false,
+        aiAnalysisUsed: state.aiAnalysisUsed,
+        swipesUsed: state.swipesUsed,
+        weekStartMs: state.weekStartMs,
+        analysisCredits: state.analysisCredits,
+      );
+      await prefs.remove(PrefKeys.proPurchaseMs);
+      await prefs.remove(PrefKeys.proProductId);
+      await prefs.remove(PrefKeys.trialAnalysisUsed);
+    } else {
+      state = state.copyWith(isPro: true);
+    }
+    await prefs.setBool(PrefKeys.isPro, isPro);
   }
 
-  /// [count] adet analiz hakkı tüketir — önce free kota, taşan kısım kredilerden.
+  /// Satın alma/restore olayından Pro yetkisi verir; trial penceresi hesabı
+  /// için ürün kimliği ve işlem zamanını saklar. Restore orijinal işlem
+  /// tarihini getirdiğinden pencere reinstall sonrası da doğru hesaplanır.
+  Future<void> setProFromPurchase({
+    required String productId,
+    int? purchaseMs,
+  }) async {
+    final int effectiveMs =
+        purchaseMs ?? DateTime.now().millisecondsSinceEpoch;
+    state = state.copyWith(
+      isPro: true,
+      proPurchaseMs: effectiveMs,
+      proProductId: productId,
+    );
+    final prefs = ref.read(sharedPreferencesProvider);
+    await prefs.setBool(PrefKeys.isPro, true);
+    await prefs.setInt(PrefKeys.proPurchaseMs, effectiveMs);
+    await prefs.setString(PrefKeys.proProductId, productId);
+  }
+
+  /// [count] adet analiz hakkı tüketir. Trial penceresinde önce trial
+  /// sayacı, değilse önce free kota; taşan kısım her iki yolda kredilerden.
   Future<void> registerAnalysis(int count) async {
+    final prefs = ref.read(sharedPreferencesProvider);
+    if (state.isInTrialWindow) {
+      final int trialUsed = min(count, state.remainingTrialAnalysis);
+      final int creditUsed = count - trialUsed;
+      state = state.copyWith(
+        trialAnalysisUsed: state.trialAnalysisUsed + trialUsed,
+        analysisCredits: (state.analysisCredits - creditUsed).clamp(
+          0,
+          state.analysisCredits,
+        ),
+      );
+      await prefs.setInt(PrefKeys.trialAnalysisUsed, state.trialAnalysisUsed);
+      await prefs.setInt(PrefKeys.analysisCredits, state.analysisCredits);
+      return;
+    }
     ensureWeeklyWindow();
     final int freeUsed = min(count, state.remainingFreeAnalysis);
     final int creditUsed = count - freeUsed;
@@ -138,7 +236,6 @@ class EntitlementNotifier extends Notifier<EntitlementState> {
         state.analysisCredits,
       ),
     );
-    final prefs = ref.read(sharedPreferencesProvider);
     await prefs.setInt(PrefKeys.aiAnalysisUsed, state.aiAnalysisUsed);
     await prefs.setInt(PrefKeys.analysisCredits, state.analysisCredits);
   }
@@ -168,11 +265,13 @@ class EntitlementNotifier extends Notifier<EntitlementState> {
       swipesUsed: 0,
       weekStartMs: nowMs,
       analysisCredits: 0,
+      trialAnalysisUsed: 0,
     );
     final prefs = ref.read(sharedPreferencesProvider);
     await prefs.setInt(PrefKeys.aiAnalysisUsed, 0);
     await prefs.setInt(PrefKeys.swipesUsed, 0);
     await prefs.setInt(PrefKeys.aiWeekStart, nowMs);
     await prefs.setInt(PrefKeys.analysisCredits, 0);
+    await prefs.setInt(PrefKeys.trialAnalysisUsed, 0);
   }
 }

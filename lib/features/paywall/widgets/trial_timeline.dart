@@ -1,6 +1,7 @@
 // Yıllık plan seçiliyken gösterilen 7 günlük ücretsiz deneme zaman çizelgesi.
 import 'package:flutter/material.dart';
 
+import '../../../core/constants/app_constants.dart';
 import '../../../core/constants/ui_constants.dart';
 import '../../../core/l10n/l10n_extension.dart';
 
@@ -15,7 +16,8 @@ class TrialTimeline extends StatelessWidget {
       (
         Icons.lock_open_outlined,
         l10n.paywallTimelineDay1Title,
-        l10n.paywallTimelineDay1Body,
+        // Şeffaflık: trial'daki analiz sınırı satın alma öncesi açıkça yazılır.
+        l10n.paywallTimelineDay1Body(TrialLimits.aiAnalysis),
       ),
       (
         Icons.notifications_outlined,

@@ -170,6 +170,82 @@ void main() {
     });
   });
 
+  group('trial analiz sınırı', () {
+    test('yıllık satın alma trial penceresini açar ve sınır uygulanır',
+        () async {
+      final container = await _container();
+      final notifier = container.read(entitlementProvider.notifier);
+      await notifier.setProFromPurchase(productId: ProductIds.yearly);
+
+      var state = container.read(entitlementProvider);
+      expect(state.isInTrialWindow, isTrue);
+      expect(state.remainingTrialAnalysis, TrialLimits.aiAnalysis);
+      expect(state.canAnalyze, isTrue);
+
+      await notifier.registerAnalysis(TrialLimits.aiAnalysis);
+      state = container.read(entitlementProvider);
+      expect(state.remainingTrialAnalysis, 0);
+      expect(state.canAnalyze, isFalse);
+      // Haftalık free sayaç trial tüketiminden etkilenmez.
+      expect(state.aiAnalysisUsed, 0);
+    });
+
+    test('pencere geçmişte kaldıysa Pro sınırsızdır', () async {
+      final container = await _container();
+      final notifier = container.read(entitlementProvider.notifier);
+      final int oldMs = DateTime.now()
+          .subtract(TrialLimits.window + const Duration(hours: 1))
+          .millisecondsSinceEpoch;
+      await notifier.setProFromPurchase(
+        productId: ProductIds.yearly,
+        purchaseMs: oldMs,
+      );
+
+      final state = container.read(entitlementProvider);
+      expect(state.isInTrialWindow, isFalse);
+      expect(state.canAnalyze, isTrue);
+    });
+
+    test('aylık/lifetime satın almada trial penceresi oluşmaz', () async {
+      final container = await _container();
+      final notifier = container.read(entitlementProvider.notifier);
+      await notifier.setProFromPurchase(productId: ProductIds.lifetime);
+      expect(container.read(entitlementProvider).isInTrialWindow, isFalse);
+    });
+
+    test('trial sınırı dolunca krediler kullanılabilir', () async {
+      final container = await _container();
+      final notifier = container.read(entitlementProvider.notifier);
+      await notifier.setProFromPurchase(productId: ProductIds.yearly);
+      await notifier.addCredits(10);
+      await notifier.registerAnalysis(TrialLimits.aiAnalysis + 4);
+
+      final state = container.read(entitlementProvider);
+      expect(state.remainingTrialAnalysis, 0);
+      expect(state.analysisCredits, 6);
+      expect(state.canAnalyze, isTrue);
+    });
+
+    test('setPro(false) trial izlerini temizler, free hafta korunur',
+        () async {
+      final container = await _container();
+      final notifier = container.read(entitlementProvider.notifier);
+      // Önce free kullanıcı olarak biraz kota harca.
+      await notifier.registerAnalysis(20);
+      await notifier.setProFromPurchase(productId: ProductIds.yearly);
+      await notifier.registerAnalysis(50);
+      await notifier.setPro(false);
+
+      final state = container.read(entitlementProvider);
+      expect(state.isPro, isFalse);
+      expect(state.isInTrialWindow, isFalse);
+      expect(state.proProductId, isNull);
+      expect(state.trialAnalysisUsed, 0);
+      // Trial'a girmeden önceki free kullanım aynen durur.
+      expect(state.aiAnalysisUsed, 20);
+    });
+  });
+
   group('canCreateBoards', () {
     test('free kullanıcı özel pano oluşturamaz', () async {
       final container = await _container();

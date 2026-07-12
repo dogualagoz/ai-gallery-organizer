@@ -118,9 +118,15 @@ class AnalysisQueueNotifier extends Notifier<AnalysisQueueState> {
       );
       return;
     }
-    final int budget = entitlement.isPro
-        ? pending.length
-        : min(pending.length, entitlement.totalRemainingAnalysis);
+    // Trial penceresindeki Pro kullanıcı sınırlı; kalıcı Pro sınırsız.
+    final int budget = switch (entitlement) {
+      EntitlementState(isInTrialWindow: true) => min(
+        pending.length,
+        entitlement.remainingTrialAnalysis + entitlement.analysisCredits,
+      ),
+      EntitlementState(isPro: true) => pending.length,
+      _ => min(pending.length, entitlement.totalRemainingAnalysis),
+    };
 
     _cancelRequested = false;
     _dailyCapHit = false;
