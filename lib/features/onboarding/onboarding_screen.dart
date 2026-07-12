@@ -1,14 +1,18 @@
-// 3 sayfalık animasyonlu onboarding: değer önerisi, gizlilik, izin isteme.
-// İzin verilince onboarding bayrağı işaretlenir; router otomatik galeriye alır.
+// 4 sayfalık animasyonlu onboarding: değer önerisi, gizlilik, haftalık
+// ücretsiz kota ve izin isteme. İzin verilince onboarding bayrağı
+// işaretlenir; router otomatik galeriye alır.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/constants/app_constants.dart';
 import '../../core/constants/ui_constants.dart';
 import '../../core/l10n/l10n_extension.dart';
+import '../../core/services/haptic_service.dart';
 import '../../core/services/photo_permission_service.dart';
 import '../../core/services/preferences_service.dart';
 import 'widgets/access_illustration.dart';
 import 'widgets/privacy_illustration.dart';
+import 'widgets/quota_illustration.dart';
 import 'widgets/sort_illustration.dart';
 
 class OnboardingScreen extends ConsumerStatefulWidget {
@@ -19,7 +23,7 @@ class OnboardingScreen extends ConsumerStatefulWidget {
 }
 
 class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
-  static const int _pageCount = 3;
+  static const int _pageCount = 4;
 
   final PageController _pageController = PageController();
   int _currentPage = 0;
@@ -42,7 +46,10 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             Expanded(
               child: PageView(
                 controller: _pageController,
-                onPageChanged: (page) => setState(() => _currentPage = page),
+                onPageChanged: (page) {
+                  Haptics.tap();
+                  setState(() => _currentPage = page);
+                },
                 children: [
                   _OnboardingPage(
                     illustration: const SortIllustration(),
@@ -53,6 +60,11 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                     illustration: const PrivacyIllustration(),
                     title: l10n.onboardingTitle2,
                     body: l10n.onboardingBody2,
+                  ),
+                  _OnboardingPage(
+                    illustration: const QuotaIllustration(),
+                    title: l10n.onboardingTitleQuota(FreeLimits.aiAnalysis),
+                    body: l10n.onboardingBodyQuota(FreeLimits.aiAnalysis),
                   ),
                   _OnboardingPage(
                     illustration: const AccessIllustration(),
@@ -165,25 +177,56 @@ class _OnboardingPage extends StatelessWidget {
               child: illustration,
             ),
           ),
-          Text(
-            title,
-            style: textTheme.headlineMedium?.copyWith(
-              fontWeight: FontWeight.w700,
+          _FadeSlideIn(
+            child: Text(
+              title,
+              style: textTheme.headlineMedium?.copyWith(
+                fontWeight: FontWeight.w700,
+              ),
+              textAlign: TextAlign.center,
             ),
-            textAlign: TextAlign.center,
           ),
           const SizedBox(height: AppSpacing.md),
-          Text(
-            body,
-            style: textTheme.bodyLarge?.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-              height: 1.5,
+          _FadeSlideIn(
+            delayFraction: 0.25,
+            child: Text(
+              body,
+              style: textTheme.bodyLarge?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                height: 1.5,
+              ),
+              textAlign: TextAlign.center,
             ),
-            textAlign: TextAlign.center,
           ),
           const SizedBox(height: AppSpacing.xl),
         ],
       ),
+    );
+  }
+}
+
+/// Sayfa ilk kurulduğunda başlık/gövdeyi aşağıdan yumuşakça getirir.
+/// [delayFraction] ile ikinci satır kademeli (staggered) başlar.
+class _FadeSlideIn extends StatelessWidget {
+  const _FadeSlideIn({required this.child, this.delayFraction = 0});
+
+  final Widget child;
+  final double delayFraction;
+
+  @override
+  Widget build(BuildContext context) {
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0, end: 1),
+      duration: AppDurations.slow,
+      curve: Interval(delayFraction, 1, curve: Curves.easeOutCubic),
+      builder: (context, t, child) => Opacity(
+        opacity: t,
+        child: Transform.translate(
+          offset: Offset(0, (1 - t) * AppSpacing.md),
+          child: child,
+        ),
+      ),
+      child: child,
     );
   }
 }

@@ -90,6 +90,18 @@
     }
   },
   "analysisDailyCapBanner": "Günlük analiz limiti doldu. Yarın kaldığı yerden devam eder.",
+  "onboardingTitleQuota": "Her hafta {count} ücretsiz analiz",
+  "@onboardingTitleQuota": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "onboardingBodyQuota": "Snaply her hafta {count} ekran görüntüsünü ücretsiz gruplandırır — kotan her hafta kendiliğinden yenilenir. Daha fazlası gerekirse paketler ve Pro hazır.",
+  "@onboardingBodyQuota": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
   "analyzeHeroTitle": "{count} ekran görüntüsünü analiz et",
   "@analyzeHeroTitle": {
     "placeholders": {

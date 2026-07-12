@@ -90,6 +90,18 @@
     }
   },
   "analysisDailyCapBanner": "Daily analysis limit reached. It will continue tomorrow.",
+  "onboardingTitleQuota": "{count} free analyses, every week",
+  "@onboardingTitleQuota": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "onboardingBodyQuota": "Snaply organizes {count} screenshots for free each week — your quota renews automatically. Packs and Pro are there when you need more.",
+  "@onboardingBodyQuota": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
   "analyzeHeroTitle": "Analyze {count} screenshots",
   "@analyzeHeroTitle": {
     "placeholders": {

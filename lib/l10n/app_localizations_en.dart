@@ -209,6 +209,16 @@ class AppLocalizationsEn extends AppLocalizations {
       'Daily analysis limit reached. It will continue tomorrow.';
 
   @override
+  String onboardingTitleQuota(int count) {
+    return '$count free analyses, every week';
+  }
+
+  @override
+  String onboardingBodyQuota(int count) {
+    return 'Snaply organizes $count screenshots for free each week — your quota renews automatically. Packs and Pro are there when you need more.';
+  }
+
+  @override
   String analyzeHeroTitle(int count) {
     return 'Analyze $count screenshots';
   }

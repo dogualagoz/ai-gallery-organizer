@@ -446,6 +446,18 @@ abstract class AppLocalizations {
   /// **'Daily analysis limit reached. It will continue tomorrow.'**
   String get analysisDailyCapBanner;
 
+  /// No description provided for @onboardingTitleQuota.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} free analyses, every week'**
+  String onboardingTitleQuota(int count);
+
+  /// No description provided for @onboardingBodyQuota.
+  ///
+  /// In en, this message translates to:
+  /// **'Snaply organizes {count} screenshots for free each week — your quota renews automatically. Packs and Pro are there when you need more.'**
+  String onboardingBodyQuota(int count);
+
   /// No description provided for @analyzeHeroTitle.
   ///
   /// In en, this message translates to:

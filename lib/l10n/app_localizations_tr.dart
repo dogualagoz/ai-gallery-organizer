@@ -209,6 +209,16 @@ class AppLocalizationsTr extends AppLocalizations {
       'Günlük analiz limiti doldu. Yarın kaldığı yerden devam eder.';
 
   @override
+  String onboardingTitleQuota(int count) {
+    return 'Her hafta $count ücretsiz analiz';
+  }
+
+  @override
+  String onboardingBodyQuota(int count) {
+    return 'Snaply her hafta $count ekran görüntüsünü ücretsiz gruplandırır — kotan her hafta kendiliğinden yenilenir. Daha fazlası gerekirse paketler ve Pro hazır.';
+  }
+
+  @override
   String analyzeHeroTitle(int count) {
     return '$count ekran görüntüsünü analiz et';
   }
