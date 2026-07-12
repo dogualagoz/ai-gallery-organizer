@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:liquid_glass_renderer/liquid_glass_renderer.dart';
 
+import '../../features/analysis/milestone_screen.dart';
 import '../../features/detail/detail_screen.dart';
 import '../../features/home/home_screen.dart';
 import '../../features/onboarding/onboarding_screen.dart';
@@ -25,6 +26,7 @@ abstract final class AppRoutes {
   static const String search = '/search';
   static const String sorting = '/sorting';
   static const String paywall = '/paywall';
+  static const String analysisMilestone = '/analysis-milestone';
 
   /// Paywall query parametresi: açılışta paket bölümüne kaydır.
   static const String paywallFocusQuery = 'focus';
@@ -97,6 +99,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.search,
         builder: (context, state) => const SearchScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.analysisMilestone,
+        // Kutlama sayfası da paywall gibi alttan tam sayfa modal.
+        pageBuilder: (context, state) => const MaterialPage(
+          fullscreenDialog: true,
+          child: MilestoneScreen(),
+        ),
       ),
       GoRoute(
         path: AppRoutes.paywall,

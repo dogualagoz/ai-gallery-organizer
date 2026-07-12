@@ -90,6 +90,28 @@
     }
   },
   "analysisDailyCapBanner": "Daily analysis limit reached. It will continue tomorrow.",
+  "milestoneTitle": "Great progress!",
+  "milestoneSubtitle": "You've used all {limit} free analyses this week.",
+  "@milestoneSubtitle": {
+    "placeholders": {
+      "limit": {"type": "int"}
+    }
+  },
+  "milestoneRunSummary": "{count} screenshots organized in this run.",
+  "@milestoneRunSummary": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "milestoneResetHint": "Your free quota renews in {days} days.",
+  "@milestoneResetHint": {
+    "placeholders": {
+      "days": {"type": "int"}
+    }
+  },
+  "milestoneCtaPacks": "Browse analysis packs",
+  "milestoneCtaPro": "Go Pro — unlimited analysis",
+  "milestoneCtaLater": "Continue next week",
   "dismissAction": "Dismiss",
   "categoryLockScreen": "Lock screen",
   "categorySocial": "Social",

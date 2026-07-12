@@ -10,6 +10,7 @@ import '../../core/models/screenshot_category.dart';
 import '../../core/models/screenshot_entry.dart';
 import '../../core/router/app_router.dart';
 import '../../core/services/entitlement_service.dart';
+import '../analysis/providers/analysis_queue_provider.dart';
 import '../analysis/providers/auto_sort_provider.dart';
 import '../analysis/widgets/analysis_banner.dart';
 import '../analysis/widgets/auto_sort_chip.dart';
@@ -29,6 +30,7 @@ class HomeScreen extends ConsumerWidget {
     // Ekran boyunca yaşatılır: galeri güncellendikçe Pro kullanıcı için
     // analiz kuyruğunu otomatik tetikler.
     ref.watch(autoSortControllerProvider);
+    _listenForMilestone(context, ref);
     final l10n = context.l10n;
     final gallery = ref.watch(galleryProvider);
 
@@ -52,6 +54,22 @@ class HomeScreen extends ConsumerWidget {
             : _HomeContent(entries: entries),
       ),
     );
+  }
+
+  /// Haftalık free kota bir analiz turunda gerçekten tükendiğinde milestone
+  /// kutlama sayfasını açar. Yalnız limitReached'e *geçişte* tetiklenir —
+  /// aynı tur için ikinci kez açılmaz.
+  void _listenForMilestone(BuildContext context, WidgetRef ref) {
+    ref.listen(analysisQueueProvider, (previous, next) {
+      final bool becameLimited =
+          next.status == AnalysisQueueStatus.limitReached &&
+          previous?.status != AnalysisQueueStatus.limitReached;
+      if (!becameLimited || !next.freeQuotaExhausted || next.done == 0) return;
+      // Listener build sırasında çalışabilir; navigasyon frame sonrasına atılır.
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (context.mounted) context.push(AppRoutes.analysisMilestone);
+      });
+    });
   }
 
   /// Eşitlemeyi çalıştırır; hata olursa kullanıcıya snackbar gösterir.

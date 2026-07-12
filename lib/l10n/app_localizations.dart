@@ -446,6 +446,48 @@ abstract class AppLocalizations {
   /// **'Daily analysis limit reached. It will continue tomorrow.'**
   String get analysisDailyCapBanner;
 
+  /// No description provided for @milestoneTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Great progress!'**
+  String get milestoneTitle;
+
+  /// No description provided for @milestoneSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ve used all {limit} free analyses this week.'**
+  String milestoneSubtitle(int limit);
+
+  /// No description provided for @milestoneRunSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} screenshots organized in this run.'**
+  String milestoneRunSummary(int count);
+
+  /// No description provided for @milestoneResetHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Your free quota renews in {days} days.'**
+  String milestoneResetHint(int days);
+
+  /// No description provided for @milestoneCtaPacks.
+  ///
+  /// In en, this message translates to:
+  /// **'Browse analysis packs'**
+  String get milestoneCtaPacks;
+
+  /// No description provided for @milestoneCtaPro.
+  ///
+  /// In en, this message translates to:
+  /// **'Go Pro — unlimited analysis'**
+  String get milestoneCtaPro;
+
+  /// No description provided for @milestoneCtaLater.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue next week'**
+  String get milestoneCtaLater;
+
   /// No description provided for @dismissAction.
   ///
   /// In en, this message translates to:

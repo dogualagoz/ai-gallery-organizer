@@ -209,6 +209,33 @@ class AppLocalizationsTr extends AppLocalizations {
       'Günlük analiz limiti doldu. Yarın kaldığı yerden devam eder.';
 
   @override
+  String get milestoneTitle => 'Harika ilerleme!';
+
+  @override
+  String milestoneSubtitle(int limit) {
+    return 'Bu haftaki $limit ücretsiz analizin tamamını kullandın.';
+  }
+
+  @override
+  String milestoneRunSummary(int count) {
+    return 'Bu turda $count ekran görüntüsü gruplandırıldı.';
+  }
+
+  @override
+  String milestoneResetHint(int days) {
+    return 'Ücretsiz kotan $days gün sonra yenilenir.';
+  }
+
+  @override
+  String get milestoneCtaPacks => 'Analiz paketlerini incele';
+
+  @override
+  String get milestoneCtaPro => 'Pro\'ya geç — sınırsız analiz';
+
+  @override
+  String get milestoneCtaLater => 'Haftaya devam et';
+
+  @override
   String get dismissAction => 'Kapat';
 
   @override

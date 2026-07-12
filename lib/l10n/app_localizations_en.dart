@@ -209,6 +209,33 @@ class AppLocalizationsEn extends AppLocalizations {
       'Daily analysis limit reached. It will continue tomorrow.';
 
   @override
+  String get milestoneTitle => 'Great progress!';
+
+  @override
+  String milestoneSubtitle(int limit) {
+    return 'You\'ve used all $limit free analyses this week.';
+  }
+
+  @override
+  String milestoneRunSummary(int count) {
+    return '$count screenshots organized in this run.';
+  }
+
+  @override
+  String milestoneResetHint(int days) {
+    return 'Your free quota renews in $days days.';
+  }
+
+  @override
+  String get milestoneCtaPacks => 'Browse analysis packs';
+
+  @override
+  String get milestoneCtaPro => 'Go Pro — unlimited analysis';
+
+  @override
+  String get milestoneCtaLater => 'Continue next week';
+
+  @override
   String get dismissAction => 'Dismiss';
 
   @override

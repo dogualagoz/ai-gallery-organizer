@@ -90,6 +90,28 @@
     }
   },
   "analysisDailyCapBanner": "Günlük analiz limiti doldu. Yarın kaldığı yerden devam eder.",
+  "milestoneTitle": "Harika ilerleme!",
+  "milestoneSubtitle": "Bu haftaki {limit} ücretsiz analizin tamamını kullandın.",
+  "@milestoneSubtitle": {
+    "placeholders": {
+      "limit": {"type": "int"}
+    }
+  },
+  "milestoneRunSummary": "Bu turda {count} ekran görüntüsü gruplandırıldı.",
+  "@milestoneRunSummary": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "milestoneResetHint": "Ücretsiz kotan {days} gün sonra yenilenir.",
+  "@milestoneResetHint": {
+    "placeholders": {
+      "days": {"type": "int"}
+    }
+  },
+  "milestoneCtaPacks": "Analiz paketlerini incele",
+  "milestoneCtaPro": "Pro'ya geç — sınırsız analiz",
+  "milestoneCtaLater": "Haftaya devam et",
   "dismissAction": "Kapat",
   "categoryLockScreen": "Kilit ekranı",
   "categorySocial": "Sosyal medya",
