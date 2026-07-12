@@ -1,5 +1,7 @@
 // Ana sayfadaki hero analiz butonu: gradient, nabız gibi atan parıltı ve
 // haftalık kota bilgisiyle uygulamanın ana aksiyonunu öne çıkarır.
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -96,19 +98,43 @@ class _HeroContent extends ConsumerWidget {
 
   final int pendingCount;
 
+  /// Bu turda gerçekten analiz edilecek sayı: bütçe (kalan hak + kredi)
+  /// bekleyenden azsa başlık onu söyler — "197 analiz et" deyip 100'de
+  /// durmak güven kırar. Bütçe 0 ise bekleyen sayısı gösterilir (tık →
+  /// limit akışı zaten devreye girer).
+  int _displayCount(EntitlementState entitlement) {
+    final int budget = entitlement.isInTrialWindow
+        ? entitlement.remainingTrialAnalysis + entitlement.analysisCredits
+        : entitlement.isPro
+        ? pendingCount
+        : entitlement.totalRemainingAnalysis;
+    return budget > 0 ? min(pendingCount, budget) : pendingCount;
+  }
+
+  String _quotaHint(AppLocalizations l10n, EntitlementState entitlement) {
+    if (entitlement.isInTrialWindow) {
+      return l10n.analyzeHeroTrialHint(entitlement.remainingTrialAnalysis);
+    }
+    if (entitlement.isPro) return l10n.analyzeHeroUnlimited;
+    // Krediler "X/100" kalıbına karıştırılmaz — ayrı gösterilir.
+    return entitlement.analysisCredits > 0
+        ? l10n.analyzeHeroQuotaWithCredits(
+            entitlement.remainingFreeAnalysis,
+            FreeLimits.aiAnalysis,
+            entitlement.analysisCredits,
+          )
+        : l10n.analyzeHeroQuotaHint(
+            entitlement.remainingFreeAnalysis,
+            FreeLimits.aiAnalysis,
+          );
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
     final ColorScheme scheme = Theme.of(context).colorScheme;
     final EntitlementState entitlement = ref.watch(entitlementProvider);
-    final String quotaHint = entitlement.isInTrialWindow
-        ? l10n.analyzeHeroTrialHint(entitlement.remainingTrialAnalysis)
-        : entitlement.isPro
-        ? l10n.analyzeHeroUnlimited
-        : l10n.analyzeHeroQuotaHint(
-            entitlement.totalRemainingAnalysis,
-            FreeLimits.aiAnalysis,
-          );
+    final String quotaHint = _quotaHint(l10n, entitlement);
 
     return Row(
       children: [
@@ -119,7 +145,7 @@ class _HeroContent extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                l10n.analyzeHeroTitle(pendingCount),
+                l10n.analyzeHeroTitle(_displayCount(entitlement)),
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
                   color: scheme.onPrimary,
                   fontWeight: FontWeight.w600,

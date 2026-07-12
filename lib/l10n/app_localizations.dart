@@ -482,6 +482,12 @@ abstract class AppLocalizations {
   /// **'{remaining} of {limit} free analyses left this week'**
   String analyzeHeroQuotaHint(int remaining, int limit);
 
+  /// No description provided for @analyzeHeroQuotaWithCredits.
+  ///
+  /// In en, this message translates to:
+  /// **'{remaining} of {limit} weekly free + {credits} credits'**
+  String analyzeHeroQuotaWithCredits(int remaining, int limit, int credits);
+
   /// No description provided for @analyzeHeroUnlimited.
   ///
   /// In en, this message translates to:

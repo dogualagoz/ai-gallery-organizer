@@ -13,7 +13,8 @@ abstract final class FreeLimits {
   /// "X gün sonra yenilenir" hesabı basit.
   static const Duration aiAnalysisWindow = Duration(days: 7);
 
-  /// Ücretsiz manuel swipe sıralama hakkı.
+  /// Haftalık ücretsiz manuel swipe sıralama hakkı (analizle aynı
+  /// [aiAnalysisWindow] penceresinde yenilenir).
   static const int swipeSorts = 100;
 }
 

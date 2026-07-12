@@ -39,7 +39,7 @@ class EntitlementState {
   /// Aktif haftalık kota penceresinin başlangıcı (epoch ms).
   final int weekStartMs;
 
-  /// Bugüne dek kullanılan manuel swipe sıralama sayısı.
+  /// Bu haftalık pencerede kullanılan manuel swipe sıralama sayısı.
   final int swipesUsed;
 
   /// Satın alınan analiz paketlerinden kalan kredi (free kota bitince kullanılır).
@@ -132,19 +132,22 @@ class EntitlementNotifier extends Notifier<EntitlementState> {
 
     // Migration (anahtar yok: ilk kurulum ya da ömürlük-kota sürümünden gelen
     // kullanıcı — taze haftalık kota alır) veya pencere süresi dolmuş: sıfırla.
+    int swipesUsed = prefs.getInt(PrefKeys.swipesUsed) ?? 0;
     final bool expired =
         nowMs - weekStartMs >= FreeLimits.aiAnalysisWindow.inMilliseconds;
     if (storedWeekStart == null || expired) {
       weekStartMs = nowMs;
       aiAnalysisUsed = 0;
+      swipesUsed = 0;
       unawaited(prefs.setInt(PrefKeys.aiWeekStart, weekStartMs));
       unawaited(prefs.setInt(PrefKeys.aiAnalysisUsed, 0));
+      unawaited(prefs.setInt(PrefKeys.swipesUsed, 0));
     }
 
     return EntitlementState(
       isPro: prefs.getBool(PrefKeys.isPro) ?? false,
       aiAnalysisUsed: aiAnalysisUsed,
-      swipesUsed: prefs.getInt(PrefKeys.swipesUsed) ?? 0,
+      swipesUsed: swipesUsed,
       weekStartMs: weekStartMs,
       analysisCredits: prefs.getInt(PrefKeys.analysisCredits) ?? 0,
       proPurchaseMs: prefs.getInt(PrefKeys.proPurchaseMs),
@@ -153,18 +156,23 @@ class EntitlementNotifier extends Notifier<EntitlementState> {
     );
   }
 
-  /// Haftalık pencere süresi dolduysa free sayacı sıfırlayıp yeni pencere
-  /// açar; dolmadıysa hiçbir şey yapmaz (idempotent). Krediler etkilenmez.
-  /// [now] yalnız testlerde saat enjeksiyonu için kullanılır.
+  /// Haftalık pencere süresi dolduysa free analiz ve swipe sayaçlarını
+  /// sıfırlayıp yeni pencere açar; dolmadıysa hiçbir şey yapmaz (idempotent).
+  /// Krediler etkilenmez. [now] yalnız testlerde saat enjeksiyonu içindir.
   void ensureWeeklyWindow({DateTime? now}) {
     final int nowMs = (now ?? DateTime.now()).millisecondsSinceEpoch;
     if (nowMs - state.weekStartMs < FreeLimits.aiAnalysisWindow.inMilliseconds) {
       return;
     }
-    state = state.copyWith(weekStartMs: nowMs, aiAnalysisUsed: 0);
+    state = state.copyWith(
+      weekStartMs: nowMs,
+      aiAnalysisUsed: 0,
+      swipesUsed: 0,
+    );
     final prefs = ref.read(sharedPreferencesProvider);
     unawaited(prefs.setInt(PrefKeys.aiWeekStart, nowMs));
     unawaited(prefs.setInt(PrefKeys.aiAnalysisUsed, 0));
+    unawaited(prefs.setInt(PrefKeys.swipesUsed, 0));
   }
 
   /// IAP doğrulaması sonrası çağrılır (satın alma / restore / iptal).
@@ -210,7 +218,10 @@ class EntitlementNotifier extends Notifier<EntitlementState> {
 
   /// [count] adet analiz hakkı tüketir. Trial penceresinde önce trial
   /// sayacı, değilse önce free kota; taşan kısım her iki yolda kredilerden.
+  /// Kalıcı Pro hiç sayaç düşürmez — abonelik iptal edilirse kullanıcının
+  /// dokunulmamış haftalık free kotası ve kredileri aynen durur.
   Future<void> registerAnalysis(int count) async {
+    if (state.isPro && !state.isInTrialWindow) return;
     final prefs = ref.read(sharedPreferencesProvider);
     if (state.isInTrialWindow) {
       final int trialUsed = min(count, state.remainingTrialAnalysis);
@@ -248,8 +259,11 @@ class EntitlementNotifier extends Notifier<EntitlementState> {
         .setInt(PrefKeys.analysisCredits, state.analysisCredits);
   }
 
-  /// Tek swipe hakkı tüketir.
+  /// Tek swipe hakkı tüketir. Pro'da (trial dahil) swipe sınırsızdır —
+  /// sayaç düşmez ki iptal sonrası free haftası dokunulmamış kalsın.
   Future<void> registerSwipe() async {
+    if (state.isPro) return;
+    ensureWeeklyWindow();
     state = state.copyWith(swipesUsed: state.swipesUsed + 1);
     await ref
         .read(sharedPreferencesProvider)

@@ -122,6 +122,14 @@
       "limit": {"type": "int"}
     }
   },
+  "analyzeHeroQuotaWithCredits": "{remaining} of {limit} weekly free + {credits} credits",
+  "@analyzeHeroQuotaWithCredits": {
+    "placeholders": {
+      "remaining": {"type": "int"},
+      "limit": {"type": "int"},
+      "credits": {"type": "int"}
+    }
+  },
   "analyzeHeroUnlimited": "Unlimited analysis with Pro",
   "analyzeHeroTrialHint": "{count} trial analyses left",
   "@analyzeHeroTrialHint": {

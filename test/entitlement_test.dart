@@ -158,6 +158,29 @@ void main() {
       expect(state.weekStartMs, weekStart);
     });
 
+    test('pencere dolunca swipe sayacı da sıfırlanır', () async {
+      final container = await _container();
+      final notifier = container.read(entitlementProvider.notifier);
+      await notifier.registerSwipe();
+      await notifier.registerSwipe();
+      expect(container.read(entitlementProvider).swipesUsed, 2);
+
+      notifier.ensureWeeklyWindow(
+        now: DateTime.now().add(
+          FreeLimits.aiAnalysisWindow + const Duration(minutes: 1),
+        ),
+      );
+      expect(container.read(entitlementProvider).swipesUsed, 0);
+    });
+
+    test('Pro kullanıcının swipe tüketimi sayaca yazılmaz', () async {
+      final container = await _container();
+      final notifier = container.read(entitlementProvider.notifier);
+      await notifier.setPro(true);
+      await notifier.registerSwipe();
+      expect(container.read(entitlementProvider).swipesUsed, 0);
+    });
+
     test('nextWeeklyReset pencere başlangıcı + 7 gündür', () async {
       final container = await _container();
       final state = container.read(entitlementProvider);
@@ -224,6 +247,18 @@ void main() {
       expect(state.remainingTrialAnalysis, 0);
       expect(state.analysisCredits, 6);
       expect(state.canAnalyze, isTrue);
+    });
+
+    test('kalıcı Pro tüketimi hiçbir sayacı düşürmez', () async {
+      final container = await _container();
+      final notifier = container.read(entitlementProvider.notifier);
+      await notifier.addCredits(50);
+      await notifier.setPro(true);
+      await notifier.registerAnalysis(500);
+
+      final state = container.read(entitlementProvider);
+      expect(state.aiAnalysisUsed, 0);
+      expect(state.analysisCredits, 50);
     });
 
     test('setPro(false) trial izlerini temizler, free hafta korunur',

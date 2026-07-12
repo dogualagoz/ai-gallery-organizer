@@ -23,7 +23,8 @@ class _AnalysisExperienceScreenState
     extends ConsumerState<AnalysisExperienceScreen> {
   bool _popScheduled = false;
 
-  /// Tur sonu geçişlerinde haptic geri bildirim verir.
+  /// Tur sonu geçişlerinde haptic geri bildirim verir; haftalık kota bu
+  /// turda tükendiyse milestone sayfasına yol açmak için kendini kapatır.
   void _onStatusChanged(AnalysisQueueState? previous, AnalysisQueueState next) {
     if (previous?.status == next.status) return;
     switch (next.status) {
@@ -31,11 +32,19 @@ class _AnalysisExperienceScreenState
         Haptics.success();
       case AnalysisQueueStatus.failed:
         Haptics.warning();
+      case AnalysisQueueStatus.limitReached:
+        // Milestone sayfasını HomeScreen listener'ı frame sonunda açar; bu
+        // ekran hemen (senkron) kapanarak iki katmanlı görünümü önler.
+        // Kutlama haptic'i milestone sayfasından gelir.
+        if (next.freeQuotaExhausted &&
+            next.done > 0 &&
+            mounted &&
+            context.canPop()) {
+          context.pop();
+        }
       case AnalysisQueueStatus.idle:
       case AnalysisQueueStatus.running:
-      case AnalysisQueueStatus.limitReached:
       case AnalysisQueueStatus.dailyCapReached:
-        // limitReached'in kutlaması milestone sayfasından gelir.
         break;
     }
   }

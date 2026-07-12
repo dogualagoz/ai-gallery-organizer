@@ -37,6 +37,13 @@ class _SortingScreenState extends ConsumerState<SortingScreen> {
   final SwipeCardController _cardController = SwipeCardController();
 
   @override
+  void initState() {
+    super.initState();
+    // 7 gün boşta kalan kullanıcı ekrana taze haftalık swipe kotasıyla girsin.
+    ref.read(entitlementProvider.notifier).ensureWeeklyWindow();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final EntitlementState entitlement = ref.watch(entitlementProvider);

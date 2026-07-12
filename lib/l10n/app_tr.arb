@@ -122,6 +122,14 @@
       "limit": {"type": "int"}
     }
   },
+  "analyzeHeroQuotaWithCredits": "Bu hafta {remaining}/{limit} ücretsiz + {credits} kredi",
+  "@analyzeHeroQuotaWithCredits": {
+    "placeholders": {
+      "remaining": {"type": "int"},
+      "limit": {"type": "int"},
+      "credits": {"type": "int"}
+    }
+  },
   "analyzeHeroUnlimited": "Pro ile sınırsız analiz",
   "analyzeHeroTrialHint": "Denemede {count} analiz hakkın kaldı",
   "@analyzeHeroTrialHint": {

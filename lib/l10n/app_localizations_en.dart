@@ -237,6 +237,11 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String analyzeHeroQuotaWithCredits(int remaining, int limit, int credits) {
+    return '$remaining of $limit weekly free + $credits credits';
+  }
+
+  @override
   String get analyzeHeroUnlimited => 'Unlimited analysis with Pro';
 
   @override
