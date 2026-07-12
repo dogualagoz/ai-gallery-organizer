@@ -1,9 +1,9 @@
 // iOS 26 liquid glass yüzen alt gezinme çubuğu; seçim kayarak taşınır.
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:liquid_glass_renderer/liquid_glass_renderer.dart';
 
 import '../constants/ui_constants.dart';
+import '../services/haptic_service.dart';
 
 /// [GlassNavBar] içindeki tek sekme tanımı.
 class GlassNavDestination {
@@ -53,7 +53,7 @@ class _GlassNavBarState extends State<GlassNavBar> {
     final int index = _indexForDx(details.localPosition.dx, width);
     if (index == (_dragIndex ?? widget.selectedIndex)) return;
     _dragIndex = index;
-    HapticFeedback.selectionClick();
+    Haptics.tap();
     widget.onSelected(index);
   }
 
@@ -109,7 +109,7 @@ class _GlassNavBarState extends State<GlassNavBar> {
                         destination: widget.destinations[i],
                         selected: i == widget.selectedIndex,
                         onTap: () {
-                          HapticFeedback.selectionClick();
+                          Haptics.tap();
                           widget.onSelected(i);
                         },
                       ),

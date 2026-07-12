@@ -1,7 +1,6 @@
 // Ayarlar ekranı: Pro durumu, görünüm, satın alım geri yükleme, yasal linkler, sürüm.
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -11,6 +10,7 @@ import '../../core/constants/ui_constants.dart';
 import '../../core/l10n/l10n_extension.dart';
 import '../../core/router/app_router.dart';
 import '../../core/services/entitlement_service.dart';
+import '../../core/services/haptic_service.dart';
 import '../../core/services/preferences_service.dart';
 import '../../core/utils/link_opener.dart';
 import '../paywall/providers/purchase_provider.dart';
@@ -85,7 +85,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     switch (next.status) {
       case PurchaseFlowStatus.success:
         _restoreRequested = false;
-        HapticFeedback.mediumImpact();
+        Haptics.purchaseSuccess();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(context.l10n.settingsRestoreSuccess)),
         );
@@ -211,7 +211,7 @@ class _ThemeSection extends ConsumerWidget {
           ],
           selected: {themeMode},
           onSelectionChanged: (selection) {
-            HapticFeedback.selectionClick();
+            Haptics.tap();
             ref.read(themeModeProvider.notifier).setMode(selection.first);
           },
         ),

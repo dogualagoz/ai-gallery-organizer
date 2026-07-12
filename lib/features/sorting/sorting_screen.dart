@@ -1,7 +1,6 @@
 // Swipe sıralama ekranı: analiz edilmemiş/"diğer" screenshot'lar için
 // sola sil / sağa panoya ata / yukarı atla kart akışı.
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:photo_manager/photo_manager.dart';
@@ -13,6 +12,7 @@ import '../../core/models/screenshot_category.dart';
 import '../../core/models/screenshot_entry.dart';
 import '../../core/router/app_router.dart';
 import '../../core/services/entitlement_service.dart';
+import '../../core/services/haptic_service.dart';
 import '../boards/providers/board_provider.dart';
 import '../boards/widgets/board_name_dialog.dart';
 import '../gallery/data/screenshot_repository.dart';
@@ -67,7 +67,7 @@ class _SortingScreenState extends ConsumerState<SortingScreen> {
               controller: _cardController,
               onDelete: () => _handleDelete(queue.first.assetId),
               onSkip: () {
-                HapticFeedback.selectionClick();
+                Haptics.tap();
                 setState(() => _skippedIds.add(queue.first.assetId));
               },
               onAssign: () => _handleAssign(queue.first.assetId),
@@ -85,7 +85,7 @@ class _SortingScreenState extends ConsumerState<SortingScreen> {
       return false;
     }
     if (deleted.isEmpty) return false;
-    HapticFeedback.mediumImpact();
+    Haptics.confirm();
     await ref.read(screenshotRepositoryProvider).removeEntry(assetId);
     await ref.read(entitlementProvider.notifier).registerSwipe();
     return true;
@@ -106,7 +106,7 @@ class _SortingScreenState extends ConsumerState<SortingScreen> {
       await _createBoardAndAssign(assetId);
       return;
     }
-    HapticFeedback.lightImpact();
+    Haptics.tick();
     await ref.read(screenshotRepositoryProvider).assignToBoard(assetId, choice);
     await ref.read(entitlementProvider.notifier).registerSwipe();
   }

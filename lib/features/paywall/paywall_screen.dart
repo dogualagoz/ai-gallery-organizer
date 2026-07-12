@@ -1,13 +1,13 @@
 // Paywall ekranı: gradient hero, açıklamalı özellikler, plan kartları,
 // deneme zaman çizelgesi, analiz paketleri ve alta sabit CTA.
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 
 import '../../core/constants/app_constants.dart';
 import '../../core/constants/ui_constants.dart';
 import '../../core/l10n/l10n_extension.dart';
+import '../../core/services/haptic_service.dart';
 import '../../core/utils/link_opener.dart';
 import 'providers/purchase_provider.dart';
 import 'widgets/feature_list.dart';
@@ -30,7 +30,7 @@ class PaywallScreen extends ConsumerWidget {
 
     ref.listen(purchaseFlowProvider, (_, next) {
       if (next.status == PurchaseFlowStatus.success) {
-        HapticFeedback.mediumImpact();
+        Haptics.purchaseSuccess();
         ref.read(purchaseFlowProvider.notifier).dismissError();
         final int? credits = ProductIds.creditsFor(next.productId ?? '');
         if (credits != null) {
@@ -44,6 +44,7 @@ class PaywallScreen extends ConsumerWidget {
           Navigator.of(context).pop();
         }
       } else if (next.status == PurchaseFlowStatus.error) {
+        Haptics.warning();
         final String message = next.errorMessage ?? l10n.paywallPurchaseFailed;
         ScaffoldMessenger.of(
           context,
@@ -241,7 +242,7 @@ class _PaywallContentState extends ConsumerState<_PaywallContent> {
                               ? monthly
                               : null,
                           onTap: () {
-                            HapticFeedback.selectionClick();
+                            Haptics.tap();
                             setState(() => _selectedProductId = product.id);
                           },
                         ),

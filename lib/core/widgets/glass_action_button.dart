@@ -1,9 +1,9 @@
 // Navbar pilinin yanında yüzen, aynı liquid glass stilini paylaşan dairesel aksiyon butonu.
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:liquid_glass_renderer/liquid_glass_renderer.dart';
 
 import '../constants/ui_constants.dart';
+import '../services/haptic_service.dart';
 
 /// [GlassNavBar] ile aynı hizada, ayrı bir dairesel buton (ör. Arama).
 /// Bir ata `LiquidGlassLayer` + `LiquidGlassBlendGroup` içinde
@@ -48,7 +48,7 @@ class GlassActionButton extends StatelessWidget {
             child: InkWell(
               customBorder: const CircleBorder(),
               onTap: () {
-                HapticFeedback.selectionClick();
+                Haptics.tap();
                 onPressed();
               },
               child: Icon(icon, color: scheme.primary, size: AppSizes.navBarIcon),
