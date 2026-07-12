@@ -446,6 +446,36 @@ abstract class AppLocalizations {
   /// **'Daily analysis limit reached. It will continue tomorrow.'**
   String get analysisDailyCapBanner;
 
+  /// No description provided for @analyzeHeroTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Analyze {count} screenshots'**
+  String analyzeHeroTitle(int count);
+
+  /// No description provided for @analyzeHeroQuotaHint.
+  ///
+  /// In en, this message translates to:
+  /// **'{remaining} of {limit} free analyses left this week'**
+  String analyzeHeroQuotaHint(int remaining, int limit);
+
+  /// No description provided for @analyzeHeroUnlimited.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlimited analysis with Pro'**
+  String get analyzeHeroUnlimited;
+
+  /// No description provided for @analyzeHeroTrialHint.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} trial analyses left'**
+  String analyzeHeroTrialHint(int count);
+
+  /// No description provided for @analysisExperienceTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Organizing your screenshots'**
+  String get analysisExperienceTitle;
+
   /// No description provided for @milestoneTitle.
   ///
   /// In en, this message translates to:

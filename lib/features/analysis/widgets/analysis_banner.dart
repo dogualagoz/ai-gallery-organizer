@@ -8,6 +8,7 @@ import '../../../core/l10n/l10n_extension.dart';
 import '../../../core/router/app_router.dart';
 import '../../../core/services/entitlement_service.dart';
 import '../providers/analysis_queue_provider.dart';
+import 'analyze_hero_button.dart';
 
 class AnalysisBanner extends ConsumerWidget {
   const AnalysisBanner({super.key, required this.pendingCount});
@@ -19,18 +20,22 @@ class AnalysisBanner extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final AnalysisQueueState queue = ref.watch(analysisQueueProvider);
 
-    final Widget? content = switch (queue.status) {
-      AnalysisQueueStatus.idle when pendingCount > 0 => _IdleContent(
-        pendingCount: pendingCount,
-      ),
-      AnalysisQueueStatus.idle => null,
+    // Boşta bekleyen varsa banner yerine hero buton gösterilir (kendi
+    // stilini taşır, secondaryContainer kabına girmez).
+    if (queue.status == AnalysisQueueStatus.idle) {
+      return pendingCount > 0
+          ? AnalyzeHeroButton(pendingCount: pendingCount)
+          : const SizedBox.shrink();
+    }
+
+    final Widget content = switch (queue.status) {
+      AnalysisQueueStatus.idle => const SizedBox.shrink(),
       AnalysisQueueStatus.running => _RunningContent(queue: queue),
       AnalysisQueueStatus.completed => _CompletedContent(queue: queue),
       AnalysisQueueStatus.failed => const _FailedContent(),
       AnalysisQueueStatus.limitReached => _LimitContent(done: queue.done),
       AnalysisQueueStatus.dailyCapReached => const _DailyCapContent(),
     };
-    if (content == null) return const SizedBox.shrink();
 
     final ColorScheme scheme = Theme.of(context).colorScheme;
     return Container(
@@ -48,36 +53,8 @@ class AnalysisBanner extends ConsumerWidget {
   }
 }
 
-/// Bekleyen screenshot'lar için "analiz et" çağrısı.
-class _IdleContent extends ConsumerWidget {
-  const _IdleContent({required this.pendingCount});
-
-  final int pendingCount;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final ColorScheme scheme = Theme.of(context).colorScheme;
-    return Row(
-      children: [
-        Icon(Icons.auto_awesome_outlined, size: 20, color: scheme.primary),
-        const SizedBox(width: AppSpacing.sm),
-        Expanded(
-          child: Text(
-            context.l10n.analysisPendingBanner(pendingCount),
-            style: Theme.of(context).textTheme.bodyMedium,
-          ),
-        ),
-        FilledButton.tonal(
-          style: FilledButton.styleFrom(minimumSize: Size.zero),
-          onPressed: () => ref.read(analysisQueueProvider.notifier).start(),
-          child: Text(context.l10n.analysisStartAction),
-        ),
-      ],
-    );
-  }
-}
-
-/// Koşan kuyruk: ilerleme çubuğu + sayaç + iptal.
+/// Koşan kuyruk: ilerleme çubuğu + sayaç + iptal; satıra dokununca
+/// tam ekran analiz deneyimine geçilir.
 class _RunningContent extends ConsumerWidget {
   const _RunningContent({required this.queue});
 
@@ -86,31 +63,35 @@ class _RunningContent extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final int processed = queue.done + queue.failed;
-    return Row(
-      children: [
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                context.l10n.analysisProgress(processed, queue.total),
-                style: Theme.of(context).textTheme.bodyMedium,
-              ),
-              const SizedBox(height: AppSpacing.sm),
-              LinearProgressIndicator(
-                value: queue.total == 0 ? null : processed / queue.total,
-                borderRadius: BorderRadius.circular(AppRadius.sm),
-              ),
-            ],
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () => context.push(AppRoutes.analysis),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  context.l10n.analysisProgress(processed, queue.total),
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                LinearProgressIndicator(
+                  value: queue.total == 0 ? null : processed / queue.total,
+                  borderRadius: BorderRadius.circular(AppRadius.sm),
+                ),
+              ],
+            ),
           ),
-        ),
-        const SizedBox(width: AppSpacing.sm),
-        IconButton(
-          tooltip: context.l10n.analysisCancelAction,
-          icon: const Icon(Icons.close),
-          onPressed: () => ref.read(analysisQueueProvider.notifier).cancel(),
-        ),
-      ],
+          const SizedBox(width: AppSpacing.sm),
+          IconButton(
+            tooltip: context.l10n.analysisCancelAction,
+            icon: const Icon(Icons.close),
+            onPressed: () => ref.read(analysisQueueProvider.notifier).cancel(),
+          ),
+        ],
+      ),
     );
   }
 }

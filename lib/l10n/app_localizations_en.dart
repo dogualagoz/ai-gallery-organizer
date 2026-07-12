@@ -209,6 +209,27 @@ class AppLocalizationsEn extends AppLocalizations {
       'Daily analysis limit reached. It will continue tomorrow.';
 
   @override
+  String analyzeHeroTitle(int count) {
+    return 'Analyze $count screenshots';
+  }
+
+  @override
+  String analyzeHeroQuotaHint(int remaining, int limit) {
+    return '$remaining of $limit free analyses left this week';
+  }
+
+  @override
+  String get analyzeHeroUnlimited => 'Unlimited analysis with Pro';
+
+  @override
+  String analyzeHeroTrialHint(int count) {
+    return '$count trial analyses left';
+  }
+
+  @override
+  String get analysisExperienceTitle => 'Organizing your screenshots';
+
+  @override
   String get milestoneTitle => 'Great progress!';
 
   @override

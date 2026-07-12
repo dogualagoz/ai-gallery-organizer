@@ -209,6 +209,27 @@ class AppLocalizationsTr extends AppLocalizations {
       'Günlük analiz limiti doldu. Yarın kaldığı yerden devam eder.';
 
   @override
+  String analyzeHeroTitle(int count) {
+    return '$count ekran görüntüsünü analiz et';
+  }
+
+  @override
+  String analyzeHeroQuotaHint(int remaining, int limit) {
+    return 'Bu hafta $remaining/$limit ücretsiz analiz hakkın var';
+  }
+
+  @override
+  String get analyzeHeroUnlimited => 'Pro ile sınırsız analiz';
+
+  @override
+  String analyzeHeroTrialHint(int count) {
+    return 'Denemede $count analiz hakkın kaldı';
+  }
+
+  @override
+  String get analysisExperienceTitle => 'Ekran görüntülerin gruplandırılıyor';
+
+  @override
   String get milestoneTitle => 'Harika ilerleme!';
 
   @override

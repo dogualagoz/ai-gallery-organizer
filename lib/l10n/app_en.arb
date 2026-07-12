@@ -90,6 +90,27 @@
     }
   },
   "analysisDailyCapBanner": "Daily analysis limit reached. It will continue tomorrow.",
+  "analyzeHeroTitle": "Analyze {count} screenshots",
+  "@analyzeHeroTitle": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "analyzeHeroQuotaHint": "{remaining} of {limit} free analyses left this week",
+  "@analyzeHeroQuotaHint": {
+    "placeholders": {
+      "remaining": {"type": "int"},
+      "limit": {"type": "int"}
+    }
+  },
+  "analyzeHeroUnlimited": "Unlimited analysis with Pro",
+  "analyzeHeroTrialHint": "{count} trial analyses left",
+  "@analyzeHeroTrialHint": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "analysisExperienceTitle": "Organizing your screenshots",
   "milestoneTitle": "Great progress!",
   "milestoneSubtitle": "You've used all {limit} free analyses this week.",
   "@milestoneSubtitle": {

@@ -90,6 +90,27 @@
     }
   },
   "analysisDailyCapBanner": "Günlük analiz limiti doldu. Yarın kaldığı yerden devam eder.",
+  "analyzeHeroTitle": "{count} ekran görüntüsünü analiz et",
+  "@analyzeHeroTitle": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "analyzeHeroQuotaHint": "Bu hafta {remaining}/{limit} ücretsiz analiz hakkın var",
+  "@analyzeHeroQuotaHint": {
+    "placeholders": {
+      "remaining": {"type": "int"},
+      "limit": {"type": "int"}
+    }
+  },
+  "analyzeHeroUnlimited": "Pro ile sınırsız analiz",
+  "analyzeHeroTrialHint": "Denemede {count} analiz hakkın kaldı",
+  "@analyzeHeroTrialHint": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "analysisExperienceTitle": "Ekran görüntülerin gruplandırılıyor",
   "milestoneTitle": "Harika ilerleme!",
   "milestoneSubtitle": "Bu haftaki {limit} ücretsiz analizin tamamını kullandın.",
   "@milestoneSubtitle": {
