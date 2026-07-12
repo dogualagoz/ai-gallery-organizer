@@ -446,6 +446,18 @@ abstract class AppLocalizations {
   /// **'Daily analysis limit reached. It will continue tomorrow.'**
   String get analysisDailyCapBanner;
 
+  /// No description provided for @proBadgeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'PRO'**
+  String get proBadgeLabel;
+
+  /// No description provided for @settingsTrialRemaining.
+  ///
+  /// In en, this message translates to:
+  /// **'Trial — {count} analyses left'**
+  String settingsTrialRemaining(int count);
+
   /// No description provided for @onboardingTitleQuota.
   ///
   /// In en, this message translates to:

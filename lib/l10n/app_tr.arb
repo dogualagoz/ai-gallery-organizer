@@ -90,6 +90,13 @@
     }
   },
   "analysisDailyCapBanner": "Günlük analiz limiti doldu. Yarın kaldığı yerden devam eder.",
+  "proBadgeLabel": "PRO",
+  "settingsTrialRemaining": "Deneme — {count} analiz hakkı kaldı",
+  "@settingsTrialRemaining": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
   "onboardingTitleQuota": "Her hafta {count} ücretsiz analiz",
   "@onboardingTitleQuota": {
     "placeholders": {

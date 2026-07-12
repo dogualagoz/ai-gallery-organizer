@@ -209,6 +209,14 @@ class AppLocalizationsTr extends AppLocalizations {
       'Günlük analiz limiti doldu. Yarın kaldığı yerden devam eder.';
 
   @override
+  String get proBadgeLabel => 'PRO';
+
+  @override
+  String settingsTrialRemaining(int count) {
+    return 'Deneme — $count analiz hakkı kaldı';
+  }
+
+  @override
   String onboardingTitleQuota(int count) {
     return 'Her hafta $count ücretsiz analiz';
   }

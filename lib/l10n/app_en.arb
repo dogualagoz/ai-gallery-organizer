@@ -90,6 +90,13 @@
     }
   },
   "analysisDailyCapBanner": "Daily analysis limit reached. It will continue tomorrow.",
+  "proBadgeLabel": "PRO",
+  "settingsTrialRemaining": "Trial — {count} analyses left",
+  "@settingsTrialRemaining": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
   "onboardingTitleQuota": "{count} free analyses, every week",
   "@onboardingTitleQuota": {
     "placeholders": {

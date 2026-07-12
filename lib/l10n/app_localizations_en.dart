@@ -209,6 +209,14 @@ class AppLocalizationsEn extends AppLocalizations {
       'Daily analysis limit reached. It will continue tomorrow.';
 
   @override
+  String get proBadgeLabel => 'PRO';
+
+  @override
+  String settingsTrialRemaining(int count) {
+    return 'Trial — $count analyses left';
+  }
+
+  @override
   String onboardingTitleQuota(int count) {
     return '$count free analyses, every week';
   }

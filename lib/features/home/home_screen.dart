@@ -10,6 +10,7 @@ import '../../core/models/screenshot_category.dart';
 import '../../core/models/screenshot_entry.dart';
 import '../../core/router/app_router.dart';
 import '../../core/services/entitlement_service.dart';
+import '../../core/widgets/pro_badge.dart';
 import '../analysis/providers/analysis_queue_provider.dart';
 import '../analysis/providers/auto_sort_provider.dart';
 import '../analysis/widgets/analysis_banner.dart';
@@ -33,10 +34,39 @@ class HomeScreen extends ConsumerWidget {
     _listenForMilestone(context, ref);
     final l10n = context.l10n;
     final gallery = ref.watch(galleryProvider);
+    final bool isPro = ref.watch(
+      entitlementProvider.select((state) => state.isPro),
+    );
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(l10n.galleryTitle),
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(l10n.galleryTitle),
+            if (isPro) ...[
+              const SizedBox(width: AppSpacing.sm),
+              const ProBadge(),
+            ],
+          ],
+        ),
+        // Pro'ya özel incelikli gradient — premium hissi sürekli ama sessiz.
+        flexibleSpace: isPro
+            ? DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Theme.of(context).colorScheme.primaryContainer
+                          .withValues(alpha: AppOpacities.proAppBarTint),
+                      Colors.transparent,
+                    ],
+                  ),
+                ),
+                child: const SizedBox.expand(),
+              )
+            : null,
         actions: [
           IconButton(
             tooltip: l10n.gallerySyncTooltip,

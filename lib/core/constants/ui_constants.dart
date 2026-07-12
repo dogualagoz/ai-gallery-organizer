@@ -53,6 +53,12 @@ abstract final class AppGlass {
   static const double blend = 20;
 }
 
+/// Standart opaklık değerleri.
+abstract final class AppOpacities {
+  /// Pro kullanıcının app bar'ındaki incelikli gradient tonunun opaklığı.
+  static const double proAppBarTint = 0.12;
+}
+
 /// Standart animasyon süreleri.
 abstract final class AppDurations {
   static const Duration fast = Duration(milliseconds: 150);

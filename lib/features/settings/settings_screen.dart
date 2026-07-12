@@ -105,15 +105,16 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 }
 
 /// Pro üyelikte durum kartı, değilse paywall'a götüren teklif kartı.
-class _ProStatusCard extends StatelessWidget {
+class _ProStatusCard extends ConsumerWidget {
   const _ProStatusCard({required this.isPro});
 
   final bool isPro;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
     final ColorScheme scheme = Theme.of(context).colorScheme;
+    final EntitlementState entitlement = ref.watch(entitlementProvider);
 
     return Material(
       clipBehavior: Clip.antiAlias,
@@ -163,6 +164,20 @@ class _ProStatusCard extends StatelessWidget {
                           color: scheme.onPrimary.withValues(alpha: 0.85),
                         ),
                       ),
+                      if (entitlement.isInTrialWindow) ...[
+                        const SizedBox(height: 2),
+                        Text(
+                          l10n.settingsTrialRemaining(
+                            entitlement.remainingTrialAnalysis,
+                          ),
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(
+                                color: scheme.onPrimary.withValues(
+                                  alpha: 0.85,
+                                ),
+                              ),
+                        ),
+                      ],
                     ],
                   ),
                 ),
