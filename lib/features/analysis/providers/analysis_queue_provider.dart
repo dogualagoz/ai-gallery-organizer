@@ -10,6 +10,7 @@ import 'package:photo_manager/photo_manager.dart';
 
 import '../../../core/constants/ai_constants.dart';
 import '../../../core/constants/ai_rate_profile.dart';
+import '../../../core/models/screenshot_category.dart';
 import '../../../core/models/screenshot_entry.dart';
 import '../../../core/services/daily_quota_tracker.dart';
 import '../../../core/services/entitlement_service.dart';
@@ -39,6 +40,15 @@ enum AnalysisQueueStatus {
   dailyCapReached,
 }
 
+/// Başarıyla analiz edilen tek öğe — UI'daki "uçan thumbnail" animasyonunu
+/// ve kategori yığın sayaçlarını besler.
+class AnalyzedItem {
+  const AnalyzedItem({required this.assetId, required this.category});
+
+  final String assetId;
+  final ScreenshotCategory category;
+}
+
 /// Kuyruğun anlık görünümü (immutable).
 class AnalysisQueueState {
   const AnalysisQueueState({
@@ -46,7 +56,14 @@ class AnalysisQueueState {
     this.done = 0,
     this.failed = 0,
     this.total = 0,
+    this.recent = const [],
+    this.categoryCounts = const {},
+    this.freeQuotaExhausted = false,
   });
+
+  /// [recent] listesinde tutulan en fazla öğe sayısı — animasyon için
+  /// yalnız son tamamlananlar gerekir, sınırsız büyüme istenmez.
+  static const int maxRecentItems = 16;
 
   final AnalysisQueueStatus status;
 
@@ -59,19 +76,53 @@ class AnalysisQueueState {
   /// Bu turda hedeflenen toplam (free'de kalan hakla sınırlı).
   final int total;
 
+  /// Bu turda son tamamlanan öğeler (en eski → en yeni, en fazla
+  /// [maxRecentItems]). UI diff'leyerek yeni tamamlananları animasyonla oynatır.
+  final List<AnalyzedItem> recent;
+
+  /// Bu turda kategori başına başarı sayısı (kategori yığınları için).
+  final Map<ScreenshotCategory, int> categoryCounts;
+
+  /// Tur [AnalysisQueueStatus.limitReached] ile bittiğinde haftalık free
+  /// kotanın gerçekten tükendiğini ayırt eder (trial sınırı / kotasız
+  /// başlama durumlarından farklı) — milestone sayfası yalnız bunda açılır.
+  final bool freeQuotaExhausted;
+
   bool get isRunning => status == AnalysisQueueStatus.running;
+
+  /// Başarılı bir analiz sonrası yeni state: sayaç, sınırlı [recent] listesi
+  /// ve kategori sayacı birlikte güncellenir (saf, test edilebilir).
+  AnalysisQueueState afterSuccess(AnalyzedItem item) {
+    final List<AnalyzedItem> appended = [...recent, item];
+    return copyWith(
+      done: done + 1,
+      recent: appended.length > maxRecentItems
+          ? appended.sublist(appended.length - maxRecentItems)
+          : appended,
+      categoryCounts: {
+        ...categoryCounts,
+        item.category: (categoryCounts[item.category] ?? 0) + 1,
+      },
+    );
+  }
 
   AnalysisQueueState copyWith({
     AnalysisQueueStatus? status,
     int? done,
     int? failed,
     int? total,
+    List<AnalyzedItem>? recent,
+    Map<ScreenshotCategory, int>? categoryCounts,
+    bool? freeQuotaExhausted,
   }) {
     return AnalysisQueueState(
       status: status ?? this.status,
       done: done ?? this.done,
       failed: failed ?? this.failed,
       total: total ?? this.total,
+      recent: recent ?? this.recent,
+      categoryCounts: categoryCounts ?? this.categoryCounts,
+      freeQuotaExhausted: freeQuotaExhausted ?? this.freeQuotaExhausted,
     );
   }
 }
@@ -113,8 +164,9 @@ class AnalysisQueueNotifier extends Notifier<AnalysisQueueState> {
     ref.read(entitlementProvider.notifier).ensureWeeklyWindow();
     final EntitlementState entitlement = ref.read(entitlementProvider);
     if (!entitlement.canAnalyze) {
-      state = const AnalysisQueueState(
+      state = AnalysisQueueState(
         status: AnalysisQueueStatus.limitReached,
+        freeQuotaExhausted: _isFreeQuotaExhausted(entitlement),
       );
       return;
     }
@@ -142,8 +194,18 @@ class AnalysisQueueNotifier extends Notifier<AnalysisQueueState> {
       for (int i = 0; i < profile.concurrency; i++) _worker(repo, queue, profile),
     ]);
 
-    state = state.copyWith(status: _finalStatus(pending.length));
+    final AnalysisQueueStatus finalStatus = _finalStatus(pending.length);
+    state = state.copyWith(
+      status: finalStatus,
+      freeQuotaExhausted:
+          finalStatus == AnalysisQueueStatus.limitReached &&
+          _isFreeQuotaExhausted(ref.read(entitlementProvider)),
+    );
   }
+
+  /// Haftalık free kota bu turda gerçekten tükendi mi (milestone tetiği).
+  bool _isFreeQuotaExhausted(EntitlementState entitlement) =>
+      !entitlement.isPro && entitlement.remainingFreeAnalysis == 0;
 
   /// Ortak kuyruktan öğe çekip işleyen bir worker; havuzdaki eşzamanlılık
   /// kadar paralel çalışır. Kota/iptal koşullarında sessizce durur.
@@ -197,7 +259,9 @@ class AnalysisQueueNotifier extends Notifier<AnalysisQueueState> {
         ocrText: result.ocrText,
       );
       await ref.read(entitlementProvider.notifier).registerAnalysis(1);
-      state = state.copyWith(done: state.done + 1);
+      state = state.afterSuccess(
+        AnalyzedItem(assetId: entry.assetId, category: result.category),
+      );
     } on AnalysisRateLimitException catch (error) {
       debugPrint('Günlük kota hatası (${entry.assetId}): $error');
       _dailyCapHit = true;
