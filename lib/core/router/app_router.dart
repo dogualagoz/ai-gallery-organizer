@@ -34,8 +34,11 @@ abstract final class AppRoutes {
   static const String paywallPacks =
       '$paywall?$paywallFocusQuery=$paywallFocusPacks';
 
-  /// Detay rotası assetId parametresi alır.
-  static String detail(String assetId) => '/detail/$assetId';
+  /// Detay rotası assetId parametresi alır. iOS asset ID'leri slash içerir
+  /// (`UUID/L0/001`) — encode edilmezse rota fazladan segmentlere bölünüp
+  /// eşleşmez; go_router parametreyi okurken kendisi decode eder.
+  static String detail(String assetId) =>
+      '/detail/${Uri.encodeComponent(assetId)}';
 }
 
 final appRouterProvider = Provider<GoRouter>((ref) {
