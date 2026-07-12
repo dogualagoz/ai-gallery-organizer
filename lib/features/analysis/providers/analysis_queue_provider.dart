@@ -109,6 +109,8 @@ class AnalysisQueueNotifier extends Notifier<AnalysisQueueState> {
         .toList();
     if (pending.isEmpty) return;
 
+    // 7 gün boşta kalan kullanıcı taze haftalık kotayla başlasın.
+    ref.read(entitlementProvider.notifier).ensureWeeklyWindow();
     final EntitlementState entitlement = ref.read(entitlementProvider);
     if (!entitlement.canAnalyze) {
       state = const AnalysisQueueState(
@@ -213,6 +215,7 @@ class AnalysisQueueNotifier extends Notifier<AnalysisQueueState> {
   /// Detay ekranından tek screenshot analizi. Kuyruk çalışıyorsa reddedilir.
   Future<SingleAnalysisOutcome> analyzeSingle(String assetId) async {
     if (state.isRunning) return SingleAnalysisOutcome.failed;
+    ref.read(entitlementProvider.notifier).ensureWeeklyWindow();
     if (!ref.read(entitlementProvider).canAnalyze) {
       return SingleAnalysisOutcome.limitReached;
     }

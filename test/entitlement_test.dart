@@ -6,8 +6,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-Future<ProviderContainer> _container() async {
-  SharedPreferences.setMockInitialValues({});
+Future<ProviderContainer> _container({
+  Map<String, Object> initialValues = const {},
+}) async {
+  SharedPreferences.setMockInitialValues(initialValues);
   final prefs = await SharedPreferences.getInstance();
   final container = ProviderContainer(
     overrides: [sharedPreferencesProvider.overrideWithValue(prefs)],
@@ -77,6 +79,94 @@ void main() {
       await notifier.registerAnalysis(FreeLimits.aiAnalysis + 5);
 
       expect(container.read(entitlementProvider).analysisCredits, 0);
+    });
+  });
+
+  group('haftalık kota penceresi', () {
+    test('migration: pencere anahtarı yoksa sayaç sıfırlanıp pencere açılır',
+        () async {
+      // Ömürlük-kota sürümünden gelen kullanıcı: kullanım var ama pencere yok.
+      final container = await _container(
+        initialValues: {PrefKeys.aiAnalysisUsed: 80},
+      );
+      final state = container.read(entitlementProvider);
+      expect(state.aiAnalysisUsed, 0);
+      expect(state.weekStartMs, greaterThan(0));
+      expect(state.remainingFreeAnalysis, FreeLimits.aiAnalysis);
+    });
+
+    test('dolmamış pencere ve sayaç korunur', () async {
+      final int recentStart = DateTime.now()
+          .subtract(const Duration(days: 1))
+          .millisecondsSinceEpoch;
+      final container = await _container(
+        initialValues: {
+          PrefKeys.aiAnalysisUsed: 40,
+          PrefKeys.aiWeekStart: recentStart,
+        },
+      );
+      final state = container.read(entitlementProvider);
+      expect(state.aiAnalysisUsed, 40);
+      expect(state.weekStartMs, recentStart);
+    });
+
+    test('süresi dolmuş pencere build sırasında sıfırlanır', () async {
+      final int oldStart = DateTime.now()
+          .subtract(FreeLimits.aiAnalysisWindow + const Duration(hours: 1))
+          .millisecondsSinceEpoch;
+      final container = await _container(
+        initialValues: {
+          PrefKeys.aiAnalysisUsed: 100,
+          PrefKeys.aiWeekStart: oldStart,
+        },
+      );
+      final state = container.read(entitlementProvider);
+      expect(state.aiAnalysisUsed, 0);
+      expect(state.weekStartMs, greaterThan(oldStart));
+    });
+
+    test('ensureWeeklyWindow süre dolunca free sayacı sıfırlar, kredi kalır',
+        () async {
+      final container = await _container();
+      final notifier = container.read(entitlementProvider.notifier);
+      await notifier.addCredits(50);
+      await notifier.registerAnalysis(FreeLimits.aiAnalysis);
+      expect(container.read(entitlementProvider).canAnalyze, isTrue);
+
+      final DateTime later = DateTime.now().add(
+        FreeLimits.aiAnalysisWindow + const Duration(minutes: 1),
+      );
+      notifier.ensureWeeklyWindow(now: later);
+
+      final state = container.read(entitlementProvider);
+      expect(state.aiAnalysisUsed, 0);
+      expect(state.remainingFreeAnalysis, FreeLimits.aiAnalysis);
+      expect(state.analysisCredits, 50);
+    });
+
+    test('ensureWeeklyWindow pencere dolmadıysa hiçbir şeyi değiştirmez',
+        () async {
+      final container = await _container();
+      final notifier = container.read(entitlementProvider.notifier);
+      await notifier.registerAnalysis(30);
+      final int weekStart = container.read(entitlementProvider).weekStartMs;
+
+      notifier.ensureWeeklyWindow();
+
+      final state = container.read(entitlementProvider);
+      expect(state.aiAnalysisUsed, 30);
+      expect(state.weekStartMs, weekStart);
+    });
+
+    test('nextWeeklyReset pencere başlangıcı + 7 gündür', () async {
+      final container = await _container();
+      final state = container.read(entitlementProvider);
+      expect(
+        state.nextWeeklyReset,
+        DateTime.fromMillisecondsSinceEpoch(
+          state.weekStartMs,
+        ).add(FreeLimits.aiAnalysisWindow),
+      );
     });
   });
 

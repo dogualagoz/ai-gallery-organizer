@@ -5,8 +5,13 @@ const String kAppName = 'Snaply';
 
 /// Free kullanıcı limitleri (PROJECT_DOCUMENTATION.md Bölüm 3).
 abstract final class FreeLimits {
-  /// Ücretsiz otomatik AI analizi hakkı.
+  /// Haftalık ücretsiz otomatik AI analizi hakkı.
   static const int aiAnalysis = 100;
+
+  /// Ücretsiz analiz kotasının yenilenme penceresi. Kayan 7 gün tercih
+  /// edildi (ISO hafta değil): timezone/locale kenar durumu yok ve
+  /// "X gün sonra yenilenir" hesabı basit.
+  static const Duration aiAnalysisWindow = Duration(days: 7);
 
   /// Ücretsiz manuel swipe sıralama hakkı.
   static const int swipeSorts = 100;

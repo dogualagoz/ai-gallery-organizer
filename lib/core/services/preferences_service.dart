@@ -14,6 +14,7 @@ abstract final class PrefKeys {
   static const String onboardingComplete = 'onboarding_complete';
   static const String themeMode = 'theme_mode';
   static const String aiAnalysisUsed = 'ai_analysis_used';
+  static const String aiWeekStart = 'ai_week_start';
   static const String swipesUsed = 'swipes_used';
   static const String isPro = 'is_pro';
   static const String aiDailyCount = 'ai_daily_count';
