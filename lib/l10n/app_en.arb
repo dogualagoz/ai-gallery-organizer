@@ -90,6 +90,12 @@
     }
   },
   "analysisDailyCapBanner": "Daily analysis limit reached. It will continue tomorrow.",
+  "paywallPackSavings": "{percent}% better value",
+  "@paywallPackSavings": {
+    "placeholders": {
+      "percent": {"type": "int"}
+    }
+  },
   "proBadgeLabel": "PRO",
   "settingsTrialRemaining": "Trial — {count} analyses left",
   "@settingsTrialRemaining": {

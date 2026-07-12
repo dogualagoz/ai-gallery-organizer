@@ -209,6 +209,11 @@ class AppLocalizationsTr extends AppLocalizations {
       'Günlük analiz limiti doldu. Yarın kaldığı yerden devam eder.';
 
   @override
+  String paywallPackSavings(int percent) {
+    return '%$percent daha avantajlı';
+  }
+
+  @override
   String get proBadgeLabel => 'PRO';
 
   @override

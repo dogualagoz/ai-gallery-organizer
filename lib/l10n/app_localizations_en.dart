@@ -209,6 +209,11 @@ class AppLocalizationsEn extends AppLocalizations {
       'Daily analysis limit reached. It will continue tomorrow.';
 
   @override
+  String paywallPackSavings(int percent) {
+    return '$percent% better value';
+  }
+
+  @override
   String get proBadgeLabel => 'PRO';
 
   @override

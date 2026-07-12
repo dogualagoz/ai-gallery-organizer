@@ -90,6 +90,12 @@
     }
   },
   "analysisDailyCapBanner": "Günlük analiz limiti doldu. Yarın kaldığı yerden devam eder.",
+  "paywallPackSavings": "%{percent} daha avantajlı",
+  "@paywallPackSavings": {
+    "placeholders": {
+      "percent": {"type": "int"}
+    }
+  },
   "proBadgeLabel": "PRO",
   "settingsTrialRemaining": "Deneme — {count} analiz hakkı kaldı",
   "@settingsTrialRemaining": {
