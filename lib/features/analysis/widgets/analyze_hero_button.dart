@@ -4,12 +4,10 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../../core/constants/app_constants.dart';
 import '../../../core/constants/ui_constants.dart';
 import '../../../core/l10n/l10n_extension.dart';
-import '../../../core/router/app_router.dart';
 import '../../../core/services/entitlement_service.dart';
 import '../../../core/services/haptic_service.dart';
 import '../providers/analysis_queue_provider.dart';
@@ -40,10 +38,9 @@ class _AnalyzeHeroButtonState extends ConsumerState<AnalyzeHeroButton>
 
   void _startAnalysis() {
     Haptics.analysisStart();
-    // start() ilk await'ine kadar senkron çalışır: ekran açıldığında kuyruk
-    // durumu çoktan running (ya da limitReached) olur.
+    // Ekran değişmez: banner aynı yerde ilerleme kartına dönüşür ve
+    // gölgeler kategori kartlarına uçar (CategoryFlyLayer).
     ref.read(analysisQueueProvider.notifier).start();
-    context.push(AppRoutes.analysis);
   }
 
   @override

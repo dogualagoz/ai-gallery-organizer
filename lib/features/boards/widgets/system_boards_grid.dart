@@ -7,6 +7,7 @@ import '../../../core/l10n/l10n_extension.dart';
 import '../../../core/models/screenshot_category.dart';
 import '../../../core/models/screenshot_entry.dart';
 import '../../../core/widgets/fade_in_up.dart';
+import '../../analysis/widgets/category_fly_layer.dart';
 import '../../gallery/data/screenshot_repository.dart';
 import '../board_detail_screen.dart';
 import 'board_covers.dart';
@@ -37,6 +38,9 @@ class SystemBoardsGrid extends StatelessWidget {
 
     return GridView.builder(
       shrinkWrap: true,
+      // shrinkWrap grid, MediaQuery safe-area padding'ini örtük olarak
+      // devralır (SliverAppBar'lı gövdede üstte boşluk yaratır) — sıfırla.
+      padding: EdgeInsets.zero,
       physics: const NeverScrollableScrollPhysics(),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
@@ -50,15 +54,19 @@ class SystemBoardsGrid extends StatelessWidget {
         final List<ScreenshotEntry> categoryEntries = entries
             .where((entry) => entry.category == category)
             .toList();
-        return FadeInUp(
-          delay: boardStaggerStep * index,
-          child: BoardTile(
-            icon: category.icon,
-            label: category.label(l10n),
-            count: categoryEntries.length,
-            covers: boardCovers(repo, categoryEntries),
-            openBuilder: (context) =>
-                BoardDetailScreen.category(category: category),
+        // Analiz gölgelerinin uçuş hedefi olarak katmana kaydolur.
+        return KeyedSubtree(
+          key: CategoryFlyScope.of(context)?.keyFor(category),
+          child: FadeInUp(
+            delay: boardStaggerStep * index,
+            child: BoardTile(
+              icon: category.icon,
+              label: category.label(l10n),
+              count: categoryEntries.length,
+              covers: boardCovers(repo, categoryEntries),
+              openBuilder: (context) =>
+                  BoardDetailScreen.category(category: category),
+            ),
           ),
         );
       },

@@ -7,8 +7,10 @@ import '../../../core/constants/ui_constants.dart';
 import '../../../core/l10n/l10n_extension.dart';
 import '../../../core/router/app_router.dart';
 import '../../../core/services/entitlement_service.dart';
+import '../../../core/services/haptic_service.dart';
 import '../providers/analysis_queue_provider.dart';
 import 'analyze_hero_button.dart';
+import 'category_fly_layer.dart';
 
 class AnalysisBanner extends ConsumerWidget {
   const AnalysisBanner({super.key, required this.pendingCount});
@@ -16,45 +18,79 @@ class AnalysisBanner extends ConsumerWidget {
   /// Galerideki analiz edilmemiş screenshot sayısı.
   final int pendingCount;
 
+  /// Tur sonu geçişlerinde haptic geri bildirim.
+  void _onStatusChanged(AnalysisQueueState? previous, AnalysisQueueState next) {
+    if (previous?.status == next.status) return;
+    switch (next.status) {
+      case AnalysisQueueStatus.completed:
+        Haptics.success();
+      case AnalysisQueueStatus.failed:
+        Haptics.warning();
+      case AnalysisQueueStatus.idle:
+      case AnalysisQueueStatus.running:
+      case AnalysisQueueStatus.limitReached:
+      case AnalysisQueueStatus.dailyCapReached:
+        // limitReached'in kutlaması milestone sayfasından gelir.
+        break;
+    }
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    ref.listen(analysisQueueProvider, _onStatusChanged);
     final AnalysisQueueState queue = ref.watch(analysisQueueProvider);
 
-    // Boşta bekleyen varsa banner yerine hero buton gösterilir (kendi
-    // stilini taşır, secondaryContainer kabına girmez).
+    // Boşta bekleyen varsa banner yerine hero buton gösterilir; analiz
+    // başlayınca buton aynı yerde ilerleme kartına dönüşür (AnimatedSwitcher).
+    final Widget child;
     if (queue.status == AnalysisQueueStatus.idle) {
-      return pendingCount > 0
+      child = pendingCount > 0
           ? AnalyzeHeroButton(pendingCount: pendingCount)
           : const SizedBox.shrink();
+    } else {
+      final Widget content = switch (queue.status) {
+        AnalysisQueueStatus.idle => const SizedBox.shrink(),
+        AnalysisQueueStatus.running => _RunningContent(queue: queue),
+        AnalysisQueueStatus.completed => _CompletedContent(queue: queue),
+        AnalysisQueueStatus.failed => const _FailedContent(),
+        AnalysisQueueStatus.limitReached => _LimitContent(done: queue.done),
+        AnalysisQueueStatus.dailyCapReached => const _DailyCapContent(),
+      };
+
+      final ColorScheme scheme = Theme.of(context).colorScheme;
+      child = Container(
+        // Uçan gölgelerin başlangıç noktası: koşarken kart kaynağa bağlanır.
+        // Yalnız running'de bağlanır ki switcher geçişinde anahtar çakışmasın.
+        key: queue.isRunning
+            ? CategoryFlyScope.of(context)?.sourceKey
+            : null,
+        margin: const EdgeInsets.only(bottom: AppSpacing.sm),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.md,
+          vertical: AppSpacing.sm,
+        ),
+        decoration: BoxDecoration(
+          color: scheme.secondaryContainer,
+          borderRadius: BorderRadius.circular(AppRadius.md),
+        ),
+        child: content,
+      );
     }
 
-    final Widget content = switch (queue.status) {
-      AnalysisQueueStatus.idle => const SizedBox.shrink(),
-      AnalysisQueueStatus.running => _RunningContent(queue: queue),
-      AnalysisQueueStatus.completed => _CompletedContent(queue: queue),
-      AnalysisQueueStatus.failed => const _FailedContent(),
-      AnalysisQueueStatus.limitReached => _LimitContent(done: queue.done),
-      AnalysisQueueStatus.dailyCapReached => const _DailyCapContent(),
-    };
-
-    final ColorScheme scheme = Theme.of(context).colorScheme;
-    return Container(
-      margin: const EdgeInsets.only(bottom: AppSpacing.sm),
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.md,
-        vertical: AppSpacing.sm,
+    return AnimatedSwitcher(
+      duration: AppDurations.medium,
+      switchInCurve: Curves.easeOutCubic,
+      switchOutCurve: Curves.easeInCubic,
+      child: KeyedSubtree(
+        key: ValueKey<AnalysisQueueStatus>(queue.status),
+        child: child,
       ),
-      decoration: BoxDecoration(
-        color: scheme.secondaryContainer,
-        borderRadius: BorderRadius.circular(AppRadius.md),
-      ),
-      child: content,
     );
   }
 }
 
-/// Koşan kuyruk: ilerleme çubuğu + sayaç + iptal; satıra dokununca
-/// tam ekran analiz deneyimine geçilir.
+/// Koşan kuyruk: hero butonun yerinde beliren ilerleme kartı — halka,
+/// başlık, sayaç ve iptal.
 class _RunningContent extends ConsumerWidget {
   const _RunningContent({required this.queue});
 
@@ -63,35 +99,46 @@ class _RunningContent extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final int processed = queue.done + queue.failed;
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTap: () => context.push(AppRoutes.analysis),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  context.l10n.analysisProgress(processed, queue.total),
-                  style: Theme.of(context).textTheme.bodyMedium,
-                ),
-                const SizedBox(height: AppSpacing.sm),
-                LinearProgressIndicator(
-                  value: queue.total == 0 ? null : processed / queue.total,
-                  borderRadius: BorderRadius.circular(AppRadius.sm),
-                ),
-              ],
-            ),
+    return Row(
+      children: [
+        SizedBox(
+          width: 36,
+          height: 36,
+          child: CircularProgressIndicator(
+            strokeWidth: 4,
+            value: queue.total == 0 ? null : processed / queue.total,
           ),
-          const SizedBox(width: AppSpacing.sm),
-          IconButton(
-            tooltip: context.l10n.analysisCancelAction,
-            icon: const Icon(Icons.close),
-            onPressed: () => ref.read(analysisQueueProvider.notifier).cancel(),
+        ),
+        const SizedBox(width: AppSpacing.md),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                context.l10n.analysisExperienceTitle,
+                style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              Text(
+                context.l10n.analysisProgress(processed, queue.total),
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
+        ),
+        const SizedBox(width: AppSpacing.sm),
+        IconButton(
+          tooltip: context.l10n.analysisCancelAction,
+          icon: const Icon(Icons.close),
+          onPressed: () {
+            Haptics.warning();
+            ref.read(analysisQueueProvider.notifier).cancel();
+          },
+        ),
+      ],
     );
   }
 }

@@ -36,6 +36,9 @@ class CustomBoardsGrid extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return GridView.builder(
       shrinkWrap: true,
+      // shrinkWrap grid, MediaQuery safe-area padding'ini örtük olarak
+      // devralır (SliverAppBar'lı gövdede üstte boşluk yaratır) — sıfırla.
+      padding: EdgeInsets.zero,
       physics: const NeverScrollableScrollPhysics(),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,

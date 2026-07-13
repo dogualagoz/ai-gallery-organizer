@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:liquid_glass_renderer/liquid_glass_renderer.dart';
 
-import '../../features/analysis/analysis_experience_screen.dart';
 import '../../features/analysis/milestone_screen.dart';
 import '../../features/detail/detail_screen.dart';
 import '../../features/home/home_screen.dart';
@@ -28,7 +27,6 @@ abstract final class AppRoutes {
   static const String sorting = '/sorting';
   static const String paywall = '/paywall';
   static const String analysisMilestone = '/analysis-milestone';
-  static const String analysis = '/analysis';
 
   /// Paywall query parametresi: açılışta paket bölümüne kaydır.
   static const String paywallFocusQuery = 'focus';
@@ -101,15 +99,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.search,
         builder: (context, state) => const SearchScreen(),
-      ),
-      GoRoute(
-        path: AppRoutes.analysis,
-        // Analiz deneyimi tam ekran modal; kuyruk global olduğundan ekran
-        // kapatılsa da analiz arka planda sürer.
-        pageBuilder: (context, state) => const MaterialPage(
-          fullscreenDialog: true,
-          child: AnalysisExperienceScreen(),
-        ),
       ),
       GoRoute(
         path: AppRoutes.analysisMilestone,

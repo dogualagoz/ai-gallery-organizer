@@ -14,6 +14,7 @@ import '../../core/widgets/pro_badge.dart';
 import '../analysis/providers/analysis_queue_provider.dart';
 import '../analysis/providers/auto_sort_provider.dart';
 import '../analysis/widgets/analysis_banner.dart';
+import '../analysis/widgets/category_fly_layer.dart';
 import '../analysis/widgets/auto_sort_chip.dart';
 import '../boards/providers/board_provider.dart';
 import '../boards/widgets/custom_boards_grid.dart';
@@ -32,57 +33,35 @@ class HomeScreen extends ConsumerWidget {
     // analiz kuyruğunu otomatik tetikler.
     ref.watch(autoSortControllerProvider);
     _listenForMilestone(context, ref);
-    final l10n = context.l10n;
     final gallery = ref.watch(galleryProvider);
-    final bool isPro = ref.watch(
-      entitlementProvider.select((state) => state.isPro),
-    );
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(l10n.galleryTitle),
-            if (isPro) ...[
-              const SizedBox(width: AppSpacing.sm),
-              const ProBadge(),
-            ],
-          ],
-        ),
-        // Pro'ya özel incelikli gradient — premium hissi sürekli ama sessiz.
-        flexibleSpace: isPro
-            ? DecoratedBox(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      Theme.of(context).colorScheme.primaryContainer
-                          .withValues(alpha: AppOpacities.proAppBarTint),
-                      Colors.transparent,
-                    ],
-                  ),
-                ),
-                child: const SizedBox.expand(),
-              )
-            : null,
-        actions: [
-          IconButton(
-            tooltip: l10n.gallerySyncTooltip,
-            icon: const Icon(Icons.sync),
-            onPressed: () => _syncWithFeedback(context, ref),
-          ),
-        ],
+    // Veri varken app bar liste içinde (SliverAppBar) — aşağı kayınca
+    // içerikle birlikte gider. Boş/hata/yükleme durumlarında kaydırma
+    // olmadığı için klasik sabit app bar kullanılır.
+    return gallery.when(
+      loading: () => Scaffold(
+        appBar: _classicAppBar(context, ref),
+        body: const Center(child: CircularProgressIndicator()),
       ),
-      body: gallery.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) =>
-            GalleryEmptyState(onSync: () => _syncWithFeedback(context, ref)),
-        data: (entries) => entries.isEmpty
-            ? GalleryEmptyState(onSync: () => _syncWithFeedback(context, ref))
-            : _HomeContent(entries: entries),
+      error: (error, _) => Scaffold(
+        appBar: _classicAppBar(context, ref),
+        body: GalleryEmptyState(onSync: () => _syncWithFeedback(context, ref)),
       ),
+      data: (entries) => entries.isEmpty
+          ? Scaffold(
+              appBar: _classicAppBar(context, ref),
+              body: GalleryEmptyState(
+                onSync: () => _syncWithFeedback(context, ref),
+              ),
+            )
+          : Scaffold(body: _HomeContent(entries: entries)),
+    );
+  }
+
+  AppBar _classicAppBar(BuildContext context, WidgetRef ref) {
+    return AppBar(
+      title: const _HomeTitle(),
+      actions: [_SyncAction(onSync: () => _syncWithFeedback(context, ref))],
     );
   }
 
@@ -103,7 +82,10 @@ class HomeScreen extends ConsumerWidget {
   }
 
   /// Eşitlemeyi çalıştırır; hata olursa kullanıcıya snackbar gösterir.
-  Future<void> _syncWithFeedback(BuildContext context, WidgetRef ref) async {
+  static Future<void> _syncWithFeedback(
+    BuildContext context,
+    WidgetRef ref,
+  ) async {
     final String failureMessage = context.l10n.gallerySyncFailed;
     try {
       await ref.read(galleryProvider.notifier).sync();
@@ -114,6 +96,44 @@ class HomeScreen extends ConsumerWidget {
         context,
       ).showSnackBar(SnackBar(content: Text(failureMessage)));
     }
+  }
+}
+
+/// App bar başlığı: galeri adı + Pro rozetinden oluşan satır.
+class _HomeTitle extends ConsumerWidget {
+  const _HomeTitle();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final bool isPro = ref.watch(
+      entitlementProvider.select((state) => state.isPro),
+    );
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(context.l10n.galleryTitle),
+        if (isPro) ...[
+          const SizedBox(width: AppSpacing.sm),
+          const ProBadge(),
+        ],
+      ],
+    );
+  }
+}
+
+/// Eşitleme aksiyon butonu.
+class _SyncAction extends StatelessWidget {
+  const _SyncAction({required this.onSync});
+
+  final VoidCallback onSync;
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+      tooltip: context.l10n.gallerySyncTooltip,
+      icon: const Icon(Icons.sync),
+      onPressed: onSync,
+    );
   }
 }
 
@@ -128,41 +148,72 @@ class _HomeContent extends ConsumerWidget {
     final repo = ref.watch(screenshotRepositoryProvider);
     final bool isPro = ref.watch(entitlementProvider).isPro;
 
-    return RefreshIndicator(
-      onRefresh: () => ref.read(galleryProvider.notifier).sync(),
-      child: CustomScrollView(
-        slivers: [
-          SliverPadding(
-            padding: const EdgeInsets.fromLTRB(
-              AppSpacing.md,
-              AppSpacing.xs,
-              AppSpacing.md,
-              0,
+    // CategoryFlyLayer: analiz gölgeleri ilerleme kartından kategori
+    // kartlarına bu katmanın koordinat uzayında uçar.
+    return CategoryFlyLayer(
+      child: RefreshIndicator(
+        onRefresh: () => ref.read(galleryProvider.notifier).sync(),
+        child: CustomScrollView(
+          slivers: [
+            SliverAppBar(
+              // Sabitlenmez: aşağı kaydırınca içerikle birlikte gider.
+              pinned: false,
+              title: const _HomeTitle(),
+              // Pro'ya özel incelikli gradient — premium hissi ama sessiz.
+              flexibleSpace: isPro
+                  ? DecoratedBox(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            Theme.of(context).colorScheme.primaryContainer
+                                .withValues(alpha: AppOpacities.proAppBarTint),
+                            Colors.transparent,
+                          ],
+                        ),
+                      ),
+                      child: const SizedBox.expand(),
+                    )
+                  : null,
+              actions: [
+                _SyncAction(
+                  onSync: () => HomeScreen._syncWithFeedback(context, ref),
+                ),
+              ],
             ),
-            sliver: SliverToBoxAdapter(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  if (!isPro) const AutoSortChip(),
-                  AnalysisBanner(
-                    pendingCount: entries
-                        .where((entry) => entry.isPending)
-                        .length,
-                  ),
-                  const SizedBox(height: AppSpacing.sm),
-                  _BoardsSection(entries: entries, repo: repo),
-                  const SizedBox(height: AppSpacing.lg),
-                  Text(
-                    context.l10n.homeRecentsSection,
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
-                  const SizedBox(height: AppSpacing.xs),
-                ],
+            SliverPadding(
+              padding: const EdgeInsets.fromLTRB(
+                AppSpacing.md,
+                AppSpacing.xs,
+                AppSpacing.md,
+                0,
+              ),
+              sliver: SliverToBoxAdapter(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (!isPro) const AutoSortChip(),
+                    AnalysisBanner(
+                      pendingCount: entries
+                          .where((entry) => entry.isPending)
+                          .length,
+                    ),
+                    const SizedBox(height: AppSpacing.sm),
+                    _BoardsSection(entries: entries, repo: repo),
+                    const SizedBox(height: AppSpacing.lg),
+                    Text(
+                      context.l10n.homeRecentsSection,
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                    const SizedBox(height: AppSpacing.xs),
+                  ],
+                ),
               ),
             ),
-          ),
-          _RecentsGrid(entries: entries, repo: repo),
-        ],
+            _RecentsGrid(entries: entries, repo: repo),
+          ],
+        ),
       ),
     );
   }

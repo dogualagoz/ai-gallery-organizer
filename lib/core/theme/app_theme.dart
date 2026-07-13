@@ -81,12 +81,13 @@ abstract final class AppTheme {
       colorScheme: scheme,
       scaffoldBackgroundColor: scheme.surfaceContainer,
     );
+    // iOS'ta San Francisco tipografisini kullan (Material default Roboto'yu ezer).
+    final TextTheme textTheme =
+        Typography.material2021(platform: TargetPlatform.iOS).englishLike
+            .apply(bodyColor: scheme.onSurface, displayColor: scheme.onSurface);
 
     return base.copyWith(
-      // iOS'ta San Francisco tipografisini kullan (Material default Roboto'yu ezer).
-      textTheme: Typography.material2021(platform: TargetPlatform.iOS)
-          .englishLike
-          .apply(bodyColor: scheme.onSurface, displayColor: scheme.onSurface),
+      textTheme: textTheme,
       // Not: push geçişleri iOS'ta framework default'u olan Cupertino
       // (sağdan kayma + interaktif geri swipe) ile gelir; ek ayar gerekmez.
       appBarTheme: AppBarTheme(
@@ -95,6 +96,10 @@ abstract final class AppTheme {
         elevation: 0,
         scrolledUnderElevation: 0,
         centerTitle: false,
+        titleTextStyle: textTheme.titleLarge?.copyWith(
+          fontWeight: FontWeight.w700,
+          color: scheme.onSurface,
+        ),
       ),
       cardTheme: CardThemeData(
         color: scheme.surface,
