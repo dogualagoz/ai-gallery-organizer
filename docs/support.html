@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Snaply — Destek / Support</title>
+<style>
+  :root {
+    --iris: #5457D6;
+    --violet: #7E6BD9;
+    --bg: #F5F5FB;
+    --text: #1C1B29;
+    --muted: #5B5A6E;
+    --card: #FFFFFF;
+    --border: #E4E3F1;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #14131E;
+      --text: #EDEDF5;
+      --muted: #A6A4BE;
+      --card: #1D1C2B;
+      --border: #2C2B3E;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    line-height: 1.6;
+  }
+  .wrap {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 2.5rem 1.25rem 4rem;
+  }
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-weight: 700;
+    font-size: 1.15rem;
+  }
+  .brand .dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--iris), var(--violet));
+  }
+  .lang-toggle {
+    display: flex;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 4px;
+    gap: 4px;
+  }
+  .lang-toggle button {
+    border: none;
+    background: transparent;
+    padding: 0.4rem 0.9rem;
+    border-radius: 999px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--muted);
+    cursor: pointer;
+  }
+  .lang-toggle button.active {
+    background: linear-gradient(135deg, var(--iris), var(--violet));
+    color: white;
+  }
+  h1 {
+    font-size: 1.6rem;
+    margin-bottom: 0.25rem;
+  }
+  .updated {
+    color: var(--muted);
+    font-size: 0.85rem;
+    margin-bottom: 2rem;
+  }
+  section {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 1rem;
+  }
+  h2 {
+    font-size: 1.05rem;
+    margin-top: 0;
+    margin-bottom: 0.6rem;
+    color: var(--iris);
+  }
+  p, li { color: var(--text); font-size: 0.95rem; }
+  ul { margin: 0.4rem 0; padding-left: 1.2rem; }
+  a { color: var(--iris); }
+  .contact-btn {
+    display: inline-block;
+    margin-top: 0.5rem;
+    padding: 0.7rem 1.4rem;
+    border-radius: 999px;
+    background: linear-gradient(135deg, var(--iris), var(--violet));
+    color: white;
+    font-weight: 600;
+    text-decoration: none;
+  }
+  .lang-block[hidden] { display: none; }
+  footer {
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.8rem;
+    margin-top: 2.5rem;
+  }
+  footer a { color: var(--muted); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand"><span class="dot"></span> Snaply</div>
+    <div class="lang-toggle">
+      <button id="btn-tr" class="active" onclick="setLang('tr')">Türkçe</button>
+      <button id="btn-en" onclick="setLang('en')">English</button>
+    </div>
+  </header>
+
+  <div id="lang-tr" class="lang-block">
+    <h1>Destek</h1>
+    <p class="updated">Snaply — Yardım ve İletişim</p>
+
+    <section>
+      <h2>Snaply nedir?</h2>
+      <p>Snaply, iOS galerinizdeki ekran görüntülerini yapay zeka ile otomatik kategorilere ayıran, içindeki metni okuyan (OCR) ve tüm kütüphanenizi aranabilir yapan bir uygulamadır. Kaydırarak hızlı temizlik ve kategori bazlı panolar sunar.</p>
+    </section>
+
+    <section>
+      <h2>Bize ulaşın</h2>
+      <p>Sorunuz, hata bildiriminiz veya öneriniz mi var? Genellikle 1–2 iş günü içinde dönüş yapıyoruz.</p>
+      <a class="contact-btn" href="mailto:dogualagoz@icloud.com?subject=Snaply%20Destek">E-posta gönder</a>
+      <p style="margin-top:0.8rem;"><a href="mailto:dogualagoz@icloud.com">dogualagoz@icloud.com</a></p>
+    </section>
+
+    <section>
+      <h2>Sık sorulan sorular</h2>
+      <p><strong>Snaply neden galeri iznine ihtiyaç duyuyor?</strong><br>Ekran görüntülerinizi okuyup kategorilere ayırabilmek için galeriye erişmesi gerekir. Snaply yalnızca ekran görüntüleriyle çalışır ve görselleriniz cihazınız dışında saklanmaz.</p>
+      <p><strong>Verilerim güvende mi?</strong><br>Analiz sonuçları yalnızca cihazınızda, AES ile şifrelenmiş yerel bir veritabanında tutulur. Snaply'nin kendi sunucusu yoktur ve kullanıcı hesabı istemez.</p>
+      <p><strong>Aboneliğimi nasıl yönetir veya iptal ederim?</strong><br>Abonelikler Apple üzerinden yönetilir: iPhone'da <em>Ayarlar → [adınız] → Abonelikler</em> yolundan Snaply'yi bulup değiştirebilir veya iptal edebilirsiniz.</p>
+      <p><strong>Satın almalarımı nasıl geri yüklerim?</strong><br>Uygulama içindeki paywall ekranında <em>"Satın Almaları Geri Yükle"</em> seçeneğini kullanın.</p>
+      <p><strong>Bir ekran görüntüsü yanlış kategoriye düştü, ne yapmalıyım?</strong><br>İlgili görüntüyü açıp doğru panoya taşıyabilirsiniz. Geri bildiriminiz gelecekteki sıralamaları da iyileştirir.</p>
+    </section>
+
+    <section>
+      <h2>Yasal</h2>
+      <ul>
+        <li><a href="privacy.html">Gizlilik Politikası</a></li>
+        <li><a href="terms.html">Kullanım Koşulları</a></li>
+      </ul>
+    </section>
+  </div>
+
+  <div id="lang-en" class="lang-block" hidden>
+    <h1>Support</h1>
+    <p class="updated">Snaply — Help &amp; Contact</p>
+
+    <section>
+      <h2>What is Snaply?</h2>
+      <p>Snaply automatically sorts the screenshots in your iOS photo library using AI, reads the text inside them (OCR), and makes your entire library searchable. It offers swipe-to-clean and category-based boards.</p>
+    </section>
+
+    <section>
+      <h2>Contact us</h2>
+      <p>Have a question, bug report, or suggestion? We usually reply within 1–2 business days.</p>
+      <a class="contact-btn" href="mailto:dogualagoz@icloud.com?subject=Snaply%20Support">Send email</a>
+      <p style="margin-top:0.8rem;"><a href="mailto:dogualagoz@icloud.com">dogualagoz@icloud.com</a></p>
+    </section>
+
+    <section>
+      <h2>Frequently asked questions</h2>
+      <p><strong>Why does Snaply need photo library access?</strong><br>It needs access to read your screenshots and sort them into categories. Snaply only works with screenshots, and your images are never stored outside your device.</p>
+      <p><strong>Is my data safe?</strong><br>Analysis results are kept only on your device, in a local database encrypted with AES. Snaply has no servers of its own and requires no account.</p>
+      <p><strong>How do I manage or cancel my subscription?</strong><br>Subscriptions are managed through Apple: on your iPhone go to <em>Settings → [your name] → Subscriptions</em>, find Snaply, and change or cancel it.</p>
+      <p><strong>How do I restore my purchases?</strong><br>Use the <em>"Restore Purchases"</em> option on the paywall screen inside the app.</p>
+      <p><strong>A screenshot landed in the wrong category — what should I do?</strong><br>Open the image and move it to the correct board. Your feedback helps improve future sorting.</p>
+    </section>
+
+    <section>
+      <h2>Legal</h2>
+      <ul>
+        <li><a href="privacy.html">Privacy Policy</a></li>
+        <li><a href="terms.html">Terms of Use</a></li>
+      </ul>
+    </section>
+  </div>
+
+  <footer>© 2026 Snaply</footer>
+</div>
+
+<script>
+  function setLang(lang) {
+    document.getElementById('lang-tr').hidden = lang !== 'tr';
+    document.getElementById('lang-en').hidden = lang !== 'en';
+    document.getElementById('btn-tr').classList.toggle('active', lang === 'tr');
+    document.getElementById('btn-en').classList.toggle('active', lang === 'en');
+    document.documentElement.lang = lang;
+  }
+</script>
+</body>
+</html>
