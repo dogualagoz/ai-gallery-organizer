@@ -48,6 +48,16 @@ class OnboardingCompleteNotifier extends Notifier<bool> {
         .read(sharedPreferencesProvider)
         .setBool(PrefKeys.onboardingComplete, true);
   }
+
+  /// Yalnız debug ayarlar ekranından çağrılır: bayrağı sıfırlar, router
+  /// redirect'i otomatik olarak onboarding'e yönlendirir (store ekran
+  /// görüntüleri için akışı baştan izlemeyi sağlar).
+  Future<void> resetForDebug() async {
+    state = false;
+    await ref
+        .read(sharedPreferencesProvider)
+        .setBool(PrefKeys.onboardingComplete, false);
+  }
 }
 
 /// Kullanıcının tema tercihi (açık default).
@@ -78,10 +88,9 @@ class ThemeModeNotifier extends Notifier<ThemeMode> {
 
 /// Pro kullanıcının auto-sort tercihi (default açık). Free'de anlamsız —
 /// entitlement kontrolü ayrı yapılır, bu yalnız kullanıcı tercihini tutar.
-final autoSortEnabledProvider =
-    NotifierProvider<AutoSortEnabledNotifier, bool>(
-      AutoSortEnabledNotifier.new,
-    );
+final autoSortEnabledProvider = NotifierProvider<AutoSortEnabledNotifier, bool>(
+  AutoSortEnabledNotifier.new,
+);
 
 class AutoSortEnabledNotifier extends Notifier<bool> {
   @override

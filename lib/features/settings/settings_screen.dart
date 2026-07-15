@@ -172,17 +172,14 @@ class _ProStatusCard extends ConsumerWidget {
                           ),
                           style: Theme.of(context).textTheme.bodySmall
                               ?.copyWith(
-                                color: scheme.onPrimary.withValues(
-                                  alpha: 0.85,
-                                ),
+                                color: scheme.onPrimary.withValues(alpha: 0.85),
                               ),
                         ),
                       ],
                     ],
                   ),
                 ),
-                if (!isPro)
-                  Icon(Icons.chevron_right, color: scheme.onPrimary),
+                if (!isPro) Icon(Icons.chevron_right, color: scheme.onPrimary),
               ],
             ),
           ),
@@ -204,7 +201,10 @@ class _ThemeSection extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(l10n.settingsTheme, style: Theme.of(context).textTheme.titleMedium),
+        Text(
+          l10n.settingsTheme,
+          style: Theme.of(context).textTheme.titleMedium,
+        ),
         const SizedBox(height: AppSpacing.sm),
         SegmentedButton<ThemeMode>(
           segments: [
@@ -290,9 +290,8 @@ class _AutoSortSwitchTile extends ConsumerWidget {
       title: Text(title, style: Theme.of(context).textTheme.bodyLarge),
       subtitle: Text(
         subtitle,
-        style: Theme.of(
-          context,
-        ).textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant),
+        style: Theme.of(context).textTheme.bodySmall
+            ?.copyWith(color: scheme.onSurfaceVariant),
       ),
       value: enabled,
       onChanged: (value) =>
@@ -367,14 +366,19 @@ class _DebugSection extends ConsumerWidget {
             _SettingsTile(
               icon: Icons.logout,
               label: 'Exit Pro (debug)',
-              onTap: () =>
-                  ref.read(entitlementProvider.notifier).setPro(false),
+              onTap: () => ref.read(entitlementProvider.notifier).setPro(false),
             ),
             _SettingsTile(
               icon: Icons.restart_alt,
               label: 'Reset analysis usage & credits (debug)',
               onTap: () =>
                   ref.read(entitlementProvider.notifier).resetUsageForDebug(),
+            ),
+            _SettingsTile(
+              icon: Icons.replay,
+              label: 'Show onboarding again (debug)',
+              onTap: () =>
+                  ref.read(onboardingCompleteProvider.notifier).resetForDebug(),
             ),
           ],
         ),
