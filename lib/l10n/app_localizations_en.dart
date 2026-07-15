@@ -43,6 +43,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsThemeSystem => 'System';
 
   @override
+  String get settingsLanguage => 'Language';
+
+  @override
+  String get settingsLanguageSystem => 'System';
+
+  @override
+  String get settingsLanguageEnglish => 'English';
+
+  @override
+  String get settingsLanguageTurkish => 'Turkish';
+
+  @override
   String get autoSortPausedChip => 'Auto-sort paused — upgrade to Pro';
 
   @override

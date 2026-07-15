@@ -25,6 +25,7 @@ abstract final class PrefKeys {
   static const String analysisCredits = 'analysis_credits';
   static const String deliveredPackTxIds = 'delivered_pack_tx_ids';
   static const String autoSortEnabled = 'auto_sort_enabled';
+  static const String appLocale = 'app_locale';
 }
 
 /// Onboarding tamamlandı bilgisi (router redirect bunu izler).
@@ -106,5 +107,30 @@ class AutoSortEnabledNotifier extends Notifier<bool> {
     await ref
         .read(sharedPreferencesProvider)
         .setBool(PrefKeys.autoSortEnabled, enabled);
+  }
+}
+
+/// Kullanıcının uygulama dili tercihi. `null` = sistem dilini takip et.
+final localeProvider = NotifierProvider<LocaleNotifier, Locale?>(
+  LocaleNotifier.new,
+);
+
+class LocaleNotifier extends Notifier<Locale?> {
+  @override
+  Locale? build() {
+    final String? stored = ref
+        .read(sharedPreferencesProvider)
+        .getString(PrefKeys.appLocale);
+    return stored == null ? null : Locale(stored);
+  }
+
+  Future<void> setLocale(Locale? locale) async {
+    state = locale;
+    final prefs = ref.read(sharedPreferencesProvider);
+    if (locale == null) {
+      await prefs.remove(PrefKeys.appLocale);
+    } else {
+      await prefs.setString(PrefKeys.appLocale, locale.languageCode);
+    }
   }
 }

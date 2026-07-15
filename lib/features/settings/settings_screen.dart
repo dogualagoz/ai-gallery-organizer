@@ -56,6 +56,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           const SizedBox(height: AppSpacing.lg),
           const _ThemeSection(),
           const SizedBox(height: AppSpacing.lg),
+          const _LanguageSection(),
+          const SizedBox(height: AppSpacing.lg),
           _AutoSortSection(isPro: isPro),
           const SizedBox(height: AppSpacing.lg),
           _PurchasesSection(
@@ -228,6 +230,49 @@ class _ThemeSection extends ConsumerWidget {
           onSelectionChanged: (selection) {
             Haptics.tap();
             ref.read(themeModeProvider.notifier).setMode(selection.first);
+          },
+        ),
+      ],
+    );
+  }
+}
+
+/// Dil bölümü: sistem/İngilizce/Türkçe seçimi.
+class _LanguageSection extends ConsumerWidget {
+  const _LanguageSection();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
+    final Locale? locale = ref.watch(localeProvider);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          l10n.settingsLanguage,
+          style: Theme.of(context).textTheme.titleMedium,
+        ),
+        const SizedBox(height: AppSpacing.sm),
+        SegmentedButton<Locale?>(
+          segments: [
+            ButtonSegment(
+              value: null,
+              label: Text(l10n.settingsLanguageSystem),
+            ),
+            ButtonSegment(
+              value: const Locale('en'),
+              label: Text(l10n.settingsLanguageEnglish),
+            ),
+            ButtonSegment(
+              value: const Locale('tr'),
+              label: Text(l10n.settingsLanguageTurkish),
+            ),
+          ],
+          selected: {locale},
+          onSelectionChanged: (selection) {
+            Haptics.tap();
+            ref.read(localeProvider.notifier).setLocale(selection.first);
           },
         ),
       ],

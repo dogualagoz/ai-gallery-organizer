@@ -43,6 +43,18 @@ class AppLocalizationsTr extends AppLocalizations {
   String get settingsThemeSystem => 'Sistem';
 
   @override
+  String get settingsLanguage => 'Dil';
+
+  @override
+  String get settingsLanguageSystem => 'Sistem';
+
+  @override
+  String get settingsLanguageEnglish => 'İngilizce';
+
+  @override
+  String get settingsLanguageTurkish => 'Türkçe';
+
+  @override
   String get autoSortPausedChip =>
       'Otomatik düzenleme duraklatıldı — Pro\'ya geç';
 
