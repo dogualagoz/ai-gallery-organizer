@@ -31,7 +31,6 @@
   "onboardingTitle3": "Allow photo access",
   "onboardingBody3": "To find and organize your screenshots, Snaply needs access to your photo library. You stay in control.",
   "onboardingContinue": "Continue",
-  "onboardingStart": "Allow and start",
   "permissionDeniedTitle": "Photo access needed",
   "permissionDeniedBody": "Snaply can't see your screenshots without permission. You can enable access in Settings.",
   "openSettings": "Open Settings",

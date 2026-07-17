@@ -284,12 +284,6 @@ abstract class AppLocalizations {
   /// **'Continue'**
   String get onboardingContinue;
 
-  /// No description provided for @onboardingStart.
-  ///
-  /// In en, this message translates to:
-  /// **'Allow and start'**
-  String get onboardingStart;
-
   /// No description provided for @permissionDeniedTitle.
   ///
   /// In en, this message translates to:

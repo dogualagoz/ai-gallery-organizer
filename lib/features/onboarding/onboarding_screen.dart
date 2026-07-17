@@ -84,11 +84,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
               ),
               child: FilledButton(
                 onPressed: _requestingPermission ? null : _onButtonPressed,
-                child: Text(
-                  _currentPage == _pageCount - 1
-                      ? l10n.onboardingStart
-                      : l10n.onboardingContinue,
-                ),
+                child: Text(l10n.onboardingContinue),
               ),
             ),
           ],

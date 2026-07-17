@@ -107,9 +107,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get onboardingContinue => 'Continue';
 
   @override
-  String get onboardingStart => 'Allow and start';
-
-  @override
   String get permissionDeniedTitle => 'Photo access needed';
 
   @override

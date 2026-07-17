@@ -109,9 +109,6 @@ class AppLocalizationsTr extends AppLocalizations {
   String get onboardingContinue => 'Devam';
 
   @override
-  String get onboardingStart => 'İzin ver ve başla';
-
-  @override
   String get permissionDeniedTitle => 'Fotoğraf erişimi gerekli';
 
   @override

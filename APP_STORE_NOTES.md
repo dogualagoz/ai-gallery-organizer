@@ -101,6 +101,12 @@ IN-APP PURCHASES:
 
 No account or login is required. The device needs an internet connection
 for the AI analysis step only.
+
+SUBMISSION 7b737aa9 FIXES (2026-07-17):
+- 3.1.2(c): Added functional Terms of Use (EULA) and Privacy Policy links to
+  the App Store Description (see Section 5 of this doc).
+- 5.1.1(iv): Onboarding's final-page button now reads "Continue" (was "Allow
+  and start") so it no longer implies granting the permission itself.
 ```
 
 ## 5. Mağaza Metinleri
@@ -120,6 +126,9 @@ for the AI analysis step only.
 > • GİZLİLİK ODAKLI — Görsellerin yalnızca etiketleme için analiz edilir, hiçbir sunucuda saklanmaz; sonuçlar cihazında şifreli tutulur. Hesap gerekmez.
 >
 > Snaply Pro ile sınırsız AI analizi, arama, özel board'lar ve otomatik sıralamanın kilidini aç. Yıllık planda 7 gün ücretsiz deneme. Abonelik istemeyenler için 500/1000'lik analiz paketleri de var.
+>
+> Kullanım Şartları: https://dogualagoz.github.io/ai-gallery-organizer/terms.html
+> Gizlilik Politikası: https://dogualagoz.github.io/ai-gallery-organizer/privacy.html
 
 ### EN
 - **Name:** Snaply — Screenshot Organizer
@@ -136,6 +145,9 @@ for the AI analysis step only.
 > • PRIVACY FIRST — Images are analyzed only to label them and are never stored on any server; results stay encrypted on your device. No account needed.
 >
 > Unlock unlimited AI analysis, search, custom boards and auto-sort with Snaply Pro. Yearly plan includes a 7-day free trial. Prefer no subscription? Grab a 500 or 1000 analysis pack.
+>
+> Terms of Use: https://dogualagoz.github.io/ai-gallery-organizer/terms.html
+> Privacy Policy: https://dogualagoz.github.io/ai-gallery-organizer/privacy.html
 
 ## 6. Firebase: Free (Spark) plandan çıkmak GEREKİYOR
 
