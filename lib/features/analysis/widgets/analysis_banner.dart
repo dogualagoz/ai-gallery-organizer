@@ -2,15 +2,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:photo_manager/photo_manager.dart';
+import 'package:photo_manager_image_provider/photo_manager_image_provider.dart';
 
 import '../../../core/constants/ui_constants.dart';
 import '../../../core/l10n/l10n_extension.dart';
 import '../../../core/router/app_router.dart';
 import '../../../core/services/entitlement_service.dart';
 import '../../../core/services/haptic_service.dart';
+import '../../gallery/data/screenshot_repository.dart';
 import '../providers/analysis_queue_provider.dart';
 import 'analyze_hero_button.dart';
 import 'category_fly_layer.dart';
+
+/// Havuz önizlemesinde gösterilecek en fazla bekleyen thumbnail sayısı.
+const int _maxPoolPreviewItems = 4;
 
 class AnalysisBanner extends ConsumerWidget {
   const AnalysisBanner({super.key, required this.pendingCount});
@@ -58,6 +64,11 @@ class AnalysisBanner extends ConsumerWidget {
       };
 
       final ColorScheme scheme = Theme.of(context).colorScheme;
+      // running'de hero butonla aynı gradyan kullanılır ki AnimatedSwitcher
+      // geçişi "canlı buton → soluk gri kutu" yerine kendi tonunda bir
+      // dönüşüm gibi okunsun (önceki sürümde secondaryContainer arka planla
+      // gradyan arasındaki keskin kontrast "gri flaş" gibi algılanıyordu).
+      final bool isRunning = queue.status == AnalysisQueueStatus.running;
       child = Container(
         // Uçan gölgelerin başlangıç noktası: koşarken kart kaynağa bağlanır.
         // Yalnız running'de bağlanır ki switcher geçişinde anahtar çakışmasın.
@@ -70,7 +81,14 @@ class AnalysisBanner extends ConsumerWidget {
           vertical: AppSpacing.sm,
         ),
         decoration: BoxDecoration(
-          color: scheme.secondaryContainer,
+          gradient: isRunning
+              ? LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [scheme.primary, scheme.tertiary],
+                )
+              : null,
+          color: isRunning ? null : scheme.primaryContainer,
           borderRadius: BorderRadius.circular(AppRadius.md),
         ),
         child: content,
@@ -98,6 +116,7 @@ class _RunningContent extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final ColorScheme scheme = Theme.of(context).colorScheme;
     final int processed = queue.done + queue.failed;
     return Row(
       children: [
@@ -107,6 +126,7 @@ class _RunningContent extends ConsumerWidget {
           child: CircularProgressIndicator(
             strokeWidth: 4,
             value: queue.total == 0 ? null : processed / queue.total,
+            color: scheme.onPrimary,
           ),
         ),
         const SizedBox(width: AppSpacing.md),
@@ -118,27 +138,94 @@ class _RunningContent extends ConsumerWidget {
                 context.l10n.analysisExperienceTitle,
                 style: Theme.of(context).textTheme.titleSmall?.copyWith(
                   fontWeight: FontWeight.w600,
+                  color: scheme.onPrimary,
                 ),
               ),
               Text(
                 context.l10n.analysisProgress(processed, queue.total),
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  color: scheme.onPrimary.withValues(alpha: 0.85),
                 ),
               ),
             ],
           ),
         ),
         const SizedBox(width: AppSpacing.sm),
+        const _PendingPool(),
+        const SizedBox(width: AppSpacing.sm),
         IconButton(
           tooltip: context.l10n.analysisCancelAction,
-          icon: const Icon(Icons.close),
+          icon: Icon(Icons.close, color: scheme.onPrimary),
           onPressed: () {
             Haptics.warning();
             ref.read(analysisQueueProvider.notifier).cancel();
           },
         ),
       ],
+    );
+  }
+}
+
+/// Bu turda henüz analiz edilmemiş birkaç thumbnail'i üst üste binmiş
+/// şekilde gösterir — "havuzdan kategorilere akış" hissini kaynağında verir.
+class _PendingPool extends ConsumerWidget {
+  const _PendingPool();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final repo = ref.watch(screenshotRepositoryProvider);
+    final pending = repo
+        .sortedEntries()
+        .where((entry) => entry.isPending)
+        .take(_maxPoolPreviewItems)
+        .toList();
+    if (pending.isEmpty) return const SizedBox.shrink();
+
+    const double tileSize = 28;
+    const double overlap = 14;
+    return SizedBox(
+      width: tileSize + overlap * (pending.length - 1),
+      height: tileSize,
+      child: Stack(
+        children: [
+          for (int i = 0; i < pending.length; i++)
+            Positioned(
+              left: overlap * i,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(AppRadius.sm),
+                child: SizedBox(
+                  width: tileSize,
+                  height: tileSize,
+                  child: _PoolThumbnail(assetId: pending[i].assetId),
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Havuz önizlemesindeki tek bir kare thumbnail.
+class _PoolThumbnail extends ConsumerWidget {
+  const _PoolThumbnail({required this.assetId});
+
+  final String assetId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final scheme = Theme.of(context).colorScheme;
+    final asset = ref.watch(screenshotRepositoryProvider).assetFor(assetId);
+    if (asset == null) {
+      return ColoredBox(color: scheme.onPrimary.withValues(alpha: 0.25));
+    }
+    return AssetEntityImage(
+      asset,
+      isOriginal: false,
+      thumbnailSize: const ThumbnailSize.square(100),
+      fit: BoxFit.cover,
+      errorBuilder: (context, error, stackTrace) =>
+          ColoredBox(color: scheme.onPrimary.withValues(alpha: 0.25)),
     );
   }
 }
