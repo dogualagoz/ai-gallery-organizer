@@ -75,6 +75,16 @@ class _CategoryFlyLayerState extends ConsumerState<CategoryFlyLayer>
   GlobalKey _keyFor(ScreenshotCategory category) =>
       _categoryKeys.putIfAbsent(category, GlobalKey.new);
 
+  /// Yüzen cam navbar + safe area'nın alttan kapladığı bant (px). Gövde
+  /// `extendBody` ile navbar'ın altına uzandığı için animasyon bu bandın
+  /// üstünde kalmalı; yoksa zerreler/gölgeler navbar'ı kirletir.
+  double _navBandInset() {
+    final double safe = MediaQuery.paddingOf(context).bottom;
+    return AppSpacing.sm +
+        AppSizes.navBarHeight +
+        (safe > 0 ? safe : AppSpacing.md);
+  }
+
   @override
   void dispose() {
     _spawnTimer?.cancel();
@@ -153,14 +163,17 @@ class _CategoryFlyLayerState extends ConsumerState<CategoryFlyLayer>
 
   /// Uçuşun hedefi: kategori karosunun merkezi. Karo ekran dışı/henüz yoksa
   /// board bölgesinin görünür alt kenarına düş — kategorinin sabit bir
-  /// sütununa (index'ten türetilen sol/sağ) hizalanmış bir nokta.
+  /// sütununa (index'ten türetilen sol/sağ) hizalanmış bir nokta. Hedef her
+  /// hâlükârda navbar bandının üstüne clamp'lenir ki gölge navbar'a inmesin.
   Offset _targetCenter(AnalyzedItem item, Size stack) {
+    final double maxY =
+        stack.height - _navBandInset() - _ghostSize.height / 2;
     final Offset? real = _centerOf(_keyFor(item.category));
-    if (real != null) return real;
+    if (real != null) return Offset(real.dx, min(real.dy, maxY));
     final bool leftColumn = item.category.index.isEven;
     return Offset(
       stack.width * (leftColumn ? 0.28 : 0.72),
-      stack.height * 0.82,
+      min(stack.height * 0.82, maxY),
     );
   }
 
@@ -231,8 +244,14 @@ class _CategoryFlyLayerState extends ConsumerState<CategoryFlyLayer>
         children: [
           widget.child,
           // İçeriğin üstünde, ghost/pulse'ların altında: yükselen mor zerreler.
+          // Bant, zerreleri yüzen navbar'ın üstünde tutar.
           Positioned.fill(
-            child: IgnorePointer(child: AnalysisParticleField(active: running)),
+            child: IgnorePointer(
+              child: AnalysisParticleField(
+                active: running,
+                bottomInset: _navBandInset(),
+              ),
+            ),
           ),
           for (final _LandingPulse pulse in _pulses)
             IgnorePointer(child: _LandingPulseCard(pulse: pulse)),

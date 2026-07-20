@@ -17,13 +17,25 @@ const double _maxFrameSeconds = 1 / 20;
 /// Particle üst kenarı bu kadar aşınca (px) alttan yeniden doğar.
 const double _topMargin = 24;
 
+/// Zerreler rezerve bant çizgisinden bu kadar (px) yükselene dek fade-in olur;
+/// yüzen navbar'ın arkasından "sızarak çıkma" hissi verir, çizgide pop olmaz.
+const double _emergeFade = 40;
+
 /// Analiz `active` iken çalışan, aşağıdan yukarı yükselen mor zerre alanı.
 /// `active` false olunca zarf yumuşakça söner ve ticker durur.
 class AnalysisParticleField extends StatefulWidget {
-  const AnalysisParticleField({super.key, required this.active});
+  const AnalysisParticleField({
+    super.key,
+    required this.active,
+    this.bottomInset = 0,
+  });
 
   /// Analiz koşuyor mu — true iken particle üretir, false iken söner.
   final bool active;
+
+  /// Alt kenardan rezerve edilen bant (px): yüzen navbar + safe area. Zerreler
+  /// bu bandın üstünden doğar ve içine çizilmez; navbar'ı kirletmez.
+  final double bottomInset;
 
   @override
   State<AnalysisParticleField> createState() => _AnalysisParticleFieldState();
@@ -77,6 +89,10 @@ class _AnalysisParticleFieldState extends State<AnalysisParticleField>
         .clamp(0, 1);
 
     if (_size != Size.zero) {
+      // Rezerve bandın üst çizgisi: partiküller buradan doğar, painter da
+      // fade/kırpmayı buna göre yapar.
+      _data.effectiveBottom =
+          (_size.height - widget.bottomInset).clamp(0, _size.height).toDouble();
       // Aktifken sayıyı hedefte tut; sönerken yeni doğurma, mevcutlar yükselsin.
       while (widget.active && _data.particles.length < _particleCount) {
         _data.particles.add(_spawn(fromBottom: true));
@@ -112,9 +128,14 @@ class _AnalysisParticleFieldState extends State<AnalysisParticleField>
   }
 
   _Particle _spawn({required bool fromBottom}) {
+    // Rezerve bandın üst çizgisinin biraz altından doğ; yükselerek çizgiyi
+    // aşınca görünür olur (navbar arkasından sızma hissi).
+    final double bottom = _data.effectiveBottom > 0
+        ? _data.effectiveBottom
+        : _size.height;
     final double y = fromBottom
-        ? _size.height + _random.nextDouble() * _topMargin
-        : _random.nextDouble() * _size.height;
+        ? bottom + _random.nextDouble() * _topMargin
+        : _random.nextDouble() * bottom;
     return _Particle(
       dx: _random.nextDouble(),
       y: y,
@@ -152,6 +173,10 @@ class _AnalysisParticleFieldState extends State<AnalysisParticleField>
 class _FieldData {
   final List<_Particle> particles = [];
   double envelope = 0;
+
+  /// Zerre alanının alt sınırı (rezerve bandın üst çizgisi); 0 ise henüz
+  /// ölçülmedi ve tüm yükseklik kullanılır.
+  double effectiveBottom = 0;
 }
 
 /// Tek bir yükselen zerre. Konum/ömür her tick'te yerinde güncellenir.
@@ -192,11 +217,17 @@ class _ParticlePainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     if (data.envelope <= 0 || size.isEmpty) return;
+    final double bottom =
+        data.effectiveBottom > 0 ? data.effectiveBottom : size.height;
     final Paint paint = Paint()..style = PaintingStyle.fill;
     for (final _Particle p in data.particles) {
-      // Üste yükseldikçe (norm 1→0) sön; en güçlü altta.
-      final double norm = (p.y / size.height).clamp(0, 1);
-      final double alpha = p.baseAlpha * norm * data.envelope;
+      // Rezerve bandın altındakiler (navbar arkası) çizilmez.
+      if (p.y > bottom) continue;
+      // Üste yükseldikçe (norm 1→0) sön; en güçlü bant çizgisine yakın.
+      final double norm = (p.y / bottom).clamp(0, 1);
+      // Çizgiden çıkarken fade-in — bant kenarında pop olmasın.
+      final double emerge = ((bottom - p.y) / _emergeFade).clamp(0, 1);
+      final double alpha = p.baseAlpha * norm * emerge * data.envelope;
       if (alpha <= 0.005) continue;
       final double x = p.dx * size.width + sin(p.phase + p.age * p.driftFreq) * p.driftAmp;
       paint.color = color.withValues(alpha: alpha);
