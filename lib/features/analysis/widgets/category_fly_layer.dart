@@ -13,7 +13,6 @@ import '../../../core/models/screenshot_category.dart';
 import '../../../core/services/haptic_service.dart';
 import '../../gallery/data/screenshot_repository.dart';
 import '../providers/analysis_queue_provider.dart';
-import 'analysis_particle_field.dart';
 
 /// Aynı anda uçabilen gölge sayısı; fazlası kuyrukta sabit kadansla bekler.
 const int _maxConcurrentGhosts = 8;
@@ -234,8 +233,6 @@ class _CategoryFlyLayerState extends ConsumerState<CategoryFlyLayer>
   @override
   Widget build(BuildContext context) {
     ref.listen(analysisQueueProvider, _onQueueChanged);
-    final bool running =
-        ref.watch(analysisQueueProvider.select((s) => s.isRunning));
     return CategoryFlyScope(
       sourceKey: _sourceKey,
       keyFor: _keyFor,
@@ -243,16 +240,6 @@ class _CategoryFlyLayerState extends ConsumerState<CategoryFlyLayer>
         key: _stackKey,
         children: [
           widget.child,
-          // İçeriğin üstünde, ghost/pulse'ların altında: yükselen mor zerreler.
-          // Bant, zerreleri yüzen navbar'ın üstünde tutar.
-          Positioned.fill(
-            child: IgnorePointer(
-              child: AnalysisParticleField(
-                active: running,
-                bottomInset: _navBandInset(),
-              ),
-            ),
-          ),
           for (final _LandingPulse pulse in _pulses)
             IgnorePointer(child: _LandingPulseCard(pulse: pulse)),
           for (final _Ghost ghost in _ghosts)

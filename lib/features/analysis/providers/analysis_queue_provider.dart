@@ -326,7 +326,15 @@ class AnalysisQueueNotifier extends Notifier<AnalysisQueueState> {
     if (entries.isEmpty) return;
 
     final Random random = Random();
-    final List<ScreenshotCategory> categories = ScreenshotCategory.values;
+    // Yalnız halihazırda kartı görünen (dolu) kategorilere ata ki uçan
+    // thumbnail'lar ekranda gerçekten var olan karolara insin; hiç yoksa
+    // tüm kategorilere düş (ilk kurulum senaryosu).
+    final List<ScreenshotCategory> visibleCategories = [
+      for (final category in ScreenshotCategory.values)
+        if (entries.any((entry) => entry.category == category)) category,
+    ];
+    final List<ScreenshotCategory> categories =
+        visibleCategories.isNotEmpty ? visibleCategories : ScreenshotCategory.values;
     final int total = min(count, entries.length);
 
     _cancelRequested = false;
