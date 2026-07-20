@@ -312,6 +312,46 @@ class AnalysisQueueNotifier extends Notifier<AnalysisQueueState> {
     }
   }
 
+  /// DEBUG: API/quota harcamadan analiz animasyonunu denemek için sahte bir
+  /// tur oynatır — Gemini'yi çağırmaz, entitlement/kota tüketmez, veriyi
+  /// değiştirmez; yalnız state akışını (running → afterSuccess'ler → completed)
+  /// gerçekçi, düzensiz bir kadansla taklit eder. Gerçek asset id'leri kullanır
+  /// ki uçan thumbnail'lar doğru görselle çizilsin.
+  Future<void> simulate({int count = 12}) async {
+    assert(kDebugMode, 'simulate yalnız debug modunda çağrılmalıdır');
+    if (state.isRunning) return;
+
+    final ScreenshotRepository repo = ref.read(screenshotRepositoryProvider);
+    final List<ScreenshotEntry> entries = repo.sortedEntries();
+    if (entries.isEmpty) return;
+
+    final Random random = Random();
+    final List<ScreenshotCategory> categories = ScreenshotCategory.values;
+    final int total = min(count, entries.length);
+
+    _cancelRequested = false;
+    state = AnalysisQueueState(
+      status: AnalysisQueueStatus.running,
+      total: total,
+    );
+
+    for (int i = 0; i < total && !_cancelRequested; i++) {
+      // Gemini dönüşlerinin düzensiz temposunu taklit eden gecikme.
+      await Future<void>.delayed(
+        Duration(milliseconds: 250 + random.nextInt(450)),
+      );
+      if (_cancelRequested) break;
+      state = state.afterSuccess(
+        AnalyzedItem(
+          assetId: entries[i].assetId,
+          category: categories[random.nextInt(categories.length)],
+        ),
+      );
+    }
+
+    state = state.copyWith(status: AnalysisQueueStatus.completed);
+  }
+
   /// Koşan kuyruğu nazikçe durdurur (aktif istek biter, yenisi başlamaz).
   void cancel() => _cancelRequested = true;
 

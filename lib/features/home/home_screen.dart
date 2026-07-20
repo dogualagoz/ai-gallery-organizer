@@ -1,4 +1,5 @@
 // Home ekranı: analiz banner'ı + panolar (sistem+özel) + son ekran görüntüleri.
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -177,6 +178,14 @@ class _HomeContent extends ConsumerWidget {
                     )
                   : null,
               actions: [
+                // DEBUG: API harcamadan analiz animasyonunu tetikler.
+                if (kDebugMode)
+                  IconButton(
+                    tooltip: 'Animasyonu dene (debug)',
+                    icon: const Icon(Icons.science_outlined),
+                    onPressed: () =>
+                        ref.read(analysisQueueProvider.notifier).simulate(),
+                  ),
                 _SyncAction(
                   onSync: () => HomeScreen._syncWithFeedback(context, ref),
                 ),
