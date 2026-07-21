@@ -517,14 +517,29 @@ class _AnalyzeCardState extends ConsumerState<AnalyzeCard>
     );
   }
 
-  /// Çarpı: analizi anında durdurur. Şimdiye kadar analiz edilenler kaydedilmiş
-  /// kalır; kart özet ("All sorted") göstermeden doğrudan "Analiz et" (idle)
-  /// durumuna döner, kalanlar için tekrar başlatılabilir.
-  void _cancelAnalysis() {
-    Haptics.warning();
-    _spawnQueue.clear();
-    ref.read(analysisQueueProvider.notifier).reset();
-    setState(_resetLocal);
+  /// Çarpı: hemen durdurmaz, önce seçim sunar. "Yarıda kes" nazikçe durdurup
+  /// şimdiye kadarki özeti gösterir; "Sıfırla" turu iptal edip karta idle'a
+  /// döner. Sheet kapatılırsa (dışarı dokunma) analiz aynen sürer.
+  Future<void> _cancelAnalysis() async {
+    Haptics.tap();
+    final _CancelChoice? choice = await showModalBottomSheet<_CancelChoice>(
+      context: context,
+      showDragHandle: true,
+      builder: (_) => const _CancelAnalysisSheet(),
+    );
+    if (!mounted || choice == null) return;
+    switch (choice) {
+      case _CancelChoice.stop:
+        // Yarıda kes: yeni istek başlamaz; uçmakta/kuyruktaki analizler
+        // inişini tamamlar ve özet ("All sorted") gösterilir.
+        ref.read(analysisQueueProvider.notifier).cancel();
+      case _CancelChoice.reset:
+        // Sıfırla: turu tamamen iptal et, kartı anında boşta duruma al.
+        Haptics.warning();
+        _spawnQueue.clear();
+        ref.read(analysisQueueProvider.notifier).reset();
+        setState(_resetLocal);
+    }
   }
 
   Widget _limitRow() {
@@ -609,4 +624,52 @@ class _Burst {
 
   final Offset center;
   final Key key;
+}
+
+/// Analizi durdurma seçimi: nazikçe yarıda kes ya da turu tamamen sıfırla.
+enum _CancelChoice { stop, reset }
+
+/// Çarpıya basınca açılan seçim sayfası: "Yarıda kes" / "Sıfırla".
+class _CancelAnalysisSheet extends StatelessWidget {
+  const _CancelAnalysisSheet();
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final ColorScheme scheme = Theme.of(context).colorScheme;
+    return SafeArea(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.lg,
+              AppSpacing.xs,
+              AppSpacing.lg,
+              AppSpacing.sm,
+            ),
+            child: Text(
+              l10n.analysisCancelSheetTitle,
+              style: Theme.of(context).textTheme.titleMedium
+                  ?.copyWith(fontWeight: FontWeight.w700),
+            ),
+          ),
+          ListTile(
+            leading: Icon(Icons.stop_circle_outlined, color: scheme.primary),
+            title: Text(l10n.analysisCancelStop),
+            subtitle: Text(l10n.analysisCancelStopHint),
+            onTap: () => Navigator.of(context).pop(_CancelChoice.stop),
+          ),
+          ListTile(
+            leading: Icon(Icons.restart_alt, color: scheme.error),
+            title: Text(l10n.analysisCancelReset),
+            subtitle: Text(l10n.analysisCancelResetHint),
+            onTap: () => Navigator.of(context).pop(_CancelChoice.reset),
+          ),
+          const SizedBox(height: AppSpacing.sm),
+        ],
+      ),
+    );
+  }
 }
