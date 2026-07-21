@@ -58,7 +58,9 @@ class SceneFlyingCard extends StatelessWidget {
           child: Transform.scale(scale: scale, child: child),
         );
       },
-      child: _CardImage(asset: flight.asset),
+      // IgnorePointer Positioned'ın İÇİNDE olmalı; Positioned doğrudan Stack'in
+      // çocuğu kalsın diye (aksi halde parent data uygulanmaz, kart 0,0'a düşer).
+      child: IgnorePointer(child: _CardImage(asset: flight.asset)),
     );
   }
 }

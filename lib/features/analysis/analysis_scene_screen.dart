@@ -58,7 +58,11 @@ class _AnalysisSceneScreenState extends ConsumerState<AnalysisSceneScreen>
   final Random _random = Random();
 
   Timer? _spawnTimer;
-  late int _lastSeenDone = ref.read(analysisQueueProvider).done;
+
+  /// Sahne açıldığındaki done değeri (genelde 0); sonrasında animasyona alınan
+  /// son tamamlananları buradan diff'ler. `late` DEĞİL — aksi halde ilk erişim
+  /// (ilk sonuç geldiğinde) done'u 1 okuyup ilk kartı atlar (off-by-one).
+  int _lastSeenDone = 0;
   int _landedTotal = 0;
   bool _summaryShown = false;
   bool _successHapticDone = false;
@@ -66,6 +70,7 @@ class _AnalysisSceneScreenState extends ConsumerState<AnalysisSceneScreen>
   @override
   void initState() {
     super.initState();
+    _lastSeenDone = ref.read(analysisQueueProvider).done;
     _spawnTimer = Timer.periodic(_spawnCadence, (_) => _drainSpawnQueue());
   }
 
@@ -316,7 +321,7 @@ class _AnalysisSceneScreenState extends ConsumerState<AnalysisSceneScreen>
                 ),
               ),
             for (final SceneFlight flight in _flights)
-              IgnorePointer(child: SceneFlyingCard(flight: flight)),
+              SceneFlyingCard(flight: flight),
             if (_summaryShown)
               SummaryPanel(
                 done: _landedTotal,
