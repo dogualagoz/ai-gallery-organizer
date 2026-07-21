@@ -411,7 +411,7 @@ class _AnalyzeCardState extends ConsumerState<AnalyzeCard>
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        _AnimHeader(queue: queue, onCancel: _cancel),
+        _AnimHeader(queue: queue, onCancel: _onCancelPressed),
         const SizedBox(height: AppSpacing.sm),
         SourceCluster(sourceKey: _clusterKey, remaining: remaining),
         const SizedBox(height: AppSpacing.sm),
@@ -419,9 +419,36 @@ class _AnalyzeCardState extends ConsumerState<AnalyzeCard>
     );
   }
 
-  void _cancel() {
+  /// Çarpıya basınca: yarıda kes (inenler kalsın) veya sıfırla (baştan) seçimi.
+  Future<void> _onCancelPressed() async {
+    Haptics.tap();
+    final _CancelChoice? choice = await showModalBottomSheet<_CancelChoice>(
+      context: context,
+      showDragHandle: true,
+      builder: (sheetContext) => const _CancelSheet(),
+    );
+    if (!mounted || choice == null) return;
+    switch (choice) {
+      case _CancelChoice.stop:
+        _stopAnalysis();
+      case _CancelChoice.reset:
+        _resetAnalysis();
+    }
+  }
+
+  /// Yarıda kes: yeni fotoğraf uçurma, kuyruğu durdur; şimdiye inenlerle özet.
+  void _stopAnalysis() {
     Haptics.warning();
+    _spawnQueue.clear();
     ref.read(analysisQueueProvider.notifier).cancel();
+    _maybeFinish(ref.read(analysisQueueProvider));
+  }
+
+  /// Sıfırla: turu tamamen iptal et, kartı anında boşta duruma döndür.
+  void _resetAnalysis() {
+    Haptics.warning();
+    ref.read(analysisQueueProvider.notifier).reset();
+    setState(_resetLocal);
   }
 
   Widget _limitRow() {
@@ -452,6 +479,56 @@ class _AnalyzeCardState extends ConsumerState<AnalyzeCard>
       icon: Icons.schedule_outlined,
       text: context.l10n.analysisDailyCapBanner,
       onDismiss: () => ref.read(analysisQueueProvider.notifier).dismiss(),
+    );
+  }
+}
+
+/// Çarpı pop-up'ının kullanıcı seçimi.
+enum _CancelChoice { stop, reset }
+
+/// Analizi yarıda kesme/sıfırlama seçeneklerini sunan alt sayfa.
+class _CancelSheet extends StatelessWidget {
+  const _CancelSheet();
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final ColorScheme scheme = Theme.of(context).colorScheme;
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(
+          AppSpacing.md,
+          0,
+          AppSpacing.md,
+          AppSpacing.md,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
+              child: Text(
+                l10n.analysisCancelSheetTitle,
+                style: Theme.of(context).textTheme.titleMedium,
+                textAlign: TextAlign.center,
+              ),
+            ),
+            ListTile(
+              leading: Icon(Icons.pause_circle_outline, color: scheme.primary),
+              title: Text(l10n.analysisCancelStop),
+              subtitle: Text(l10n.analysisCancelStopHint),
+              onTap: () => Navigator.of(context).pop(_CancelChoice.stop),
+            ),
+            ListTile(
+              leading: Icon(Icons.restart_alt, color: scheme.error),
+              title: Text(l10n.analysisCancelReset),
+              subtitle: Text(l10n.analysisCancelResetHint),
+              onTap: () => Navigator.of(context).pop(_CancelChoice.reset),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

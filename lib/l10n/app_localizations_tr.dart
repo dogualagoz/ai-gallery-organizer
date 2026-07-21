@@ -695,4 +695,19 @@ class AppLocalizationsTr extends AppLocalizations {
   @override
   String get homeWeeklyLimitUnlimitedHint =>
       'Pro ile sınırsız analiz hakkın var.';
+
+  @override
+  String get analysisCancelSheetTitle => 'Analiz durdurulsun mu?';
+
+  @override
+  String get analysisCancelStop => 'Yarıda kes';
+
+  @override
+  String get analysisCancelStopHint => 'Şimdiye kadar analiz edilenler kalsın.';
+
+  @override
+  String get analysisCancelReset => 'Sıfırla';
+
+  @override
+  String get analysisCancelResetHint => 'Bu turu iptal et, baştan başla.';
 }

@@ -138,6 +138,11 @@ final analysisQueueProvider =
 class AnalysisQueueNotifier extends Notifier<AnalysisQueueState> {
   bool _cancelRequested = false;
 
+  /// Aktif turun kimliği: `reset()` bunu artırır, böylece arka planda süren
+  /// eski `start()`/`simulate()` sıfırlamadan sonra state'i EZEMEZ (çarpı →
+  /// "Sıfırla" anında ve kalıcı temizlenir).
+  int _runId = 0;
+
   /// Ücretsiz katmanın günlük istek tavanına bu turda ulaşıldı mı.
   bool _dailyCapHit = false;
 
@@ -183,6 +188,7 @@ class AnalysisQueueNotifier extends Notifier<AnalysisQueueState> {
     _cancelRequested = false;
     _dailyCapHit = false;
     _nextRequestSlot = DateTime.now();
+    final int runId = ++_runId;
     state = AnalysisQueueState(
       status: AnalysisQueueStatus.running,
       total: budget,
@@ -191,9 +197,12 @@ class AnalysisQueueNotifier extends Notifier<AnalysisQueueState> {
     final AiRateProfile profile = AiConfig.activeProfile;
     final Queue<ScreenshotEntry> queue = Queue.of(pending.take(budget));
     await Future.wait([
-      for (int i = 0; i < profile.concurrency; i++) _worker(repo, queue, profile),
+      for (int i = 0; i < profile.concurrency; i++)
+        _worker(repo, queue, profile, runId),
     ]);
 
+    // Tur sıfırlandıysa (reset) bitiş state'ini yazma.
+    if (_runId != runId) return;
     final AnalysisQueueStatus finalStatus = _finalStatus(pending.length);
     state = state.copyWith(
       status: finalStatus,
@@ -213,16 +222,20 @@ class AnalysisQueueNotifier extends Notifier<AnalysisQueueState> {
     ScreenshotRepository repo,
     Queue<ScreenshotEntry> queue,
     AiRateProfile profile,
+    int runId,
   ) async {
     final DailyQuotaTracker quota = ref.read(dailyQuotaTrackerProvider);
-    while (!_cancelRequested && !_dailyCapHit && queue.isNotEmpty) {
+    while (_runId == runId &&
+        !_cancelRequested &&
+        !_dailyCapHit &&
+        queue.isNotEmpty) {
       if (!quota.canRequest(profile.dailyCap)) {
         _dailyCapHit = true;
         return;
       }
       final ScreenshotEntry entry = queue.removeFirst();
       await _waitForSlot(profile.minRequestGap);
-      await _analyzeEntry(repo, entry, quota);
+      await _analyzeEntry(repo, entry, quota, runId);
     }
   }
 
@@ -230,7 +243,9 @@ class AnalysisQueueNotifier extends Notifier<AnalysisQueueState> {
   Future<void> _waitForSlot(Duration gap) async {
     if (gap == Duration.zero) return;
     final DateTime now = DateTime.now();
-    final DateTime slot = _nextRequestSlot.isAfter(now) ? _nextRequestSlot : now;
+    final DateTime slot = _nextRequestSlot.isAfter(now)
+        ? _nextRequestSlot
+        : now;
     _nextRequestSlot = slot.add(gap);
     final Duration wait = slot.difference(now);
     if (wait > Duration.zero) await Future<void>.delayed(wait);
@@ -241,10 +256,11 @@ class AnalysisQueueNotifier extends Notifier<AnalysisQueueState> {
     ScreenshotRepository repo,
     ScreenshotEntry entry,
     DailyQuotaTracker quota,
+    int runId,
   ) async {
     final AssetEntity? asset = repo.assetFor(entry.assetId);
     if (asset == null) {
-      state = state.copyWith(failed: state.failed + 1);
+      if (_runId == runId) state = state.copyWith(failed: state.failed + 1);
       return;
     }
     try {
@@ -259,6 +275,8 @@ class AnalysisQueueNotifier extends Notifier<AnalysisQueueState> {
         ocrText: result.ocrText,
       );
       await ref.read(entitlementProvider.notifier).registerAnalysis(1);
+      // Sıfırlandıysa analizi kaydettik ama state'i güncelleme.
+      if (_runId != runId) return;
       state = state.afterSuccess(
         AnalyzedItem(assetId: entry.assetId, category: result.category),
       );
@@ -267,7 +285,7 @@ class AnalysisQueueNotifier extends Notifier<AnalysisQueueState> {
       _dailyCapHit = true;
     } catch (error, stackTrace) {
       debugPrint('Analiz hatası (${entry.assetId}): $error\n$stackTrace');
-      state = state.copyWith(failed: state.failed + 1);
+      if (_runId == runId) state = state.copyWith(failed: state.failed + 1);
     }
   }
 
@@ -333,22 +351,24 @@ class AnalysisQueueNotifier extends Notifier<AnalysisQueueState> {
       for (final category in ScreenshotCategory.values)
         if (entries.any((entry) => entry.category == category)) category,
     ];
-    final List<ScreenshotCategory> categories =
-        visibleCategories.isNotEmpty ? visibleCategories : ScreenshotCategory.values;
+    final List<ScreenshotCategory> categories = visibleCategories.isNotEmpty
+        ? visibleCategories
+        : ScreenshotCategory.values;
     final int total = min(count, entries.length);
 
     _cancelRequested = false;
+    final int runId = ++_runId;
     state = AnalysisQueueState(
       status: AnalysisQueueStatus.running,
       total: total,
     );
 
-    for (int i = 0; i < total && !_cancelRequested; i++) {
+    for (int i = 0; i < total && !_cancelRequested && _runId == runId; i++) {
       // Gemini dönüşlerinin düzensiz temposunu taklit eden gecikme.
       await Future<void>.delayed(
         Duration(milliseconds: 250 + random.nextInt(450)),
       );
-      if (_cancelRequested) break;
+      if (_cancelRequested || _runId != runId) break;
       state = state.afterSuccess(
         AnalyzedItem(
           assetId: entries[i].assetId,
@@ -357,11 +377,21 @@ class AnalysisQueueNotifier extends Notifier<AnalysisQueueState> {
       );
     }
 
+    if (_runId != runId) return;
     state = state.copyWith(status: AnalysisQueueStatus.completed);
   }
 
-  /// Koşan kuyruğu nazikçe durdurur (aktif istek biter, yenisi başlamaz).
+  /// Koşan kuyruğu nazikçe durdurur (aktif istek biter, yenisi başlamaz);
+  /// şimdiye inen fotoğraflarla özet gösterilir.
   void cancel() => _cancelRequested = true;
+
+  /// Turu tamamen sıfırlar: arka planda süren tur da state'i ezemez, kart
+  /// anında boşta duruma döner. Çarpı → "Sıfırla" bunu çağırır.
+  void reset() {
+    _cancelRequested = true;
+    _runId++;
+    state = const AnalysisQueueState();
+  }
 
   /// Tur sonucu banner'ını kapatır.
   void dismiss() {

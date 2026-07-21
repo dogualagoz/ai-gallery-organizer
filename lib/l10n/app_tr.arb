@@ -354,5 +354,10 @@
       "days": {"type": "int"}
     }
   },
-  "homeWeeklyLimitUnlimitedHint": "Pro ile sınırsız analiz hakkın var."
+  "homeWeeklyLimitUnlimitedHint": "Pro ile sınırsız analiz hakkın var.",
+  "analysisCancelSheetTitle": "Analiz durdurulsun mu?",
+  "analysisCancelStop": "Yarıda kes",
+  "analysisCancelStopHint": "Şimdiye kadar analiz edilenler kalsın.",
+  "analysisCancelReset": "Sıfırla",
+  "analysisCancelResetHint": "Bu turu iptal et, baştan başla."
 }

@@ -1291,6 +1291,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'You have unlimited analyses with Pro.'**
   String get homeWeeklyLimitUnlimitedHint;
+
+  /// No description provided for @analysisCancelSheetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop analysis?'**
+  String get analysisCancelSheetTitle;
+
+  /// No description provided for @analysisCancelStop.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop here'**
+  String get analysisCancelStop;
+
+  /// No description provided for @analysisCancelStopHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep the screenshots analyzed so far.'**
+  String get analysisCancelStopHint;
+
+  /// No description provided for @analysisCancelReset.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset'**
+  String get analysisCancelReset;
+
+  /// No description provided for @analysisCancelResetHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard this run and start over.'**
+  String get analysisCancelResetHint;
 }
 
 class _AppLocalizationsDelegate

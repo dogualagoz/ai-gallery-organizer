@@ -697,4 +697,19 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get homeWeeklyLimitUnlimitedHint =>
       'You have unlimited analyses with Pro.';
+
+  @override
+  String get analysisCancelSheetTitle => 'Stop analysis?';
+
+  @override
+  String get analysisCancelStop => 'Stop here';
+
+  @override
+  String get analysisCancelStopHint => 'Keep the screenshots analyzed so far.';
+
+  @override
+  String get analysisCancelReset => 'Reset';
+
+  @override
+  String get analysisCancelResetHint => 'Discard this run and start over.';
 }
