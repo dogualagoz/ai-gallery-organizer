@@ -61,6 +61,13 @@ abstract final class AppGlass {
   /// Navbar pili ile ayrık aksiyon butonunun birbirine yaklaşınca
   /// kaynaşma (blend) miktarı.
   static const double blend = 20;
+
+  /// BackdropFilter buzlu-cam (glassmorphism) bulanıklık sigma'sı — arka plandaki
+  /// içeriği gerçek Apple-vari frosted etki için bulanıklaştırır.
+  static const double backdropSigma = 24;
+
+  /// Buzlu-cam yüzeyinin kenar vurgusu opaklığı (ince ışıklı çerçeve).
+  static const double edgeAlpha = 0.08;
 }
 
 /// Standart opaklık değerleri.

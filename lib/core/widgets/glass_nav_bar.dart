@@ -1,6 +1,8 @@
-// iOS 26 liquid glass yüzen alt gezinme çubuğu; seçim kayarak taşınır.
+// iOS tarzı yüzen buzlu-cam (glassmorphism) alt gezinme çubuğu; seçim kayarak
+// taşınır ve parmak sürüklemesini takip eder.
+import 'dart:ui' show ImageFilter;
+
 import 'package:flutter/material.dart';
-import 'package:liquid_glass_renderer/liquid_glass_renderer.dart';
 
 import '../constants/ui_constants.dart';
 import '../services/haptic_service.dart';
@@ -24,13 +26,10 @@ class GlassNavDestination {
   final String label;
 }
 
-/// Modern iOS 26 dilinde yüzen, gerçek shader tabanlı liquid glass pil.
-/// Scaffold'a `extendBody: true` ile birlikte verilmelidir; içerik
-/// çubuğun arkasından akar ve kırılma/parlama efekti görünür olur.
-/// Bir ata `LiquidGlassLayer` + `LiquidGlassBlendGroup` içinde
-/// kullanılmalıdır (bkz. `_MainShell`) — cam ayarları oradan miras alınır.
-/// Dokunmanın yanı sıra parmakla yatay kaydırarak sekme değiştirmeyi de
-/// destekler (iOS 26 liquid glass tab bar davranışı).
+/// Yüzen buzlu-cam (glassmorphism) gezinme pili. Scaffold'a `extendBody: true`
+/// ile verilmelidir; içerik çubuğun arkasından akar ve [GlassSurface]'in
+/// BackdropFilter'ı onu bulanıklaştırarak frosted etkiyi görünür kılar.
+/// Dokunmanın yanı sıra parmakla yatay kaydırarak sekme değiştirmeyi de destekler.
 class GlassNavBar extends StatefulWidget {
   const GlassNavBar({
     super.key,
@@ -61,7 +60,8 @@ class _GlassNavBarState extends State<GlassNavBar> {
 
   void _handleDragUpdate(DragUpdateDetails details, double width) {
     final double pos = _posForDx(details.localPosition.dx, width);
-    final int prevNearest = (_dragPos ?? widget.selectedIndex.toDouble()).round();
+    final int prevNearest = (_dragPos ?? widget.selectedIndex.toDouble())
+        .round();
     // Yeni bir sekmenin üzerine gelince hafif haptik; sekme değişimi bırakınca.
     if (pos.round() != prevNearest) Haptics.tap();
     setState(() => _dragPos = pos);
@@ -91,52 +91,87 @@ class _GlassNavBarState extends State<GlassNavBar> {
     );
   }
 
-  /// Kurulu paket sürümünde `shadows` parametresi henüz yok; gölge dıştan
-  /// sarmalanan bir DecoratedBox ile veriliyor.
   Widget _buildGlassPill(BuildContext context) {
-    final ColorScheme scheme = Theme.of(context).colorScheme;
+    final double radius = AppSizes.navBarHeight / 2;
+    return GlassSurface(
+      borderRadius: BorderRadius.circular(radius),
+      child: SizedBox(
+        height: AppSizes.navBarHeight,
+        child: Stack(
+          children: [
+            _SlidingIndicator(
+              itemCount: widget.destinations.length,
+              position: _dragPos ?? widget.selectedIndex.toDouble(),
+              // Sürüklerken parmağı anında izle; bırakınca yaylanarak yaslan.
+              animated: _dragPos == null,
+            ),
+            Row(
+              children: [
+                for (int i = 0; i < widget.destinations.length; i++)
+                  Expanded(
+                    child: _NavItem(
+                      destination: widget.destinations[i],
+                      selected: i == widget.selectedIndex,
+                      onTap: () {
+                        Haptics.tap();
+                        widget.onSelected(i);
+                      },
+                    ),
+                  ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
 
+/// Yeniden kullanılabilir buzlu-cam yüzey: arka planı BackdropFilter ile
+/// bulanıklaştırır, üzerine yarı saydam tema tonu + ince kenar vurgusu + yumuşak
+/// gölge koyar. Navbar pili ve ayrık aksiyon butonu ortak bu yüzeyi kullanır.
+class GlassSurface extends StatelessWidget {
+  const GlassSurface({
+    super.key,
+    required this.borderRadius,
+    required this.child,
+  });
+
+  final BorderRadius borderRadius;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final ColorScheme scheme = Theme.of(context).colorScheme;
     return DecoratedBox(
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(AppSizes.navBarHeight / 2),
+        borderRadius: borderRadius,
         boxShadow: [
           BoxShadow(
-            color: scheme.inverseSurface.withValues(alpha: 0.10),
+            color: scheme.inverseSurface.withValues(alpha: 0.12),
             blurRadius: 24,
             offset: const Offset(0, 8),
           ),
         ],
       ),
-      child: LiquidGlass.grouped(
-        shape: LiquidRoundedSuperellipse(
-          borderRadius: AppSizes.navBarHeight / 2,
-        ),
-        child: SizedBox(
-          height: AppSizes.navBarHeight,
-          child: Stack(
-            children: [
-              _SlidingIndicator(
-                itemCount: widget.destinations.length,
-                position: _dragPos ?? widget.selectedIndex.toDouble(),
-                // Sürüklerken parmağı anında izle; bırakınca yaylanarak yaslan.
-                animated: _dragPos == null,
+      child: ClipRRect(
+        borderRadius: borderRadius,
+        child: BackdropFilter(
+          filter: ImageFilter.blur(
+            sigmaX: AppGlass.backdropSigma,
+            sigmaY: AppGlass.backdropSigma,
+          ),
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              // Yarı saydam yüzey tonu (açıkta beyazımsı, koyuda koyu frosted).
+              color: scheme.surface.withValues(alpha: AppGlass.tintAlpha),
+              borderRadius: borderRadius,
+              border: Border.all(
+                color: scheme.onSurface.withValues(alpha: AppGlass.edgeAlpha),
+                width: 0.6,
               ),
-              Row(
-                children: [
-                  for (int i = 0; i < widget.destinations.length; i++)
-                    Expanded(
-                      child: _NavItem(
-                        destination: widget.destinations[i],
-                        selected: i == widget.selectedIndex,
-                        onTap: () {
-                          Haptics.tap();
-                          widget.onSelected(i);
-                        },
-                      ),
-                    ),
-                ],
-              ),
-            ],
+            ),
+            child: child,
           ),
         ),
       ),

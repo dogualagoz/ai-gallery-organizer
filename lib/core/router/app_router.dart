@@ -2,7 +2,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:liquid_glass_renderer/liquid_glass_renderer.dart';
 
 import '../../features/analysis/milestone_screen.dart';
 import '../../features/detail/detail_screen.dart';
@@ -148,7 +147,6 @@ class _MainShell extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final double bottomInset = MediaQuery.paddingOf(context).bottom;
-    final ColorScheme scheme = Theme.of(context).colorScheme;
 
     return Scaffold(
       // İçerik camın arkasından aksın diye gövde navbar'ın altına uzatılır.
@@ -162,64 +160,44 @@ class _MainShell extends StatelessWidget {
           AppSpacing.lg,
           bottomInset > 0 ? bottomInset : AppSpacing.md,
         ),
-        // Pil ve ayrık aksiyon butonu tek bir LiquidGlassLayer + BlendGroup
-        // içinde: aynı ışık/renk ayarlarını paylaşırlar ve birbirine
-        // yaklaşınca gerçek iOS 26 liquid glass gibi kaynaşabilirler.
-        child: LiquidGlassLayer(
-          settings: LiquidGlassSettings(
-            thickness: AppGlass.thickness,
-            blur: AppGlass.blur,
-            // `surfaceBright`: açık temada neredeyse beyaz, koyu temada da
-            // en parlak yüzey tonu — gerçek Liquid Glass'ın nötr, parlak
-            // dolgusuna en yakın tema-uyumlu renk (düz `surface` mat kalıyordu).
-            glassColor: scheme.surfaceBright.withValues(
-              alpha: AppGlass.tintAlpha,
-            ),
-            lightIntensity: AppGlass.lightIntensity,
-            refractiveIndex: AppGlass.refractiveIndex,
-            saturation: AppGlass.saturation,
-            ambientStrength: AppGlass.ambientStrength,
-          ),
-          child: LiquidGlassBlendGroup(
-            blend: AppGlass.blend,
-            child: Row(
-              children: [
-                Expanded(
-                  child: GlassNavBar(
-                    selectedIndex: navigationShell.currentIndex,
-                    onSelected: (index) => navigationShell.goBranch(
-                      index,
-                      // Aynı sekmeye tekrar basınca kök ekrana döner (iOS davranışı).
-                      initialLocation: index == navigationShell.currentIndex,
-                    ),
-                    destinations: [
-                      GlassNavDestination(
-                        icon: Icons.home_outlined,
-                        selectedIcon: Icons.home_rounded,
-                        label: context.l10n.tabHome,
-                      ),
-                      GlassNavDestination(
-                        icon: Icons.swipe_outlined,
-                        selectedIcon: Icons.swipe,
-                        label: context.l10n.tabSort,
-                      ),
-                      GlassNavDestination(
-                        icon: Icons.settings_outlined,
-                        selectedIcon: Icons.settings_rounded,
-                        label: context.l10n.tabSettings,
-                      ),
-                    ],
+        // Yüzen pil (3 sekme) + sağında ayrık dairesel arama butonu; her biri
+        // kendi buzlu-cam yüzeyini (GlassSurface) taşır.
+        child: Row(
+          children: [
+            Expanded(
+              child: GlassNavBar(
+                selectedIndex: navigationShell.currentIndex,
+                onSelected: (index) => navigationShell.goBranch(
+                  index,
+                  // Aynı sekmeye tekrar basınca kök ekrana döner (iOS davranışı).
+                  initialLocation: index == navigationShell.currentIndex,
+                ),
+                destinations: [
+                  GlassNavDestination(
+                    icon: Icons.home_outlined,
+                    selectedIcon: Icons.home_rounded,
+                    label: context.l10n.tabHome,
                   ),
-                ),
-                const SizedBox(width: AppSpacing.sm),
-                GlassActionButton(
-                  icon: Icons.search,
-                  tooltip: context.l10n.searchTitle,
-                  onPressed: () => context.push(AppRoutes.search),
-                ),
-              ],
+                  GlassNavDestination(
+                    icon: Icons.swipe_outlined,
+                    selectedIcon: Icons.swipe,
+                    label: context.l10n.tabSort,
+                  ),
+                  GlassNavDestination(
+                    icon: Icons.settings_outlined,
+                    selectedIcon: Icons.settings_rounded,
+                    label: context.l10n.tabSettings,
+                  ),
+                ],
+              ),
             ),
-          ),
+            const SizedBox(width: AppSpacing.sm),
+            GlassActionButton(
+              icon: Icons.search,
+              tooltip: context.l10n.searchTitle,
+              onPressed: () => context.push(AppRoutes.search),
+            ),
+          ],
         ),
       ),
     );
