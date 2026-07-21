@@ -245,16 +245,49 @@ class _HomeContent extends ConsumerWidget {
               ],
             ),
           ),
-          if (analyzing)
-            Positioned.fill(
-              child: IgnorePointer(
-                child: SceneAmbientParticles(
-                  color: Theme.of(context).colorScheme.secondary,
-                  count: 18,
-                  maxAlpha: 0.12,
-                ),
+          // Partiküller alttan yukarı süzülür ama üst menü bar'ın (status bar
+          // + toolbar) altında kalmalı; bu yüzden üstten o kadar inset'lenir.
+          // Tur bitince katman aniden değil, AnimatedSwitcher ile yavaşça söner.
+          Positioned(
+            top: MediaQuery.paddingOf(context).top + kToolbarHeight,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            child: IgnorePointer(
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 900),
+                child: analyzing
+                    ? Stack(
+                        key: const ValueKey<String>('analysis-fx'),
+                        children: [
+                          // En arkada: tabandan yükselen nabızlı mor ışıma.
+                          SceneAiGlow(
+                            color: Theme.of(context).colorScheme.secondary,
+                          ),
+                          // Alttan yükselen mor duman (bir şeyler pişiyor hissi).
+                          SceneRisingSmoke(
+                            color: Theme.of(context).colorScheme.secondary,
+                            count: 20,
+                            maxAlpha: 0.26,
+                          ),
+                          // İnce yükselen zerreler — dumanın üstünde parıltı.
+                          SceneAmbientParticles(
+                            color: Theme.of(context).colorScheme.secondary,
+                            count: 18,
+                            maxAlpha: 0.12,
+                          ),
+                          // Morun içinden yükselen net, opak küçük noktalar.
+                          SceneAmbientParticles(
+                            color: Theme.of(context).colorScheme.secondary,
+                            count: 21,
+                            maxAlpha: 0.9,
+                          ),
+                        ],
+                      )
+                    : const SizedBox.shrink(),
               ),
             ),
+          ),
         ],
       ),
     );

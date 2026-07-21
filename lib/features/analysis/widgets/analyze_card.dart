@@ -72,8 +72,6 @@ class _AnalyzeCardState extends ConsumerState<AnalyzeCard>
   int _landedTotal = 0;
   bool _summaryShown = false;
   bool _successHapticDone = false;
-  // AnimatedSwitcher geçişinde giren/çıkan içeriği ayırmak için son faz anahtarı.
-  String _currentPhase = '';
 
   @override
   void initState() {
@@ -330,7 +328,6 @@ class _AnalyzeCardState extends ConsumerState<AnalyzeCard>
 
     final (String phase, Widget? inner) = _content(queue);
     if (inner == null) return const SizedBox.shrink();
-    _currentPhase = phase;
 
     return Container(
       margin: const EdgeInsets.only(bottom: AppSpacing.sm),
@@ -362,15 +359,29 @@ class _AnalyzeCardState extends ConsumerState<AnalyzeCard>
 
   /// Yeni içerik sağdan girer, eski içerik sola çıkar (istatistikler kaybolmaz,
   /// sola kayar; fotoğraf grubu sağdan gelir).
+  ///
+  /// Yön build anındaki faza göre değil, her karede animasyon durumuna göre
+  /// belirlenir: AnimatedSwitcher çıkan çocuğun transition'ını yeniden kurmaz,
+  /// yalnız aynı animasyonu ters oynatır (status == reverse). Bu yüzden
+  /// giren/çıkan ayrımını `animation.status` üzerinden yaparız — aksi halde
+  /// çıkan içerik de sağa kayıp gelenle çakışır.
   Widget _horizontalReveal(Widget child, Animation<double> animation) {
-    final bool incoming = child.key == ValueKey<String>(_currentPhase);
-    final Offset begin = incoming ? const Offset(1, 0) : const Offset(-1, 0);
-    return SlideTransition(
-      position: Tween<Offset>(
-        begin: begin,
-        end: Offset.zero,
-      ).animate(animation),
+    return AnimatedBuilder(
+      animation: animation,
       child: child,
+      builder: (context, child) {
+        final bool leaving =
+            animation.status == AnimationStatus.reverse ||
+            animation.status == AnimationStatus.dismissed;
+        // Giren: sağdan (dx=1) merkeze. Çıkan: merkezden sola (dx=-1).
+        final double dx = leaving
+            ? animation.value - 1
+            : 1 - animation.value;
+        return FractionalTranslation(
+          translation: Offset(dx, 0),
+          child: child,
+        );
+      },
     );
   }
 
