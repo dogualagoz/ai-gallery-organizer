@@ -409,6 +409,11 @@ class _DebugSection extends ConsumerWidget {
         _SettingsGroup(
           children: [
             _SettingsTile(
+              icon: Icons.workspace_premium,
+              label: 'Enter Pro (debug)',
+              onTap: () => ref.read(entitlementProvider.notifier).setPro(true),
+            ),
+            _SettingsTile(
               icon: Icons.logout,
               label: 'Exit Pro (debug)',
               onTap: () => ref.read(entitlementProvider.notifier).setPro(false),
