@@ -15,6 +15,7 @@ import '../../core/models/screenshot_entry.dart';
 import '../../core/router/app_router.dart';
 import '../../core/services/category_names_service.dart';
 import '../../core/services/entitlement_service.dart';
+import '../../core/widgets/confirm_sheet.dart';
 import '../../core/widgets/edge_swipe_back.dart';
 import '../../core/widgets/screenshot_results_grid.dart';
 import '../analysis/providers/analysis_queue_provider.dart';
@@ -181,24 +182,14 @@ class _BoardDetailScreenState extends ConsumerState<BoardDetailScreen> {
   /// anasayfaya döner; analiz animasyonu orada oynar, haftalık kotadan harcanır.
   Future<void> _reanalyzeCategory(List<ScreenshotEntry> filtered) async {
     final l10n = context.l10n;
-    final bool? confirmed = await showDialog<bool>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: Text(l10n.categoryReanalyzeConfirmTitle),
-        content: Text(l10n.categoryReanalyzeConfirmBody),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: Text(l10n.cancelAction),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: Text(l10n.categoryReanalyzeAction),
-          ),
-        ],
-      ),
+    final bool confirmed = await showConfirmSheet(
+      context,
+      title: l10n.categoryReanalyzeConfirmTitle,
+      body: l10n.categoryReanalyzeConfirmBody,
+      confirmLabel: l10n.categoryReanalyzeAction,
+      icon: Icons.auto_awesome_outlined,
     );
-    if (confirmed != true || !mounted) return;
+    if (!confirmed || !mounted) return;
 
     final ScreenshotRepository repo = ref.read(screenshotRepositoryProvider);
     final List<String> ids = filtered.map((e) => e.assetId).toList();
@@ -240,24 +231,15 @@ class _BoardDetailScreenState extends ConsumerState<BoardDetailScreen> {
     if (filtered.isEmpty) return;
     final l10n = context.l10n;
     final int count = filtered.length;
-    final bool? confirmed = await showDialog<bool>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: Text(l10n.categoryDeleteAllConfirmTitle(count)),
-        content: Text(l10n.categoryDeleteAllConfirmBody),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: Text(l10n.cancelAction),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: Text(l10n.categoryDeleteAllAction),
-          ),
-        ],
-      ),
+    final bool confirmed = await showConfirmSheet(
+      context,
+      title: l10n.categoryDeleteAllConfirmTitle(count),
+      body: l10n.categoryDeleteAllConfirmBody,
+      confirmLabel: l10n.categoryDeleteAllAction,
+      icon: Icons.delete_sweep_outlined,
+      destructive: true,
     );
-    if (confirmed != true || !mounted) return;
+    if (!confirmed || !mounted) return;
 
     setState(() => _bulkDeleting = true);
     final ScreenshotRepository repo = ref.read(screenshotRepositoryProvider);
