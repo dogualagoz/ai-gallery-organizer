@@ -110,7 +110,14 @@ class _HomeTitle extends ConsumerWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Text(context.l10n.galleryTitle),
+        // Aksiyonlar (debug + Unlimited pill + sync) başlığı sıkıştırdığında
+        // taşma (RenderFlex) olmasın diye metin esner ve gerekirse kısalır.
+        Flexible(
+          child: Text(
+            context.l10n.galleryTitle,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
         if (isPro) ...[const SizedBox(width: AppSpacing.sm), const ProBadge()],
       ],
     );
