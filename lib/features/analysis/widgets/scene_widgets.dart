@@ -67,7 +67,7 @@ class _SourceClusterState extends ConsumerState<SourceCluster>
               child: _ClusterCard(size: _card, assetId: ids[i]),
             ),
           if (ids.isEmpty) _ClusterCard(size: _card, assetId: null),
-          _SweepGlow(sweep: _sweep, size: _card, color: scheme.onSurface),
+          _SweepGlow(sweep: _sweep, size: _card, color: scheme.secondary),
           if (widget.remaining > 0)
             Positioned(
               right: 0,
