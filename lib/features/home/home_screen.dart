@@ -14,7 +14,7 @@ import '../../core/services/entitlement_service.dart';
 import '../../core/widgets/pro_badge.dart';
 import '../analysis/providers/analysis_queue_provider.dart';
 import '../analysis/providers/auto_sort_provider.dart';
-import '../analysis/widgets/analysis_banner.dart';
+import '../analysis/widgets/analyze_card.dart';
 import '../analysis/widgets/auto_sort_chip.dart';
 import '../boards/providers/board_provider.dart';
 import '../boards/widgets/custom_boards_grid.dart';
@@ -116,7 +116,7 @@ class _SyncAction extends StatelessWidget {
   }
 }
 
-/// Analiz banner'ı + panolar + son ekran görüntüleri ızgarasından oluşan gövde.
+/// Analiz kartı + panolar + son ekran görüntüleri ızgarasından oluşan gövde.
 class _HomeContent extends ConsumerWidget {
   const _HomeContent({required this.entries});
 
@@ -158,10 +158,8 @@ class _HomeContent extends ConsumerWidget {
                 IconButton(
                   tooltip: 'Animasyonu dene (debug)',
                   icon: const Icon(Icons.science_outlined),
-                  onPressed: () {
-                    context.push(AppRoutes.analysisScene);
-                    ref.read(analysisQueueProvider.notifier).simulate();
-                  },
+                  onPressed: () =>
+                      ref.read(analysisQueueProvider.notifier).simulate(),
                 ),
               _SyncAction(
                 onSync: () => HomeScreen._syncWithFeedback(context, ref),
@@ -180,11 +178,7 @@ class _HomeContent extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   if (!isPro) const AutoSortChip(),
-                  AnalysisBanner(
-                    pendingCount: entries
-                        .where((entry) => entry.isPending)
-                        .length,
-                  ),
+                  AnalyzeCard(entries: entries),
                   const SizedBox(height: AppSpacing.sm),
                   _BoardsSection(entries: entries, repo: repo),
                   const SizedBox(height: AppSpacing.lg),

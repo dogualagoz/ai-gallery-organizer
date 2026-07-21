@@ -524,6 +524,36 @@ abstract class AppLocalizations {
   /// **'{count} trial analyses left'**
   String analyzeHeroTrialHint(int count);
 
+  /// No description provided for @analyzeCardTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Organize your screenshots'**
+  String get analyzeCardTitle;
+
+  /// No description provided for @analyzeCardPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending'**
+  String get analyzeCardPending;
+
+  /// No description provided for @analyzeCardAnalyzed.
+  ///
+  /// In en, this message translates to:
+  /// **'Analyzed'**
+  String get analyzeCardAnalyzed;
+
+  /// No description provided for @analyzeCardRemaining.
+  ///
+  /// In en, this message translates to:
+  /// **'Remaining'**
+  String get analyzeCardRemaining;
+
+  /// No description provided for @analyzeCardUnlimited.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlimited'**
+  String get analyzeCardUnlimited;
+
   /// No description provided for @analysisExperienceTitle.
   ///
   /// In en, this message translates to:

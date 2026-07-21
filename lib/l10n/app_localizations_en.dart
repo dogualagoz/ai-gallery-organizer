@@ -264,6 +264,21 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get analyzeCardTitle => 'Organize your screenshots';
+
+  @override
+  String get analyzeCardPending => 'Pending';
+
+  @override
+  String get analyzeCardAnalyzed => 'Analyzed';
+
+  @override
+  String get analyzeCardRemaining => 'Remaining';
+
+  @override
+  String get analyzeCardUnlimited => 'Unlimited';
+
+  @override
   String get analysisExperienceTitle => 'Organizing your screenshots';
 
   @override

@@ -264,6 +264,21 @@ class AppLocalizationsTr extends AppLocalizations {
   }
 
   @override
+  String get analyzeCardTitle => 'Ekran görüntülerini düzenle';
+
+  @override
+  String get analyzeCardPending => 'Bekleyen';
+
+  @override
+  String get analyzeCardAnalyzed => 'Analiz edildi';
+
+  @override
+  String get analyzeCardRemaining => 'Kalan hak';
+
+  @override
+  String get analyzeCardUnlimited => 'Sınırsız';
+
+  @override
   String get analysisExperienceTitle => 'Ekran görüntülerin gruplandırılıyor';
 
   @override

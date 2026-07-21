@@ -146,6 +146,11 @@
       "count": {"type": "int"}
     }
   },
+  "analyzeCardTitle": "Ekran görüntülerini düzenle",
+  "analyzeCardPending": "Bekleyen",
+  "analyzeCardAnalyzed": "Analiz edildi",
+  "analyzeCardRemaining": "Kalan hak",
+  "analyzeCardUnlimited": "Sınırsız",
   "analysisExperienceTitle": "Ekran görüntülerin gruplandırılıyor",
   "analysisSceneSummaryTitle": "Hepsi yerleşti",
   "analysisSceneSummary": "{count} ekran görüntüsü {categories} kategoriye yerleşti",

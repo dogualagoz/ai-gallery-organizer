@@ -1,7 +1,5 @@
-// Analiz sahnesinin sunum bileşenleri: arka plan, başlık, kaynak yığın,
-// kategori şeritleri ve bitiş özeti. Orkestrasyon (uçuş/particle) sahne
-// ekranında; buradaki widget'lar yalnız veriyi çizer.
-import 'package:flutter/foundation.dart';
+// Analiz animasyonunun paylaşılan sunum bileşenleri: kaynak yığın, kategori
+// şeritleri ve tek thumbnail. Orkestrasyon (uçuş/particle) analyze_card.dart'ta.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:photo_manager/photo_manager.dart';
@@ -12,85 +10,6 @@ import '../../../core/l10n/category_labels.dart';
 import '../../../core/l10n/l10n_extension.dart';
 import '../../../core/models/screenshot_category.dart';
 import '../../gallery/data/screenshot_repository.dart';
-import '../providers/analysis_queue_provider.dart';
-
-/// Sahnenin tema-uyumlu, hafif primary tonlu sinematik arka planı.
-class SceneBackground extends StatelessWidget {
-  const SceneBackground({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    final ColorScheme scheme = Theme.of(context).colorScheme;
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [
-            Color.alphaBlend(
-              scheme.primary.withValues(alpha: 0.12),
-              scheme.surface,
-            ),
-            scheme.surface,
-          ],
-        ),
-      ),
-      child: const SizedBox.expand(),
-    );
-  }
-}
-
-/// Üst başlık: "Screenshot'ların düzenleniyor" + ilerleme + kapat.
-class SceneHeader extends StatelessWidget {
-  const SceneHeader({super.key, required this.queue, required this.onClose});
-
-  final AnalysisQueueState queue;
-  final VoidCallback onClose;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = context.l10n;
-    final ColorScheme scheme = Theme.of(context).colorScheme;
-    final int processed = queue.done + queue.failed;
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(
-        AppSpacing.lg,
-        AppSpacing.md,
-        AppSpacing.sm,
-        0,
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  l10n.analysisExperienceTitle,
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.w700,
-                    color: scheme.onSurface,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  l10n.analysisProgress(processed, queue.total),
-                  style: Theme.of(context).textTheme.bodyMedium
-                      ?.copyWith(color: scheme.onSurfaceVariant),
-                ),
-              ],
-            ),
-          ),
-          IconButton(
-            tooltip: l10n.analysisCancelAction,
-            icon: Icon(Icons.close, color: scheme.onSurfaceVariant),
-            onPressed: onClose,
-          ),
-        ],
-      ),
-    );
-  }
-}
 
 /// Merkez-üstteki kaynak yığın: bekleyenlerden birkaç fanlı thumbnail +
 /// üzerinden geçen ince tarama parıltısı + kalan sayaç rozeti. Uçuşların
@@ -438,81 +357,7 @@ class _LaneStack extends StatelessWidget {
   }
 }
 
-/// Tur bitince beliren özet paneli: başlık + "N screenshot M kategoriye
-/// yerleşti" + Bitti. Debug'da ek olarak Tekrar oynat.
-class SummaryPanel extends StatelessWidget {
-  const SummaryPanel({
-    super.key,
-    required this.done,
-    required this.categories,
-    required this.onDone,
-    this.onReplay,
-  });
-
-  final int done;
-  final int categories;
-  final VoidCallback onDone;
-  final VoidCallback? onReplay;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = context.l10n;
-    final ColorScheme scheme = Theme.of(context).colorScheme;
-    return Positioned.fill(
-      child: ColoredBox(
-        color: scheme.scrim.withValues(alpha: 0.5),
-        child: Center(
-          child: TweenAnimationBuilder<double>(
-            tween: Tween(begin: 0, end: 1),
-            duration: AppDurations.medium,
-            curve: Curves.easeOutBack,
-            builder: (context, value, child) =>
-                Transform.scale(scale: 0.9 + 0.1 * value, child: child),
-            child: Container(
-              margin: const EdgeInsets.all(AppSpacing.xl),
-              padding: const EdgeInsets.all(AppSpacing.lg),
-              decoration: BoxDecoration(
-                color: scheme.surface,
-                borderRadius: BorderRadius.circular(AppRadius.lg),
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.auto_awesome, size: 40, color: scheme.primary),
-                  const SizedBox(height: AppSpacing.md),
-                  Text(
-                    l10n.analysisSceneSummaryTitle,
-                    style: Theme.of(context).textTheme.titleLarge
-                        ?.copyWith(fontWeight: FontWeight.w700),
-                  ),
-                  const SizedBox(height: AppSpacing.sm),
-                  Text(
-                    l10n.analysisSceneSummary(done, categories),
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.bodyMedium
-                        ?.copyWith(color: scheme.onSurfaceVariant),
-                  ),
-                  const SizedBox(height: AppSpacing.lg),
-                  FilledButton(
-                    onPressed: onDone,
-                    child: Text(l10n.analysisSceneDone),
-                  ),
-                  if (kDebugMode && onReplay != null)
-                    TextButton(
-                      onPressed: onReplay,
-                      child: const Text('Tekrar oynat (debug)'),
-                    ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/// Kare, kırpılmış tek asset thumbnail'ı — sahne boyunca birden çok yerde
+/// Kare, kırpılmış tek asset thumbnail'ı — animasyon boyunca birden çok yerde
 /// (kaynak deste, şerit yığını) kullanılır.
 class SceneThumb extends ConsumerWidget {
   const SceneThumb({super.key, required this.assetId});
