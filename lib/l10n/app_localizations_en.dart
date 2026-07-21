@@ -756,4 +756,34 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get sortingFinishKeep => 'Keep them';
+
+  @override
+  String get categoryRenameAction => 'Rename';
+
+  @override
+  String get categoryRenameDialogTitle => 'Rename category';
+
+  @override
+  String get categoryDeleteAllAction => 'Delete all';
+
+  @override
+  String categoryDeleteAllConfirmTitle(int count) {
+    return 'Delete all $count screenshots?';
+  }
+
+  @override
+  String get categoryDeleteAllConfirmBody =>
+      'These will be permanently removed from your photo library.';
+
+  @override
+  String get moveAction => 'Move';
+
+  @override
+  String get moveSheetTitle => 'Move to';
+
+  @override
+  String get moveSectionCategories => 'Categories';
+
+  @override
+  String get moveSectionBoards => 'Boards';
 }

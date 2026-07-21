@@ -8,6 +8,7 @@ import '../../core/l10n/category_labels.dart';
 import '../../core/l10n/l10n_extension.dart';
 import '../../core/models/screenshot_entry.dart';
 import '../../core/router/app_router.dart';
+import '../../core/services/category_names_service.dart';
 import '../../core/services/entitlement_service.dart';
 import '../../core/utils/text_normalize.dart';
 import '../../core/widgets/screenshot_results_grid.dart';
@@ -46,11 +47,15 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     final List<ScreenshotEntry> entries =
         ref.watch(galleryProvider).value ?? const [];
     final String normalizedQuery = normalizeForSearch(_query);
+    final Map<int, String> categoryNames = ref.watch(categoryNamesProvider);
     final List<ScreenshotEntry> results = normalizedQuery.isEmpty
         ? const []
         : entries
               .where((entry) => !entry.isPending)
-              .where((entry) => _matches(entry, normalizedQuery, l10n))
+              .where(
+                (entry) =>
+                    _matches(entry, normalizedQuery, l10n, categoryNames),
+              )
               .toList();
 
     return Column(
@@ -75,10 +80,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
           child: normalizedQuery.isEmpty
               ? _SearchMessage(text: l10n.searchPrompt, icon: Icons.search)
               : results.isEmpty
-              ? _SearchMessage(
-                  text: l10n.searchEmpty,
-                  icon: Icons.search_off,
-                )
+              ? _SearchMessage(text: l10n.searchEmpty, icon: Icons.search_off)
               : ScreenshotResultsGrid(entries: results),
         ),
       ],
@@ -89,13 +91,14 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     ScreenshotEntry entry,
     String normalizedQuery,
     AppLocalizations l10n,
+    Map<int, String> categoryNames,
   ) {
     final StringBuffer haystack = StringBuffer()
       ..write(entry.tags.join(' '))
       ..write(' ')
       ..write(entry.ocrText ?? '')
       ..write(' ')
-      ..write(entry.category?.label(l10n) ?? '');
+      ..write(entry.category?.displayName(l10n, categoryNames) ?? '');
     return normalizeForSearch(haystack.toString()).contains(normalizedQuery);
   }
 }
@@ -116,13 +119,16 @@ class _SearchMessage extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: 40, color: scheme.onSurfaceVariant.withValues(alpha: 0.4)),
+            Icon(
+              icon,
+              size: 40,
+              color: scheme.onSurfaceVariant.withValues(alpha: 0.4),
+            ),
             const SizedBox(height: AppSpacing.md),
             Text(
               text,
-              style: Theme.of(
-                context,
-              ).textTheme.bodyMedium?.copyWith(color: scheme.onSurfaceVariant),
+              style: Theme.of(context).textTheme.bodyMedium
+                  ?.copyWith(color: scheme.onSurfaceVariant),
               textAlign: TextAlign.center,
             ),
           ],
@@ -169,9 +175,8 @@ class _LockedSearch extends StatelessWidget {
             const SizedBox(height: AppSpacing.sm),
             Text(
               l10n.searchLockedBody,
-              style: Theme.of(
-                context,
-              ).textTheme.bodyMedium?.copyWith(color: scheme.onSurfaceVariant),
+              style: Theme.of(context).textTheme.bodyMedium
+                  ?.copyWith(color: scheme.onSurfaceVariant),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: AppSpacing.lg),

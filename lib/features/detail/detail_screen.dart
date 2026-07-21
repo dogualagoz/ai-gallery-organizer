@@ -8,6 +8,7 @@ import '../../core/constants/ui_constants.dart';
 import '../../core/l10n/category_labels.dart';
 import '../../core/l10n/l10n_extension.dart';
 import '../../core/models/screenshot_entry.dart';
+import '../../core/services/category_names_service.dart';
 import '../gallery/data/screenshot_repository.dart';
 import '../gallery/providers/gallery_provider.dart';
 import 'widgets/detail_actions.dart';
@@ -85,13 +86,13 @@ class _ScreenshotImage extends StatelessWidget {
 }
 
 /// Kategori çipi, etiketler ve OCR metni; analiz yoksa bekleme durumu.
-class _MetadataSection extends StatelessWidget {
+class _MetadataSection extends ConsumerWidget {
   const _MetadataSection({required this.entry});
 
   final ScreenshotEntry entry;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
     final ColorScheme scheme = Theme.of(context).colorScheme;
     final TextTheme textTheme = Theme.of(context).textTheme;
@@ -117,7 +118,12 @@ class _MetadataSection extends StatelessWidget {
         if (entry.category != null)
           Chip(
             avatar: Icon(entry.category!.icon, size: 18, color: scheme.primary),
-            label: Text(entry.category!.label(l10n)),
+            label: Text(
+              entry.category!.displayName(
+                l10n,
+                ref.watch(categoryNamesProvider),
+              ),
+            ),
           ),
         if (entry.tags.isNotEmpty) ...[
           const SizedBox(height: AppSpacing.md),

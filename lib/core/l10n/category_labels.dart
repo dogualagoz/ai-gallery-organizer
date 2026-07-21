@@ -53,6 +53,11 @@ extension ScreenshotCategoryX on ScreenshotCategory {
     }
   }
 
+  /// Görüntülenecek ad: kullanıcı özel adı ([overrides]) varsa onu, yoksa
+  /// lokalize [label]'ı döndürür. [overrides] anahtarı kategori index'idir.
+  String displayName(AppLocalizations l10n, Map<int, String> overrides) =>
+      overrides[index] ?? label(l10n);
+
   /// Kategoriye eşlik eden ikon.
   IconData get icon {
     switch (this) {

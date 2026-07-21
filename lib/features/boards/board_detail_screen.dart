@@ -13,6 +13,7 @@ import '../../core/models/board.dart';
 import '../../core/models/screenshot_category.dart';
 import '../../core/models/screenshot_entry.dart';
 import '../../core/router/app_router.dart';
+import '../../core/services/category_names_service.dart';
 import '../../core/services/entitlement_service.dart';
 import '../../core/widgets/edge_swipe_back.dart';
 import '../../core/widgets/screenshot_results_grid.dart';
@@ -58,8 +59,9 @@ class _BoardDetailScreenState extends ConsumerState<BoardDetailScreen> {
               .value
               ?.firstWhereOrNull((b) => b.id == widget.boardId);
 
+    final Map<int, String> categoryNames = ref.watch(categoryNamesProvider);
     final String title = widget.category != null
-        ? widget.category!.label(l10n)
+        ? widget.category!.displayName(l10n, categoryNames)
         : (board?.name ?? l10n.boardsTitle);
 
     final bool canBulkDelete = ref.watch(entitlementProvider).canBulkDelete;
@@ -83,6 +85,13 @@ class _BoardDetailScreenState extends ConsumerState<BoardDetailScreen> {
               : null,
           actions: _selectionMode
               ? [
+                  IconButton(
+                    tooltip: l10n.moveAction,
+                    icon: const Icon(Icons.drive_file_move_outline),
+                    onPressed: _selectedIds.isEmpty || _bulkDeleting
+                        ? null
+                        : _moveSelected,
+                  ),
                   IconButton(
                     tooltip: l10n.bulkDeleteAction,
                     icon: _bulkDeleting
@@ -123,6 +132,26 @@ class _BoardDetailScreenState extends ConsumerState<BoardDetailScreen> {
                       icon: const Icon(Icons.delete_outline),
                       onPressed: () =>
                           _showDeleteConfirm(context, widget.boardId!),
+                    ),
+                  if (widget.category != null)
+                    PopupMenuButton<_CategoryMenu>(
+                      onSelected: (item) => switch (item) {
+                        _CategoryMenu.rename => _renameCategory(
+                          widget.category!,
+                        ),
+                        _CategoryMenu.deleteAll => _deleteAllCategory(filtered),
+                      },
+                      itemBuilder: (menuContext) => [
+                        PopupMenuItem(
+                          value: _CategoryMenu.rename,
+                          child: Text(l10n.categoryRenameAction),
+                        ),
+                        if (filtered.isNotEmpty)
+                          PopupMenuItem(
+                            value: _CategoryMenu.deleteAll,
+                            child: Text(l10n.categoryDeleteAllAction),
+                          ),
+                      ],
                     ),
                 ],
         ),
@@ -180,6 +209,108 @@ class _BoardDetailScreenState extends ConsumerState<BoardDetailScreen> {
     // Analiz kartı anasayfada; kullanıcı animasyonu görsün diye geri dön.
     Navigator.of(context).maybePop();
     ref.read(analysisQueueProvider.notifier).start(onlyAssetIds: ids);
+  }
+
+  /// Kategoriye özel ad verir; varsayılan etiketle aynıysa override'ı temizler.
+  Future<void> _renameCategory(ScreenshotCategory category) async {
+    final l10n = context.l10n;
+    final Map<int, String> names = ref.read(categoryNamesProvider);
+    final String current = names[category.index] ?? category.label(l10n);
+    final String? name = await showDialog<String>(
+      context: context,
+      builder: (_) => BoardNameDialog(
+        title: l10n.categoryRenameDialogTitle,
+        confirmLabel: l10n.categoryRenameAction,
+        initialValue: current,
+      ),
+    );
+    if (name == null || !mounted) return;
+    final CategoryNamesNotifier notifier = ref.read(
+      categoryNamesProvider.notifier,
+    );
+    if (name.trim() == category.label(l10n)) {
+      await notifier.clear(category);
+    } else {
+      await notifier.setName(category, name);
+    }
+  }
+
+  /// Kategorideki tüm fotoğrafları tek onayla (tek deleteWithIds) siler.
+  Future<void> _deleteAllCategory(List<ScreenshotEntry> filtered) async {
+    if (filtered.isEmpty) return;
+    final l10n = context.l10n;
+    final int count = filtered.length;
+    final bool? confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(l10n.categoryDeleteAllConfirmTitle(count)),
+        content: Text(l10n.categoryDeleteAllConfirmBody),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: Text(l10n.cancelAction),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: Text(l10n.categoryDeleteAllAction),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+
+    setState(() => _bulkDeleting = true);
+    final ScreenshotRepository repo = ref.read(screenshotRepositoryProvider);
+    final List<String> ids = filtered.map((e) => e.assetId).toList();
+    List<String> deleted;
+    try {
+      deleted = await PhotoManager.editor.deleteWithIds(ids);
+    } catch (error, stackTrace) {
+      debugPrint('Kategori toplu silme hatası: $error\n$stackTrace');
+      if (mounted) {
+        setState(() => _bulkDeleting = false);
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(l10n.bulkDeleteFailed)));
+      }
+      return;
+    }
+    for (final String assetId in deleted) {
+      await repo.removeEntry(assetId);
+    }
+    if (mounted) setState(() => _bulkDeleting = false);
+  }
+
+  /// Seçili fotoğrafları başka bir sistem kategorisine veya özel panoya taşır.
+  Future<void> _moveSelected() async {
+    final List<Board> boards = ref.read(boardsProvider).value ?? const [];
+    final Map<int, String> names = ref.read(categoryNamesProvider);
+    final _MoveTarget? target = await showModalBottomSheet<_MoveTarget>(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.lg)),
+      ),
+      builder: (_) => _MoveTargetSheet(
+        boards: boards,
+        categoryNames: names,
+        currentCategory: widget.category,
+      ),
+    );
+    if (target == null || !mounted) return;
+
+    final ScreenshotRepository repo = ref.read(screenshotRepositoryProvider);
+    for (final String assetId in _selectedIds) {
+      if (target.category != null) {
+        await repo.setCategory(assetId, target.category!);
+      } else if (target.boardId != null) {
+        await repo.assignToBoard(assetId, target.boardId);
+      }
+    }
+    if (!mounted) return;
+    setState(() {
+      _selectionMode = false;
+      _selectedIds.clear();
+    });
   }
 
   Future<void> _bulkDelete() async {
@@ -254,6 +385,86 @@ extension _FirstWhereOrNull<T> on List<T> {
       if (test(element)) return element;
     }
     return null;
+  }
+}
+
+/// Kategori detayındaki taşma menüsü seçenekleri.
+enum _CategoryMenu { rename, deleteAll }
+
+/// Taşıma hedefi: ya bir sistem kategorisi ya da bir özel pano.
+class _MoveTarget {
+  const _MoveTarget.category(this.category) : boardId = null;
+  const _MoveTarget.board(this.boardId) : category = null;
+
+  final ScreenshotCategory? category;
+  final String? boardId;
+}
+
+/// Seçili fotoğrafların taşınacağı hedefi seçtiren alt sayfa: sistem
+/// kategorileri + özel panolar.
+class _MoveTargetSheet extends StatelessWidget {
+  const _MoveTargetSheet({
+    required this.boards,
+    required this.categoryNames,
+    required this.currentCategory,
+  });
+
+  final List<Board> boards;
+  final Map<int, String> categoryNames;
+  final ScreenshotCategory? currentCategory;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final TextTheme textTheme = Theme.of(context).textTheme;
+    final List<ScreenshotCategory> categories = ScreenshotCategory.values
+        .where((c) => c != currentCategory)
+        .toList();
+
+    return SafeArea(
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          maxHeight: MediaQuery.sizeOf(context).height * 0.7,
+        ),
+        child: ListView(
+          shrinkWrap: true,
+          padding: const EdgeInsets.all(AppSpacing.md),
+          children: [
+            Text(l10n.moveSheetTitle, style: textTheme.titleMedium),
+            const SizedBox(height: AppSpacing.sm),
+            Text(
+              l10n.moveSectionCategories,
+              style: textTheme.labelMedium?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ),
+            for (final ScreenshotCategory category in categories)
+              ListTile(
+                leading: Icon(category.icon),
+                title: Text(category.displayName(l10n, categoryNames)),
+                onTap: () =>
+                    Navigator.of(context).pop(_MoveTarget.category(category)),
+              ),
+            if (boards.isNotEmpty) ...[
+              const SizedBox(height: AppSpacing.sm),
+              Text(
+                l10n.moveSectionBoards,
+                style: textTheme.labelMedium?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+              ),
+              for (final Board board in boards)
+                ListTile(
+                  leading: const Icon(Icons.folder_outlined),
+                  title: Text(board.name),
+                  onTap: () =>
+                      Navigator.of(context).pop(_MoveTarget.board(board.id)),
+                ),
+            ],
+          ],
+        ),
+      ),
+    );
   }
 }
 

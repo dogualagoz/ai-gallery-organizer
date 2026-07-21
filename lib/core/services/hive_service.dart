@@ -17,6 +17,7 @@ import '../models/screenshot_entry.dart';
 abstract final class HiveService {
   static late Box<ScreenshotEntry> screenshots;
   static late Box<Board> boards;
+  static late Box<String> categoryNames;
 
   static Future<void> init() async {
     await Hive.initFlutter();
@@ -27,14 +28,16 @@ abstract final class HiveService {
       cipher,
     );
     boards = await _openEncrypted<Board>(HiveBoxes.boards, cipher);
+    categoryNames = await _openEncrypted<String>(
+      HiveBoxes.categoryNames,
+      cipher,
+    );
   }
 
   /// Şifreleme anahtarını Keychain'den okur; ilk açılışta üretip kaydeder.
   static Future<Uint8List> _loadOrCreateKey() async {
     const FlutterSecureStorage storage = FlutterSecureStorage();
-    final String? stored = await storage.read(
-      key: HiveBoxes.encryptionKeyName,
-    );
+    final String? stored = await storage.read(key: HiveBoxes.encryptionKeyName);
     if (stored != null) return base64Decode(stored);
     final List<int> key = Hive.generateSecureKey();
     await storage.write(

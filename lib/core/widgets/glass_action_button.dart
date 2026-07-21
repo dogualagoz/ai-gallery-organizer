@@ -51,7 +51,11 @@ class GlassActionButton extends StatelessWidget {
                 Haptics.tap();
                 onPressed();
               },
-              child: Icon(icon, color: scheme.primary, size: AppSizes.navBarIcon),
+              child: Icon(
+                icon,
+                color: scheme.primary,
+                size: AppSizes.navBarIcon,
+              ),
             ),
           ),
         ),

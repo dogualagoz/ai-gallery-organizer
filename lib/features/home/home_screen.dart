@@ -10,6 +10,7 @@ import '../../core/models/board.dart';
 import '../../core/models/screenshot_category.dart';
 import '../../core/models/screenshot_entry.dart';
 import '../../core/router/app_router.dart';
+import '../../core/services/category_names_service.dart';
 import '../../core/services/entitlement_service.dart';
 import '../../core/services/review_service.dart';
 import '../../core/widgets/pro_badge.dart';
@@ -297,6 +298,7 @@ class _BoardsSection extends ConsumerWidget {
             categories: nonEmptyCategories,
             entries: entries,
             repo: repo,
+            categoryNames: ref.watch(categoryNamesProvider),
           ),
         const SizedBox(height: AppSpacing.lg),
         Text(

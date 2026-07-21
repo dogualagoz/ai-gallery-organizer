@@ -26,11 +26,15 @@ class SystemBoardsGrid extends StatelessWidget {
     required this.categories,
     required this.entries,
     required this.repo,
+    this.categoryNames = const {},
   });
 
   final List<ScreenshotCategory> categories;
   final List<ScreenshotEntry> entries;
   final ScreenshotRepository repo;
+
+  /// Kategori index → kullanıcı özel adı (yoksa çeviri etiketi kullanılır).
+  final Map<int, String> categoryNames;
 
   @override
   Widget build(BuildContext context) {
@@ -61,7 +65,7 @@ class SystemBoardsGrid extends StatelessWidget {
             delay: boardStaggerStep * index,
             child: BoardTile(
               icon: category.icon,
-              label: category.label(l10n),
+              label: category.displayName(l10n, categoryNames),
               count: categoryEntries.length,
               covers: boardCovers(repo, categoryEntries),
               openBuilder: (context) =>

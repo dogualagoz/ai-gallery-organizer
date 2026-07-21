@@ -386,5 +386,19 @@
     }
   },
   "sortingFinishConfirmBody": "These will be permanently removed from your photo library.",
-  "sortingFinishKeep": "Keep them"
+  "sortingFinishKeep": "Keep them",
+  "categoryRenameAction": "Rename",
+  "categoryRenameDialogTitle": "Rename category",
+  "categoryDeleteAllAction": "Delete all",
+  "categoryDeleteAllConfirmTitle": "Delete all {count} screenshots?",
+  "@categoryDeleteAllConfirmTitle": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "categoryDeleteAllConfirmBody": "These will be permanently removed from your photo library.",
+  "moveAction": "Move",
+  "moveSheetTitle": "Move to",
+  "moveSectionCategories": "Categories",
+  "moveSectionBoards": "Boards"
 }

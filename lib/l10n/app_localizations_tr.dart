@@ -756,4 +756,34 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get sortingFinishKeep => 'Kalsın';
+
+  @override
+  String get categoryRenameAction => 'Yeniden adlandır';
+
+  @override
+  String get categoryRenameDialogTitle => 'Kategoriyi yeniden adlandır';
+
+  @override
+  String get categoryDeleteAllAction => 'Tümünü sil';
+
+  @override
+  String categoryDeleteAllConfirmTitle(int count) {
+    return '$count ekran görüntüsünün tümü silinsin mi?';
+  }
+
+  @override
+  String get categoryDeleteAllConfirmBody =>
+      'Bunlar fotoğraf kütüphanenden kalıcı olarak silinir.';
+
+  @override
+  String get moveAction => 'Taşı';
+
+  @override
+  String get moveSheetTitle => 'Şuraya taşı';
+
+  @override
+  String get moveSectionCategories => 'Kategoriler';
+
+  @override
+  String get moveSectionBoards => 'Panolar';
 }

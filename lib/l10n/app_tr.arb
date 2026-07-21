@@ -386,5 +386,19 @@
     }
   },
   "sortingFinishConfirmBody": "Bunlar fotoğraf kütüphanenden kalıcı olarak silinir.",
-  "sortingFinishKeep": "Kalsın"
+  "sortingFinishKeep": "Kalsın",
+  "categoryRenameAction": "Yeniden adlandır",
+  "categoryRenameDialogTitle": "Kategoriyi yeniden adlandır",
+  "categoryDeleteAllAction": "Tümünü sil",
+  "categoryDeleteAllConfirmTitle": "{count} ekran görüntüsünün tümü silinsin mi?",
+  "@categoryDeleteAllConfirmTitle": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "categoryDeleteAllConfirmBody": "Bunlar fotoğraf kütüphanenden kalıcı olarak silinir.",
+  "moveAction": "Taşı",
+  "moveSheetTitle": "Şuraya taşı",
+  "moveSectionCategories": "Kategoriler",
+  "moveSectionBoards": "Panolar"
 }

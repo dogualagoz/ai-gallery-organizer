@@ -1393,6 +1393,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Keep them'**
   String get sortingFinishKeep;
+
+  /// No description provided for @categoryRenameAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Rename'**
+  String get categoryRenameAction;
+
+  /// No description provided for @categoryRenameDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Rename category'**
+  String get categoryRenameDialogTitle;
+
+  /// No description provided for @categoryDeleteAllAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete all'**
+  String get categoryDeleteAllAction;
+
+  /// No description provided for @categoryDeleteAllConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete all {count} screenshots?'**
+  String categoryDeleteAllConfirmTitle(int count);
+
+  /// No description provided for @categoryDeleteAllConfirmBody.
+  ///
+  /// In en, this message translates to:
+  /// **'These will be permanently removed from your photo library.'**
+  String get categoryDeleteAllConfirmBody;
+
+  /// No description provided for @moveAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Move'**
+  String get moveAction;
+
+  /// No description provided for @moveSheetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Move to'**
+  String get moveSheetTitle;
+
+  /// No description provided for @moveSectionCategories.
+  ///
+  /// In en, this message translates to:
+  /// **'Categories'**
+  String get moveSectionCategories;
+
+  /// No description provided for @moveSectionBoards.
+  ///
+  /// In en, this message translates to:
+  /// **'Boards'**
+  String get moveSectionBoards;
 }
 
 class _AppLocalizationsDelegate

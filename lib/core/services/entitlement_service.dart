@@ -58,16 +58,12 @@ class EntitlementState {
   }
 
   /// Deneme penceresinde kalan analiz hakkı.
-  int get remainingTrialAnalysis =>
-      (TrialLimits.aiAnalysis - trialAnalysisUsed).clamp(
-        0,
-        TrialLimits.aiAnalysis,
-      );
+  int get remainingTrialAnalysis => (TrialLimits.aiAnalysis - trialAnalysisUsed)
+      .clamp(0, TrialLimits.aiAnalysis);
 
   bool get canAnalyze {
     if (isPro) {
-      return !isInTrialWindow ||
-          remainingTrialAnalysis + analysisCredits > 0;
+      return !isInTrialWindow || remainingTrialAnalysis + analysisCredits > 0;
     }
     return totalRemainingAnalysis > 0;
   }
@@ -79,9 +75,9 @@ class EntitlementState {
       (FreeLimits.aiAnalysis - aiAnalysisUsed).clamp(0, FreeLimits.aiAnalysis);
 
   /// Haftalık ücretsiz kotanın yenileneceği an.
-  DateTime get nextWeeklyReset => DateTime.fromMillisecondsSinceEpoch(
-    weekStartMs,
-  ).add(FreeLimits.aiAnalysisWindow);
+  DateTime get nextWeeklyReset =>
+      DateTime.fromMillisecondsSinceEpoch(weekStartMs)
+          .add(FreeLimits.aiAnalysisWindow);
 
   /// Free kota + satın alınan kredilerin toplamı.
   int get totalRemainingAnalysis => remainingFreeAnalysis + analysisCredits;
@@ -161,7 +157,8 @@ class EntitlementNotifier extends Notifier<EntitlementState> {
   /// Krediler etkilenmez. [now] yalnız testlerde saat enjeksiyonu içindir.
   void ensureWeeklyWindow({DateTime? now}) {
     final int nowMs = (now ?? DateTime.now()).millisecondsSinceEpoch;
-    if (nowMs - state.weekStartMs < FreeLimits.aiAnalysisWindow.inMilliseconds) {
+    if (nowMs - state.weekStartMs <
+        FreeLimits.aiAnalysisWindow.inMilliseconds) {
       return;
     }
     state = state.copyWith(
@@ -203,8 +200,7 @@ class EntitlementNotifier extends Notifier<EntitlementState> {
     required String productId,
     int? purchaseMs,
   }) async {
-    final int effectiveMs =
-        purchaseMs ?? DateTime.now().millisecondsSinceEpoch;
+    final int effectiveMs = purchaseMs ?? DateTime.now().millisecondsSinceEpoch;
     state = state.copyWith(
       isPro: true,
       proPurchaseMs: effectiveMs,

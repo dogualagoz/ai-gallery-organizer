@@ -146,6 +146,17 @@ class ScreenshotRepository {
     await _box.put(assetId, entry);
   }
 
+  /// Kaydın sistem kategorisini elle değiştirir (kullanıcı düzeltmesi/taşıması).
+  /// Özel board'dan da çıkarır ki fotoğraf hedef kategoride görünsün.
+  Future<void> setCategory(String assetId, ScreenshotCategory category) async {
+    final ScreenshotEntry? entry = _box.get(assetId);
+    if (entry == null) return;
+    entry
+      ..category = category
+      ..boardId = null;
+    await _box.put(assetId, entry);
+  }
+
   /// Metadata kaydını siler (cihazdan silme photo_manager editor ile ayrıca yapılır).
   Future<void> removeEntry(String assetId) => _box.delete(assetId);
 
