@@ -1,8 +1,9 @@
-// Anasayfadaki tek analiz bileşeni: idle'da istatistik + "Analiz et" butonu
-// gösterir; butona basınca AYNI kartın içinde (ekstra ekran açmadan) kaynak
-// yığından kategori şeritlerine particle izli uçuş animasyonu oynar, biter ve
-// özet gösterip idle'a döner. Sahne widget'larını (kaynak yığın, şeritler,
-// uçan kart, particle) inline, sınırlı bir Stack içinde yeniden kullanır.
+// Anasayfadaki tek analiz bileşeni. Idle'da istatistik + "Analiz et" butonu
+// gösterir; butona basınca istatistikler sola kayar, sağdan fotoğraf grubu
+// (kaynak yığın) gelir ve bu yığından çıkan fotoğraflar KARTIN DIŞINA taşıp
+// anasayfadaki gerçek kategori karolarına particle izli uçuşla iner. Uçuşlar
+// tam ekran Overlay'de global koordinatlarla çizilir; hedef karo konumları
+// CategoryTargetScope üzerinden çözülür. Tur bitince kart içinde özet gösterir.
 import 'dart:async';
 import 'dart:math';
 
@@ -21,6 +22,7 @@ import '../../../core/services/haptic_service.dart';
 import '../../gallery/data/screenshot_repository.dart';
 import '../providers/analysis_queue_provider.dart';
 import 'analyze_card_content.dart';
+import 'category_target_scope.dart';
 import 'scene_flying_card.dart';
 import 'scene_particles.dart';
 import 'scene_widgets.dart';
@@ -28,7 +30,7 @@ import 'scene_widgets.dart';
 /// Aynı anda uçabilen kart sayısı; fazlası sabit kadansla kuyrukta bekler.
 const int _maxConcurrentFlights = 6;
 
-/// Tek kartın kaynaktan şeride süzülme süresi — sakin, premium tempo.
+/// Tek kartın kaynaktan karoya süzülme süresi — sakin, premium tempo.
 const Duration _flightDuration = Duration(milliseconds: 900);
 
 /// Kuyruğu boşaltan sabit kadans (tek tek besleme → akış hissi).
@@ -37,9 +39,9 @@ const Duration _spawnCadence = Duration(milliseconds: 140);
 /// İniş patlamasının çizim kutusu.
 const double _burstSize = 70;
 
-/// Animasyon alanının sabit yüksekliği — koordinatlar bu Stack'e göre olduğu
-/// için sabit tutulur (tur boyunca hedefler kaymaz).
-const double _animAreaHeight = 430;
+/// İstatistik → fotoğraf grubu yatay geçişi ve kart genişlemesi süresi.
+/// Belirgin, sakin bir açılış için standart geçişten uzun tutulur.
+const Duration _revealDuration = Duration(milliseconds: 650);
 
 class AnalyzeCard extends ConsumerStatefulWidget {
   const AnalyzeCard({super.key, required this.entries});
@@ -52,22 +54,25 @@ class AnalyzeCard extends ConsumerStatefulWidget {
 
 class _AnalyzeCardState extends ConsumerState<AnalyzeCard>
     with TickerProviderStateMixin {
-  final GlobalKey _stackKey = GlobalKey();
-  final GlobalKey _sourceKey = GlobalKey();
-  final Map<ScreenshotCategory, GlobalKey> _laneKeys = {};
+  /// Kaynak yığın (uçuşların çıkış noktası) — global merkezi buradan ölçülür.
+  final GlobalKey _clusterKey = GlobalKey();
 
-  final List<ScreenshotCategory> _lanes = [];
   final Map<ScreenshotCategory, int> _landed = {};
   final List<SceneFlight> _flights = [];
   final List<_Burst> _bursts = [];
   final List<AnalyzedItem> _spawnQueue = [];
   final Random _random = Random();
 
+  /// Uçan kartlar + patlamalar tam ekran bu katmanda (global koordinat) çizilir.
+  OverlayEntry? _overlayEntry;
+
   Timer? _spawnTimer;
   int _lastSeenDone = 0;
   int _landedTotal = 0;
   bool _summaryShown = false;
   bool _successHapticDone = false;
+  // AnimatedSwitcher geçişinde giren/çıkan içeriği ayırmak için son faz anahtarı.
+  String _currentPhase = '';
 
   @override
   void initState() {
@@ -82,11 +87,9 @@ class _AnalyzeCardState extends ConsumerState<AnalyzeCard>
     for (final SceneFlight flight in _flights) {
       flight.controller.dispose();
     }
+    _overlayEntry?.remove();
     super.dispose();
   }
-
-  GlobalKey _laneKeyFor(ScreenshotCategory category) =>
-      _laneKeys.putIfAbsent(category, GlobalKey.new);
 
   // ---- Kullanıcı aksiyonları ---------------------------------------------
 
@@ -123,12 +126,13 @@ class _AnalyzeCardState extends ConsumerState<AnalyzeCard>
     _flights.clear();
     _bursts.clear();
     _spawnQueue.clear();
-    _lanes.clear();
     _landed.clear();
     _landedTotal = 0;
     _lastSeenDone = 0;
     _summaryShown = false;
     _successHapticDone = false;
+    _overlayEntry?.remove();
+    _overlayEntry = null;
   }
 
   // ---- Kuyruk → uçuş akışı ------------------------------------------------
@@ -149,19 +153,18 @@ class _AnalyzeCardState extends ConsumerState<AnalyzeCard>
   void _drainSpawnQueue() {
     if (!mounted) return;
     if (_flights.length >= _maxConcurrentFlights || _spawnQueue.isEmpty) return;
-    if (_stackSize() == null) return; // layout henüz yok, sonraki tik dener
+    if (_sourceCenter() == null) return; // kaynak yığın henüz yerleşmedi
     _spawnFlight(_spawnQueue.removeAt(0));
   }
 
   void _spawnFlight(AnalyzedItem item) {
-    final Size stack = _stackSize()!;
-    if (!_lanes.contains(item.category)) _lanes.add(item.category);
-
-    final Offset source = _sourceCenter(stack);
-    final Offset target = _targetCenter(item.category, stack);
+    final Offset source = _sourceCenter()!;
+    final Offset start = source + Offset(_random.nextDouble() * 30 - 15, 0);
+    final Offset target = _targetCenter(item.category, source);
+    // Aşağı sarkan kavis (yerçekimi hissi): kontrol noktası orta + aşağı bump.
     final Offset control =
-        Offset.lerp(source, target, 0.5)! +
-        Offset(_random.nextDouble() * 60 - 30, -24 - _random.nextDouble() * 30);
+        Offset.lerp(start, target, 0.5)! +
+        Offset(_random.nextDouble() * 70 - 35, 30 + _random.nextDouble() * 50);
 
     final AnimationController controller = AnimationController(
       vsync: this,
@@ -169,28 +172,37 @@ class _AnalyzeCardState extends ConsumerState<AnalyzeCard>
     );
     final SceneFlight flight = SceneFlight(
       asset: ref.read(screenshotRepositoryProvider).assetFor(item.assetId),
-      start: source + Offset(_random.nextDouble() * 30 - 15, 0),
+      start: start,
       control: control,
       end: target,
       controller: controller,
     );
+    _ensureOverlay();
     controller.forward().whenComplete(() => _onLanded(flight, item));
     setState(() => _flights.add(flight));
+    _overlayEntry?.markNeedsBuild();
   }
 
   void _onLanded(SceneFlight flight, AnalyzedItem item) {
     if (!mounted) return;
     flight.controller.dispose();
-    final _Burst burst = _Burst(flight.end);
     setState(() {
       _flights.remove(flight);
       _landed[item.category] = (_landed[item.category] ?? 0) + 1;
       _landedTotal += 1;
-      _bursts.add(burst);
+      _bursts.add(_Burst(flight.end));
     });
+    _overlayEntry?.markNeedsBuild();
     if (_landedTotal % Haptics.progressTickEvery == 0) Haptics.tick();
     _drainSpawnQueue();
     _maybeFinish(ref.read(analysisQueueProvider));
+  }
+
+  void _removeBurst(_Burst burst) {
+    if (!mounted) return;
+    _bursts.remove(burst);
+    _overlayEntry?.markNeedsBuild();
+    _maybeRemoveOverlay();
   }
 
   /// Tur terminal statüye geçtiyse ve tüm uçuşlar bittiyse özeti gösterir.
@@ -212,43 +224,84 @@ class _AnalyzeCardState extends ConsumerState<AnalyzeCard>
     setState(() {});
   }
 
-  // ---- Koordinat yardımcıları --------------------------------------------
+  // ---- Uçuş katmanı (Overlay) --------------------------------------------
 
-  Size? _stackSize() {
-    final RenderBox? box =
-        _stackKey.currentContext?.findRenderObject() as RenderBox?;
-    return (box != null && box.hasSize) ? box.size : null;
+  void _ensureOverlay() {
+    if (_overlayEntry != null) return;
+    _overlayEntry = OverlayEntry(builder: _buildFlightLayer);
+    Overlay.of(context).insert(_overlayEntry!);
   }
 
-  Offset? _centerOf(GlobalKey key) {
-    final RenderBox? stack =
-        _stackKey.currentContext?.findRenderObject() as RenderBox?;
-    final RenderBox? target =
-        key.currentContext?.findRenderObject() as RenderBox?;
-    if (stack == null ||
-        target == null ||
-        !target.attached ||
-        !target.hasSize) {
-      return null;
+  void _maybeRemoveOverlay() {
+    if (_flights.isEmpty &&
+        _bursts.isEmpty &&
+        !ref.read(analysisQueueProvider).isRunning) {
+      _overlayEntry?.remove();
+      _overlayEntry = null;
     }
-    return target.localToGlobal(
-      target.size.center(Offset.zero),
-      ancestor: stack,
+  }
+
+  Widget _buildFlightLayer(BuildContext context) {
+    final ColorScheme scheme = Theme.of(context).colorScheme;
+    return IgnorePointer(
+      child: Stack(
+        children: [
+          for (final _Burst burst in _bursts)
+            Positioned(
+              left: burst.center.dx - _burstSize / 2,
+              top: burst.center.dy - _burstSize / 2,
+              width: _burstSize,
+              height: _burstSize,
+              child: LandingBurst(
+                key: burst.key,
+                color: scheme.primary,
+                onDone: () => _removeBurst(burst),
+              ),
+            ),
+          for (final SceneFlight flight in _flights)
+            SceneFlyingCard(flight: flight),
+        ],
+      ),
     );
   }
 
-  Offset _sourceCenter(Size stack) =>
-      _centerOf(_sourceKey) ?? Offset(stack.width / 2, stack.height * 0.24);
+  // ---- Global koordinat yardımcıları -------------------------------------
 
-  Offset _targetCenter(ScreenshotCategory category, Size stack) {
-    final Offset? real = _centerOf(_laneKeyFor(category));
-    if (real != null) return real;
-    final int i = _lanes.indexOf(category);
-    final int col = i % 2;
-    final int row = i ~/ 2;
+  /// Yüzen cam navbar + safe area'nın alttan kapladığı bant (px); hedef bunun
+  /// üstüne clamp'lenir ki fotoğraf navbar'ın altına inmesin.
+  double _navBandInset() {
+    final double safe = MediaQuery.paddingOf(context).bottom;
+    return AppSpacing.sm +
+        AppSizes.navBarHeight +
+        (safe > 0 ? safe : AppSpacing.md);
+  }
+
+  /// Kaynak yığının ekran (global) merkezi; henüz yerleşmemişse null.
+  Offset? _sourceCenter() {
+    final RenderBox? box =
+        _clusterKey.currentContext?.findRenderObject() as RenderBox?;
+    if (box == null || !box.attached || !box.hasSize) return null;
+    return box.localToGlobal(box.size.center(Offset.zero));
+  }
+
+  /// Hedef: kategori karosunun ekran merkezi (navbar üstüne clamp'li). Karo
+  /// görünmüyorsa (henüz oluşmadı) board bölgesine index'ten türetilen bir
+  /// noktaya düşer — böylece uçuş hiç donmaz.
+  Offset _targetCenter(ScreenshotCategory category, Offset source) {
+    final Size screen = MediaQuery.sizeOf(context);
+    final double maxY =
+        screen.height - _navBandInset() - sceneCardSize.height / 2;
+    final GlobalKey? key = CategoryTargetScope.of(context)?.keyFor(category);
+    final RenderBox? box =
+        key?.currentContext?.findRenderObject() as RenderBox?;
+    if (box != null && box.attached && box.hasSize) {
+      final Offset c = box.localToGlobal(box.size.center(Offset.zero));
+      return Offset(c.dx, min(c.dy, maxY));
+    }
+    final bool leftColumn = category.index.isEven;
     return Offset(
-      stack.width * (col == 0 ? 0.30 : 0.72),
-      stack.height * 0.5 + row * 56,
+      screen.width * (leftColumn ? 0.30 : 0.70),
+      min(source.dy + 300, maxY),
     );
   }
 
@@ -269,6 +322,7 @@ class _AnalyzeCardState extends ConsumerState<AnalyzeCard>
 
     final (String phase, Widget? inner) = _content(queue);
     if (inner == null) return const SizedBox.shrink();
+    _currentPhase = phase;
 
     return Container(
       margin: const EdgeInsets.only(bottom: AppSpacing.sm),
@@ -282,16 +336,33 @@ class _AnalyzeCardState extends ConsumerState<AnalyzeCard>
         border: Border.all(color: scheme.outlineVariant.withValues(alpha: 0.4)),
       ),
       child: AnimatedSize(
-        duration: AppDurations.medium,
+        duration: _revealDuration,
         curve: Curves.easeOutCubic,
         alignment: Alignment.topCenter,
-        child: AnimatedSwitcher(
-          duration: AppDurations.medium,
-          switchInCurve: Curves.easeOutCubic,
-          switchOutCurve: Curves.easeInCubic,
-          child: KeyedSubtree(key: ValueKey<String>(phase), child: inner),
+        child: ClipRect(
+          child: AnimatedSwitcher(
+            duration: _revealDuration,
+            switchInCurve: Curves.easeOutCubic,
+            switchOutCurve: Curves.easeInCubic,
+            transitionBuilder: _horizontalReveal,
+            child: KeyedSubtree(key: ValueKey<String>(phase), child: inner),
+          ),
         ),
       ),
+    );
+  }
+
+  /// Yeni içerik sağdan girer, eski içerik sola çıkar (istatistikler kaybolmaz,
+  /// sola kayar; fotoğraf grubu sağdan gelir).
+  Widget _horizontalReveal(Widget child, Animation<double> animation) {
+    final bool incoming = child.key == ValueKey<String>(_currentPhase);
+    final Offset begin = incoming ? const Offset(1, 0) : const Offset(-1, 0);
+    return SlideTransition(
+      position: Tween<Offset>(
+        begin: begin,
+        end: Offset.zero,
+      ).animate(animation),
+      child: child,
     );
   }
 
@@ -308,7 +379,7 @@ class _AnalyzeCardState extends ConsumerState<AnalyzeCard>
         ),
       );
     }
-    if (_animating) return ('anim', _animationArea(queue));
+    if (_animating) return ('anim', _clusterContent(queue));
 
     switch (queue.status) {
       case AnalysisQueueStatus.idle:
@@ -333,59 +404,18 @@ class _AnalyzeCardState extends ConsumerState<AnalyzeCard>
     }
   }
 
-  Widget _animationArea(AnalysisQueueState queue) {
-    final ColorScheme scheme = Theme.of(context).colorScheme;
+  /// Analiz sürerken kart içeriği: başlık/ilerleme + kaynak fotoğraf yığını.
+  /// Fotoğraflar bu yığından çıkıp kartın dışındaki karolara uçar.
+  Widget _clusterContent(AnalysisQueueState queue) {
     final int remaining = (queue.total - _landedTotal).clamp(0, queue.total);
-    return SizedBox(
-      height: _animAreaHeight,
-      child: Stack(
-        key: _stackKey,
-        children: [
-          Positioned.fill(child: SceneAmbientParticles(color: scheme.primary)),
-          Positioned.fill(
-            child: Column(
-              children: [
-                _AnimHeader(queue: queue, onCancel: _cancel),
-                Expanded(
-                  flex: 4,
-                  child: Center(
-                    child: SourceCluster(
-                      sourceKey: _sourceKey,
-                      remaining: remaining,
-                    ),
-                  ),
-                ),
-                Expanded(
-                  flex: 6,
-                  child: LanesArea(
-                    lanes: _lanes,
-                    landed: _landed,
-                    laneKeyFor: _laneKeyFor,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          for (final _Burst burst in _bursts)
-            Positioned(
-              left: burst.center.dx - _burstSize / 2,
-              top: burst.center.dy - _burstSize / 2,
-              width: _burstSize,
-              height: _burstSize,
-              child: IgnorePointer(
-                child: LandingBurst(
-                  key: burst.key,
-                  color: scheme.primary,
-                  onDone: () {
-                    if (mounted) setState(() => _bursts.remove(burst));
-                  },
-                ),
-              ),
-            ),
-          for (final SceneFlight flight in _flights)
-            SceneFlyingCard(flight: flight),
-        ],
-      ),
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        _AnimHeader(queue: queue, onCancel: _cancel),
+        const SizedBox(height: AppSpacing.sm),
+        SourceCluster(sourceKey: _clusterKey, remaining: remaining),
+        const SizedBox(height: AppSpacing.sm),
+      ],
     );
   }
 

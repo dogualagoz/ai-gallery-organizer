@@ -16,6 +16,7 @@ import '../analysis/providers/analysis_queue_provider.dart';
 import '../analysis/providers/auto_sort_provider.dart';
 import '../analysis/widgets/analyze_card.dart';
 import '../analysis/widgets/auto_sort_chip.dart';
+import '../analysis/widgets/category_target_scope.dart';
 import '../boards/providers/board_provider.dart';
 import '../boards/widgets/custom_boards_grid.dart';
 import '../boards/widgets/system_boards_grid.dart';
@@ -116,6 +117,9 @@ class _SyncAction extends StatelessWidget {
   }
 }
 
+// TEMP-AUTOSIM
+bool _tempAutoSimDone = false;
+
 /// Analiz kartı + panolar + son ekran görüntüleri ızgarasından oluşan gövde.
 class _HomeContent extends ConsumerWidget {
   const _HomeContent({required this.entries});
@@ -127,72 +131,85 @@ class _HomeContent extends ConsumerWidget {
     final repo = ref.watch(screenshotRepositoryProvider);
     final bool isPro = ref.watch(entitlementProvider).isPro;
 
-    return RefreshIndicator(
-      onRefresh: () => ref.read(galleryProvider.notifier).sync(),
-      child: CustomScrollView(
-        slivers: [
-          SliverAppBar(
-            // Sabitlenmez: aşağı kaydırınca içerikle birlikte gider.
-            pinned: false,
-            title: const _HomeTitle(),
-            // Pro'ya özel incelikli gradient — premium hissi ama sessiz.
-            flexibleSpace: isPro
-                ? DecoratedBox(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          Theme.of(context).colorScheme.primaryContainer
-                              .withValues(alpha: AppOpacities.proAppBarTint),
-                          Colors.transparent,
-                        ],
+    // TEMP-AUTOSIM
+    if (kDebugMode && !_tempAutoSimDone) {
+      _tempAutoSimDone = true;
+      final notifier = ref.read(analysisQueueProvider.notifier);
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Future.delayed(const Duration(seconds: 3), () => notifier.simulate());
+      });
+    }
+
+    // Uçan analiz fotoğraflarının hedefi olan kategori karoları ile kaynak
+    // (AnalyzeCard) aynı kapsamda; uçuşlar kartın dışına çıkıp karolara iner.
+    return CategoryTargetProvider(
+      child: RefreshIndicator(
+        onRefresh: () => ref.read(galleryProvider.notifier).sync(),
+        child: CustomScrollView(
+          slivers: [
+            SliverAppBar(
+              // Sabitlenmez: aşağı kaydırınca içerikle birlikte gider.
+              pinned: false,
+              title: const _HomeTitle(),
+              // Pro'ya özel incelikli gradient — premium hissi ama sessiz.
+              flexibleSpace: isPro
+                  ? DecoratedBox(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            Theme.of(context).colorScheme.primaryContainer
+                                .withValues(alpha: AppOpacities.proAppBarTint),
+                            Colors.transparent,
+                          ],
+                        ),
                       ),
-                    ),
-                    child: const SizedBox.expand(),
-                  )
-                : null,
-            actions: [
-              // DEBUG: API harcamadan analiz animasyonunu tetikler.
-              if (kDebugMode)
-                IconButton(
-                  tooltip: 'Animasyonu dene (debug)',
-                  icon: const Icon(Icons.science_outlined),
-                  onPressed: () =>
-                      ref.read(analysisQueueProvider.notifier).simulate(),
-                ),
-              _SyncAction(
-                onSync: () => HomeScreen._syncWithFeedback(context, ref),
-              ),
-            ],
-          ),
-          SliverPadding(
-            padding: const EdgeInsets.fromLTRB(
-              AppSpacing.md,
-              AppSpacing.xs,
-              AppSpacing.md,
-              0,
-            ),
-            sliver: SliverToBoxAdapter(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  if (!isPro) const AutoSortChip(),
-                  AnalyzeCard(entries: entries),
-                  const SizedBox(height: AppSpacing.sm),
-                  _BoardsSection(entries: entries, repo: repo),
-                  const SizedBox(height: AppSpacing.lg),
-                  Text(
-                    context.l10n.homeRecentsSection,
-                    style: Theme.of(context).textTheme.titleMedium,
+                      child: const SizedBox.expand(),
+                    )
+                  : null,
+              actions: [
+                // DEBUG: API harcamadan analiz animasyonunu tetikler.
+                if (kDebugMode)
+                  IconButton(
+                    tooltip: 'Animasyonu dene (debug)',
+                    icon: const Icon(Icons.science_outlined),
+                    onPressed: () =>
+                        ref.read(analysisQueueProvider.notifier).simulate(),
                   ),
-                  const SizedBox(height: AppSpacing.xs),
-                ],
+                _SyncAction(
+                  onSync: () => HomeScreen._syncWithFeedback(context, ref),
+                ),
+              ],
+            ),
+            SliverPadding(
+              padding: const EdgeInsets.fromLTRB(
+                AppSpacing.md,
+                AppSpacing.xs,
+                AppSpacing.md,
+                0,
+              ),
+              sliver: SliverToBoxAdapter(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (!isPro) const AutoSortChip(),
+                    AnalyzeCard(entries: entries),
+                    const SizedBox(height: AppSpacing.sm),
+                    _BoardsSection(entries: entries, repo: repo),
+                    const SizedBox(height: AppSpacing.lg),
+                    Text(
+                      context.l10n.homeRecentsSection,
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                    const SizedBox(height: AppSpacing.xs),
+                  ],
+                ),
               ),
             ),
-          ),
-          _RecentsGrid(entries: entries, repo: repo),
-        ],
+            _RecentsGrid(entries: entries, repo: repo),
+          ],
+        ),
       ),
     );
   }
