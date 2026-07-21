@@ -1,4 +1,4 @@
-// Tinder tarzı sürüklenebilir kart: sola sil, sağa panoya ata, yukarı atla.
+// Tinder tarzı sürüklenebilir kart: sola sil, sağa atla, yukarı seçili kategoriye ata.
 import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:photo_manager_image_provider/photo_manager_image_provider.dart';
@@ -44,20 +44,26 @@ class SwipeCard extends StatefulWidget {
     required this.onDelete,
     required this.onSkip,
     required this.onAssign,
+    required this.assignIcon,
+    required this.assignLabel,
     this.controller,
   });
 
   final AssetEntity? asset;
 
-  /// Silme işlemini gerçekleştirir; kullanıcı sistem onayını reddederse
+  /// Silme işlemini gerçekleştirir (sola); kullanıcı sistem onayını reddederse
   /// `false` döner ve kart geri yaylanır.
   final Future<bool> Function() onDelete;
 
+  /// Atla (sağa): kartı bu oturumda geç.
   final VoidCallback onSkip;
 
-  /// Panoya atama akışını başlatır (board seçici); kart her koşulda merkeze
-  /// döner, gerçek atama tamamlandığında kart üst sıradan zaten düşer.
+  /// Seçili kategoriye atar (yukarı); atama sonrası kart kuyruktan düşer.
   final VoidCallback onAssign;
+
+  /// Yukarı-ata ipucunda gösterilen seçili kategori ikonu ve adı.
+  final IconData assignIcon;
+  final String assignLabel;
 
   /// Alttaki aksiyon butonlarının aynı jestleri tetikleyebilmesi için.
   final SwipeCardController? controller;
@@ -123,18 +129,19 @@ class _SwipeCardState extends State<SwipeCard>
     if (_animating) return;
     final Offset offset = _dragOffset;
     if (offset.dx > _threshold) {
-      await _performAssign();
+      await _performSkip();
     } else if (offset.dx < -_threshold) {
       await _performDelete();
     } else if (offset.dy < -_threshold && offset.dx.abs() < _threshold) {
-      await _performSkip();
+      await _performAssign();
     } else {
       await _animateTo(Offset.zero);
     }
   }
 
+  /// Yukarı: seçili kategoriye ata. Kart yukarı uçar, atama sonrası kuyruktan düşer.
   Future<void> _performAssign() async {
-    await _animateTo(Offset.zero);
+    await _animateTo(const Offset(0, -900));
     widget.onAssign();
   }
 
@@ -144,8 +151,9 @@ class _SwipeCardState extends State<SwipeCard>
     if (!removed && mounted) await _animateTo(Offset.zero);
   }
 
+  /// Sağa: atla (bu oturumda geç). Kart sağa uçar.
   Future<void> _performSkip() async {
-    await _animateTo(const Offset(0, -900));
+    await _animateTo(const Offset(700, 0));
     widget.onSkip();
   }
 
@@ -166,6 +174,7 @@ class _SwipeCardState extends State<SwipeCard>
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final ColorScheme scheme = Theme.of(context).colorScheme;
     final double angle = _dragOffset.dx / 3000;
     final double rightHint = (_dragOffset.dx / _threshold).clamp(0.0, 1.0);
     final double leftHint = (-_dragOffset.dx / _threshold).clamp(0.0, 1.0);
@@ -199,9 +208,9 @@ class _SwipeCardState extends State<SwipeCard>
                     _DirectionHint(
                       opacity: rightHint,
                       alignment: Alignment.centerRight,
-                      color: Colors.green,
-                      icon: Icons.bookmark_add_outlined,
-                      label: l10n.sortingHintAssign,
+                      color: Colors.blueGrey,
+                      icon: Icons.arrow_forward,
+                      label: l10n.sortingHintSkip,
                     ),
                   if (leftHint > 0)
                     _DirectionHint(
@@ -215,9 +224,9 @@ class _SwipeCardState extends State<SwipeCard>
                     _DirectionHint(
                       opacity: upHint,
                       alignment: Alignment.topCenter,
-                      color: Colors.blueGrey,
-                      icon: Icons.arrow_upward,
-                      label: l10n.sortingHintSkip,
+                      color: scheme.primary,
+                      icon: widget.assignIcon,
+                      label: widget.assignLabel,
                     ),
                 ],
               ),

@@ -147,13 +147,32 @@ class ScreenshotRepository {
   }
 
   /// Kaydın sistem kategorisini elle değiştirir (kullanıcı düzeltmesi/taşıması).
-  /// Özel board'dan da çıkarır ki fotoğraf hedef kategoride görünsün.
+  /// Özel board'dan da çıkarır ki fotoğraf hedef kategoride görünsün. Kart
+  /// henüz analiz edilmemişse (pending) elle kategorize edilince "işlendi"
+  /// sayılır — böylece swipe kuyruğundan düşer.
   Future<void> setCategory(String assetId, ScreenshotCategory category) async {
     final ScreenshotEntry? entry = _box.get(assetId);
     if (entry == null) return;
     entry
       ..category = category
       ..boardId = null;
+    entry.analyzedAt ??= DateTime.now();
+    await _box.put(assetId, entry);
+  }
+
+  /// Kaydın kategori/analiz durumunu verilen değerlere geri yazar. Swipe
+  /// "geri al" akışı, atama öncesi durumu birebir eski haline döndürmek için
+  /// kullanır (pending kart pending'e, `other` kartı `other`'a döner).
+  Future<void> restoreCategoryState(
+    String assetId, {
+    required ScreenshotCategory? category,
+    required DateTime? analyzedAt,
+  }) async {
+    final ScreenshotEntry? entry = _box.get(assetId);
+    if (entry == null) return;
+    entry
+      ..category = category
+      ..analyzedAt = analyzedAt;
     await _box.put(assetId, entry);
   }
 

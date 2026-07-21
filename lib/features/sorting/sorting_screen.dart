@@ -1,27 +1,24 @@
 // Swipe sıralama ekranı: analiz edilmemiş/"diğer" screenshot'lar için
-// sola sil / sağa panoya ata / yukarı atla kart akışı.
+// sola sil / sağa atla / yukarı seçili kategoriye ata kart akışı.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:photo_manager/photo_manager.dart';
 
 import '../../core/constants/ui_constants.dart';
+import '../../core/l10n/category_labels.dart';
 import '../../core/l10n/l10n_extension.dart';
-import '../../core/models/board.dart';
 import '../../core/models/screenshot_category.dart';
 import '../../core/models/screenshot_entry.dart';
 import '../../core/router/app_router.dart';
+import '../../core/services/category_names_service.dart';
 import '../../core/services/entitlement_service.dart';
 import '../../core/services/haptic_service.dart';
 import '../../core/services/review_service.dart';
-import '../boards/providers/board_provider.dart';
-import '../boards/widgets/board_name_dialog.dart';
 import '../gallery/data/screenshot_repository.dart';
 import '../gallery/providers/gallery_provider.dart';
+import 'widgets/category_picker_sheet.dart';
 import 'widgets/swipe_card.dart';
-
-/// Board seçici sheet'inde "yeni pano oluştur" satırını işaretleyen sentinel.
-const String _createNewBoardSentinel = '__create_new_board__';
 
 class SortingScreen extends ConsumerStatefulWidget {
   const SortingScreen({super.key});
@@ -34,10 +31,20 @@ class SortingScreen extends ConsumerStatefulWidget {
 enum _SwipeType { delete, skip, assign }
 
 class _SwipeAction {
-  const _SwipeAction(this.type, this.assetId);
+  const _SwipeAction(
+    this.type,
+    this.assetId, {
+    this.prevCategory,
+    this.prevAnalyzedAt,
+  });
 
   final _SwipeType type;
   final String assetId;
+
+  /// Kategori-atama öncesi durum (yalnız [_SwipeType.assign] için) — geri
+  /// alınınca kartı birebir eski haline döndürmek için saklanır.
+  final ScreenshotCategory? prevCategory;
+  final DateTime? prevAnalyzedAt;
 }
 
 class _SortingScreenState extends ConsumerState<SortingScreen> {
@@ -56,6 +63,9 @@ class _SortingScreenState extends ConsumerState<SortingScreen> {
 
   /// Sort sekmesi bir önceki karede aktif miydi — çıkışı (aktif→pasif) yakalar.
   bool _wasTabActive = true;
+
+  /// Yukarı kaydırmanın hedef kategorisi; üstteki chip'ten değiştirilir.
+  ScreenshotCategory _selectedCategory = ScreenshotCategory.social;
 
   /// Alttaki aksiyon butonlarının üstteki karta jest gönderebilmesi için.
   final SwipeCardController _cardController = SwipeCardController();
@@ -99,47 +109,65 @@ class _SortingScreenState extends ConsumerState<SortingScreen> {
         )
         .toList();
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.sortingTitle),
-        actions: [
-          if (_history.isNotEmpty)
-            IconButton(
-              tooltip: l10n.sortingUndo,
-              icon: const Icon(Icons.undo),
-              onPressed: _undo,
-            ),
-          // Silme ikonu artık ayrı bir buton/onay değil; yalnızca kaç kartın
-          // silmeye kuyruklandığını gösteren bir sayaç. Gerçek silme, Sort
-          // sekmesinden çıkışta iOS'un kendi onayıyla yapılır.
-          if (_pendingDeletes.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.only(right: AppSpacing.md),
-              child: _PendingDeleteCounter(count: _pendingDeletes.length),
-            ),
-        ],
-      ),
-      body: !entitlement.canSwipe
-          ? const _SortingLimit()
-          : queue.isEmpty
-          ? (_pendingDeletes.isEmpty
-                ? const _SortingEmpty()
-                : _SortingFinishPrompt(
-                    count: _pendingDeletes.length,
-                    deleting: _finishing,
-                    onFinish: _commitDeletes,
-                  ))
-          : _SortingDeck(
-              top: queue.first,
-              next: queue.length > 1 ? queue[1] : null,
-              remaining: queue.length,
-              asset: repo.assetFor(queue.first.assetId),
-              controller: _cardController,
-              onDelete: () => _queueDelete(queue.first.assetId),
-              onSkip: () => _skipCard(queue.first.assetId),
-              onAssign: () => _handleAssign(queue.first.assetId),
-            ),
+    final Map<int, String> categoryNames = ref.watch(categoryNamesProvider);
+    final String categoryLabel = _selectedCategory.displayName(
+      l10n,
+      categoryNames,
     );
+
+    return Scaffold(
+      body: SafeArea(
+        bottom: false,
+        child: Column(
+          children: [
+            _SortHeader(
+              categoryIcon: _selectedCategory.icon,
+              categoryLabel: categoryLabel,
+              remaining: queue.length,
+              pendingDeleteCount: _pendingDeletes.length,
+              canUndo: _history.isNotEmpty,
+              onUndo: _undo,
+              onPickCategory: _pickCategory,
+            ),
+            Expanded(
+              child: !entitlement.canSwipe
+                  ? const _SortingLimit()
+                  : queue.isEmpty
+                  ? (_pendingDeletes.isEmpty
+                        ? const _SortingEmpty()
+                        : _SortingFinishPrompt(
+                            count: _pendingDeletes.length,
+                            deleting: _finishing,
+                            onFinish: _commitDeletes,
+                          ))
+                  : _SortingDeck(
+                      top: queue.first,
+                      next: queue.length > 1 ? queue[1] : null,
+                      asset: repo.assetFor(queue.first.assetId),
+                      controller: _cardController,
+                      categoryIcon: _selectedCategory.icon,
+                      categoryLabel: categoryLabel,
+                      onDelete: () => _queueDelete(queue.first.assetId),
+                      onSkip: () => _skipCard(queue.first.assetId),
+                      onAssign: () => _assignToCategory(queue.first),
+                    ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Yukarı-atama hedef kategorisini seçtirir.
+  Future<void> _pickCategory() async {
+    Haptics.tap();
+    final ScreenshotCategory? selected = await showCategoryPickerSheet(
+      context,
+      selected: _selectedCategory,
+    );
+    if (selected != null && mounted) {
+      setState(() => _selectedCategory = selected);
+    }
   }
 
   /// Sola kaydırma: hemen silmez, silinecekler kümesine ekler (tek onay için).
@@ -172,11 +200,14 @@ class _SortingScreenState extends ConsumerState<SortingScreen> {
       case _SwipeType.skip:
         setState(() => _skippedIds.remove(action.assetId));
       case _SwipeType.assign:
-        // Atama öncesi kart kuyrukta (boardId == null) olduğundan geri alınca
-        // board'dan çıkarılır ve deste başına yeniden düşer.
+        // Atama öncesi kategori/analiz durumuna geri dön → kart deste başına düşer.
         await ref
             .read(screenshotRepositoryProvider)
-            .assignToBoard(action.assetId, null);
+            .restoreCategoryState(
+              action.assetId,
+              category: action.prevCategory,
+              analyzedAt: action.prevAnalyzedAt,
+            );
         if (mounted) setState(() {});
     }
   }
@@ -219,50 +250,26 @@ class _SortingScreenState extends ConsumerState<SortingScreen> {
     }
   }
 
-  Future<void> _handleAssign(String assetId) async {
-    final List<Board> boards = ref.read(boardsProvider).value ?? const [];
-    final String? choice = await showModalBottomSheet<String>(
-      context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.lg)),
-      ),
-      builder: (_) => _BoardPickerSheet(boards: boards),
-    );
-    if (choice == null || !mounted) return;
-
-    if (choice == _createNewBoardSentinel) {
-      await _createBoardAndAssign(assetId);
-      return;
-    }
+  /// Yukarı kaydırma: kartı üstte seçili kategoriye atar. Atama öncesi durum
+  /// geri-al için saklanır; setCategory pending kartı "işlendi" yapıp kuyruktan
+  /// düşürür.
+  Future<void> _assignToCategory(ScreenshotEntry entry) async {
     Haptics.tick();
-    await ref.read(screenshotRepositoryProvider).assignToBoard(assetId, choice);
-    await ref.read(entitlementProvider.notifier).registerSwipe();
-    if (mounted) {
-      setState(() => _history.add(_SwipeAction(_SwipeType.assign, assetId)));
-    }
-  }
-
-  Future<void> _createBoardAndAssign(String assetId) async {
-    final l10n = context.l10n;
-    if (!ref.read(entitlementProvider).canCreateBoards) {
-      if (mounted) context.push(AppRoutes.paywall);
-      return;
-    }
-    final String? name = await showDialog<String>(
-      context: context,
-      builder: (_) => BoardNameDialog(
-        title: l10n.boardsNewBoardDialogTitle,
-        confirmLabel: l10n.boardsCreateAction,
-      ),
-    );
-    if (name == null || name.isEmpty || !mounted) return;
-    final Board created = await ref.read(boardsProvider.notifier).create(name);
     await ref
         .read(screenshotRepositoryProvider)
-        .assignToBoard(assetId, created.id);
+        .setCategory(entry.assetId, _selectedCategory);
     await ref.read(entitlementProvider.notifier).registerSwipe();
     if (mounted) {
-      setState(() => _history.add(_SwipeAction(_SwipeType.assign, assetId)));
+      setState(
+        () => _history.add(
+          _SwipeAction(
+            _SwipeType.assign,
+            entry.assetId,
+            prevCategory: entry.category,
+            prevAnalyzedAt: entry.analyzedAt,
+          ),
+        ),
+      );
     }
   }
 
@@ -278,9 +285,10 @@ class _SortingDeck extends StatelessWidget {
   const _SortingDeck({
     required this.top,
     required this.next,
-    required this.remaining,
     required this.asset,
     required this.controller,
+    required this.categoryIcon,
+    required this.categoryLabel,
     required this.onDelete,
     required this.onSkip,
     required this.onAssign,
@@ -288,9 +296,10 @@ class _SortingDeck extends StatelessWidget {
 
   final ScreenshotEntry top;
   final ScreenshotEntry? next;
-  final int remaining;
   final AssetEntity? asset;
   final SwipeCardController controller;
+  final IconData categoryIcon;
+  final String categoryLabel;
   final Future<bool> Function() onDelete;
   final VoidCallback onSkip;
   final VoidCallback onAssign;
@@ -315,19 +324,6 @@ class _SortingDeck extends StatelessWidget {
       ),
       child: Column(
         children: [
-          // Kalan kart sayısı (silme sayacı artık yalnız üst bardadır).
-          SizedBox(
-            height: 28,
-            child: Center(
-              child: Text(
-                context.l10n.sortingRemainingCount(remaining),
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(height: AppSpacing.md),
           Expanded(
             child: LayoutBuilder(
               builder: (context, constraints) {
@@ -368,6 +364,8 @@ class _SortingDeck extends StatelessWidget {
                           key: ValueKey(top.assetId),
                           asset: asset,
                           controller: controller,
+                          assignIcon: categoryIcon,
+                          assignLabel: categoryLabel,
                           onDelete: onDelete,
                           onSkip: onSkip,
                           onAssign: onAssign,
@@ -381,6 +379,8 @@ class _SortingDeck extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.lg),
           _SortingActionRow(
+            categoryIcon: categoryIcon,
+            categoryLabel: categoryLabel,
             onDelete: controller.triggerDelete,
             onSkip: controller.triggerSkip,
             onAssign: controller.triggerAssign,
@@ -392,15 +392,19 @@ class _SortingDeck extends StatelessWidget {
 }
 
 /// Her zaman görünen aksiyon satırı: sol/orta/sağ konumu ilgili jest yönüyle
-/// eşleşir (sil-sol, atla-yukarı, panoya ekle-sağ), böylece kullanıcı jesti
+/// eşleşir (sil-sol, kategori-yukarı, atla-sağ), böylece kullanıcı jesti
 /// denemeden önce ne işe yaradığını görür; dokunarak da tetiklenebilir.
 class _SortingActionRow extends StatelessWidget {
   const _SortingActionRow({
+    required this.categoryIcon,
+    required this.categoryLabel,
     required this.onDelete,
     required this.onSkip,
     required this.onAssign,
   });
 
+  final IconData categoryIcon;
+  final String categoryLabel;
   final VoidCallback onDelete;
   final VoidCallback onSkip;
   final VoidCallback onAssign;
@@ -408,6 +412,7 @@ class _SortingActionRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final ColorScheme scheme = Theme.of(context).colorScheme;
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
@@ -418,16 +423,16 @@ class _SortingActionRow extends StatelessWidget {
           onTap: onDelete,
         ),
         _SortingActionButton(
-          icon: Icons.arrow_upward,
+          icon: categoryIcon,
+          label: categoryLabel,
+          color: scheme.primary,
+          onTap: onAssign,
+        ),
+        _SortingActionButton(
+          icon: Icons.arrow_forward,
           label: l10n.sortingHintSkip,
           color: Colors.blueGrey,
           onTap: onSkip,
-        ),
-        _SortingActionButton(
-          icon: Icons.bookmark_add_outlined,
-          label: l10n.sortingHintAssign,
-          color: Colors.green,
-          onTap: onAssign,
         ),
       ],
     );
@@ -475,38 +480,145 @@ class _SortingActionButton extends StatelessWidget {
   }
 }
 
-class _BoardPickerSheet extends StatelessWidget {
-  const _BoardPickerSheet({required this.boards});
+/// Sort ekranının üst başlığı (AppBar yerine): solda geri-al, ortada seçili
+/// kategori chip'i (dokununca değiştirir), sağda silme sayacı; altında kalan
+/// kart sayısı ince bir gösterge olarak. Üstte belirgin düz başlık yoktur.
+class _SortHeader extends StatelessWidget {
+  const _SortHeader({
+    required this.categoryIcon,
+    required this.categoryLabel,
+    required this.remaining,
+    required this.pendingDeleteCount,
+    required this.canUndo,
+    required this.onUndo,
+    required this.onPickCategory,
+  });
 
-  final List<Board> boards;
+  final IconData categoryIcon;
+  final String categoryLabel;
+  final int remaining;
+  final int pendingDeleteCount;
+  final bool canUndo;
+  final VoidCallback onUndo;
+  final VoidCallback onPickCategory;
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.md),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              l10n.sortingAssignSheetTitle,
-              style: Theme.of(context).textTheme.titleMedium,
+    final ColorScheme scheme = Theme.of(context).colorScheme;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.sm,
+        AppSpacing.sm,
+        AppSpacing.sm,
+        0,
+      ),
+      child: Column(
+        children: [
+          SizedBox(
+            height: 48,
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                Center(
+                  child: _CategoryChip(
+                    icon: categoryIcon,
+                    label: categoryLabel,
+                    onTap: onPickCategory,
+                  ),
+                ),
+                if (canUndo)
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: IconButton(
+                      tooltip: l10n.sortingUndo,
+                      icon: const Icon(Icons.undo),
+                      onPressed: onUndo,
+                    ),
+                  ),
+                if (pendingDeleteCount > 0)
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: Padding(
+                      padding: const EdgeInsets.only(right: AppSpacing.sm),
+                      child: _PendingDeleteCounter(count: pendingDeleteCount),
+                    ),
+                  ),
+              ],
             ),
-            const SizedBox(height: AppSpacing.sm),
-            for (final Board board in boards)
-              ListTile(
-                leading: const Icon(Icons.folder_outlined),
-                title: Text(board.name),
-                onTap: () => Navigator.of(context).pop(board.id),
+          ),
+          if (remaining > 0)
+            Padding(
+              padding: const EdgeInsets.only(top: AppSpacing.xs),
+              child: Text(
+                l10n.sortingRemainingCount(remaining),
+                style: Theme.of(
+                  context,
+                ).textTheme.labelMedium?.copyWith(color: scheme.onSurfaceVariant),
               ),
-            ListTile(
-              leading: const Icon(Icons.add),
-              title: Text(l10n.boardsNewBoardAction),
-              onTap: () => Navigator.of(context).pop(_createNewBoardSentinel),
             ),
-          ],
+        ],
+      ),
+    );
+  }
+}
+
+/// Seçili yukarı-atama kategorisini gösteren, dokununca değiştiren pill.
+class _CategoryChip extends StatelessWidget {
+  const _CategoryChip({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final ColorScheme scheme = Theme.of(context).colorScheme;
+    return Material(
+      color: scheme.primaryContainer,
+      borderRadius: BorderRadius.circular(AppRadius.pill),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onTap,
+        child: ConstrainedBox(
+          // Uzun özel adlar undo/sayaç ile çakışmasın diye ekranın %60'ıyla sınırla.
+          constraints: BoxConstraints(
+            maxWidth: MediaQuery.sizeOf(context).width * 0.6,
+          ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.md,
+              vertical: AppSpacing.sm,
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(icon, size: 18, color: scheme.onPrimaryContainer),
+                const SizedBox(width: AppSpacing.xs),
+                Flexible(
+                  child: Text(
+                    label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                      color: scheme.onPrimaryContainer,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.xs),
+                Icon(
+                  Icons.expand_more,
+                  size: 18,
+                  color: scheme.onPrimaryContainer,
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );
