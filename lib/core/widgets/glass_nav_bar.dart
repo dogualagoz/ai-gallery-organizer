@@ -48,19 +48,29 @@ class GlassNavBar extends StatefulWidget {
 }
 
 class _GlassNavBarState extends State<GlassNavBar> {
-  int? _dragIndex;
+  /// Sürükleme sırasında göstergenin sürekli (kesirli) konumu; parmağı birebir
+  /// takip eder. Sürükleme yoksa null → gösterge seçili sekmeye yaslanır.
+  double? _dragPos;
 
-  int _indexForDx(double dx, double width) {
-    final double itemWidth = width / widget.destinations.length;
-    return (dx / itemWidth).floor().clamp(0, widget.destinations.length - 1);
+  /// Parmağın x konumunu 0..(count-1) aralığında kesirli sekme konumuna çevirir.
+  double _posForDx(double dx, double width) {
+    final int count = widget.destinations.length;
+    final double itemWidth = width / count;
+    return (dx / itemWidth - 0.5).clamp(0.0, (count - 1).toDouble());
   }
 
   void _handleDragUpdate(DragUpdateDetails details, double width) {
-    final int index = _indexForDx(details.localPosition.dx, width);
-    if (index == (_dragIndex ?? widget.selectedIndex)) return;
-    _dragIndex = index;
-    Haptics.tap();
-    widget.onSelected(index);
+    final double pos = _posForDx(details.localPosition.dx, width);
+    final int prevNearest = (_dragPos ?? widget.selectedIndex.toDouble()).round();
+    // Yeni bir sekmenin üzerine gelince hafif haptik; sekme değişimi bırakınca.
+    if (pos.round() != prevNearest) Haptics.tap();
+    setState(() => _dragPos = pos);
+  }
+
+  void _handleDragEnd() {
+    final int target = (_dragPos ?? widget.selectedIndex.toDouble()).round();
+    setState(() => _dragPos = null);
+    if (target != widget.selectedIndex) widget.onSelected(target);
   }
 
   @override
@@ -70,10 +80,12 @@ class _GlassNavBarState extends State<GlassNavBar> {
     return LayoutBuilder(
       builder: (context, constraints) => GestureDetector(
         behavior: HitTestBehavior.opaque,
-        onHorizontalDragStart: (_) => _dragIndex = widget.selectedIndex,
+        onHorizontalDragStart: (_) =>
+            setState(() => _dragPos = widget.selectedIndex.toDouble()),
         onHorizontalDragUpdate: (details) =>
             _handleDragUpdate(details, constraints.maxWidth),
-        onHorizontalDragEnd: (_) => _dragIndex = null,
+        onHorizontalDragEnd: (_) => _handleDragEnd(),
+        onHorizontalDragCancel: () => setState(() => _dragPos = null),
         child: _buildGlassPill(context),
       ),
     );
@@ -105,7 +117,9 @@ class _GlassNavBarState extends State<GlassNavBar> {
             children: [
               _SlidingIndicator(
                 itemCount: widget.destinations.length,
-                selectedIndex: widget.selectedIndex,
+                position: _dragPos ?? widget.selectedIndex.toDouble(),
+                // Sürüklerken parmağı anında izle; bırakınca yaylanarak yaslan.
+                animated: _dragPos == null,
               ),
               Row(
                 children: [
@@ -130,43 +144,50 @@ class _GlassNavBarState extends State<GlassNavBar> {
   }
 }
 
-/// Seçili sekmenin arkasında kayarak hareket eden vurgu hapı.
+/// Seçili sekmenin arkasında kayan vurgu hapı. Sürüklerken [position] kesirli
+/// olur ve gösterge parmağı birebir izler ([animated] false); bırakınca
+/// [animated] true ile en yakın sekmeye yaylanarak yaslanır.
 class _SlidingIndicator extends StatelessWidget {
   const _SlidingIndicator({
     required this.itemCount,
-    required this.selectedIndex,
+    required this.position,
+    required this.animated,
   });
 
   final int itemCount;
-  final int selectedIndex;
+  final double position;
+  final bool animated;
 
   @override
   Widget build(BuildContext context) {
     final ColorScheme scheme = Theme.of(context).colorScheme;
-    // Alignment -1..1 aralığında: i. sekmenin merkezine denk gelir.
-    final double x = itemCount == 1
-        ? 0
-        : -1 + (2 * selectedIndex / (itemCount - 1));
+    // Alignment -1..1 aralığında: verilen (kesirli) sekme konumuna denk gelir.
+    final double x = itemCount == 1 ? 0 : -1 + (2 * position / (itemCount - 1));
+    final Alignment alignment = Alignment(x, 0);
 
-    return AnimatedAlign(
-      duration: AppDurations.medium,
-      // Yaylı eğri: gösterge hedefe hafif "yaylanarak" oturur, statik durmaz.
-      curve: Curves.easeOutBack,
-      alignment: Alignment(x, 0),
-      child: FractionallySizedBox(
-        widthFactor: 1 / itemCount,
-        heightFactor: 1,
-        child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.xs + 2),
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              color: scheme.primary.withValues(alpha: 0.14),
-              borderRadius: BorderRadius.circular(AppRadius.pill),
-            ),
+    final Widget pill = FractionallySizedBox(
+      widthFactor: 1 / itemCount,
+      heightFactor: 1,
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.xs + 2),
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: scheme.primary.withValues(alpha: 0.16),
+            borderRadius: BorderRadius.circular(AppRadius.pill),
           ),
         ),
       ),
     );
+
+    return animated
+        ? AnimatedAlign(
+            duration: AppDurations.medium,
+            // Yaylı eğri: gösterge hedefe hafif "yaylanarak" oturur.
+            curve: Curves.easeOutBack,
+            alignment: alignment,
+            child: pill,
+          )
+        : Align(alignment: alignment, child: pill);
   }
 }
 
