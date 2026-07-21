@@ -731,4 +731,29 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get recentsScreenTitle => 'Son ekran görüntüleri';
+
+  @override
+  String get sortingUndo => 'Geri al';
+
+  @override
+  String sortingPendingDeleteCount(int count) {
+    return '$count silinecek';
+  }
+
+  @override
+  String sortingFinishAction(int count) {
+    return '$count sil';
+  }
+
+  @override
+  String sortingFinishConfirmTitle(int count) {
+    return '$count ekran görüntüsü silinsin mi?';
+  }
+
+  @override
+  String get sortingFinishConfirmBody =>
+      'Bunlar fotoğraf kütüphanenden kalıcı olarak silinir.';
+
+  @override
+  String get sortingFinishKeep => 'Kalsın';
 }

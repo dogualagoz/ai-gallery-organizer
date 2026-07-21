@@ -731,4 +731,29 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get recentsScreenTitle => 'Recent screenshots';
+
+  @override
+  String get sortingUndo => 'Undo';
+
+  @override
+  String sortingPendingDeleteCount(int count) {
+    return '$count to delete';
+  }
+
+  @override
+  String sortingFinishAction(int count) {
+    return 'Delete $count';
+  }
+
+  @override
+  String sortingFinishConfirmTitle(int count) {
+    return 'Delete $count screenshots?';
+  }
+
+  @override
+  String get sortingFinishConfirmBody =>
+      'These will be permanently removed from your photo library.';
+
+  @override
+  String get sortingFinishKeep => 'Keep them';
 }

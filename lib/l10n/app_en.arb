@@ -365,5 +365,26 @@
   "categoryReanalyzeConfirmBody": "The screenshots in this group will be sent to AI again. This uses your weekly analysis quota.",
   "categoryReanalyzeEmpty": "There's nothing to re-analyze here.",
   "homeRecentsMore": "Show more",
-  "recentsScreenTitle": "Recent screenshots"
+  "recentsScreenTitle": "Recent screenshots",
+  "sortingUndo": "Undo",
+  "sortingPendingDeleteCount": "{count} to delete",
+  "@sortingPendingDeleteCount": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "sortingFinishAction": "Delete {count}",
+  "@sortingFinishAction": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "sortingFinishConfirmTitle": "Delete {count} screenshots?",
+  "@sortingFinishConfirmTitle": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "sortingFinishConfirmBody": "These will be permanently removed from your photo library.",
+  "sortingFinishKeep": "Keep them"
 }

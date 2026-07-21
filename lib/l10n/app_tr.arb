@@ -365,5 +365,26 @@
   "categoryReanalyzeConfirmBody": "Bu gruptaki ekran görüntüleri AI'a yeniden gönderilir. Bu, haftalık analiz hakkından harcar.",
   "categoryReanalyzeEmpty": "Burada yeniden analiz edilecek bir şey yok.",
   "homeRecentsMore": "Daha fazla göster",
-  "recentsScreenTitle": "Son ekran görüntüleri"
+  "recentsScreenTitle": "Son ekran görüntüleri",
+  "sortingUndo": "Geri al",
+  "sortingPendingDeleteCount": "{count} silinecek",
+  "@sortingPendingDeleteCount": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "sortingFinishAction": "{count} sil",
+  "@sortingFinishAction": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "sortingFinishConfirmTitle": "{count} ekran görüntüsü silinsin mi?",
+  "@sortingFinishConfirmTitle": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "sortingFinishConfirmBody": "Bunlar fotoğraf kütüphanenden kalıcı olarak silinir.",
+  "sortingFinishKeep": "Kalsın"
 }

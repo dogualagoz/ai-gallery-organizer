@@ -1357,6 +1357,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Recent screenshots'**
   String get recentsScreenTitle;
+
+  /// No description provided for @sortingUndo.
+  ///
+  /// In en, this message translates to:
+  /// **'Undo'**
+  String get sortingUndo;
+
+  /// No description provided for @sortingPendingDeleteCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} to delete'**
+  String sortingPendingDeleteCount(int count);
+
+  /// No description provided for @sortingFinishAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete {count}'**
+  String sortingFinishAction(int count);
+
+  /// No description provided for @sortingFinishConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete {count} screenshots?'**
+  String sortingFinishConfirmTitle(int count);
+
+  /// No description provided for @sortingFinishConfirmBody.
+  ///
+  /// In en, this message translates to:
+  /// **'These will be permanently removed from your photo library.'**
+  String get sortingFinishConfirmBody;
+
+  /// No description provided for @sortingFinishKeep.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep them'**
+  String get sortingFinishKeep;
 }
 
 class _AppLocalizationsDelegate

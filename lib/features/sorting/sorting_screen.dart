@@ -13,6 +13,7 @@ import '../../core/models/screenshot_entry.dart';
 import '../../core/router/app_router.dart';
 import '../../core/services/entitlement_service.dart';
 import '../../core/services/haptic_service.dart';
+import '../../core/services/review_service.dart';
 import '../boards/providers/board_provider.dart';
 import '../boards/widgets/board_name_dialog.dart';
 import '../gallery/data/screenshot_repository.dart';
@@ -29,9 +30,29 @@ class SortingScreen extends ConsumerStatefulWidget {
   ConsumerState<SortingScreen> createState() => _SortingScreenState();
 }
 
+/// Bu oturumdaki tek swipe hareketi — "Geri al" için kaydedilir.
+enum _SwipeType { delete, skip, assign }
+
+class _SwipeAction {
+  const _SwipeAction(this.type, this.assetId);
+
+  final _SwipeType type;
+  final String assetId;
+}
+
 class _SortingScreenState extends ConsumerState<SortingScreen> {
   /// Bu oturumda "atla" denen kartlar — kalıcı değil, ekran kapanınca sıfırlanır.
   final Set<String> _skippedIds = {};
+
+  /// Sola kaydırılıp silmeye kuyruklanan (henüz silinMEmiş) kartlar. Tek iOS
+  /// onayıyla toplu silinmek üzere biriktirilir.
+  final Set<String> _pendingDeletes = {};
+
+  /// Son swipe'ları geri almak için hareket geçmişi.
+  final List<_SwipeAction> _history = [];
+
+  /// Toplu silme sürerken tekrar tetiklenmeyi önler.
+  bool _finishing = false;
 
   /// Alttaki aksiyon butonlarının üstteki karta jest gönderebilmesi için.
   final SwipeCardController _cardController = SwipeCardController();
@@ -56,46 +77,145 @@ class _SortingScreenState extends ConsumerState<SortingScreen> {
           (entry) =>
               entry.boardId == null &&
               (entry.isPending || entry.category == ScreenshotCategory.other) &&
-              !_skippedIds.contains(entry.assetId),
+              !_skippedIds.contains(entry.assetId) &&
+              !_pendingDeletes.contains(entry.assetId),
         )
         .toList();
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.sortingTitle)),
+      appBar: AppBar(
+        title: Text(l10n.sortingTitle),
+        actions: [
+          if (_history.isNotEmpty)
+            IconButton(
+              tooltip: l10n.sortingUndo,
+              icon: const Icon(Icons.undo),
+              onPressed: _undo,
+            ),
+          if (_pendingDeletes.isNotEmpty)
+            TextButton.icon(
+              onPressed: _finishing ? null : _finishDeletes,
+              icon: const Icon(Icons.delete_outline, size: 18),
+              label: Text(l10n.sortingFinishAction(_pendingDeletes.length)),
+            ),
+        ],
+      ),
       body: !entitlement.canSwipe
           ? const _SortingLimit()
           : queue.isEmpty
-          ? const _SortingEmpty()
+          ? (_pendingDeletes.isEmpty
+                ? const _SortingEmpty()
+                : _SortingFinishPrompt(
+                    count: _pendingDeletes.length,
+                    deleting: _finishing,
+                    onFinish: _finishDeletes,
+                  ))
           : _SortingDeck(
               top: queue.first,
               next: queue.length > 1 ? queue[1] : null,
               remaining: queue.length,
+              pendingDeleteCount: _pendingDeletes.length,
               asset: repo.assetFor(queue.first.assetId),
               controller: _cardController,
-              onDelete: () => _handleDelete(queue.first.assetId),
-              onSkip: () {
-                Haptics.tap();
-                setState(() => _skippedIds.add(queue.first.assetId));
-              },
+              onDelete: () => _queueDelete(queue.first.assetId),
+              onSkip: () => _skipCard(queue.first.assetId),
               onAssign: () => _handleAssign(queue.first.assetId),
             ),
     );
   }
 
-  Future<bool> _handleDelete(String assetId) async {
+  /// Sola kaydırma: hemen silmez, silinecekler kümesine ekler (tek onay için).
+  Future<bool> _queueDelete(String assetId) async {
+    Haptics.confirm();
+    setState(() {
+      _pendingDeletes.add(assetId);
+      _history.add(_SwipeAction(_SwipeType.delete, assetId));
+    });
+    await ref.read(entitlementProvider.notifier).registerSwipe();
+    return true; // kart uçup gitsin; gerçek silme "Bitir"de yapılır
+  }
+
+  void _skipCard(String assetId) {
+    Haptics.tap();
+    setState(() {
+      _skippedIds.add(assetId);
+      _history.add(_SwipeAction(_SwipeType.skip, assetId));
+    });
+  }
+
+  /// Son hareketi geri alır: silme/atlama kuyruğundan çıkarır, atamayı bozar.
+  Future<void> _undo() async {
+    if (_history.isEmpty) return;
+    Haptics.tap();
+    final _SwipeAction action = _history.removeLast();
+    switch (action.type) {
+      case _SwipeType.delete:
+        setState(() => _pendingDeletes.remove(action.assetId));
+      case _SwipeType.skip:
+        setState(() => _skippedIds.remove(action.assetId));
+      case _SwipeType.assign:
+        // Atama öncesi kart kuyrukta (boardId == null) olduğundan geri alınca
+        // board'dan çıkarılır ve deste başına yeniden düşer.
+        await ref
+            .read(screenshotRepositoryProvider)
+            .assignToBoard(action.assetId, null);
+        if (mounted) setState(() {});
+    }
+  }
+
+  /// Biriken silme kuyruğunu tek deleteWithIds çağrısıyla (tek iOS onayı) siler.
+  Future<void> _finishDeletes() async {
+    if (_pendingDeletes.isEmpty || _finishing) return;
+    final l10n = context.l10n;
+    final int count = _pendingDeletes.length;
+    final bool? confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(l10n.sortingFinishConfirmTitle(count)),
+        content: Text(l10n.sortingFinishConfirmBody),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: Text(l10n.sortingFinishKeep),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: Text(l10n.sortingFinishAction(count)),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+
+    setState(() => _finishing = true);
+    final List<String> ids = _pendingDeletes.toList();
     List<String> deleted;
     try {
-      deleted = await PhotoManager.editor.deleteWithIds([assetId]);
+      deleted = await PhotoManager.editor.deleteWithIds(ids);
     } catch (error, stackTrace) {
-      debugPrint('Sıralama sil hatası ($assetId): $error\n$stackTrace');
-      if (mounted) _showSnack(context.l10n.sortingDeleteFailed);
-      return false;
+      debugPrint('Toplu swipe sil hatası: $error\n$stackTrace');
+      if (mounted) {
+        setState(() => _finishing = false);
+        _showSnack(l10n.sortingDeleteFailed);
+      }
+      return;
     }
-    if (deleted.isEmpty) return false;
-    Haptics.confirm();
-    await ref.read(screenshotRepositoryProvider).removeEntry(assetId);
-    await ref.read(entitlementProvider.notifier).registerSwipe();
-    return true;
+    final ScreenshotRepository repo = ref.read(screenshotRepositoryProvider);
+    for (final String assetId in deleted) {
+      await repo.removeEntry(assetId);
+    }
+    if (!mounted) return;
+    setState(() {
+      _finishing = false;
+      _pendingDeletes.removeAll(deleted);
+      _history.removeWhere(
+        (a) => a.type == _SwipeType.delete && deleted.contains(a.assetId),
+      );
+    });
+    // Temizlik sonrası olumlu an: değerlendirme iste (cooldown'lı).
+    if (deleted.isNotEmpty) {
+      ref.read(reviewServiceProvider).requestIfAppropriate();
+    }
   }
 
   Future<void> _handleAssign(String assetId) async {
@@ -116,6 +236,9 @@ class _SortingScreenState extends ConsumerState<SortingScreen> {
     Haptics.tick();
     await ref.read(screenshotRepositoryProvider).assignToBoard(assetId, choice);
     await ref.read(entitlementProvider.notifier).registerSwipe();
+    if (mounted) {
+      setState(() => _history.add(_SwipeAction(_SwipeType.assign, assetId)));
+    }
   }
 
   Future<void> _createBoardAndAssign(String assetId) async {
@@ -137,12 +260,14 @@ class _SortingScreenState extends ConsumerState<SortingScreen> {
         .read(screenshotRepositoryProvider)
         .assignToBoard(assetId, created.id);
     await ref.read(entitlementProvider.notifier).registerSwipe();
+    if (mounted) {
+      setState(() => _history.add(_SwipeAction(_SwipeType.assign, assetId)));
+    }
   }
 
   void _showSnack(String message) {
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text(message)));
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(message)));
   }
 }
 
@@ -153,6 +278,7 @@ class _SortingDeck extends StatelessWidget {
     required this.top,
     required this.next,
     required this.remaining,
+    required this.pendingDeleteCount,
     required this.asset,
     required this.controller,
     required this.onDelete,
@@ -163,6 +289,7 @@ class _SortingDeck extends StatelessWidget {
   final ScreenshotEntry top;
   final ScreenshotEntry? next;
   final int remaining;
+  final int pendingDeleteCount;
   final AssetEntity? asset;
   final SwipeCardController controller;
   final Future<bool> Function() onDelete;
@@ -189,10 +316,26 @@ class _SortingDeck extends StatelessWidget {
       ),
       child: Column(
         children: [
-          Text(
-            context.l10n.sortingRemainingCount(remaining),
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
+          // Kalan sayısı ortada; sola kaydırılıp silmeye giden sayısı solda.
+          SizedBox(
+            height: 28,
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                Center(
+                  child: Text(
+                    context.l10n.sortingRemainingCount(remaining),
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ),
+                if (pendingDeleteCount > 0)
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: _PendingDeleteChip(count: pendingDeleteCount),
+                  ),
+              ],
             ),
           ),
           const SizedBox(height: AppSpacing.md),
@@ -225,9 +368,9 @@ class _SortingDeck extends StatelessWidget {
                                   AppRadius.lg,
                                 ),
                                 child: ColoredBox(
-                                  color: Theme.of(
-                                    context,
-                                  ).colorScheme.surfaceContainerHighest,
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .surfaceContainerHighest,
                                 ),
                               ),
                             ),
@@ -335,9 +478,8 @@ class _SortingActionButton extends StatelessWidget {
         const SizedBox(height: AppSpacing.xs),
         Text(
           label,
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
-          ),
+          style: Theme.of(context).textTheme.bodySmall
+              ?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
         ),
       ],
     );
@@ -382,6 +524,108 @@ class _BoardPickerSheet extends StatelessWidget {
   }
 }
 
+/// Silmeye kuyruklanan kart sayısını gösteren küçük kırmızı hap.
+class _PendingDeleteChip extends StatelessWidget {
+  const _PendingDeleteChip({required this.count});
+
+  final int count;
+
+  @override
+  Widget build(BuildContext context) {
+    final ColorScheme scheme = Theme.of(context).colorScheme;
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.sm,
+        vertical: AppSpacing.xs,
+      ),
+      decoration: BoxDecoration(
+        color: scheme.errorContainer,
+        borderRadius: BorderRadius.circular(AppRadius.pill),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.delete_outline, size: 14, color: scheme.onErrorContainer),
+          const SizedBox(width: AppSpacing.xs),
+          Text(
+            context.l10n.sortingPendingDeleteCount(count),
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+              color: scheme.onErrorContainer,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Deste bitince, bekleyen silmeleri tek onayla tamamlamaya davet eden ekran.
+class _SortingFinishPrompt extends StatelessWidget {
+  const _SortingFinishPrompt({
+    required this.count,
+    required this.deleting,
+    required this.onFinish,
+  });
+
+  final int count;
+  final bool deleting;
+  final VoidCallback onFinish;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final ColorScheme scheme = Theme.of(context).colorScheme;
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.xl),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 96,
+              height: 96,
+              decoration: BoxDecoration(
+                color: scheme.errorContainer,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.delete_sweep_outlined,
+                size: 40,
+                color: scheme.onErrorContainer,
+              ),
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            Text(
+              l10n.sortingPendingDeleteCount(count),
+              style: Theme.of(context).textTheme.titleLarge,
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            Text(
+              l10n.sortingFinishConfirmBody,
+              style: Theme.of(context).textTheme.bodyMedium
+                  ?.copyWith(color: scheme.onSurfaceVariant),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            FilledButton.icon(
+              onPressed: deleting ? null : onFinish,
+              icon: deleting
+                  ? const SizedBox.square(
+                      dimension: 18,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Icon(Icons.delete_outline),
+              label: Text(l10n.sortingFinishAction(count)),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class _SortingEmpty extends StatelessWidget {
   const _SortingEmpty();
 
@@ -417,9 +661,8 @@ class _SortingEmpty extends StatelessWidget {
             const SizedBox(height: AppSpacing.sm),
             Text(
               l10n.sortingEmptyBody,
-              style: Theme.of(
-                context,
-              ).textTheme.bodyMedium?.copyWith(color: scheme.onSurfaceVariant),
+              style: Theme.of(context).textTheme.bodyMedium
+                  ?.copyWith(color: scheme.onSurfaceVariant),
               textAlign: TextAlign.center,
             ),
           ],
@@ -464,9 +707,8 @@ class _SortingLimit extends StatelessWidget {
             const SizedBox(height: AppSpacing.sm),
             Text(
               l10n.sortingLimitBody,
-              style: Theme.of(
-                context,
-              ).textTheme.bodyMedium?.copyWith(color: scheme.onSurfaceVariant),
+              style: Theme.of(context).textTheme.bodyMedium
+                  ?.copyWith(color: scheme.onSurfaceVariant),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: AppSpacing.lg),
