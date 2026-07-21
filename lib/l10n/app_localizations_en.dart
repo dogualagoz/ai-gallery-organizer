@@ -279,6 +279,24 @@ class AppLocalizationsEn extends AppLocalizations {
   String get analyzeCardUnlimited => 'Unlimited';
 
   @override
+  String analyzeUngroupedBar(int count) {
+    return '$count new screenshots to organize';
+  }
+
+  @override
+  String get analyzeUngroupedQuotaTitle => 'Weekly limit reached';
+
+  @override
+  String get analyzeUngroupedQuotaBody =>
+      'You\'ve used all your free analyses this week. Go Pro for unlimited analysis, or grab an analysis pack.';
+
+  @override
+  String get analyzeUngroupedQuotaUpgrade => 'Go Pro';
+
+  @override
+  String get analyzeUngroupedQuotaNotNow => 'Not now';
+
+  @override
   String get analysisExperienceTitle => 'Organizing your screenshots';
 
   @override

@@ -279,6 +279,24 @@ class AppLocalizationsTr extends AppLocalizations {
   String get analyzeCardUnlimited => 'Sınırsız';
 
   @override
+  String analyzeUngroupedBar(int count) {
+    return '$count yeni ekran görüntüsü gruplanmayı bekliyor';
+  }
+
+  @override
+  String get analyzeUngroupedQuotaTitle => 'Haftalık hakkın doldu';
+
+  @override
+  String get analyzeUngroupedQuotaBody =>
+      'Bu haftaki ücretsiz analiz hakkını kullandın. Sınırsız analiz için Pro\'ya geç ya da analiz paketi al.';
+
+  @override
+  String get analyzeUngroupedQuotaUpgrade => 'Pro\'ya yükselt';
+
+  @override
+  String get analyzeUngroupedQuotaNotNow => 'Şimdi değil';
+
+  @override
   String get analysisExperienceTitle => 'Ekran görüntülerin gruplandırılıyor';
 
   @override

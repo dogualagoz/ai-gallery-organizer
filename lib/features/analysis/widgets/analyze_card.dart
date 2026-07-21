@@ -73,6 +73,10 @@ class _AnalyzeCardState extends ConsumerState<AnalyzeCard>
   bool _summaryShown = false;
   bool _successHapticDone = false;
 
+  /// Kırmızı "gruplanmamış" çubuğunun kapatıldığı andaki pending sayısı; bunu
+  /// aşan yeni ss gelene dek çubuk gizli kalır. null: hiç kapatılmadı.
+  int? _dismissedAtPending;
+
   @override
   void initState() {
     super.initState();
@@ -137,6 +141,7 @@ class _AnalyzeCardState extends ConsumerState<AnalyzeCard>
     _lastSeenDone = 0;
     _summaryShown = false;
     _successHapticDone = false;
+    _dismissedAtPending = null;
     _overlayEntry?.remove();
     _overlayEntry = null;
   }
@@ -406,10 +411,12 @@ class _AnalyzeCardState extends ConsumerState<AnalyzeCard>
         if (_pending <= 0) return ('idle', null);
         return (
           'idle',
-          AnalyzeIdle(
-            pending: _pending,
-            analyzed: widget.entries.length - _pending,
-            onAnalyze: _startAnalysis,
+          _idleWithBar(
+            AnalyzeIdle(
+              pending: _pending,
+              analyzed: widget.entries.length - _pending,
+              onAnalyze: _startAnalysis,
+            ),
           ),
         );
       case AnalysisQueueStatus.completed:
@@ -423,6 +430,69 @@ class _AnalyzeCardState extends ConsumerState<AnalyzeCard>
     }
   }
 
+  /// Free planda, kapatılmamışsa ve bekleyen ss varsa idle içeriğin üstüne
+  /// kırmızı "gruplanmamış" bildirim çubuğunu ekler. Pro'da auto-sort zaten
+  /// grupladığı için çubuk gösterilmez.
+  Widget _idleWithBar(Widget idle) {
+    final bool isPro = ref.watch(
+      entitlementProvider.select((e) => e.isPro),
+    );
+    final bool showBar = !isPro && _pending > (_dismissedAtPending ?? -1);
+    if (!showBar) return idle;
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        AnalyzeUngroupedBar(
+          count: _pending,
+          onTap: _onUngroupedBarTap,
+          onDismiss: _dismissBar,
+        ),
+        idle,
+      ],
+    );
+  }
+
+  /// Çubuğa dokununca: hak varsa analizi başlat; haftalık hak dolmuşsa Pro'ya
+  /// yükseltme pop-up'ını aç.
+  void _onUngroupedBarTap() {
+    Haptics.tap();
+    if (ref.read(entitlementProvider).canAnalyze) {
+      _startAnalysis();
+    } else {
+      _showQuotaDialog();
+    }
+  }
+
+  /// Çubuğu bu pending sayısında gizler; daha fazla yeni ss gelince yine çıkar.
+  void _dismissBar() {
+    Haptics.tap();
+    setState(() => _dismissedAtPending = _pending);
+  }
+
+  /// Haftalık hak dolduğunda: durumu anlatan + Pro'ya yükselt seçenekli pop-up.
+  Future<void> _showQuotaDialog() async {
+    final l10n = context.l10n;
+    final bool? goPro = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(l10n.analyzeUngroupedQuotaTitle),
+        content: Text(l10n.analyzeUngroupedQuotaBody),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: Text(l10n.analyzeUngroupedQuotaNotNow),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: Text(l10n.analyzeUngroupedQuotaUpgrade),
+          ),
+        ],
+      ),
+    );
+    if (goPro == true && mounted) context.push(AppRoutes.paywall);
+  }
+
   /// Analiz sürerken kart içeriği: başlık/ilerleme + kaynak fotoğraf yığını.
   /// Fotoğraflar bu yığından çıkıp kartın dışındaki karolara uçar.
   Widget _clusterContent(AnalysisQueueState queue) {
@@ -430,7 +500,7 @@ class _AnalyzeCardState extends ConsumerState<AnalyzeCard>
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        _AnimHeader(queue: queue, onCancel: _onCancelPressed),
+        _AnimHeader(queue: queue, onCancel: _cancelAnalysis),
         const SizedBox(height: AppSpacing.sm),
         SourceCluster(sourceKey: _clusterKey, remaining: remaining),
         const SizedBox(height: AppSpacing.sm),
@@ -438,34 +508,12 @@ class _AnalyzeCardState extends ConsumerState<AnalyzeCard>
     );
   }
 
-  /// Çarpıya basınca: yarıda kes (inenler kalsın) veya sıfırla (baştan) seçimi.
-  Future<void> _onCancelPressed() async {
-    Haptics.tap();
-    final _CancelChoice? choice = await showModalBottomSheet<_CancelChoice>(
-      context: context,
-      showDragHandle: true,
-      builder: (sheetContext) => const _CancelSheet(),
-    );
-    if (!mounted || choice == null) return;
-    switch (choice) {
-      case _CancelChoice.stop:
-        _stopAnalysis();
-      case _CancelChoice.reset:
-        _resetAnalysis();
-    }
-  }
-
-  /// Yarıda kes: yeni fotoğraf uçurma, kuyruğu durdur; şimdiye inenlerle özet.
-  void _stopAnalysis() {
+  /// Çarpı: analizi anında durdurur. Şimdiye kadar analiz edilenler kaydedilmiş
+  /// kalır; kart özet ("All sorted") göstermeden doğrudan "Analiz et" (idle)
+  /// durumuna döner, kalanlar için tekrar başlatılabilir.
+  void _cancelAnalysis() {
     Haptics.warning();
     _spawnQueue.clear();
-    ref.read(analysisQueueProvider.notifier).cancel();
-    _maybeFinish(ref.read(analysisQueueProvider));
-  }
-
-  /// Sıfırla: turu tamamen iptal et, kartı anında boşta duruma döndür.
-  void _resetAnalysis() {
-    Haptics.warning();
     ref.read(analysisQueueProvider.notifier).reset();
     setState(_resetLocal);
   }
@@ -498,56 +546,6 @@ class _AnalyzeCardState extends ConsumerState<AnalyzeCard>
       icon: Icons.schedule_outlined,
       text: context.l10n.analysisDailyCapBanner,
       onDismiss: () => ref.read(analysisQueueProvider.notifier).dismiss(),
-    );
-  }
-}
-
-/// Çarpı pop-up'ının kullanıcı seçimi.
-enum _CancelChoice { stop, reset }
-
-/// Analizi yarıda kesme/sıfırlama seçeneklerini sunan alt sayfa.
-class _CancelSheet extends StatelessWidget {
-  const _CancelSheet();
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = context.l10n;
-    final ColorScheme scheme = Theme.of(context).colorScheme;
-    return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(
-          AppSpacing.md,
-          0,
-          AppSpacing.md,
-          AppSpacing.md,
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
-              child: Text(
-                l10n.analysisCancelSheetTitle,
-                style: Theme.of(context).textTheme.titleMedium,
-                textAlign: TextAlign.center,
-              ),
-            ),
-            ListTile(
-              leading: Icon(Icons.pause_circle_outline, color: scheme.primary),
-              title: Text(l10n.analysisCancelStop),
-              subtitle: Text(l10n.analysisCancelStopHint),
-              onTap: () => Navigator.of(context).pop(_CancelChoice.stop),
-            ),
-            ListTile(
-              leading: Icon(Icons.restart_alt, color: scheme.error),
-              title: Text(l10n.analysisCancelReset),
-              subtitle: Text(l10n.analysisCancelResetHint),
-              onTap: () => Navigator.of(context).pop(_CancelChoice.reset),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }

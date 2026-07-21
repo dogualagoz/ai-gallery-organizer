@@ -554,6 +554,36 @@ abstract class AppLocalizations {
   /// **'Unlimited'**
   String get analyzeCardUnlimited;
 
+  /// No description provided for @analyzeUngroupedBar.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} new screenshots to organize'**
+  String analyzeUngroupedBar(int count);
+
+  /// No description provided for @analyzeUngroupedQuotaTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly limit reached'**
+  String get analyzeUngroupedQuotaTitle;
+
+  /// No description provided for @analyzeUngroupedQuotaBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ve used all your free analyses this week. Go Pro for unlimited analysis, or grab an analysis pack.'**
+  String get analyzeUngroupedQuotaBody;
+
+  /// No description provided for @analyzeUngroupedQuotaUpgrade.
+  ///
+  /// In en, this message translates to:
+  /// **'Go Pro'**
+  String get analyzeUngroupedQuotaUpgrade;
+
+  /// No description provided for @analyzeUngroupedQuotaNotNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Not now'**
+  String get analyzeUngroupedQuotaNotNow;
+
   /// No description provided for @analysisExperienceTitle.
   ///
   /// In en, this message translates to:

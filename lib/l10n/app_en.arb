@@ -151,6 +151,16 @@
   "analyzeCardAnalyzed": "Analyzed",
   "analyzeCardRemaining": "Remaining",
   "analyzeCardUnlimited": "Unlimited",
+  "analyzeUngroupedBar": "{count} new screenshots to organize",
+  "@analyzeUngroupedBar": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "analyzeUngroupedQuotaTitle": "Weekly limit reached",
+  "analyzeUngroupedQuotaBody": "You've used all your free analyses this week. Go Pro for unlimited analysis, or grab an analysis pack.",
+  "analyzeUngroupedQuotaUpgrade": "Go Pro",
+  "analyzeUngroupedQuotaNotNow": "Not now",
   "analysisExperienceTitle": "Organizing your screenshots",
   "analysisSceneSummaryTitle": "All sorted",
   "analysisSceneSummary": "{count} screenshots settled into {categories} categories",

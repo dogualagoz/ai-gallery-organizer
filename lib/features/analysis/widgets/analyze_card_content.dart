@@ -9,6 +9,78 @@ import '../../../core/constants/ui_constants.dart';
 import '../../../core/l10n/l10n_extension.dart';
 import '../../../core/services/entitlement_service.dart';
 
+/// Galeride gruplanmamış (analiz edilmemiş) yeni ekran görüntüleri varken idle
+/// kartın üstünde çıkan kırmızı bildirim çubuğu. Basınca analizi başlatır
+/// ([onTap]); sağdaki (x) ile kullanıcı gizleyebilir ([onDismiss]). Free plan
+/// içindir (Pro'da auto-sort zaten gruplar).
+class AnalyzeUngroupedBar extends StatelessWidget {
+  const AnalyzeUngroupedBar({
+    super.key,
+    required this.count,
+    required this.onTap,
+    required this.onDismiss,
+  });
+
+  final int count;
+  final VoidCallback onTap;
+  final VoidCallback onDismiss;
+
+  @override
+  Widget build(BuildContext context) {
+    final ColorScheme scheme = Theme.of(context).colorScheme;
+    return Padding(
+      padding: const EdgeInsets.only(bottom: AppSpacing.md),
+      child: Material(
+        color: scheme.errorContainer,
+        borderRadius: BorderRadius.circular(AppRadius.md),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.md,
+              AppSpacing.sm,
+              AppSpacing.xs,
+              AppSpacing.sm,
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.notifications_active_outlined,
+                  size: 20,
+                  color: scheme.onErrorContainer,
+                ),
+                const SizedBox(width: AppSpacing.sm),
+                Expanded(
+                  child: Text(
+                    context.l10n.analyzeUngroupedBar(count),
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: scheme.onErrorContainer,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+                Icon(
+                  Icons.chevron_right,
+                  size: 20,
+                  color: scheme.onErrorContainer,
+                ),
+                // Kapat: analiz yapmak istemeyen kullanıcı çubuğu gizler.
+                IconButton(
+                  tooltip: context.l10n.dismissAction,
+                  icon: Icon(Icons.close, size: 18, color: scheme.onErrorContainer),
+                  visualDensity: VisualDensity.compact,
+                  onPressed: onDismiss,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 /// Idle durum: başlık + üç istatistik (bekleyen / analiz edildi / kalan hak)
 /// + büyük gradient "Analiz et" butonu.
 class AnalyzeIdle extends ConsumerWidget {

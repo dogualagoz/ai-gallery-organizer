@@ -151,6 +151,16 @@
   "analyzeCardAnalyzed": "Analiz edildi",
   "analyzeCardRemaining": "Kalan hak",
   "analyzeCardUnlimited": "Sınırsız",
+  "analyzeUngroupedBar": "{count} yeni ekran görüntüsü gruplanmayı bekliyor",
+  "@analyzeUngroupedBar": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "analyzeUngroupedQuotaTitle": "Haftalık hakkın doldu",
+  "analyzeUngroupedQuotaBody": "Bu haftaki ücretsiz analiz hakkını kullandın. Sınırsız analiz için Pro'ya geç ya da analiz paketi al.",
+  "analyzeUngroupedQuotaUpgrade": "Pro'ya yükselt",
+  "analyzeUngroupedQuotaNotNow": "Şimdi değil",
   "analysisExperienceTitle": "Ekran görüntülerin gruplandırılıyor",
   "analysisSceneSummaryTitle": "Hepsi yerleşti",
   "analysisSceneSummary": "{count} ekran görüntüsü {categories} kategoriye yerleşti",
