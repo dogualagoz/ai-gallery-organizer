@@ -133,9 +133,6 @@ class _SyncAction extends StatelessWidget {
   }
 }
 
-// TEMP-AUTOSIM
-bool _tempAutoSimDone = false;
-
 /// Uygulama açılış sayacının bu oturumda bir kez işlendiğini işaretler.
 bool _appOpenCounted = false;
 
@@ -154,15 +151,6 @@ class _HomeContent extends ConsumerWidget {
     final bool analyzing = ref.watch(
       analysisQueueProvider.select((s) => s.isRunning),
     );
-
-    // TEMP-AUTOSIM
-    if (kDebugMode && !_tempAutoSimDone) {
-      _tempAutoSimDone = true;
-      final notifier = ref.read(analysisQueueProvider.notifier);
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        Future.delayed(const Duration(seconds: 3), () => notifier.simulate());
-      });
-    }
 
     // Uçan analiz fotoğraflarının hedefi olan kategori karoları ile kaynak
     // (AnalyzeCard) aynı kapsamda; uçuşlar kartın dışına çıkıp karolara iner.
