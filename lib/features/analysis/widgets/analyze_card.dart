@@ -189,13 +189,22 @@ class _AnalyzeCardState extends ConsumerState<AnalyzeCard>
       controller: controller,
     );
     _ensureOverlay();
-    controller.forward().whenComplete(() => _onLanded(flight, item));
+    // Uçuş normal biterse iniş; tur sıfırlanıp (çarpı) controller dispose
+    // edilirse ticker iptal olur ve `orCancel` TickerCanceled fırlatır. Bunu
+    // yutmazsak `_onLanded` çift dispose'a gidip uygulamayı çökertir.
+    controller.forward().orCancel.then(
+      (_) => _onLanded(flight, item),
+      onError: (Object _) {},
+    );
     setState(() => _flights.add(flight));
     _overlayEntry?.markNeedsBuild();
   }
 
   void _onLanded(SceneFlight flight, AnalyzedItem item) {
     if (!mounted) return;
+    // Tur sıfırlandıysa `_resetLocal` bu uçuşu zaten dispose edip listeden
+    // çıkardı; normal tamamlanma ile çakışırsa çift dispose'u burada engelle.
+    if (!_flights.contains(flight)) return;
     flight.controller.dispose();
     setState(() {
       _flights.remove(flight);
