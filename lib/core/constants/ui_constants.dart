@@ -47,27 +47,28 @@ abstract final class AppSizes {
 /// Liquid glass (iOS 26) render ayarları — sayısal değerler burada, renk
 /// (glassColor) çağrı yerinde `colorScheme`'den üretilir.
 abstract final class AppGlass {
-  static const double thickness = 22;
-  static const double blur = 18;
-  static const double lightIntensity = 0.8;
-  static const double refractiveIndex = 1.6;
+  static const double thickness = 24;
+  // Blend (metaball kaynaşma) ile birlikte yüksek blur bozulma yapıyor; sıvı
+  // damla morph'unun temiz görünmesi için düşük tutulur (paket önerisi).
+  static const double blur = 6;
+  static const double lightIntensity = 0.9;
+  static const double refractiveIndex = 1.5;
   static const double saturation = 1.5;
-  static const double ambientStrength = 0.2;
+  static const double ambientStrength = 0.15;
+
+  /// Renk sapması (chromatic aberration) — cam kenarlarında hafif prizma.
+  static const double chromaticAberration = 0.03;
 
   /// `scheme.surfaceBright` üzerine uygulanan cam dolgu opaklığı; parlak,
   /// belirgin bir cam yüzeyi için yüksek tutulur (mat/soluk görünmesin diye).
-  static const double tintAlpha = 0.6;
+  static const double tintAlpha = 0.5;
 
-  /// Navbar pili ile ayrık aksiyon butonunun birbirine yaklaşınca
-  /// kaynaşma (blend) miktarı.
-  static const double blend = 20;
+  /// Navbar pili, ayrık aksiyon butonu ve kayan gösterge damlasının birbirine
+  /// yaklaşınca sıvı gibi kaynaşma (metaball blend) miktarı. Yüksek = daha akışkan.
+  static const double blend = 32;
 
-  /// BackdropFilter buzlu-cam (glassmorphism) bulanıklık sigma'sı — arka plandaki
-  /// içeriği gerçek Apple-vari frosted etki için bulanıklaştırır.
-  static const double backdropSigma = 24;
-
-  /// Buzlu-cam yüzeyinin kenar vurgusu opaklığı (ince ışıklı çerçeve).
-  static const double edgeAlpha = 0.08;
+  /// Seçili sekme altındaki cam damla göstergesinin primary ton opaklığı.
+  static const double indicatorTint = 0.18;
 }
 
 /// Standart opaklık değerleri.

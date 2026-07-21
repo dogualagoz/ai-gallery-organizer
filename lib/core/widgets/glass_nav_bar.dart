@@ -1,8 +1,8 @@
-// iOS tarzı yüzen buzlu-cam (glassmorphism) alt gezinme çubuğu; seçim kayarak
-// taşınır ve parmak sürüklemesini takip eder.
-import 'dart:ui' show ImageFilter;
-
+// iOS 26 liquid glass yüzen alt gezinme çubuğu: seçili sekmenin altında, barla
+// aynı blend group'ta kaynaşan bir cam "damla" göstergesi kayar (metaball morph);
+// parmak sürüklemesini akıcı takip eder.
 import 'package:flutter/material.dart';
+import 'package:liquid_glass_renderer/liquid_glass_renderer.dart';
 
 import '../constants/ui_constants.dart';
 import '../services/haptic_service.dart';
@@ -92,22 +92,52 @@ class _GlassNavBarState extends State<GlassNavBar> {
   }
 
   Widget _buildGlassPill(BuildContext context) {
+    final ColorScheme scheme = Theme.of(context).colorScheme;
     final double radius = AppSizes.navBarHeight / 2;
-    return GlassSurface(
-      borderRadius: BorderRadius.circular(radius),
+    final int count = widget.destinations.length;
+    final double pos = _dragPos ?? widget.selectedIndex.toDouble();
+    final double x = count == 1 ? 0 : -1 + (2 * pos / (count - 1));
+
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(radius),
+        boxShadow: [
+          BoxShadow(
+            color: scheme.inverseSurface.withValues(alpha: 0.12),
+            blurRadius: 24,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
       child: SizedBox(
         height: AppSizes.navBarHeight,
         child: Stack(
           children: [
-            _SlidingIndicator(
-              itemCount: widget.destinations.length,
-              position: _dragPos ?? widget.selectedIndex.toDouble(),
-              // Sürüklerken parmağı anında izle; bırakınca yaylanarak yaslan.
-              animated: _dragPos == null,
+            // Bar zemini — tek cam şekli (blend group'tan miras cam ayarları).
+            Positioned.fill(
+              child: LiquidGlass.grouped(
+                shape: LiquidRoundedSuperellipse(borderRadius: radius),
+                child: const SizedBox.expand(),
+              ),
             ),
+            // Kayan cam damla göstergesi: barla aynı grupta olduğu için
+            // metaball gibi kaynaşır → sekmeye kayarken sıvı morph efekti.
+            _dragPos == null
+                ? AnimatedAlign(
+                    duration: AppDurations.medium,
+                    curve: Curves.easeOutBack,
+                    alignment: Alignment(x, 0),
+                    child: _indicatorBlob(scheme, count, radius),
+                  )
+                : Align(
+                    // Sürüklerken parmağı anında izler (animasyonsuz).
+                    alignment: Alignment(x, 0),
+                    child: _indicatorBlob(scheme, count, radius),
+                  ),
+            // İkon + etiketler camın üstünde (refraksiyona girmez, okunur kalır).
             Row(
               children: [
-                for (int i = 0; i < widget.destinations.length; i++)
+                for (int i = 0; i < count; i++)
                   Expanded(
                     child: _NavItem(
                       destination: widget.destinations[i],
@@ -125,104 +155,25 @@ class _GlassNavBarState extends State<GlassNavBar> {
       ),
     );
   }
-}
 
-/// Yeniden kullanılabilir buzlu-cam yüzey: arka planı BackdropFilter ile
-/// bulanıklaştırır, üzerine yarı saydam tema tonu + ince kenar vurgusu + yumuşak
-/// gölge koyar. Navbar pili ve ayrık aksiyon butonu ortak bu yüzeyi kullanır.
-class GlassSurface extends StatelessWidget {
-  const GlassSurface({
-    super.key,
-    required this.borderRadius,
-    required this.child,
-  });
-
-  final BorderRadius borderRadius;
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    final ColorScheme scheme = Theme.of(context).colorScheme;
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        borderRadius: borderRadius,
-        boxShadow: [
-          BoxShadow(
-            color: scheme.inverseSurface.withValues(alpha: 0.12),
-            blurRadius: 24,
-            offset: const Offset(0, 8),
-          ),
-        ],
-      ),
-      child: ClipRRect(
-        borderRadius: borderRadius,
-        child: BackdropFilter(
-          filter: ImageFilter.blur(
-            sigmaX: AppGlass.backdropSigma,
-            sigmaY: AppGlass.backdropSigma,
-          ),
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              // Yarı saydam yüzey tonu (açıkta beyazımsı, koyuda koyu frosted).
-              color: scheme.surface.withValues(alpha: AppGlass.tintAlpha),
-              borderRadius: borderRadius,
-              border: Border.all(
-                color: scheme.onSurface.withValues(alpha: AppGlass.edgeAlpha),
-                width: 0.6,
-              ),
-            ),
-            child: child,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/// Seçili sekmenin arkasında kayan vurgu hapı. Sürüklerken [position] kesirli
-/// olur ve gösterge parmağı birebir izler ([animated] false); bırakınca
-/// [animated] true ile en yakın sekmeye yaylanarak yaslanır.
-class _SlidingIndicator extends StatelessWidget {
-  const _SlidingIndicator({
-    required this.itemCount,
-    required this.position,
-    required this.animated,
-  });
-
-  final int itemCount;
-  final double position;
-  final bool animated;
-
-  @override
-  Widget build(BuildContext context) {
-    final ColorScheme scheme = Theme.of(context).colorScheme;
-    // Alignment -1..1 aralığında: verilen (kesirli) sekme konumuna denk gelir.
-    final double x = itemCount == 1 ? 0 : -1 + (2 * position / (itemCount - 1));
-    final Alignment alignment = Alignment(x, 0);
-
-    final Widget pill = FractionallySizedBox(
-      widthFactor: 1 / itemCount,
+  /// Tek sekme genişliğinde, hafif primary tonlu cam damla (seçim göstergesi).
+  Widget _indicatorBlob(ColorScheme scheme, int count, double radius) {
+    return FractionallySizedBox(
+      widthFactor: 1 / count,
       heightFactor: 1,
       child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.xs + 2),
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            color: scheme.primary.withValues(alpha: 0.16),
-            borderRadius: BorderRadius.circular(AppRadius.pill),
+        padding: const EdgeInsets.all(AppSpacing.xs),
+        child: LiquidGlass.grouped(
+          shape: LiquidRoundedSuperellipse(borderRadius: radius),
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              color: scheme.primary.withValues(alpha: AppGlass.indicatorTint),
+              borderRadius: BorderRadius.circular(radius),
+            ),
           ),
         ),
       ),
     );
-
-    return animated
-        ? AnimatedAlign(
-            duration: AppDurations.medium,
-            // Yaylı eğri: gösterge hedefe hafif "yaylanarak" oturur.
-            curve: Curves.easeOutBack,
-            alignment: alignment,
-            child: pill,
-          )
-        : Align(alignment: alignment, child: pill);
   }
 }
 

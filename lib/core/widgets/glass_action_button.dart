@@ -1,12 +1,13 @@
-// Navbar pilinin yanında yüzen, aynı buzlu-cam yüzeyi paylaşan dairesel buton.
+// Navbar pilinin yanında yüzen, aynı liquid glass katmanını paylaşan dairesel buton.
 import 'package:flutter/material.dart';
+import 'package:liquid_glass_renderer/liquid_glass_renderer.dart';
 
 import '../constants/ui_constants.dart';
 import '../services/haptic_service.dart';
-import 'glass_nav_bar.dart';
 
-/// [GlassNavBar] ile aynı hizada, ayrı bir dairesel buton (ör. Arama). Cam
-/// görünümü paylaşılan [GlassSurface] ile üretilir.
+/// [GlassNavBar] ile aynı hizada, ayrı bir dairesel buton (ör. Arama). Bir ata
+/// `LiquidGlassLayer` + `LiquidGlassBlendGroup` içinde kullanılmalıdır (bkz.
+/// `_MainShell`) — cam ayarları oradan miras alınır ve pile yaklaşınca kaynaşır.
 class GlassActionButton extends StatelessWidget {
   const GlassActionButton({
     super.key,
@@ -23,21 +24,37 @@ class GlassActionButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final ColorScheme scheme = Theme.of(context).colorScheme;
 
-    return GlassSurface(
-      borderRadius: BorderRadius.circular(AppSizes.navBarHeight / 2),
-      child: SizedBox(
-        width: AppSizes.navBarActionSize,
-        height: AppSizes.navBarHeight,
-        child: Semantics(
-          button: true,
-          label: tooltip,
-          child: InkWell(
-            customBorder: const CircleBorder(),
-            onTap: () {
-              Haptics.tap();
-              onPressed();
-            },
-            child: Icon(icon, color: scheme.primary, size: AppSizes.navBarIcon),
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        boxShadow: [
+          BoxShadow(
+            color: scheme.inverseSurface.withValues(alpha: 0.12),
+            blurRadius: 24,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: LiquidGlass.grouped(
+        shape: const LiquidOval(),
+        child: SizedBox(
+          width: AppSizes.navBarActionSize,
+          height: AppSizes.navBarHeight,
+          child: Semantics(
+            button: true,
+            label: tooltip,
+            child: InkWell(
+              customBorder: const CircleBorder(),
+              onTap: () {
+                Haptics.tap();
+                onPressed();
+              },
+              child: Icon(
+                icon,
+                color: scheme.primary,
+                size: AppSizes.navBarIcon,
+              ),
+            ),
           ),
         ),
       ),
