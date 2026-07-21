@@ -13,6 +13,7 @@ import '../../features/paywall/paywall_screen.dart';
 import '../../features/search/search_screen.dart';
 import '../../features/settings/settings_screen.dart';
 import '../../features/sorting/sorting_screen.dart';
+import '../../features/splash/splash_screen.dart';
 import '../constants/ui_constants.dart';
 import '../l10n/l10n_extension.dart';
 import '../services/preferences_service.dart';
@@ -21,6 +22,7 @@ import '../widgets/glass_nav_bar.dart';
 
 /// Rota yolları — string tekrarını önlemek için tek yerde.
 abstract final class AppRoutes {
+  static const String splash = '/splash';
   static const String onboarding = '/onboarding';
   static const String gallery = '/gallery';
   static const String settings = '/settings';
@@ -50,14 +52,20 @@ final appRouterProvider = Provider<GoRouter>((ref) {
   final bool onboardingComplete = ref.watch(onboardingCompleteProvider);
 
   return GoRouter(
-    initialLocation: AppRoutes.gallery,
+    initialLocation: AppRoutes.splash,
     redirect: (context, state) {
+      // Splash kendi yönlendirmesini animasyon bitince yapar — muaf tut.
+      if (state.matchedLocation == AppRoutes.splash) return null;
       final bool onOnboarding = state.matchedLocation == AppRoutes.onboarding;
       if (!onboardingComplete && !onOnboarding) return AppRoutes.onboarding;
       if (onboardingComplete && onOnboarding) return AppRoutes.gallery;
       return null;
     },
     routes: [
+      GoRoute(
+        path: AppRoutes.splash,
+        builder: (context, state) => const SplashScreen(),
+      ),
       GoRoute(
         path: AppRoutes.onboarding,
         builder: (context, state) => const OnboardingScreen(),
