@@ -4,15 +4,29 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 
-/// Ambient alandaki toplam zerre sayısı — premium his için yeterli, ama
+/// Ambient alandaki varsayılan zerre sayısı — premium his için yeterli, ama
 /// performans için düşük (widget başına particle YOK, hepsi tek painter'da).
-const int _ambientCount = 28;
+const int _defaultAmbientCount = 28;
+
+/// Zerrenin en belirgin (orta) anındaki varsayılan opaklığı.
+const double _defaultAmbientAlpha = 0.16;
 
 /// Sahne arkasında yavaşça yükselip yanıp sönen ışık zerreleri.
 class SceneAmbientParticles extends StatefulWidget {
-  const SceneAmbientParticles({super.key, required this.color});
+  const SceneAmbientParticles({
+    super.key,
+    required this.color,
+    this.count = _defaultAmbientCount,
+    this.maxAlpha = _defaultAmbientAlpha,
+  });
 
   final Color color;
+
+  /// Aynı anda süzülen zerre sayısı (anasayfada abartısız tutmak için düşük).
+  final int count;
+
+  /// Zerrenin en belirgin anındaki opaklık tavanı.
+  final double maxAlpha;
 
   @override
   State<SceneAmbientParticles> createState() => _SceneAmbientParticlesState();
@@ -32,7 +46,7 @@ class _SceneAmbientParticlesState extends State<SceneAmbientParticles>
     super.initState();
     final Random random = Random();
     _dots = List<_AmbientDot>.generate(
-      _ambientCount,
+      widget.count,
       (_) => _AmbientDot.random(random),
     );
   }
@@ -54,6 +68,7 @@ class _SceneAmbientParticlesState extends State<SceneAmbientParticles>
             dots: _dots,
             progress: _controller.value,
             color: widget.color,
+            maxAlpha: widget.maxAlpha,
           ),
         ),
       ),
@@ -93,11 +108,13 @@ class _AmbientPainter extends CustomPainter {
     required this.dots,
     required this.progress,
     required this.color,
+    required this.maxAlpha,
   });
 
   final List<_AmbientDot> dots;
   final double progress;
   final Color color;
+  final double maxAlpha;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -107,14 +124,16 @@ class _AmbientPainter extends CustomPainter {
       final double y = size.height * (1 - t); // aşağıdan yukarı süzülür
       final double x = size.width * dot.x;
       final double fade = sin(t * pi); // uçlarda görünmez, ortada belirgin
-      paint.color = color.withValues(alpha: 0.16 * fade);
+      paint.color = color.withValues(alpha: maxAlpha * fade);
       canvas.drawCircle(Offset(x, y), dot.radius, paint);
     }
   }
 
   @override
   bool shouldRepaint(_AmbientPainter oldDelegate) =>
-      oldDelegate.progress != progress || oldDelegate.color != color;
+      oldDelegate.progress != progress ||
+      oldDelegate.color != color ||
+      oldDelegate.maxAlpha != maxAlpha;
 }
 
 /// Kart bir şeride indiğinde merkezinden dışa saçılıp sönen zerreler.

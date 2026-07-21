@@ -17,6 +17,7 @@ import '../analysis/providers/auto_sort_provider.dart';
 import '../analysis/widgets/analyze_card.dart';
 import '../analysis/widgets/auto_sort_chip.dart';
 import '../analysis/widgets/category_target_scope.dart';
+import '../analysis/widgets/scene_particles.dart';
 import '../analysis/widgets/weekly_limit_badge.dart';
 import '../boards/providers/board_provider.dart';
 import '../boards/widgets/custom_boards_grid.dart';
@@ -135,6 +136,11 @@ class _HomeContent extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final repo = ref.watch(screenshotRepositoryProvider);
     final bool isPro = ref.watch(entitlementProvider).isPro;
+    // Analiz sürerken anasayfada yukarı süzülen incelikli mor partikül alanı;
+    // yalnız o an mount edilir (always-on değil → kayma akıcı kalır).
+    final bool analyzing = ref.watch(
+      analysisQueueProvider.select((s) => s.isRunning),
+    );
 
     // TEMP-AUTOSIM
     if (kDebugMode && !_tempAutoSimDone) {
@@ -148,79 +154,95 @@ class _HomeContent extends ConsumerWidget {
     // Uçan analiz fotoğraflarının hedefi olan kategori karoları ile kaynak
     // (AnalyzeCard) aynı kapsamda; uçuşlar kartın dışına çıkıp karolara iner.
     return CategoryTargetProvider(
-      child: RefreshIndicator(
-        onRefresh: () => ref.read(galleryProvider.notifier).sync(),
-        child: CustomScrollView(
-          slivers: [
-            SliverAppBar(
-              // Sabitlenmez: aşağı kaydırınca içerikle birlikte gider.
-              pinned: false,
-              title: const _HomeTitle(),
-              // Pro'ya özel incelikli gradient — premium hissi ama sessiz.
-              flexibleSpace: isPro
-                  ? DecoratedBox(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          colors: [
-                            Theme.of(context).colorScheme.primaryContainer
-                                .withValues(alpha: AppOpacities.proAppBarTint),
-                            Colors.transparent,
-                          ],
-                        ),
+      child: Stack(
+        children: [
+          RefreshIndicator(
+            onRefresh: () => ref.read(galleryProvider.notifier).sync(),
+            child: CustomScrollView(
+              slivers: [
+                SliverAppBar(
+                  // Sabitlenmez: aşağı kaydırınca içerikle birlikte gider.
+                  pinned: false,
+                  title: const _HomeTitle(),
+                  // Pro'ya özel incelikli gradient — premium hissi ama sessiz.
+                  flexibleSpace: isPro
+                      ? DecoratedBox(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              colors: [
+                                Theme.of(context).colorScheme.primaryContainer
+                                    .withValues(
+                                      alpha: AppOpacities.proAppBarTint,
+                                    ),
+                                Colors.transparent,
+                              ],
+                            ),
+                          ),
+                          child: const SizedBox.expand(),
+                        )
+                      : null,
+                  actions: [
+                    // DEBUG: API harcamadan analiz animasyonunu tetikler.
+                    if (kDebugMode)
+                      IconButton(
+                        tooltip: 'Animasyonu dene (debug)',
+                        icon: const Icon(Icons.science_outlined),
+                        onPressed: () =>
+                            ref.read(analysisQueueProvider.notifier).simulate(),
                       ),
-                      child: const SizedBox.expand(),
-                    )
-                  : null,
-              actions: [
-                // DEBUG: API harcamadan analiz animasyonunu tetikler.
-                if (kDebugMode)
-                  IconButton(
-                    tooltip: 'Animasyonu dene (debug)',
-                    icon: const Icon(Icons.science_outlined),
-                    onPressed: () =>
-                        ref.read(analysisQueueProvider.notifier).simulate(),
-                  ),
-                const WeeklyLimitBadge(),
-                const SizedBox(width: AppSpacing.xs),
-                _SyncAction(
-                  onSync: () => HomeScreen._syncWithFeedback(context, ref),
-                ),
-              ],
-            ),
-            SliverPadding(
-              padding: const EdgeInsets.fromLTRB(
-                AppSpacing.md,
-                AppSpacing.xs,
-                AppSpacing.md,
-                0,
-              ),
-              sliver: SliverToBoxAdapter(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    if (!isPro) const AutoSortChip(),
-                    AnalyzeCard(entries: entries),
-                    const SizedBox(height: AppSpacing.sm),
-                    _BoardsSection(entries: entries, repo: repo),
-                    const SizedBox(height: AppSpacing.lg),
-                    Text(
-                      context.l10n.homeRecentsSection,
-                      style: Theme.of(context).textTheme.titleMedium,
+                    const WeeklyLimitBadge(),
+                    const SizedBox(width: AppSpacing.xs),
+                    _SyncAction(
+                      onSync: () => HomeScreen._syncWithFeedback(context, ref),
                     ),
-                    const SizedBox(height: AppSpacing.xs),
                   ],
                 ),
+                SliverPadding(
+                  padding: const EdgeInsets.fromLTRB(
+                    AppSpacing.md,
+                    AppSpacing.xs,
+                    AppSpacing.md,
+                    0,
+                  ),
+                  sliver: SliverToBoxAdapter(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        if (!isPro) const AutoSortChip(),
+                        AnalyzeCard(entries: entries),
+                        const SizedBox(height: AppSpacing.sm),
+                        _BoardsSection(entries: entries, repo: repo),
+                        const SizedBox(height: AppSpacing.lg),
+                        Text(
+                          context.l10n.homeRecentsSection,
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
+                        const SizedBox(height: AppSpacing.xs),
+                      ],
+                    ),
+                  ),
+                ),
+                _RecentsGrid(
+                  entries: entries.take(kHomeRecentsLimit).toList(),
+                  repo: repo,
+                ),
+                _RecentsFooter(hasMore: entries.length > kHomeRecentsLimit),
+              ],
+            ),
+          ),
+          if (analyzing)
+            Positioned.fill(
+              child: IgnorePointer(
+                child: SceneAmbientParticles(
+                  color: Theme.of(context).colorScheme.secondary,
+                  count: 18,
+                  maxAlpha: 0.12,
+                ),
               ),
             ),
-            _RecentsGrid(
-              entries: entries.take(kHomeRecentsLimit).toList(),
-              repo: repo,
-            ),
-            _RecentsFooter(hasMore: entries.length > kHomeRecentsLimit),
-          ],
-        ),
+        ],
       ),
     );
   }
