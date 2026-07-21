@@ -1,6 +1,10 @@
 // UI sabitleri: boşluk, köşe yarıçapı ve animasyon süreleri.
 // Magic number kullanmamak için tüm widget'lar bu değerleri kullanır.
 
+/// Anasayfada "son görüntüler" ızgarasında gösterilen en fazla karo (3 sütun ×
+/// 7 satır); fazlası "Daha fazla" ile tam ekran Recents'te açılır.
+const int kHomeRecentsLimit = 21;
+
 /// Standart boşluk ölçeği (4pt grid).
 abstract final class AppSpacing {
   static const double xs = 4;

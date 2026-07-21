@@ -363,5 +363,7 @@
   "categoryReanalyzeAction": "Yeniden analiz et",
   "categoryReanalyzeConfirmTitle": "Bu kategori yeniden analiz edilsin mi?",
   "categoryReanalyzeConfirmBody": "Bu gruptaki ekran görüntüleri AI'a yeniden gönderilir. Bu, haftalık analiz hakkından harcar.",
-  "categoryReanalyzeEmpty": "Burada yeniden analiz edilecek bir şey yok."
+  "categoryReanalyzeEmpty": "Burada yeniden analiz edilecek bir şey yok.",
+  "homeRecentsMore": "Daha fazla göster",
+  "recentsScreenTitle": "Son ekran görüntüleri"
 }

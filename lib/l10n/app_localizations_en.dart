@@ -725,4 +725,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get categoryReanalyzeEmpty => 'There\'s nothing to re-analyze here.';
+
+  @override
+  String get homeRecentsMore => 'Show more';
+
+  @override
+  String get recentsScreenTitle => 'Recent screenshots';
 }

@@ -214,7 +214,11 @@ class _HomeContent extends ConsumerWidget {
                 ),
               ),
             ),
-            _RecentsGrid(entries: entries, repo: repo),
+            _RecentsGrid(
+              entries: entries.take(kHomeRecentsLimit).toList(),
+              repo: repo,
+            ),
+            _RecentsFooter(hasMore: entries.length > kHomeRecentsLimit),
           ],
         ),
       ),
@@ -287,13 +291,8 @@ class _RecentsGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SliverPadding(
-      padding: EdgeInsets.fromLTRB(
-        AppSpacing.md,
-        0,
-        AppSpacing.md,
-        // Yüzen navbar son satırı örtmesin diye alt boşluk eklenir.
-        MediaQuery.paddingOf(context).bottom + AppSpacing.md,
-      ),
+      // Alt boşluk (navbar örtmesin diye) _RecentsFooter'da eklenir.
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
       sliver: SliverGrid.builder(
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 3,
@@ -311,6 +310,35 @@ class _RecentsGrid extends StatelessWidget {
             onTap: () => context.push(AppRoutes.detail(entry.assetId)),
           );
         },
+      ),
+    );
+  }
+}
+
+/// Son görüntüler ızgarasının altındaki alan: gerekiyorsa "Daha fazla" butonu
+/// + yüzen navbar'ın son satırı örtmemesi için alt boşluk.
+class _RecentsFooter extends StatelessWidget {
+  const _RecentsFooter({required this.hasMore});
+
+  final bool hasMore;
+
+  @override
+  Widget build(BuildContext context) {
+    return SliverToBoxAdapter(
+      child: Padding(
+        padding: EdgeInsets.fromLTRB(
+          AppSpacing.md,
+          hasMore ? AppSpacing.md : 0,
+          AppSpacing.md,
+          MediaQuery.paddingOf(context).bottom + AppSpacing.md,
+        ),
+        child: hasMore
+            ? OutlinedButton.icon(
+                onPressed: () => context.push(AppRoutes.recents),
+                icon: const Icon(Icons.grid_view_outlined, size: 18),
+                label: Text(context.l10n.homeRecentsMore),
+              )
+            : const SizedBox.shrink(),
       ),
     );
   }

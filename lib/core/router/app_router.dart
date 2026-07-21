@@ -7,6 +7,7 @@ import 'package:liquid_glass_renderer/liquid_glass_renderer.dart';
 import '../../features/analysis/milestone_screen.dart';
 import '../../features/detail/detail_screen.dart';
 import '../../features/home/home_screen.dart';
+import '../../features/home/recents_screen.dart';
 import '../../features/onboarding/onboarding_screen.dart';
 import '../../features/paywall/paywall_screen.dart';
 import '../../features/search/search_screen.dart';
@@ -25,6 +26,7 @@ abstract final class AppRoutes {
   static const String settings = '/settings';
   static const String search = '/search';
   static const String sorting = '/sorting';
+  static const String recents = '/recents';
   static const String paywall = '/paywall';
   static const String analysisMilestone = '/analysis-milestone';
 
@@ -99,6 +101,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.search,
         builder: (context, state) => const SearchScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.recents,
+        builder: (context, state) => const RecentsScreen(),
       ),
       GoRoute(
         path: AppRoutes.analysisMilestone,

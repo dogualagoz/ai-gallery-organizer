@@ -363,5 +363,7 @@
   "categoryReanalyzeAction": "Re-analyze",
   "categoryReanalyzeConfirmTitle": "Re-analyze this category?",
   "categoryReanalyzeConfirmBody": "The screenshots in this group will be sent to AI again. This uses your weekly analysis quota.",
-  "categoryReanalyzeEmpty": "There's nothing to re-analyze here."
+  "categoryReanalyzeEmpty": "There's nothing to re-analyze here.",
+  "homeRecentsMore": "Show more",
+  "recentsScreenTitle": "Recent screenshots"
 }

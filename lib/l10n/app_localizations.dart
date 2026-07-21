@@ -1345,6 +1345,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'There\'s nothing to re-analyze here.'**
   String get categoryReanalyzeEmpty;
+
+  /// No description provided for @homeRecentsMore.
+  ///
+  /// In en, this message translates to:
+  /// **'Show more'**
+  String get homeRecentsMore;
+
+  /// No description provided for @recentsScreenTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent screenshots'**
+  String get recentsScreenTitle;
 }
 
 class _AppLocalizationsDelegate

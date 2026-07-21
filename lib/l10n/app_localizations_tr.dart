@@ -725,4 +725,10 @@ class AppLocalizationsTr extends AppLocalizations {
   @override
   String get categoryReanalyzeEmpty =>
       'Burada yeniden analiz edilecek bir şey yok.';
+
+  @override
+  String get homeRecentsMore => 'Daha fazla göster';
+
+  @override
+  String get recentsScreenTitle => 'Son ekran görüntüleri';
 }
