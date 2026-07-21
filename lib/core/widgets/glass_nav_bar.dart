@@ -5,6 +5,12 @@ import 'package:liquid_glass_renderer/liquid_glass_renderer.dart';
 import '../constants/ui_constants.dart';
 import '../services/haptic_service.dart';
 
+/// Sekmeye basılıyken uygulanan hafif küçülme (dokunma geri bildirimi).
+const double _navItemPressScale = 0.9;
+
+/// Seçili sekme ikonunun kısa "pop" büyümesi.
+const double _navItemSelectedScale = 1.14;
+
 /// [GlassNavBar] içindeki tek sekme tanımı.
 class GlassNavDestination {
   const GlassNavDestination({
@@ -144,7 +150,8 @@ class _SlidingIndicator extends StatelessWidget {
 
     return AnimatedAlign(
       duration: AppDurations.medium,
-      curve: Curves.easeOutCubic,
+      // Yaylı eğri: gösterge hedefe hafif "yaylanarak" oturur, statik durmaz.
+      curve: Curves.easeOutBack,
       alignment: Alignment(x, 0),
       child: FractionallySizedBox(
         widthFactor: 1 / itemCount,
@@ -163,8 +170,9 @@ class _SlidingIndicator extends StatelessWidget {
   }
 }
 
-/// İkon + etiketten oluşan tek sekme düğmesi.
-class _NavItem extends StatelessWidget {
+/// İkon + etiketten oluşan tek sekme düğmesi. Basılıyken hafifçe küçülür,
+/// seçilince ikon kısa bir "pop" ile büyür — çubuğa canlılık katar.
+class _NavItem extends StatefulWidget {
   const _NavItem({
     required this.destination,
     required this.selected,
@@ -176,42 +184,72 @@ class _NavItem extends StatelessWidget {
   final VoidCallback onTap;
 
   @override
+  State<_NavItem> createState() => _NavItemState();
+}
+
+class _NavItemState extends State<_NavItem> {
+  bool _pressed = false;
+
+  void _setPressed(bool value) {
+    if (_pressed != value) setState(() => _pressed = value);
+  }
+
+  @override
   Widget build(BuildContext context) {
     final ColorScheme scheme = Theme.of(context).colorScheme;
-    final Color color = selected ? scheme.primary : scheme.onSurfaceVariant;
+    final Color color = widget.selected
+        ? scheme.primary
+        : scheme.onSurfaceVariant;
 
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
-      onTap: onTap,
-      child: Semantics(
-        selected: selected,
-        button: true,
-        label: destination.label,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            AnimatedSwitcher(
-              duration: AppDurations.fast,
-              switchInCurve: Curves.easeOut,
-              switchOutCurve: Curves.easeIn,
-              child: Icon(
-                selected ? destination.selectedIcon : destination.icon,
-                key: ValueKey(selected),
-                color: color,
-                size: AppSizes.navBarIcon,
+      onTapDown: (_) => _setPressed(true),
+      onTapUp: (_) => _setPressed(false),
+      onTapCancel: () => _setPressed(false),
+      onTap: widget.onTap,
+      child: AnimatedScale(
+        scale: _pressed ? _navItemPressScale : 1.0,
+        duration: AppDurations.fast,
+        curve: Curves.easeOut,
+        child: Semantics(
+          selected: widget.selected,
+          button: true,
+          label: widget.destination.label,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              AnimatedScale(
+                scale: widget.selected ? _navItemSelectedScale : 1.0,
+                duration: AppDurations.medium,
+                curve: Curves.easeOutBack,
+                child: AnimatedSwitcher(
+                  duration: AppDurations.fast,
+                  switchInCurve: Curves.easeOut,
+                  switchOutCurve: Curves.easeIn,
+                  child: Icon(
+                    widget.selected
+                        ? widget.destination.selectedIcon
+                        : widget.destination.icon,
+                    key: ValueKey(widget.selected),
+                    color: color,
+                    size: AppSizes.navBarIcon,
+                  ),
+                ),
               ),
-            ),
-            const SizedBox(height: 2),
-            Text(
-              destination.label,
-              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                color: color,
-                fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
+              const SizedBox(height: 2),
+              Text(
+                widget.destination.label,
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  color: color,
+                  fontWeight: widget.selected
+                      ? FontWeight.w600
+                      : FontWeight.w500,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
