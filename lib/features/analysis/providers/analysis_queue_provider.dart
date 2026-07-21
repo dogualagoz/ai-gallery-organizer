@@ -152,16 +152,21 @@ class AnalysisQueueNotifier extends Notifier<AnalysisQueueState> {
   @override
   AnalysisQueueState build() => const AnalysisQueueState();
 
-  /// Bekleyen tüm screenshot'ları [AiConfig.activeProfile] tempo/eşzamanlılık
+  /// Bekleyen screenshot'ları [AiConfig.activeProfile] tempo/eşzamanlılık
   /// ayarıyla analiz eder. Free kullanıcıda kalan hak kadar işlenir; hak
   /// biterse [limitReached], günlük kota dolarsa [dailyCapReached].
-  Future<void> start() async {
+  ///
+  /// [onlyAssetIds] verilirse yalnız o id'lerdeki bekleyen kayıtlar işlenir
+  /// (kategori içinde "yeniden analiz et"); verilmezse tüm bekleyen galeri.
+  Future<void> start({Iterable<String>? onlyAssetIds}) async {
     if (state.isRunning) return;
 
     final ScreenshotRepository repo = ref.read(screenshotRepositoryProvider);
+    final Set<String>? scope = onlyAssetIds?.toSet();
     final List<ScreenshotEntry> pending = repo
         .sortedEntries()
         .where((entry) => entry.isPending)
+        .where((entry) => scope == null || scope.contains(entry.assetId))
         .toList();
     if (pending.isEmpty) return;
 

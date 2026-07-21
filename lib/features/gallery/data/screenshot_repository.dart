@@ -128,6 +128,16 @@ class ScreenshotRepository {
     await _box.put(assetId, entry);
   }
 
+  /// Kaydı yeniden analize hazır hale getirir: `analyzedAt`'i sıfırlar, böylece
+  /// [isPending] tekrar true olur ve analiz kuyruğu onu yeniden işler. Kategori
+  /// korunur; yeni sonuç üzerine yazana kadar mevcut grupta görünmeye devam eder.
+  Future<void> markPending(String assetId) async {
+    final ScreenshotEntry? entry = _box.get(assetId);
+    if (entry == null) return;
+    entry.analyzedAt = null;
+    await _box.put(assetId, entry);
+  }
+
   /// Kaydı kullanıcı board'una taşır ([boardId] null ise board'dan çıkarır).
   Future<void> assignToBoard(String assetId, String? boardId) async {
     final ScreenshotEntry? entry = _box.get(assetId);

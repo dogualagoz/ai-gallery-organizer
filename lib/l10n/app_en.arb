@@ -359,5 +359,9 @@
   "analysisCancelStop": "Stop here",
   "analysisCancelStopHint": "Keep the screenshots analyzed so far.",
   "analysisCancelReset": "Reset",
-  "analysisCancelResetHint": "Discard this run and start over."
+  "analysisCancelResetHint": "Discard this run and start over.",
+  "categoryReanalyzeAction": "Re-analyze",
+  "categoryReanalyzeConfirmTitle": "Re-analyze this category?",
+  "categoryReanalyzeConfirmBody": "The screenshots in this group will be sent to AI again. This uses your weekly analysis quota.",
+  "categoryReanalyzeEmpty": "There's nothing to re-analyze here."
 }

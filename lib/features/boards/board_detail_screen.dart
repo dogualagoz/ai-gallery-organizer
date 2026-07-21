@@ -16,6 +16,7 @@ import '../../core/router/app_router.dart';
 import '../../core/services/entitlement_service.dart';
 import '../../core/widgets/edge_swipe_back.dart';
 import '../../core/widgets/screenshot_results_grid.dart';
+import '../analysis/providers/analysis_queue_provider.dart';
 import '../gallery/data/screenshot_repository.dart';
 import '../gallery/providers/gallery_provider.dart';
 import 'providers/board_provider.dart';
@@ -96,6 +97,12 @@ class _BoardDetailScreenState extends ConsumerState<BoardDetailScreen> {
                   ),
                 ]
               : [
+                  if (widget.category != null && filtered.isNotEmpty)
+                    IconButton(
+                      tooltip: l10n.categoryReanalyzeAction,
+                      icon: const Icon(Icons.auto_awesome_outlined),
+                      onPressed: () => _reanalyzeCategory(filtered),
+                    ),
                   if (filtered.isNotEmpty)
                     IconButton(
                       tooltip: l10n.bulkSelectAction,
@@ -139,6 +146,40 @@ class _BoardDetailScreenState extends ConsumerState<BoardDetailScreen> {
       _selectionMode = false;
       _selectedIds.clear();
     });
+  }
+
+  /// Kategoriyi yeniden analiz eder: onaydan sonra kayıtları pending'e alıp
+  /// anasayfaya döner; analiz animasyonu orada oynar, haftalık kotadan harcanır.
+  Future<void> _reanalyzeCategory(List<ScreenshotEntry> filtered) async {
+    final l10n = context.l10n;
+    final bool? confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(l10n.categoryReanalyzeConfirmTitle),
+        content: Text(l10n.categoryReanalyzeConfirmBody),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: Text(l10n.cancelAction),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: Text(l10n.categoryReanalyzeAction),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+
+    final ScreenshotRepository repo = ref.read(screenshotRepositoryProvider);
+    final List<String> ids = filtered.map((e) => e.assetId).toList();
+    for (final String assetId in ids) {
+      await repo.markPending(assetId);
+    }
+    if (!mounted) return;
+    // Analiz kartı anasayfada; kullanıcı animasyonu görsün diye geri dön.
+    Navigator.of(context).maybePop();
+    ref.read(analysisQueueProvider.notifier).start(onlyAssetIds: ids);
   }
 
   Future<void> _bulkDelete() async {

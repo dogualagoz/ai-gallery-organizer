@@ -712,4 +712,17 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get analysisCancelResetHint => 'Discard this run and start over.';
+
+  @override
+  String get categoryReanalyzeAction => 'Re-analyze';
+
+  @override
+  String get categoryReanalyzeConfirmTitle => 'Re-analyze this category?';
+
+  @override
+  String get categoryReanalyzeConfirmBody =>
+      'The screenshots in this group will be sent to AI again. This uses your weekly analysis quota.';
+
+  @override
+  String get categoryReanalyzeEmpty => 'There\'s nothing to re-analyze here.';
 }

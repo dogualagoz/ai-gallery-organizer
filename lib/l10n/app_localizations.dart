@@ -1321,6 +1321,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Discard this run and start over.'**
   String get analysisCancelResetHint;
+
+  /// No description provided for @categoryReanalyzeAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Re-analyze'**
+  String get categoryReanalyzeAction;
+
+  /// No description provided for @categoryReanalyzeConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Re-analyze this category?'**
+  String get categoryReanalyzeConfirmTitle;
+
+  /// No description provided for @categoryReanalyzeConfirmBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The screenshots in this group will be sent to AI again. This uses your weekly analysis quota.'**
+  String get categoryReanalyzeConfirmBody;
+
+  /// No description provided for @categoryReanalyzeEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'There\'s nothing to re-analyze here.'**
+  String get categoryReanalyzeEmpty;
 }
 
 class _AppLocalizationsDelegate

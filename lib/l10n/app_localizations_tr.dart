@@ -710,4 +710,19 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get analysisCancelResetHint => 'Bu turu iptal et, baştan başla.';
+
+  @override
+  String get categoryReanalyzeAction => 'Yeniden analiz et';
+
+  @override
+  String get categoryReanalyzeConfirmTitle =>
+      'Bu kategori yeniden analiz edilsin mi?';
+
+  @override
+  String get categoryReanalyzeConfirmBody =>
+      'Bu gruptaki ekran görüntüleri AI\'a yeniden gönderilir. Bu, haftalık analiz hakkından harcar.';
+
+  @override
+  String get categoryReanalyzeEmpty =>
+      'Burada yeniden analiz edilecek bir şey yok.';
 }
