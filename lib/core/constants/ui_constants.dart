@@ -32,6 +32,12 @@ abstract final class AppSizes {
 
   /// Board kartlarındaki kapak şeridi yüksekliği referansı.
   static const double boardCoverMin = 72;
+
+  /// iOS geri-kaydırma jestinin başlayabileceği sol kenar bölgesi (px).
+  static const double edgeSwipeZone = 24;
+
+  /// Geri-kaydırmayı tamamlamak için gereken minimum yatay mesafe (px).
+  static const double edgeSwipeTriggerDistance = 80;
 }
 
 /// Liquid glass (iOS 26) render ayarları — sayısal değerler burada, renk

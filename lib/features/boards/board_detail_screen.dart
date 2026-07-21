@@ -14,6 +14,7 @@ import '../../core/models/screenshot_category.dart';
 import '../../core/models/screenshot_entry.dart';
 import '../../core/router/app_router.dart';
 import '../../core/services/entitlement_service.dart';
+import '../../core/widgets/edge_swipe_back.dart';
 import '../../core/widgets/screenshot_results_grid.dart';
 import '../gallery/data/screenshot_repository.dart';
 import '../gallery/providers/gallery_provider.dart';
@@ -62,67 +63,74 @@ class _BoardDetailScreenState extends ConsumerState<BoardDetailScreen> {
 
     final bool canBulkDelete = ref.watch(entitlementProvider).canBulkDelete;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          _selectionMode ? l10n.bulkSelectionCount(_selectedIds.length) : title,
+    return EdgeSwipeBack(
+      // Seçim modunda kenar-swipe kapalı: yanlışlıkla ekrandan çıkmayı önler.
+      enabled: !_selectionMode,
+      onBack: () => Navigator.maybePop(context),
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(
+            _selectionMode
+                ? l10n.bulkSelectionCount(_selectedIds.length)
+                : title,
+          ),
+          leading: _selectionMode
+              ? IconButton(
+                  icon: const Icon(Icons.close),
+                  onPressed: _exitSelection,
+                )
+              : null,
+          actions: _selectionMode
+              ? [
+                  IconButton(
+                    tooltip: l10n.bulkDeleteAction,
+                    icon: _bulkDeleting
+                        ? const SizedBox.square(
+                            dimension: 20,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Icon(Icons.delete_outline),
+                    onPressed: _selectedIds.isEmpty || _bulkDeleting
+                        ? null
+                        : _bulkDelete,
+                  ),
+                ]
+              : [
+                  if (filtered.isNotEmpty)
+                    IconButton(
+                      tooltip: l10n.bulkSelectAction,
+                      icon: const Icon(Icons.checklist_outlined),
+                      onPressed: () => canBulkDelete
+                          ? setState(() => _selectionMode = true)
+                          : context.push(AppRoutes.paywall),
+                    ),
+                  if (widget.boardId != null && board != null)
+                    IconButton(
+                      tooltip: l10n.boardsRenameAction,
+                      icon: const Icon(Icons.edit_outlined),
+                      onPressed: () => _showRenameDialog(context, board),
+                    ),
+                  if (widget.boardId != null)
+                    IconButton(
+                      tooltip: l10n.boardsDeleteAction,
+                      icon: const Icon(Icons.delete_outline),
+                      onPressed: () =>
+                          _showDeleteConfirm(context, widget.boardId!),
+                    ),
+                ],
         ),
-        leading: _selectionMode
-            ? IconButton(
-                icon: const Icon(Icons.close),
-                onPressed: _exitSelection,
+        body: filtered.isEmpty
+            ? _EmptyBoard(text: l10n.boardDetailEmpty)
+            : _selectionMode
+            ? _SelectableGrid(
+                entries: filtered,
+                selectedIds: _selectedIds,
+                onToggle: (assetId) => setState(() {
+                  if (!_selectedIds.remove(assetId)) _selectedIds.add(assetId);
+                }),
               )
-            : null,
-        actions: _selectionMode
-            ? [
-                IconButton(
-                  tooltip: l10n.bulkDeleteAction,
-                  icon: _bulkDeleting
-                      ? const SizedBox.square(
-                          dimension: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Icon(Icons.delete_outline),
-                  onPressed: _selectedIds.isEmpty || _bulkDeleting
-                      ? null
-                      : _bulkDelete,
-                ),
-              ]
-            : [
-                if (filtered.isNotEmpty)
-                  IconButton(
-                    tooltip: l10n.bulkSelectAction,
-                    icon: const Icon(Icons.checklist_outlined),
-                    onPressed: () => canBulkDelete
-                        ? setState(() => _selectionMode = true)
-                        : context.push(AppRoutes.paywall),
-                  ),
-                if (widget.boardId != null && board != null)
-                  IconButton(
-                    tooltip: l10n.boardsRenameAction,
-                    icon: const Icon(Icons.edit_outlined),
-                    onPressed: () => _showRenameDialog(context, board),
-                  ),
-                if (widget.boardId != null)
-                  IconButton(
-                    tooltip: l10n.boardsDeleteAction,
-                    icon: const Icon(Icons.delete_outline),
-                    onPressed: () =>
-                        _showDeleteConfirm(context, widget.boardId!),
-                  ),
-              ],
+            : ScreenshotResultsGrid(entries: filtered),
       ),
-      body: filtered.isEmpty
-          ? _EmptyBoard(text: l10n.boardDetailEmpty)
-          : _selectionMode
-          ? _SelectableGrid(
-              entries: filtered,
-              selectedIds: _selectedIds,
-              onToggle: (assetId) => setState(() {
-                if (!_selectedIds.remove(assetId)) _selectedIds.add(assetId);
-              }),
-            )
-          : ScreenshotResultsGrid(entries: filtered),
     );
   }
 
@@ -144,9 +152,8 @@ class _BoardDetailScreenState extends ConsumerState<BoardDetailScreen> {
       debugPrint('Toplu silme hatası: $error\n$stackTrace');
       if (mounted) {
         setState(() => _bulkDeleting = false);
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(failureMessage)));
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(failureMessage)));
       }
       return;
     }
@@ -319,9 +326,8 @@ class _EmptyBoard extends StatelessWidget {
             const SizedBox(height: AppSpacing.md),
             Text(
               text,
-              style: Theme.of(
-                context,
-              ).textTheme.bodyMedium?.copyWith(color: scheme.onSurfaceVariant),
+              style: Theme.of(context).textTheme.bodyMedium
+                  ?.copyWith(color: scheme.onSurfaceVariant),
               textAlign: TextAlign.center,
             ),
           ],
