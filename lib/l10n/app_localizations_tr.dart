@@ -267,6 +267,17 @@ class AppLocalizationsTr extends AppLocalizations {
   String get analysisExperienceTitle => 'Ekran görüntülerin gruplandırılıyor';
 
   @override
+  String get analysisSceneSummaryTitle => 'Hepsi yerleşti';
+
+  @override
+  String analysisSceneSummary(int count, int categories) {
+    return '$count ekran görüntüsü $categories kategoriye yerleşti';
+  }
+
+  @override
+  String get analysisSceneDone => 'Bitti';
+
+  @override
   String get milestoneTitle => 'Harika ilerleme!';
 
   @override

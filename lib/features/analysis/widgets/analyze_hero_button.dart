@@ -4,10 +4,12 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../core/constants/app_constants.dart';
 import '../../../core/constants/ui_constants.dart';
 import '../../../core/l10n/l10n_extension.dart';
+import '../../../core/router/app_router.dart';
 import '../../../core/services/entitlement_service.dart';
 import '../../../core/services/haptic_service.dart';
 import '../providers/analysis_queue_provider.dart';
@@ -38,8 +40,12 @@ class _AnalyzeHeroButtonState extends ConsumerState<AnalyzeHeroButton>
 
   void _startAnalysis() {
     Haptics.analysisStart();
-    // Ekran değişmez: banner aynı yerde ilerleme kartına dönüşür ve
-    // gölgeler kategori kartlarına uçar (CategoryFlyLayer).
+    // Kota varsa tam ekran sinematik sahneyi aç; sahne kuyruğu izleyerek
+    // kartları kategori şeritlerine yerleştirir. Kota yoksa sahneyi açma —
+    // start() doğrudan limitReached'e düşer, banner paywall CTA'sını gösterir.
+    if (ref.read(entitlementProvider).canAnalyze) {
+      context.push(AppRoutes.analysisScene);
+    }
     ref.read(analysisQueueProvider.notifier).start();
   }
 
@@ -151,9 +157,8 @@ class _HeroContent extends ConsumerWidget {
               const SizedBox(height: 2),
               Text(
                 quotaHint,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: scheme.onPrimary.withValues(alpha: 0.85),
-                ),
+                style: Theme.of(context).textTheme.bodySmall
+                    ?.copyWith(color: scheme.onPrimary.withValues(alpha: 0.85)),
               ),
             ],
           ),

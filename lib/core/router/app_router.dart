@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:liquid_glass_renderer/liquid_glass_renderer.dart';
 
+import '../../features/analysis/analysis_scene_screen.dart';
 import '../../features/analysis/milestone_screen.dart';
 import '../../features/detail/detail_screen.dart';
 import '../../features/home/home_screen.dart';
@@ -27,6 +28,9 @@ abstract final class AppRoutes {
   static const String sorting = '/sorting';
   static const String paywall = '/paywall';
   static const String analysisMilestone = '/analysis-milestone';
+
+  /// Analiz sırasında oynayan tam ekran sinematik sahne.
+  static const String analysisScene = '/analysis-scene';
 
   /// Paywall query parametresi: açılışta paket bölümüne kaydır.
   static const String paywallFocusQuery = 'focus';
@@ -99,6 +103,30 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.search,
         builder: (context, state) => const SearchScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.analysisScene,
+        // Opak, kapatılamaz tam ekran sahne; fade + hafif scale ile premium
+        // giriş (alttan sheet değil).
+        pageBuilder: (context, state) => CustomTransitionPage<void>(
+          opaque: true,
+          barrierDismissible: false,
+          transitionDuration: AppDurations.medium,
+          child: const AnalysisSceneScreen(),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            final Animation<double> curved = CurvedAnimation(
+              parent: animation,
+              curve: Curves.easeOutCubic,
+            );
+            return FadeTransition(
+              opacity: curved,
+              child: ScaleTransition(
+                scale: Tween<double>(begin: 0.96, end: 1).animate(curved),
+                child: child,
+              ),
+            );
+          },
+        ),
       ),
       GoRoute(
         path: AppRoutes.analysisMilestone,

@@ -530,6 +530,24 @@ abstract class AppLocalizations {
   /// **'Organizing your screenshots'**
   String get analysisExperienceTitle;
 
+  /// No description provided for @analysisSceneSummaryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'All sorted'**
+  String get analysisSceneSummaryTitle;
+
+  /// No description provided for @analysisSceneSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} screenshots settled into {categories} categories'**
+  String analysisSceneSummary(int count, int categories);
+
+  /// No description provided for @analysisSceneDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get analysisSceneDone;
+
   /// No description provided for @milestoneTitle.
   ///
   /// In en, this message translates to:

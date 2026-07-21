@@ -2,21 +2,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:photo_manager/photo_manager.dart';
-import 'package:photo_manager_image_provider/photo_manager_image_provider.dart';
 
 import '../../../core/constants/ui_constants.dart';
 import '../../../core/l10n/l10n_extension.dart';
 import '../../../core/router/app_router.dart';
 import '../../../core/services/entitlement_service.dart';
 import '../../../core/services/haptic_service.dart';
-import '../../gallery/data/screenshot_repository.dart';
 import '../providers/analysis_queue_provider.dart';
 import 'analyze_hero_button.dart';
-import 'category_fly_layer.dart';
-
-/// Havuz önizlemesinde gösterilecek en fazla bekleyen thumbnail sayısı.
-const int _maxPoolPreviewItems = 4;
 
 class AnalysisBanner extends ConsumerWidget {
   const AnalysisBanner({super.key, required this.pendingCount});
@@ -70,11 +63,6 @@ class AnalysisBanner extends ConsumerWidget {
       // gradyan arasındaki keskin kontrast "gri flaş" gibi algılanıyordu).
       final bool isRunning = queue.status == AnalysisQueueStatus.running;
       child = Container(
-        // Uçan gölgelerin başlangıç noktası: koşarken kart kaynağa bağlanır.
-        // Yalnız running'de bağlanır ki switcher geçişinde anahtar çakışmasın.
-        key: queue.isRunning
-            ? CategoryFlyScope.of(context)?.sourceKey
-            : null,
         margin: const EdgeInsets.only(bottom: AppSpacing.sm),
         padding: const EdgeInsets.symmetric(
           horizontal: AppSpacing.md,
@@ -143,15 +131,12 @@ class _RunningContent extends ConsumerWidget {
               ),
               Text(
                 context.l10n.analysisProgress(processed, queue.total),
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: scheme.onPrimary.withValues(alpha: 0.85),
-                ),
+                style: Theme.of(context).textTheme.bodySmall
+                    ?.copyWith(color: scheme.onPrimary.withValues(alpha: 0.85)),
               ),
             ],
           ),
         ),
-        const SizedBox(width: AppSpacing.sm),
-        const _PendingPool(),
         const SizedBox(width: AppSpacing.sm),
         IconButton(
           tooltip: context.l10n.analysisCancelAction,
@@ -162,70 +147,6 @@ class _RunningContent extends ConsumerWidget {
           },
         ),
       ],
-    );
-  }
-}
-
-/// Bu turda henüz analiz edilmemiş birkaç thumbnail'i üst üste binmiş
-/// şekilde gösterir — "havuzdan kategorilere akış" hissini kaynağında verir.
-class _PendingPool extends ConsumerWidget {
-  const _PendingPool();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final repo = ref.watch(screenshotRepositoryProvider);
-    final pending = repo
-        .sortedEntries()
-        .where((entry) => entry.isPending)
-        .take(_maxPoolPreviewItems)
-        .toList();
-    if (pending.isEmpty) return const SizedBox.shrink();
-
-    const double tileSize = 28;
-    const double overlap = 14;
-    return SizedBox(
-      width: tileSize + overlap * (pending.length - 1),
-      height: tileSize,
-      child: Stack(
-        children: [
-          for (int i = 0; i < pending.length; i++)
-            Positioned(
-              left: overlap * i,
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(AppRadius.sm),
-                child: SizedBox(
-                  width: tileSize,
-                  height: tileSize,
-                  child: _PoolThumbnail(assetId: pending[i].assetId),
-                ),
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-}
-
-/// Havuz önizlemesindeki tek bir kare thumbnail.
-class _PoolThumbnail extends ConsumerWidget {
-  const _PoolThumbnail({required this.assetId});
-
-  final String assetId;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final scheme = Theme.of(context).colorScheme;
-    final asset = ref.watch(screenshotRepositoryProvider).assetFor(assetId);
-    if (asset == null) {
-      return ColoredBox(color: scheme.onPrimary.withValues(alpha: 0.25));
-    }
-    return AssetEntityImage(
-      asset,
-      isOriginal: false,
-      thumbnailSize: const ThumbnailSize.square(100),
-      fit: BoxFit.cover,
-      errorBuilder: (context, error, stackTrace) =>
-          ColoredBox(color: scheme.onPrimary.withValues(alpha: 0.25)),
     );
   }
 }
@@ -271,7 +192,13 @@ class _FailedContent extends ConsumerWidget {
           ),
         ),
         TextButton(
-          onPressed: () => ref.read(analysisQueueProvider.notifier).start(),
+          onPressed: () {
+            // Hero butonla aynı akış: kota varsa sahneyi aç, sonra başlat.
+            if (ref.read(entitlementProvider).canAnalyze) {
+              context.push(AppRoutes.analysisScene);
+            }
+            ref.read(analysisQueueProvider.notifier).start();
+          },
           child: Text(context.l10n.analysisRetryAction),
         ),
         IconButton(

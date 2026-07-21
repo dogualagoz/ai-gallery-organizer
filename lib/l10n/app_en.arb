@@ -147,6 +147,15 @@
     }
   },
   "analysisExperienceTitle": "Organizing your screenshots",
+  "analysisSceneSummaryTitle": "All sorted",
+  "analysisSceneSummary": "{count} screenshots settled into {categories} categories",
+  "@analysisSceneSummary": {
+    "placeholders": {
+      "count": {"type": "int"},
+      "categories": {"type": "int"}
+    }
+  },
+  "analysisSceneDone": "Done",
   "milestoneTitle": "Great progress!",
   "milestoneSubtitle": "You've used all {limit} free analyses this week.",
   "@milestoneSubtitle": {

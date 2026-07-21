@@ -147,6 +147,15 @@
     }
   },
   "analysisExperienceTitle": "Ekran görüntülerin gruplandırılıyor",
+  "analysisSceneSummaryTitle": "Hepsi yerleşti",
+  "analysisSceneSummary": "{count} ekran görüntüsü {categories} kategoriye yerleşti",
+  "@analysisSceneSummary": {
+    "placeholders": {
+      "count": {"type": "int"},
+      "categories": {"type": "int"}
+    }
+  },
+  "analysisSceneDone": "Bitti",
   "milestoneTitle": "Harika ilerleme!",
   "milestoneSubtitle": "Bu haftaki {limit} ücretsiz analizin tamamını kullandın.",
   "@milestoneSubtitle": {

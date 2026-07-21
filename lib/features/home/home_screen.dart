@@ -15,7 +15,6 @@ import '../../core/widgets/pro_badge.dart';
 import '../analysis/providers/analysis_queue_provider.dart';
 import '../analysis/providers/auto_sort_provider.dart';
 import '../analysis/widgets/analysis_banner.dart';
-import '../analysis/widgets/category_fly_layer.dart';
 import '../analysis/widgets/auto_sort_chip.dart';
 import '../boards/providers/board_provider.dart';
 import '../boards/widgets/custom_boards_grid.dart';
@@ -33,7 +32,6 @@ class HomeScreen extends ConsumerWidget {
     // Ekran boyunca yaşatılır: galeri güncellendikçe Pro kullanıcı için
     // analiz kuyruğunu otomatik tetikler.
     ref.watch(autoSortControllerProvider);
-    _listenForMilestone(context, ref);
     final gallery = ref.watch(galleryProvider);
 
     // Veri varken app bar liste içinde (SliverAppBar) — aşağı kayınca
@@ -66,22 +64,6 @@ class HomeScreen extends ConsumerWidget {
     );
   }
 
-  /// Haftalık free kota bir analiz turunda gerçekten tükendiğinde milestone
-  /// kutlama sayfasını açar. Yalnız limitReached'e *geçişte* tetiklenir —
-  /// aynı tur için ikinci kez açılmaz.
-  void _listenForMilestone(BuildContext context, WidgetRef ref) {
-    ref.listen(analysisQueueProvider, (previous, next) {
-      final bool becameLimited =
-          next.status == AnalysisQueueStatus.limitReached &&
-          previous?.status != AnalysisQueueStatus.limitReached;
-      if (!becameLimited || !next.freeQuotaExhausted || next.done == 0) return;
-      // Listener build sırasında çalışabilir; navigasyon frame sonrasına atılır.
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (context.mounted) context.push(AppRoutes.analysisMilestone);
-      });
-    });
-  }
-
   /// Eşitlemeyi çalıştırır; hata olursa kullanıcıya snackbar gösterir.
   static Future<void> _syncWithFeedback(
     BuildContext context,
@@ -93,9 +75,8 @@ class HomeScreen extends ConsumerWidget {
     } catch (error, stackTrace) {
       debugPrint('Galeri manuel eşitleme hatası: $error\n$stackTrace');
       if (!context.mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(failureMessage)));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(failureMessage)));
     }
   }
 }
@@ -113,10 +94,7 @@ class _HomeTitle extends ConsumerWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         Text(context.l10n.galleryTitle),
-        if (isPro) ...[
-          const SizedBox(width: AppSpacing.sm),
-          const ProBadge(),
-        ],
+        if (isPro) ...[const SizedBox(width: AppSpacing.sm), const ProBadge()],
       ],
     );
   }
@@ -149,80 +127,78 @@ class _HomeContent extends ConsumerWidget {
     final repo = ref.watch(screenshotRepositoryProvider);
     final bool isPro = ref.watch(entitlementProvider).isPro;
 
-    // CategoryFlyLayer: analiz gölgeleri ilerleme kartından kategori
-    // kartlarına bu katmanın koordinat uzayında uçar.
-    return CategoryFlyLayer(
-      child: RefreshIndicator(
-        onRefresh: () => ref.read(galleryProvider.notifier).sync(),
-        child: CustomScrollView(
-          slivers: [
-            SliverAppBar(
-              // Sabitlenmez: aşağı kaydırınca içerikle birlikte gider.
-              pinned: false,
-              title: const _HomeTitle(),
-              // Pro'ya özel incelikli gradient — premium hissi ama sessiz.
-              flexibleSpace: isPro
-                  ? DecoratedBox(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          colors: [
-                            Theme.of(context).colorScheme.primaryContainer
-                                .withValues(alpha: AppOpacities.proAppBarTint),
-                            Colors.transparent,
-                          ],
-                        ),
+    return RefreshIndicator(
+      onRefresh: () => ref.read(galleryProvider.notifier).sync(),
+      child: CustomScrollView(
+        slivers: [
+          SliverAppBar(
+            // Sabitlenmez: aşağı kaydırınca içerikle birlikte gider.
+            pinned: false,
+            title: const _HomeTitle(),
+            // Pro'ya özel incelikli gradient — premium hissi ama sessiz.
+            flexibleSpace: isPro
+                ? DecoratedBox(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Theme.of(context).colorScheme.primaryContainer
+                              .withValues(alpha: AppOpacities.proAppBarTint),
+                          Colors.transparent,
+                        ],
                       ),
-                      child: const SizedBox.expand(),
-                    )
-                  : null,
-              actions: [
-                // DEBUG: API harcamadan analiz animasyonunu tetikler.
-                if (kDebugMode)
-                  IconButton(
-                    tooltip: 'Animasyonu dene (debug)',
-                    icon: const Icon(Icons.science_outlined),
-                    onPressed: () =>
-                        ref.read(analysisQueueProvider.notifier).simulate(),
+                    ),
+                    child: const SizedBox.expand(),
+                  )
+                : null,
+            actions: [
+              // DEBUG: API harcamadan analiz animasyonunu tetikler.
+              if (kDebugMode)
+                IconButton(
+                  tooltip: 'Animasyonu dene (debug)',
+                  icon: const Icon(Icons.science_outlined),
+                  onPressed: () {
+                    context.push(AppRoutes.analysisScene);
+                    ref.read(analysisQueueProvider.notifier).simulate();
+                  },
+                ),
+              _SyncAction(
+                onSync: () => HomeScreen._syncWithFeedback(context, ref),
+              ),
+            ],
+          ),
+          SliverPadding(
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.md,
+              AppSpacing.xs,
+              AppSpacing.md,
+              0,
+            ),
+            sliver: SliverToBoxAdapter(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (!isPro) const AutoSortChip(),
+                  AnalysisBanner(
+                    pendingCount: entries
+                        .where((entry) => entry.isPending)
+                        .length,
                   ),
-                _SyncAction(
-                  onSync: () => HomeScreen._syncWithFeedback(context, ref),
-                ),
-              ],
-            ),
-            SliverPadding(
-              padding: const EdgeInsets.fromLTRB(
-                AppSpacing.md,
-                AppSpacing.xs,
-                AppSpacing.md,
-                0,
-              ),
-              sliver: SliverToBoxAdapter(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    if (!isPro) const AutoSortChip(),
-                    AnalysisBanner(
-                      pendingCount: entries
-                          .where((entry) => entry.isPending)
-                          .length,
-                    ),
-                    const SizedBox(height: AppSpacing.sm),
-                    _BoardsSection(entries: entries, repo: repo),
-                    const SizedBox(height: AppSpacing.lg),
-                    Text(
-                      context.l10n.homeRecentsSection,
-                      style: Theme.of(context).textTheme.titleMedium,
-                    ),
-                    const SizedBox(height: AppSpacing.xs),
-                  ],
-                ),
+                  const SizedBox(height: AppSpacing.sm),
+                  _BoardsSection(entries: entries, repo: repo),
+                  const SizedBox(height: AppSpacing.lg),
+                  Text(
+                    context.l10n.homeRecentsSection,
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                  const SizedBox(height: AppSpacing.xs),
+                ],
               ),
             ),
-            _RecentsGrid(entries: entries, repo: repo),
-          ],
-        ),
+          ),
+          _RecentsGrid(entries: entries, repo: repo),
+        ],
       ),
     );
   }

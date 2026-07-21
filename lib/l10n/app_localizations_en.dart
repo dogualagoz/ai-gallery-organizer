@@ -267,6 +267,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String get analysisExperienceTitle => 'Organizing your screenshots';
 
   @override
+  String get analysisSceneSummaryTitle => 'All sorted';
+
+  @override
+  String analysisSceneSummary(int count, int categories) {
+    return '$count screenshots settled into $categories categories';
+  }
+
+  @override
+  String get analysisSceneDone => 'Done';
+
+  @override
   String get milestoneTitle => 'Great progress!';
 
   @override
