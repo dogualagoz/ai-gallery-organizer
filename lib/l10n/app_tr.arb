@@ -340,5 +340,19 @@
       "version": {"type": "String"}
     }
   },
-  "settingsLinkFailed": "Bağlantı açılamadı. Lütfen tekrar dene."
+  "settingsLinkFailed": "Bağlantı açılamadı. Lütfen tekrar dene.",
+  "homeWeeklyLimitUnlimited": "Sınırsız",
+  "homeWeeklyLimitRemaining": "{count} kaldı",
+  "@homeWeeklyLimitRemaining": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "homeWeeklyLimitResetIn": "Haftalık kota {days} gün sonra yenilenir.",
+  "@homeWeeklyLimitResetIn": {
+    "placeholders": {
+      "days": {"type": "int"}
+    }
+  },
+  "homeWeeklyLimitUnlimitedHint": "Pro ile sınırsız analiz hakkın var."
 }

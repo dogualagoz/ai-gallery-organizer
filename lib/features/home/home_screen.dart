@@ -17,6 +17,7 @@ import '../analysis/providers/auto_sort_provider.dart';
 import '../analysis/widgets/analyze_card.dart';
 import '../analysis/widgets/auto_sort_chip.dart';
 import '../analysis/widgets/category_target_scope.dart';
+import '../analysis/widgets/weekly_limit_badge.dart';
 import '../boards/providers/board_provider.dart';
 import '../boards/widgets/custom_boards_grid.dart';
 import '../boards/widgets/system_boards_grid.dart';
@@ -61,7 +62,11 @@ class HomeScreen extends ConsumerWidget {
   AppBar _classicAppBar(BuildContext context, WidgetRef ref) {
     return AppBar(
       title: const _HomeTitle(),
-      actions: [_SyncAction(onSync: () => _syncWithFeedback(context, ref))],
+      actions: [
+        const WeeklyLimitBadge(),
+        const SizedBox(width: AppSpacing.xs),
+        _SyncAction(onSync: () => _syncWithFeedback(context, ref)),
+      ],
     );
   }
 
@@ -177,6 +182,8 @@ class _HomeContent extends ConsumerWidget {
                     onPressed: () =>
                         ref.read(analysisQueueProvider.notifier).simulate(),
                   ),
+                const WeeklyLimitBadge(),
+                const SizedBox(width: AppSpacing.xs),
                 _SyncAction(
                   onSync: () => HomeScreen._syncWithFeedback(context, ref),
                 ),

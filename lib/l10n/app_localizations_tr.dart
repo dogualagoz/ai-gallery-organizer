@@ -678,4 +678,21 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get settingsLinkFailed => 'Bağlantı açılamadı. Lütfen tekrar dene.';
+
+  @override
+  String get homeWeeklyLimitUnlimited => 'Sınırsız';
+
+  @override
+  String homeWeeklyLimitRemaining(int count) {
+    return '$count kaldı';
+  }
+
+  @override
+  String homeWeeklyLimitResetIn(int days) {
+    return 'Haftalık kota $days gün sonra yenilenir.';
+  }
+
+  @override
+  String get homeWeeklyLimitUnlimitedHint =>
+      'Pro ile sınırsız analiz hakkın var.';
 }

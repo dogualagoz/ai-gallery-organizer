@@ -680,4 +680,21 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get settingsLinkFailed =>
       'The link couldn\'t be opened. Please try again.';
+
+  @override
+  String get homeWeeklyLimitUnlimited => 'Unlimited';
+
+  @override
+  String homeWeeklyLimitRemaining(int count) {
+    return '$count left';
+  }
+
+  @override
+  String homeWeeklyLimitResetIn(int days) {
+    return 'Weekly quota renews in $days days.';
+  }
+
+  @override
+  String get homeWeeklyLimitUnlimitedHint =>
+      'You have unlimited analyses with Pro.';
 }

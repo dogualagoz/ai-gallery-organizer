@@ -1267,6 +1267,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'The link couldn\'t be opened. Please try again.'**
   String get settingsLinkFailed;
+
+  /// No description provided for @homeWeeklyLimitUnlimited.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlimited'**
+  String get homeWeeklyLimitUnlimited;
+
+  /// No description provided for @homeWeeklyLimitRemaining.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} left'**
+  String homeWeeklyLimitRemaining(int count);
+
+  /// No description provided for @homeWeeklyLimitResetIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly quota renews in {days} days.'**
+  String homeWeeklyLimitResetIn(int days);
+
+  /// No description provided for @homeWeeklyLimitUnlimitedHint.
+  ///
+  /// In en, this message translates to:
+  /// **'You have unlimited analyses with Pro.'**
+  String get homeWeeklyLimitUnlimitedHint;
 }
 
 class _AppLocalizationsDelegate

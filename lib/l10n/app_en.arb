@@ -340,5 +340,19 @@
       "version": {"type": "String"}
     }
   },
-  "settingsLinkFailed": "The link couldn't be opened. Please try again."
+  "settingsLinkFailed": "The link couldn't be opened. Please try again.",
+  "homeWeeklyLimitUnlimited": "Unlimited",
+  "homeWeeklyLimitRemaining": "{count} left",
+  "@homeWeeklyLimitRemaining": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "homeWeeklyLimitResetIn": "Weekly quota renews in {days} days.",
+  "@homeWeeklyLimitResetIn": {
+    "placeholders": {
+      "days": {"type": "int"}
+    }
+  },
+  "homeWeeklyLimitUnlimitedHint": "You have unlimited analyses with Pro."
 }
