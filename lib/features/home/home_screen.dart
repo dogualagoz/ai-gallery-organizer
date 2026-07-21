@@ -13,6 +13,7 @@ import '../../core/router/app_router.dart';
 import '../../core/services/category_names_service.dart';
 import '../../core/services/entitlement_service.dart';
 import '../../core/services/review_service.dart';
+import '../../core/widgets/page_header.dart';
 import '../../core/widgets/pro_badge.dart';
 import '../analysis/providers/analysis_queue_provider.dart';
 import '../analysis/providers/auto_sort_provider.dart';
@@ -47,37 +48,32 @@ class HomeScreen extends ConsumerWidget {
       });
     }
 
-    // Veri varken app bar liste içinde (SliverAppBar) — aşağı kayınca
-    // içerikle birlikte gider. Boş/hata/yükleme durumlarında kaydırma
-    // olmadığı için klasik sabit app bar kullanılır.
+    // Üst bar sayfaya gömülü (PageHeader). Veri varken header kaydırılabilir
+    // listenin ilk elemanı; boş/hata/yükleme durumlarında header + ortalanmış
+    // içerik olarak bir Column içinde durur.
     return gallery.when(
       loading: () => Scaffold(
-        appBar: _classicAppBar(context, ref),
-        body: const Center(child: CircularProgressIndicator()),
+        body: _HomeStateScaffold(
+          onSync: () => _syncWithFeedback(context, ref),
+          child: const Center(child: CircularProgressIndicator()),
+        ),
       ),
       error: (error, _) => Scaffold(
-        appBar: _classicAppBar(context, ref),
-        body: GalleryEmptyState(onSync: () => _syncWithFeedback(context, ref)),
+        body: _HomeStateScaffold(
+          onSync: () => _syncWithFeedback(context, ref),
+          child: GalleryEmptyState(onSync: () => _syncWithFeedback(context, ref)),
+        ),
       ),
       data: (entries) => entries.isEmpty
           ? Scaffold(
-              appBar: _classicAppBar(context, ref),
-              body: GalleryEmptyState(
+              body: _HomeStateScaffold(
                 onSync: () => _syncWithFeedback(context, ref),
+                child: GalleryEmptyState(
+                  onSync: () => _syncWithFeedback(context, ref),
+                ),
               ),
             )
           : Scaffold(body: _HomeContent(entries: entries)),
-    );
-  }
-
-  AppBar _classicAppBar(BuildContext context, WidgetRef ref) {
-    return AppBar(
-      title: const _HomeTitle(),
-      actions: [
-        const WeeklyLimitBadge(),
-        const SizedBox(width: AppSpacing.xs),
-        _SyncAction(onSync: () => _syncWithFeedback(context, ref)),
-      ],
     );
   }
 
@@ -98,27 +94,50 @@ class HomeScreen extends ConsumerWidget {
   }
 }
 
-/// App bar başlığı: galeri adı + Pro rozetinden oluşan satır.
-class _HomeTitle extends ConsumerWidget {
-  const _HomeTitle();
+/// Sayfaya gömülü üst başlık: galeri adı + Pro rozeti + aksiyonlar
+/// (debug animasyon tetiği, haftalık kota rozeti, eşitleme).
+class _HomeHeader extends ConsumerWidget {
+  const _HomeHeader({required this.onSync});
+
+  final VoidCallback onSync;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final bool isPro = ref.watch(
       entitlementProvider.select((state) => state.isPro),
     );
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        // Aksiyonlar (debug + Unlimited pill + sync) başlığı sıkıştırdığında
-        // taşma (RenderFlex) olmasın diye metin esner ve gerekirse kısalır.
-        Flexible(
-          child: Text(
-            context.l10n.galleryTitle,
-            overflow: TextOverflow.ellipsis,
+    return PageHeader(
+      title: context.l10n.galleryTitle,
+      titleTrailing: isPro ? const ProBadge() : null,
+      actions: [
+        if (kDebugMode)
+          IconButton(
+            tooltip: 'Animasyonu dene (debug)',
+            icon: const Icon(Icons.science_outlined),
+            onPressed: () =>
+                ref.read(analysisQueueProvider.notifier).simulate(),
           ),
-        ),
-        if (isPro) ...[const SizedBox(width: AppSpacing.sm), const ProBadge()],
+        const WeeklyLimitBadge(),
+        const SizedBox(width: AppSpacing.xs),
+        _SyncAction(onSync: onSync),
+      ],
+    );
+  }
+}
+
+/// Boş/hata/yükleme durumlarında gömülü header + ortalanmış içerik.
+class _HomeStateScaffold extends StatelessWidget {
+  const _HomeStateScaffold({required this.onSync, required this.child});
+
+  final VoidCallback onSync;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        _HomeHeader(onSync: onSync),
+        Expanded(child: child),
       ],
     );
   }
@@ -168,44 +187,10 @@ class _HomeContent extends ConsumerWidget {
             onRefresh: () => ref.read(galleryProvider.notifier).sync(),
             child: CustomScrollView(
               slivers: [
-                SliverAppBar(
-                  // Sabitlenmez: aşağı kaydırınca içerikle birlikte gider.
-                  pinned: false,
-                  title: const _HomeTitle(),
-                  // Pro'ya özel incelikli gradient — premium hissi ama sessiz.
-                  flexibleSpace: isPro
-                      ? DecoratedBox(
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              begin: Alignment.topCenter,
-                              end: Alignment.bottomCenter,
-                              colors: [
-                                Theme.of(context).colorScheme.primaryContainer
-                                    .withValues(
-                                      alpha: AppOpacities.proAppBarTint,
-                                    ),
-                                Colors.transparent,
-                              ],
-                            ),
-                          ),
-                          child: const SizedBox.expand(),
-                        )
-                      : null,
-                  actions: [
-                    // DEBUG: API harcamadan analiz animasyonunu tetikler.
-                    if (kDebugMode)
-                      IconButton(
-                        tooltip: 'Animasyonu dene (debug)',
-                        icon: const Icon(Icons.science_outlined),
-                        onPressed: () =>
-                            ref.read(analysisQueueProvider.notifier).simulate(),
-                      ),
-                    const WeeklyLimitBadge(),
-                    const SizedBox(width: AppSpacing.xs),
-                    _SyncAction(
-                      onSync: () => HomeScreen._syncWithFeedback(context, ref),
-                    ),
-                  ],
+                SliverToBoxAdapter(
+                  child: _HomeHeader(
+                    onSync: () => HomeScreen._syncWithFeedback(context, ref),
+                  ),
                 ),
                 SliverPadding(
                   padding: const EdgeInsets.fromLTRB(

@@ -17,6 +17,7 @@ import '../../core/services/category_names_service.dart';
 import '../../core/services/entitlement_service.dart';
 import '../../core/widgets/confirm_sheet.dart';
 import '../../core/widgets/edge_swipe_back.dart';
+import '../../core/widgets/page_header.dart';
 import '../../core/widgets/screenshot_results_grid.dart';
 import '../analysis/providers/analysis_queue_provider.dart';
 import '../gallery/data/screenshot_repository.dart';
@@ -72,101 +73,146 @@ class _BoardDetailScreenState extends ConsumerState<BoardDetailScreen> {
       enabled: !_selectionMode,
       onBack: () => Navigator.maybePop(context),
       child: Scaffold(
-        appBar: AppBar(
-          title: Text(
-            _selectionMode
-                ? l10n.bulkSelectionCount(_selectedIds.length)
-                : title,
-          ),
-          leading: _selectionMode
-              ? IconButton(
-                  icon: const Icon(Icons.close),
-                  onPressed: _exitSelection,
-                )
-              : null,
-          actions: _selectionMode
-              ? [
-                  IconButton(
-                    tooltip: l10n.moveAction,
-                    icon: const Icon(Icons.drive_file_move_outline),
-                    onPressed: _selectedIds.isEmpty || _bulkDeleting
-                        ? null
-                        : _moveSelected,
-                  ),
-                  IconButton(
-                    tooltip: l10n.bulkDeleteAction,
-                    icon: _bulkDeleting
-                        ? const SizedBox.square(
-                            dimension: 20,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : const Icon(Icons.delete_outline),
-                    onPressed: _selectedIds.isEmpty || _bulkDeleting
-                        ? null
-                        : _bulkDelete,
-                  ),
-                ]
-              : [
-                  if (widget.category != null && filtered.isNotEmpty)
-                    IconButton(
-                      tooltip: l10n.categoryReanalyzeAction,
-                      icon: const Icon(Icons.auto_awesome_outlined),
-                      onPressed: () => _reanalyzeCategory(filtered),
-                    ),
-                  if (filtered.isNotEmpty)
-                    IconButton(
-                      tooltip: l10n.bulkSelectAction,
-                      icon: const Icon(Icons.checklist_outlined),
-                      onPressed: () => canBulkDelete
-                          ? setState(() => _selectionMode = true)
-                          : context.push(AppRoutes.paywall),
-                    ),
-                  if (widget.boardId != null && board != null)
-                    IconButton(
-                      tooltip: l10n.boardsRenameAction,
-                      icon: const Icon(Icons.edit_outlined),
-                      onPressed: () => _showRenameDialog(context, board),
-                    ),
-                  if (widget.boardId != null)
-                    IconButton(
-                      tooltip: l10n.boardsDeleteAction,
-                      icon: const Icon(Icons.delete_outline),
-                      onPressed: () =>
-                          _showDeleteConfirm(context, widget.boardId!),
-                    ),
-                  if (widget.category != null)
-                    PopupMenuButton<_CategoryMenu>(
-                      onSelected: (item) => switch (item) {
-                        _CategoryMenu.rename => _renameCategory(
-                          widget.category!,
-                        ),
-                        _CategoryMenu.deleteAll => _deleteAllCategory(filtered),
-                      },
-                      itemBuilder: (menuContext) => [
-                        PopupMenuItem(
-                          value: _CategoryMenu.rename,
-                          child: Text(l10n.categoryRenameAction),
-                        ),
-                        if (filtered.isNotEmpty)
-                          PopupMenuItem(
-                            value: _CategoryMenu.deleteAll,
-                            child: Text(l10n.categoryDeleteAllAction),
-                          ),
-                      ],
-                    ),
-                ],
+        body: Column(
+          children: [
+            _buildHeader(context, title, filtered, board, canBulkDelete),
+            Expanded(
+              child: filtered.isEmpty
+                  ? _EmptyBoard(text: l10n.boardDetailEmpty)
+                  : _selectionMode
+                  ? _SelectableGrid(
+                      entries: filtered,
+                      selectedIds: _selectedIds,
+                      onToggle: (assetId) => setState(() {
+                        if (!_selectedIds.remove(assetId)) {
+                          _selectedIds.add(assetId);
+                        }
+                      }),
+                    )
+                  : ScreenshotResultsGrid(entries: filtered),
+            ),
+          ],
         ),
-        body: filtered.isEmpty
-            ? _EmptyBoard(text: l10n.boardDetailEmpty)
-            : _selectionMode
-            ? _SelectableGrid(
-                entries: filtered,
-                selectedIds: _selectedIds,
-                onToggle: (assetId) => setState(() {
-                  if (!_selectedIds.remove(assetId)) _selectedIds.add(assetId);
-                }),
-              )
-            : ScreenshotResultsGrid(entries: filtered),
+      ),
+    );
+  }
+
+  /// AppBar yerine sayfaya gömülü header: geri chevron + başlık + aksiyonlar.
+  /// Seçim modunda kapat + "N seçildi" + Taşı/Sil varyantına geçer.
+  Widget _buildHeader(
+    BuildContext context,
+    String title,
+    List<ScreenshotEntry> filtered,
+    Board? board,
+    bool canBulkDelete,
+  ) {
+    final l10n = context.l10n;
+    if (_selectionMode) {
+      return PageHeader(
+        title: l10n.bulkSelectionCount(_selectedIds.length),
+        leading: IconButton(
+          icon: const Icon(Icons.close),
+          onPressed: _exitSelection,
+        ),
+        actions: [
+          IconButton(
+            tooltip: l10n.moveAction,
+            icon: const Icon(Icons.drive_file_move_outline),
+            onPressed: _selectedIds.isEmpty || _bulkDeleting
+                ? null
+                : _moveSelected,
+          ),
+          IconButton(
+            tooltip: l10n.bulkDeleteAction,
+            icon: _bulkDeleting
+                ? const SizedBox.square(
+                    dimension: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Icon(Icons.delete_outline),
+            onPressed: _selectedIds.isEmpty || _bulkDeleting
+                ? null
+                : _bulkDelete,
+          ),
+        ],
+      );
+    }
+    return PageHeader(
+      title: title,
+      leading: IconButton(
+        icon: const Icon(Icons.arrow_back_ios_new, size: 20),
+        onPressed: () => Navigator.maybePop(context),
+      ),
+      actions: [
+        if (widget.category != null && filtered.isNotEmpty)
+          IconButton(
+            tooltip: l10n.categoryReanalyzeAction,
+            icon: const Icon(Icons.auto_awesome_outlined),
+            onPressed: () => _reanalyzeCategory(filtered),
+          ),
+        if (filtered.isNotEmpty)
+          IconButton(
+            tooltip: l10n.bulkSelectAction,
+            icon: const Icon(Icons.checklist_outlined),
+            onPressed: () => canBulkDelete
+                ? setState(() => _selectionMode = true)
+                : context.push(AppRoutes.paywall),
+          ),
+        if (widget.boardId != null && board != null)
+          IconButton(
+            tooltip: l10n.boardsRenameAction,
+            icon: const Icon(Icons.edit_outlined),
+            onPressed: () => _showRenameDialog(context, board),
+          ),
+        if (widget.boardId != null)
+          IconButton(
+            tooltip: l10n.boardsDeleteAction,
+            icon: const Icon(Icons.delete_outline),
+            onPressed: () => _showDeleteConfirm(context, widget.boardId!),
+          ),
+        if (widget.category != null)
+          IconButton(
+            icon: const Icon(Icons.more_horiz),
+            onPressed: () => _showCategoryActions(filtered),
+          ),
+      ],
+    );
+  }
+
+  /// Kategori "..." aksiyonları: eski açılır menü yerine iOS-tarzı aksiyon sheet.
+  Future<void> _showCategoryActions(List<ScreenshotEntry> filtered) async {
+    final l10n = context.l10n;
+    final ColorScheme scheme = Theme.of(context).colorScheme;
+    await showModalBottomSheet<void>(
+      context: context,
+      showDragHandle: true,
+      builder: (sheetContext) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.edit_outlined),
+              title: Text(l10n.categoryRenameAction),
+              onTap: () {
+                Navigator.of(sheetContext).pop();
+                _renameCategory(widget.category!);
+              },
+            ),
+            if (filtered.isNotEmpty)
+              ListTile(
+                leading: Icon(Icons.delete_outline, color: scheme.error),
+                title: Text(
+                  l10n.categoryDeleteAllAction,
+                  style: TextStyle(color: scheme.error),
+                ),
+                onTap: () {
+                  Navigator.of(sheetContext).pop();
+                  _deleteAllCategory(filtered);
+                },
+              ),
+            const SizedBox(height: AppSpacing.sm),
+          ],
+        ),
       ),
     );
   }
@@ -369,9 +415,6 @@ extension _FirstWhereOrNull<T> on List<T> {
     return null;
   }
 }
-
-/// Kategori detayındaki taşma menüsü seçenekleri.
-enum _CategoryMenu { rename, deleteAll }
 
 /// Taşıma hedefi: ya bir sistem kategorisi ya da bir özel pano.
 class _MoveTarget {

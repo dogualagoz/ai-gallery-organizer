@@ -13,6 +13,7 @@ import '../../core/services/entitlement_service.dart';
 import '../../core/services/haptic_service.dart';
 import '../../core/services/preferences_service.dart';
 import '../../core/utils/link_opener.dart';
+import '../../core/widgets/page_header.dart';
 import '../paywall/providers/purchase_provider.dart';
 
 /// Uygulama sürüm bilgisi (tek seferlik platform sorgusu).
@@ -42,37 +43,43 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     ref.listen(purchaseFlowProvider, _onPurchaseFlowChanged);
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.settingsTitle)),
-      body: ListView(
-        padding: EdgeInsets.fromLTRB(
-          AppSpacing.md,
-          AppSpacing.md,
-          AppSpacing.md,
-          // Yüzen navbar içeriği örtmesin diye alt boşluk eklenir.
-          MediaQuery.paddingOf(context).bottom + AppSpacing.md,
-        ),
+      body: Column(
         children: [
-          _ProStatusCard(isPro: isPro),
-          const SizedBox(height: AppSpacing.lg),
-          const _ThemeSection(),
-          const SizedBox(height: AppSpacing.lg),
-          const _LanguageSection(),
-          const SizedBox(height: AppSpacing.lg),
-          _AutoSortSection(isPro: isPro),
-          const SizedBox(height: AppSpacing.lg),
-          _PurchasesSection(
-            pending: restorePending,
-            onRestore: () {
-              _restoreRequested = true;
-              ref.read(purchaseFlowProvider.notifier).restore();
-            },
+          PageHeader(title: l10n.settingsTitle),
+          Expanded(
+            child: ListView(
+              padding: EdgeInsets.fromLTRB(
+                AppSpacing.md,
+                AppSpacing.xs,
+                AppSpacing.md,
+                // Yüzen navbar içeriği örtmesin diye alt boşluk eklenir.
+                MediaQuery.paddingOf(context).bottom + AppSpacing.md,
+              ),
+              children: [
+                _ProStatusCard(isPro: isPro),
+                const SizedBox(height: AppSpacing.lg),
+                const _ThemeSection(),
+                const SizedBox(height: AppSpacing.lg),
+                const _LanguageSection(),
+                const SizedBox(height: AppSpacing.lg),
+                _AutoSortSection(isPro: isPro),
+                const SizedBox(height: AppSpacing.lg),
+                _PurchasesSection(
+                  pending: restorePending,
+                  onRestore: () {
+                    _restoreRequested = true;
+                    ref.read(purchaseFlowProvider.notifier).restore();
+                  },
+                ),
+                if (kDebugMode) ...[
+                  const SizedBox(height: AppSpacing.lg),
+                  const _DebugSection(),
+                ],
+                const SizedBox(height: AppSpacing.lg),
+                const _AboutSection(),
+              ],
+            ),
           ),
-          if (kDebugMode) ...[
-            const SizedBox(height: AppSpacing.lg),
-            const _DebugSection(),
-          ],
-          const SizedBox(height: AppSpacing.lg),
-          const _AboutSection(),
         ],
       ),
     );
