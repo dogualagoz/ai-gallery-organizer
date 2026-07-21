@@ -244,6 +244,7 @@
   "sortingHintDelete": "Delete",
   "sortingHintAssign": "Add to board",
   "sortingHintSkip": "Skip",
+  "sortCategoryPickerTitle": "Assign to category",
   "sortingRemainingCount": "{count} left",
   "@sortingRemainingCount": {
     "placeholders": {

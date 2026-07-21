@@ -244,6 +244,7 @@
   "sortingHintDelete": "Sil",
   "sortingHintAssign": "Panoya ekle",
   "sortingHintSkip": "Atla",
+  "sortCategoryPickerTitle": "Kategoriye ata",
   "sortingRemainingCount": "{count} kaldı",
   "@sortingRemainingCount": {
     "placeholders": {

@@ -494,6 +494,9 @@ class AppLocalizationsTr extends AppLocalizations {
   String get sortingHintSkip => 'Atla';
 
   @override
+  String get sortCategoryPickerTitle => 'Kategoriye ata';
+
+  @override
   String sortingRemainingCount(int count) {
     return '$count kaldı';
   }

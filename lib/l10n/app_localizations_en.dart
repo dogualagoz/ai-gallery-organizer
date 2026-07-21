@@ -494,6 +494,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get sortingHintSkip => 'Skip';
 
   @override
+  String get sortCategoryPickerTitle => 'Assign to category';
+
+  @override
   String sortingRemainingCount(int count) {
     return '$count left';
   }

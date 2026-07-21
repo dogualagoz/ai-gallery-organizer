@@ -956,6 +956,12 @@ abstract class AppLocalizations {
   /// **'Skip'**
   String get sortingHintSkip;
 
+  /// No description provided for @sortCategoryPickerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Assign to category'**
+  String get sortCategoryPickerTitle;
+
   /// No description provided for @sortingRemainingCount.
   ///
   /// In en, this message translates to:
