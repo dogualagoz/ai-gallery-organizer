@@ -54,6 +54,9 @@ class _SortingScreenState extends ConsumerState<SortingScreen> {
   /// Toplu silme sürerken tekrar tetiklenmeyi önler.
   bool _finishing = false;
 
+  /// Sort sekmesi bir önceki karede aktif miydi — çıkışı (aktif→pasif) yakalar.
+  bool _wasTabActive = true;
+
   /// Alttaki aksiyon butonlarının üstteki karta jest gönderebilmesi için.
   final SwipeCardController _cardController = SwipeCardController();
 
@@ -62,6 +65,20 @@ class _SortingScreenState extends ConsumerState<SortingScreen> {
     super.initState();
     // 7 gün boşta kalan kullanıcı ekrana taze haftalık swipe kotasıyla girsin.
     ref.read(entitlementProvider.notifier).ensureWeeklyWindow();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // go_router sekme dallarını `TickerMode` ile sarar: Sort sekmesinden
+    // çıkınca aktiflik false'a döner. O an biriken silmeleri iOS'un kendi
+    // onayıyla işleriz. `didChangeDependencies` içinde setState çağırmamak
+    // için işlemi kare sonrasına erteleriz.
+    final bool active = TickerMode.valuesOf(context).enabled;
+    if (_wasTabActive && !active && _pendingDeletes.isNotEmpty) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _commitDeletes());
+    }
+    _wasTabActive = active;
   }
 
   @override
@@ -92,11 +109,13 @@ class _SortingScreenState extends ConsumerState<SortingScreen> {
               icon: const Icon(Icons.undo),
               onPressed: _undo,
             ),
+          // Silme ikonu artık ayrı bir buton/onay değil; yalnızca kaç kartın
+          // silmeye kuyruklandığını gösteren bir sayaç. Gerçek silme, Sort
+          // sekmesinden çıkışta iOS'un kendi onayıyla yapılır.
           if (_pendingDeletes.isNotEmpty)
-            TextButton.icon(
-              onPressed: _finishing ? null : _finishDeletes,
-              icon: const Icon(Icons.delete_outline, size: 18),
-              label: Text(l10n.sortingFinishAction(_pendingDeletes.length)),
+            Padding(
+              padding: const EdgeInsets.only(right: AppSpacing.md),
+              child: _PendingDeleteCounter(count: _pendingDeletes.length),
             ),
         ],
       ),
@@ -108,13 +127,12 @@ class _SortingScreenState extends ConsumerState<SortingScreen> {
                 : _SortingFinishPrompt(
                     count: _pendingDeletes.length,
                     deleting: _finishing,
-                    onFinish: _finishDeletes,
+                    onFinish: _commitDeletes,
                   ))
           : _SortingDeck(
               top: queue.first,
               next: queue.length > 1 ? queue[1] : null,
               remaining: queue.length,
-              pendingDeleteCount: _pendingDeletes.length,
               asset: repo.assetFor(queue.first.assetId),
               controller: _cardController,
               onDelete: () => _queueDelete(queue.first.assetId),
@@ -163,30 +181,13 @@ class _SortingScreenState extends ConsumerState<SortingScreen> {
     }
   }
 
-  /// Biriken silme kuyruğunu tek deleteWithIds çağrısıyla (tek iOS onayı) siler.
-  Future<void> _finishDeletes() async {
-    if (_pendingDeletes.isEmpty || _finishing) return;
+  /// Biriken silme kuyruğunu tek `deleteWithIds` çağrısıyla siler. Onay olarak
+  /// iOS'un kendi "N fotoğrafı sil?" sorusu gösterilir — ayrıca Flutter dialogu
+  /// açılmaz. Sort sekmesinden çıkışta ve deste bitiş ekranındaki butonda
+  /// çağrılır. Kullanıcı iOS onayını iptal ederse kuyruk olduğu gibi kalır.
+  Future<void> _commitDeletes() async {
+    if (_pendingDeletes.isEmpty || _finishing || !mounted) return;
     final l10n = context.l10n;
-    final int count = _pendingDeletes.length;
-    final bool? confirmed = await showDialog<bool>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: Text(l10n.sortingFinishConfirmTitle(count)),
-        content: Text(l10n.sortingFinishConfirmBody),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: Text(l10n.sortingFinishKeep),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: Text(l10n.sortingFinishAction(count)),
-          ),
-        ],
-      ),
-    );
-    if (confirmed != true || !mounted) return;
-
     setState(() => _finishing = true);
     final List<String> ids = _pendingDeletes.toList();
     List<String> deleted;
@@ -278,7 +279,6 @@ class _SortingDeck extends StatelessWidget {
     required this.top,
     required this.next,
     required this.remaining,
-    required this.pendingDeleteCount,
     required this.asset,
     required this.controller,
     required this.onDelete,
@@ -289,7 +289,6 @@ class _SortingDeck extends StatelessWidget {
   final ScreenshotEntry top;
   final ScreenshotEntry? next;
   final int remaining;
-  final int pendingDeleteCount;
   final AssetEntity? asset;
   final SwipeCardController controller;
   final Future<bool> Function() onDelete;
@@ -316,26 +315,16 @@ class _SortingDeck extends StatelessWidget {
       ),
       child: Column(
         children: [
-          // Kalan sayısı ortada; sola kaydırılıp silmeye giden sayısı solda.
+          // Kalan kart sayısı (silme sayacı artık yalnız üst bardadır).
           SizedBox(
             height: 28,
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                Center(
-                  child: Text(
-                    context.l10n.sortingRemainingCount(remaining),
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
-                  ),
+            child: Center(
+              child: Text(
+                context.l10n.sortingRemainingCount(remaining),
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
-                if (pendingDeleteCount > 0)
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: _PendingDeleteChip(count: pendingDeleteCount),
-                  ),
-              ],
+              ),
             ),
           ),
           const SizedBox(height: AppSpacing.md),
@@ -524,34 +513,28 @@ class _BoardPickerSheet extends StatelessWidget {
   }
 }
 
-/// Silmeye kuyruklanan kart sayısını gösteren küçük kırmızı hap.
-class _PendingDeleteChip extends StatelessWidget {
-  const _PendingDeleteChip({required this.count});
+/// App bar'da silmeye kuyruklanan kart sayısını gösteren sayaç (silme ikonu +
+/// adet). Etkileşimsiz — gerçek silme sekmeden çıkışta iOS onayıyla yapılır.
+class _PendingDeleteCounter extends StatelessWidget {
+  const _PendingDeleteCounter({required this.count});
 
   final int count;
 
   @override
   Widget build(BuildContext context) {
     final ColorScheme scheme = Theme.of(context).colorScheme;
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.sm,
-        vertical: AppSpacing.xs,
-      ),
-      decoration: BoxDecoration(
-        color: scheme.errorContainer,
-        borderRadius: BorderRadius.circular(AppRadius.pill),
-      ),
+    return Tooltip(
+      message: context.l10n.sortingPendingDeleteCount(count),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.delete_outline, size: 14, color: scheme.onErrorContainer),
+          Icon(Icons.delete_outline, size: 20, color: scheme.error),
           const SizedBox(width: AppSpacing.xs),
           Text(
-            context.l10n.sortingPendingDeleteCount(count),
-            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              color: scheme.onErrorContainer,
-              fontWeight: FontWeight.w600,
+            '$count',
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+              color: scheme.error,
+              fontWeight: FontWeight.w700,
             ),
           ),
         ],
