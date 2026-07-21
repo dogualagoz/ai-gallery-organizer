@@ -19,6 +19,7 @@ import '../../../core/models/screenshot_entry.dart';
 import '../../../core/router/app_router.dart';
 import '../../../core/services/entitlement_service.dart';
 import '../../../core/services/haptic_service.dart';
+import '../../../core/services/review_service.dart';
 import '../../gallery/data/screenshot_repository.dart';
 import '../providers/analysis_queue_provider.dart';
 import 'analyze_card_content.dart';
@@ -107,9 +108,16 @@ class _AnalyzeCardState extends ConsumerState<AnalyzeCard>
         queue.status == AnalysisQueueStatus.limitReached &&
         queue.freeQuotaExhausted &&
         queue.done > 0;
+    final bool success =
+        queue.status == AnalysisQueueStatus.completed && queue.done > 0;
     ref.read(analysisQueueProvider.notifier).dismiss();
     setState(_resetLocal);
-    if (milestone) context.push(AppRoutes.analysisMilestone);
+    if (milestone) {
+      context.push(AppRoutes.analysisMilestone);
+    } else if (success) {
+      // Başarılı bir analiz turu olumlu bir an: değerlendirme iste (cooldown'lı).
+      ref.read(reviewServiceProvider).requestIfAppropriate();
+    }
   }
 
   /// DEBUG: animasyonu baştan izle.

@@ -61,6 +61,16 @@ abstract final class ProductIds {
   };
 }
 
+/// App Store değerlendirme (in_app_review) istem ayarları.
+abstract final class ReviewConfig {
+  /// İki değerlendirme istemi arasındaki en az süre. iOS zaten yılda en fazla
+  /// 3 kez gösterir; bu, kendi ek koruma penceremiz (gereksiz sık deneme yok).
+  static const Duration minInterval = Duration(days: 30);
+
+  /// "N açılış" tetikleyicisinin eşiği — bu kadar açılıştan sonra istenebilir.
+  static const int appOpenThreshold = 5;
+}
+
 /// Yasal doküman linkleri.
 abstract final class LegalUrls {
   static const String privacyPolicy =

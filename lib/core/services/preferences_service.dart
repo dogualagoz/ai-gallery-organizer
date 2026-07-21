@@ -26,6 +26,8 @@ abstract final class PrefKeys {
   static const String deliveredPackTxIds = 'delivered_pack_tx_ids';
   static const String autoSortEnabled = 'auto_sort_enabled';
   static const String appLocale = 'app_locale';
+  static const String lastReviewRequestMs = 'last_review_request_ms';
+  static const String appOpenCount = 'app_open_count';
 }
 
 /// Onboarding tamamlandı bilgisi (router redirect bunu izler).

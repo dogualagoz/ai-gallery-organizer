@@ -11,6 +11,7 @@ import '../../core/models/screenshot_category.dart';
 import '../../core/models/screenshot_entry.dart';
 import '../../core/router/app_router.dart';
 import '../../core/services/entitlement_service.dart';
+import '../../core/services/review_service.dart';
 import '../../core/widgets/pro_badge.dart';
 import '../analysis/providers/analysis_queue_provider.dart';
 import '../analysis/providers/auto_sort_provider.dart';
@@ -36,6 +37,14 @@ class HomeScreen extends ConsumerWidget {
     // analiz kuyruğunu otomatik tetikler.
     ref.watch(autoSortControllerProvider);
     final gallery = ref.watch(galleryProvider);
+
+    // Oturumda bir kez: uygulama açılışını say (eşik sonrası değerlendirme).
+    if (!_appOpenCounted) {
+      _appOpenCounted = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        ref.read(reviewServiceProvider).registerAppOpen();
+      });
+    }
 
     // Veri varken app bar liste içinde (SliverAppBar) — aşağı kayınca
     // içerikle birlikte gider. Boş/hata/yükleme durumlarında kaydırma
@@ -125,6 +134,9 @@ class _SyncAction extends StatelessWidget {
 
 // TEMP-AUTOSIM
 bool _tempAutoSimDone = false;
+
+/// Uygulama açılış sayacının bu oturumda bir kez işlendiğini işaretler.
+bool _appOpenCounted = false;
 
 /// Analiz kartı + panolar + son ekran görüntüleri ızgarasından oluşan gövde.
 class _HomeContent extends ConsumerWidget {
