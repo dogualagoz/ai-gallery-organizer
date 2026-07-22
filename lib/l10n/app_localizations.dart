@@ -1286,6 +1286,42 @@ abstract class AppLocalizations {
   /// **'Purchases restored.'**
   String get settingsRestoreSuccess;
 
+  /// No description provided for @redeemSettingsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Redeem a code'**
+  String get redeemSettingsLabel;
+
+  /// No description provided for @redeemTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Redeem a code'**
+  String get redeemTitle;
+
+  /// No description provided for @redeemHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your code'**
+  String get redeemHint;
+
+  /// No description provided for @redeemConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Redeem'**
+  String get redeemConfirm;
+
+  /// No description provided for @redeemSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Pro unlocked for {days} days.'**
+  String redeemSuccess(int days);
+
+  /// No description provided for @redeemInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'This code isn\'t valid.'**
+  String get redeemInvalid;
+
   /// No description provided for @settingsAboutSection.
   ///
   /// In en, this message translates to:

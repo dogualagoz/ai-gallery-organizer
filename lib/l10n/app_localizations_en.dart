@@ -691,6 +691,26 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsRestoreSuccess => 'Purchases restored.';
 
   @override
+  String get redeemSettingsLabel => 'Redeem a code';
+
+  @override
+  String get redeemTitle => 'Redeem a code';
+
+  @override
+  String get redeemHint => 'Enter your code';
+
+  @override
+  String get redeemConfirm => 'Redeem';
+
+  @override
+  String redeemSuccess(int days) {
+    return 'Pro unlocked for $days days.';
+  }
+
+  @override
+  String get redeemInvalid => 'This code isn\'t valid.';
+
+  @override
   String get settingsAboutSection => 'About';
 
   @override
