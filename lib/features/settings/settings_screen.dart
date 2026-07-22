@@ -6,7 +6,6 @@ import 'package:go_router/go_router.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 import '../../core/constants/app_constants.dart';
-import '../../core/constants/redeem_constants.dart';
 import '../../core/constants/ui_constants.dart';
 import '../../core/l10n/l10n_extension.dart';
 import '../../core/router/app_router.dart';
@@ -16,7 +15,6 @@ import '../../core/services/preferences_service.dart';
 import '../../core/utils/link_opener.dart';
 import '../../core/widgets/page_header.dart';
 import '../paywall/providers/purchase_provider.dart';
-import 'widgets/redeem_code_dialog.dart';
 
 /// Uygulama sürüm bilgisi (tek seferlik platform sorgusu).
 final packageInfoProvider = FutureProvider<PackageInfo>(
@@ -399,35 +397,17 @@ class _PurchasesSection extends ConsumerWidget {
             _SettingsTile(
               icon: Icons.redeem,
               label: l10n.redeemSettingsLabel,
-              onTap: () => _openRedeem(context, ref),
+              onTap: () {
+                Haptics.tap();
+                // Apple'ın native kod ekranı; başarı purchase stream üzerinden
+                // Pro'yu açar, ayrı bir geri bildirim gerekmez.
+                ref.read(purchaseFlowProvider.notifier).presentCodeRedemption();
+              },
             ),
           ],
         ),
       ],
     );
-  }
-
-  /// Redeem diyalogunu açar; sonuca göre haptic + snackbar geri bildirimi verir.
-  Future<void> _openRedeem(BuildContext context, WidgetRef ref) async {
-    final l10n = context.l10n;
-    final messenger = ScaffoldMessenger.of(context);
-    final RedeemOutcome? outcome = await showDialog<RedeemOutcome>(
-      context: context,
-      builder: (_) => const RedeemCodeDialog(),
-    );
-    if (outcome == null) return;
-    switch (outcome) {
-      case RedeemOutcome.success:
-        await Haptics.success();
-        messenger.showSnackBar(
-          SnackBar(
-            content: Text(l10n.redeemSuccess(RedeemConfig.durationDays)),
-          ),
-        );
-      case RedeemOutcome.invalid:
-        Haptics.warning();
-        messenger.showSnackBar(SnackBar(content: Text(l10n.redeemInvalid)));
-    }
   }
 }
 

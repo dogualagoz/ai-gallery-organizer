@@ -1,6 +1,7 @@
-// in_app_purchase sarmalayıcısı: ürün sorgulama, satın alma, restore.
+// in_app_purchase sarmalayıcısı: ürün sorgulama, satın alma, restore, kod kullanımı.
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
+import 'package:in_app_purchase_storekit/in_app_purchase_storekit.dart';
 
 import '../../../core/constants/app_constants.dart';
 
@@ -39,6 +40,15 @@ class PurchaseRepository {
   }
 
   Future<void> restore() => _iap.restorePurchases();
+
+  /// Apple'ın native "kodu kullan" ekranını açar (Offer/Promo code). Girilen
+  /// geçerli kod bir abonelik transaction'ı üretir; sonuç [purchaseStream]'e
+  /// düşer ve mevcut satın alma akışıyla aynı şekilde Pro'yu açar.
+  Future<void> presentCodeRedemption() {
+    final InAppPurchaseStoreKitPlatformAddition addition =
+        _iap.getPlatformAddition<InAppPurchaseStoreKitPlatformAddition>();
+    return addition.presentCodeRedemptionSheet();
+  }
 
   Future<void> completePurchase(PurchaseDetails purchase) {
     if (purchase.pendingCompletePurchase) {

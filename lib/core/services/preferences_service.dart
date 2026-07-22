@@ -19,11 +19,6 @@ abstract final class PrefKeys {
   static const String isPro = 'is_pro';
   static const String proPurchaseMs = 'pro_purchase_ms';
   static const String proProductId = 'pro_product_id';
-
-  /// Redeem koduyla açılan Pro'nun bitiş anı (epoch ms). Yalnız redeem
-  /// erişiminde dolu; gerçek satın almalarda null kalır (o yüzden onlar
-  /// süre kontrolünden etkilenmez).
-  static const String proRedeemExpiryMs = 'pro_redeem_expiry_ms';
   static const String trialAnalysisUsed = 'trial_analysis_used';
   static const String aiDailyCount = 'ai_daily_count';
   static const String aiDailyDate = 'ai_daily_date';

@@ -95,6 +95,11 @@ class PurchaseFlowNotifier extends Notifier<PurchaseFlowState> {
     });
   }
 
+  /// Apple'ın kod kullanma ekranını açar (Offer/Promo code). Kod geçerliyse
+  /// sonuç purchase stream'e düşer, [_handleUpdates] Pro'yu açar.
+  Future<void> presentCodeRedemption() =>
+      ref.read(purchaseRepositoryProvider).presentCodeRedemption();
+
   void dismissError() => state = PurchaseFlowState.initial;
 
   Future<void> _handleUpdates(List<PurchaseDetails> purchases) async {

@@ -693,23 +693,6 @@ class AppLocalizationsTr extends AppLocalizations {
   String get redeemSettingsLabel => 'Kodu kullan';
 
   @override
-  String get redeemTitle => 'Kodu kullan';
-
-  @override
-  String get redeemHint => 'Kodunu gir';
-
-  @override
-  String get redeemConfirm => 'Kullan';
-
-  @override
-  String redeemSuccess(int days) {
-    return 'Pro $days gün açıldı.';
-  }
-
-  @override
-  String get redeemInvalid => 'Bu kod geçerli değil.';
-
-  @override
   String get settingsAboutSection => 'Hakkında';
 
   @override

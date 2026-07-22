@@ -44,6 +44,9 @@ dependencies:
   url_launcher: ^6.3.2
   intl: ^0.20.3
   in_app_purchase: ^3.3.0
+  # Apple Offer/Promo code redemption ekranı (presentCodeRedemptionSheet) için
+  # StoreKit platform eklentisi doğrudan import edilir.
+  in_app_purchase_storekit: ^0.4.10
   in_app_review: ^2.0.10
   flutter_localizations:
     sdk: flutter

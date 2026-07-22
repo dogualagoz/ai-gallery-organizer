@@ -1,6 +1,5 @@
 // EntitlementService: free/kredi tüketim sırası ve yetki matrisi testleri.
 import 'package:ai_gallery_organizer/core/constants/app_constants.dart';
-import 'package:ai_gallery_organizer/core/constants/redeem_constants.dart';
 import 'package:ai_gallery_organizer/core/services/entitlement_service.dart';
 import 'package:ai_gallery_organizer/core/services/preferences_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -292,98 +291,6 @@ void main() {
       final container = await _container();
       await container.read(entitlementProvider.notifier).setPro(true);
       expect(container.read(entitlementProvider).canCreateBoards, isTrue);
-    });
-  });
-
-  group('redeem kodu', () {
-    test('geçerli kod Pro açar ve süre bitişi yazar', () async {
-      final container = await _container();
-      final notifier = container.read(entitlementProvider.notifier);
-      final outcome = await notifier.redeemCode('SNAPLYTEST30');
-      expect(outcome, RedeemOutcome.success);
-      final state = container.read(entitlementProvider);
-      expect(state.isPro, isTrue);
-      expect(state.proRedeemExpiryMs, isNotNull);
-      final int nowMs = DateTime.now().millisecondsSinceEpoch;
-      expect(state.proRedeemExpiryMs!, greaterThan(nowMs));
-    });
-
-    test('kod normalize edilir (küçük harf + tire eşleşir)', () async {
-      final container = await _container();
-      final outcome = await container
-          .read(entitlementProvider.notifier)
-          .redeemCode('snaply-test-30');
-      expect(outcome, RedeemOutcome.success);
-      expect(container.read(entitlementProvider).isPro, isTrue);
-    });
-
-    test('geçersiz kod Pro açmaz', () async {
-      final container = await _container();
-      final outcome = await container
-          .read(entitlementProvider.notifier)
-          .redeemCode('WRONG');
-      expect(outcome, RedeemOutcome.invalid);
-      expect(container.read(entitlementProvider).isPro, isFalse);
-      expect(container.read(entitlementProvider).proRedeemExpiryMs, isNull);
-    });
-
-    test('süresi geçmiş redeem build sırasında Pro düşürür', () async {
-      final int pastMs = DateTime.now()
-          .subtract(const Duration(days: 1))
-          .millisecondsSinceEpoch;
-      final container = await _container(
-        initialValues: {
-          PrefKeys.isPro: true,
-          PrefKeys.proRedeemExpiryMs: pastMs,
-        },
-      );
-      final state = container.read(entitlementProvider);
-      expect(state.isPro, isFalse);
-      expect(state.proRedeemExpiryMs, isNull);
-    });
-
-    test('enforceRedeemWindow süre dolunca Pro düşürür', () async {
-      final int soonMs = DateTime.now()
-          .add(const Duration(seconds: 1))
-          .millisecondsSinceEpoch;
-      final container = await _container(
-        initialValues: {
-          PrefKeys.isPro: true,
-          PrefKeys.proRedeemExpiryMs: soonMs,
-        },
-      );
-      final notifier = container.read(entitlementProvider.notifier);
-      expect(container.read(entitlementProvider).isPro, isTrue);
-      notifier.enforceRedeemWindow(
-        now: DateTime.now().add(const Duration(days: 40)),
-      );
-      expect(container.read(entitlementProvider).isPro, isFalse);
-    });
-
-    test('gerçek satın alma redeem süresini temizler', () async {
-      final int soonMs = DateTime.now()
-          .add(const Duration(days: 30))
-          .millisecondsSinceEpoch;
-      final container = await _container(
-        initialValues: {
-          PrefKeys.isPro: true,
-          PrefKeys.proRedeemExpiryMs: soonMs,
-        },
-      );
-      final notifier = container.read(entitlementProvider.notifier);
-      await notifier.setProFromPurchase(productId: ProductIds.lifetime);
-      final state = container.read(entitlementProvider);
-      expect(state.isPro, isTrue);
-      expect(state.proRedeemExpiryMs, isNull);
-    });
-
-    test('gerçek Pro kullanıcıda redeem süre yazmaz (no-op success)', () async {
-      final container = await _container();
-      final notifier = container.read(entitlementProvider.notifier);
-      await notifier.setProFromPurchase(productId: ProductIds.lifetime);
-      final outcome = await notifier.redeemCode('SNAPLYTEST30');
-      expect(outcome, RedeemOutcome.success);
-      expect(container.read(entitlementProvider).proRedeemExpiryMs, isNull);
     });
   });
 }

@@ -345,16 +345,6 @@
   "settingsRemainingAnalyses": "Kalan analiz hakkı",
   "settingsRestoreSuccess": "Satın alımlar geri yüklendi.",
   "redeemSettingsLabel": "Kodu kullan",
-  "redeemTitle": "Kodu kullan",
-  "redeemHint": "Kodunu gir",
-  "redeemConfirm": "Kullan",
-  "redeemSuccess": "Pro {days} gün açıldı.",
-  "@redeemSuccess": {
-    "placeholders": {
-      "days": {"type": "int"}
-    }
-  },
-  "redeemInvalid": "Bu kod geçerli değil.",
   "settingsAboutSection": "Hakkında",
   "settingsVersion": "Sürüm {version}",
   "@settingsVersion": {

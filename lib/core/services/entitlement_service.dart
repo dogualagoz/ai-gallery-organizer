@@ -6,7 +6,6 @@ import 'dart:math';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../constants/app_constants.dart';
-import '../constants/redeem_constants.dart';
 import 'preferences_service.dart';
 
 /// Kullanıcının anlık yetki durumu.
@@ -19,7 +18,6 @@ class EntitlementState {
     this.analysisCredits = 0,
     this.proPurchaseMs,
     this.proProductId,
-    this.proRedeemExpiryMs,
     this.trialAnalysisUsed = 0,
   });
 
@@ -30,11 +28,6 @@ class EntitlementState {
 
   /// Pro yetkisini veren ürün kimliği (trial yalnız yıllık planda var).
   final String? proProductId;
-
-  /// Redeem koduyla açılan Pro'nun bitiş anı (epoch ms). Yalnız redeem
-  /// erişiminde dolu; gerçek satın almalarda null (o yüzden onlar süreye
-  /// tabi değil).
-  final int? proRedeemExpiryMs;
 
   /// Deneme penceresinde kullanılan analiz sayısı. Haftalık free sayaçtan
   /// bilinçli olarak ayrı: trial iptalinde kullanıcının free haftası bozulmaz.
@@ -104,8 +97,6 @@ class EntitlementState {
     int? analysisCredits,
     int? proPurchaseMs,
     String? proProductId,
-    int? proRedeemExpiryMs,
-    bool clearRedeemExpiry = false,
     int? trialAnalysisUsed,
   }) {
     return EntitlementState(
@@ -116,10 +107,6 @@ class EntitlementState {
       analysisCredits: analysisCredits ?? this.analysisCredits,
       proPurchaseMs: proPurchaseMs ?? this.proPurchaseMs,
       proProductId: proProductId ?? this.proProductId,
-      // Süre alanı null'a çekilebilmeli (copyWith `??` bunu yapamaz), bu
-      // yüzden ayrı bir temizleme bayrağı var.
-      proRedeemExpiryMs:
-          clearRedeemExpiry ? null : (proRedeemExpiryMs ?? this.proRedeemExpiryMs),
       trialAnalysisUsed: trialAnalysisUsed ?? this.trialAnalysisUsed,
     );
   }
@@ -153,70 +140,16 @@ class EntitlementNotifier extends Notifier<EntitlementState> {
       unawaited(prefs.setInt(PrefKeys.swipesUsed, 0));
     }
 
-    // Redeem süresi dolmuşsa Pro'yu kapat: gerçek satın almalarda expiry
-    // null olduğundan onlar etkilenmez. build() içinde state set edilemez;
-    // temizliği microtask'e bırakırız (persist + notifier güncellemesi).
-    bool isPro = prefs.getBool(PrefKeys.isPro) ?? false;
-    int? redeemExpiryMs = prefs.getInt(PrefKeys.proRedeemExpiryMs);
-    if (redeemExpiryMs != null && nowMs > redeemExpiryMs) {
-      isPro = false;
-      redeemExpiryMs = null;
-      Future.microtask(_clearExpiredRedeem);
-    }
-
     return EntitlementState(
-      isPro: isPro,
+      isPro: prefs.getBool(PrefKeys.isPro) ?? false,
       aiAnalysisUsed: aiAnalysisUsed,
       swipesUsed: swipesUsed,
       weekStartMs: weekStartMs,
       analysisCredits: prefs.getInt(PrefKeys.analysisCredits) ?? 0,
       proPurchaseMs: prefs.getInt(PrefKeys.proPurchaseMs),
       proProductId: prefs.getString(PrefKeys.proProductId),
-      proRedeemExpiryMs: redeemExpiryMs,
       trialAnalysisUsed: prefs.getInt(PrefKeys.trialAnalysisUsed) ?? 0,
     );
-  }
-
-  /// build() sırasında süresi dolmuş bulunan redeem Pro'sunu kalıcılaştırır.
-  Future<void> _clearExpiredRedeem() async {
-    final prefs = ref.read(sharedPreferencesProvider);
-    await prefs.setBool(PrefKeys.isPro, false);
-    await prefs.remove(PrefKeys.proRedeemExpiryMs);
-    state = state.copyWith(isPro: false, clearRedeemExpiry: true);
-  }
-
-  /// Redeem süresi dolduysa Pro'yu düşürür; dolmadıysa/expiry yoksa hiçbir şey
-  /// yapmaz (idempotent). [ensureWeeklyWindow] ile aynı yerlerden çağrılır.
-  /// [now] yalnız testlerde saat enjeksiyonu içindir.
-  void enforceRedeemWindow({DateTime? now}) {
-    final int? expiry = state.proRedeemExpiryMs;
-    if (expiry == null) return;
-    final int nowMs = (now ?? DateTime.now()).millisecondsSinceEpoch;
-    if (nowMs <= expiry) return;
-    state = state.copyWith(isPro: false, clearRedeemExpiry: true);
-    final prefs = ref.read(sharedPreferencesProvider);
-    unawaited(prefs.setBool(PrefKeys.isPro, false));
-    unawaited(prefs.remove(PrefKeys.proRedeemExpiryMs));
-  }
-
-  /// Yerel redeem kodunu doğrular; geçerliyse Pro'yu [RedeemConfig.duration]
-  /// boyunca açar (tekrar geçerli kod girmek süreyi yeniler). Gerçek satın
-  /// almayla Pro olan kullanıcıyı süreyle sınırlamaz.
-  Future<RedeemOutcome> redeemCode(String raw) async {
-    if (!RedeemCodes.isValid(raw)) return RedeemOutcome.invalid;
-    if (state.isPro && state.proRedeemExpiryMs == null) {
-      return RedeemOutcome.success;
-    }
-    final int expiryMs =
-        DateTime.now().add(RedeemConfig.duration).millisecondsSinceEpoch;
-    state = state.copyWith(isPro: true, proRedeemExpiryMs: expiryMs);
-    final prefs = ref.read(sharedPreferencesProvider);
-    await prefs.setBool(PrefKeys.isPro, true);
-    await prefs.setInt(PrefKeys.proRedeemExpiryMs, expiryMs);
-    // Trial izleri temizlensin: redeem Pro'su yıllık-trial 250 sınırına düşmesin.
-    await prefs.remove(PrefKeys.proProductId);
-    await prefs.remove(PrefKeys.proPurchaseMs);
-    return RedeemOutcome.success;
   }
 
   /// Haftalık pencere süresi dolduysa free analiz ve swipe sayaçlarını
@@ -253,7 +186,6 @@ class EntitlementNotifier extends Notifier<EntitlementState> {
       );
       await prefs.remove(PrefKeys.proPurchaseMs);
       await prefs.remove(PrefKeys.proProductId);
-      await prefs.remove(PrefKeys.proRedeemExpiryMs);
       await prefs.remove(PrefKeys.trialAnalysisUsed);
     } else {
       state = state.copyWith(isPro: true);
@@ -269,19 +201,15 @@ class EntitlementNotifier extends Notifier<EntitlementState> {
     int? purchaseMs,
   }) async {
     final int effectiveMs = purchaseMs ?? DateTime.now().millisecondsSinceEpoch;
-    // Gerçek satın alma redeem süresini geçersiz kılar: aksi halde 30 gün
-    // sonra kalıcı Pro yanlışlıkla düşerdi.
     state = state.copyWith(
       isPro: true,
       proPurchaseMs: effectiveMs,
       proProductId: productId,
-      clearRedeemExpiry: true,
     );
     final prefs = ref.read(sharedPreferencesProvider);
     await prefs.setBool(PrefKeys.isPro, true);
     await prefs.setInt(PrefKeys.proPurchaseMs, effectiveMs);
     await prefs.setString(PrefKeys.proProductId, productId);
-    await prefs.remove(PrefKeys.proRedeemExpiryMs);
   }
 
   /// [count] adet analiz hakkı tüketir. Trial penceresinde önce trial
