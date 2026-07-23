@@ -402,6 +402,12 @@
   "sortingFinishKeep": "Kalsın",
   "categoryRenameAction": "Yeniden adlandır",
   "categoryRenameDialogTitle": "Kategoriyi yeniden adlandır",
+  "categoryDefaultNameHint": "Otomatik sıralama: {name}",
+  "@categoryDefaultNameHint": {
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
   "categoryDeleteAllAction": "Tümünü sil",
   "categoryDeleteAllConfirmTitle": "{count} ekran görüntüsünün tümü silinsin mi?",
   "@categoryDeleteAllConfirmTitle": {

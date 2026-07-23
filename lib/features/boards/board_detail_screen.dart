@@ -26,14 +26,24 @@ import 'providers/board_provider.dart';
 import 'widgets/board_name_dialog.dart';
 
 class BoardDetailScreen extends ConsumerStatefulWidget {
-  const BoardDetailScreen.category({super.key, required this.category})
-    : boardId = null;
+  const BoardDetailScreen.category({
+    super.key,
+    required this.category,
+    this.startInSelection = false,
+  }) : boardId = null;
 
-  const BoardDetailScreen.custom({super.key, required this.boardId})
-    : category = null;
+  const BoardDetailScreen.custom({
+    super.key,
+    required this.boardId,
+    this.startInSelection = false,
+  }) : category = null;
 
   final ScreenshotCategory? category;
   final String? boardId;
+
+  /// Ekran açılır açılmaz seçim moduna girsin mi (düzenleme aksiyon sayfasından
+  /// "Fotoğrafları seç" ile gelindiğinde true).
+  final bool startInSelection;
 
   @override
   ConsumerState<BoardDetailScreen> createState() => _BoardDetailScreenState();
@@ -43,6 +53,12 @@ class _BoardDetailScreenState extends ConsumerState<BoardDetailScreen> {
   bool _selectionMode = false;
   final Set<String> _selectedIds = {};
   bool _bulkDeleting = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectionMode = widget.startInSelection;
+  }
 
   @override
   Widget build(BuildContext context) {

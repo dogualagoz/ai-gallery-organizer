@@ -1454,6 +1454,12 @@ abstract class AppLocalizations {
   /// **'Rename category'**
   String get categoryRenameDialogTitle;
 
+  /// No description provided for @categoryDefaultNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto-sorted as: {name}'**
+  String categoryDefaultNameHint(String name);
+
   /// No description provided for @categoryDeleteAllAction.
   ///
   /// In en, this message translates to:

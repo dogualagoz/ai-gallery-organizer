@@ -402,6 +402,12 @@
   "sortingFinishKeep": "Keep them",
   "categoryRenameAction": "Rename",
   "categoryRenameDialogTitle": "Rename category",
+  "categoryDefaultNameHint": "Auto-sorted as: {name}",
+  "@categoryDefaultNameHint": {
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
   "categoryDeleteAllAction": "Delete all",
   "categoryDeleteAllConfirmTitle": "Delete all {count} screenshots?",
   "@categoryDeleteAllConfirmTitle": {

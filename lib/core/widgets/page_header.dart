@@ -13,6 +13,7 @@ class PageHeader extends StatelessWidget {
     this.leading,
     this.actions = const [],
     this.titleTrailing,
+    this.inlineTitle = false,
   });
 
   /// Büyük başlık metni.
@@ -27,10 +28,42 @@ class PageHeader extends StatelessWidget {
   /// Başlığın yanındaki küçük öğe (ör. Pro rozeti).
   final Widget? titleTrailing;
 
+  /// true iken başlık ile aksiyonlar tek satırda durur (üstteki boşluk kalkar);
+  /// false iken aksiyon satırı üstte, büyük başlık altında (iOS büyük başlık).
+  final bool inlineTitle;
+
   @override
   Widget build(BuildContext context) {
     final double topInset = MediaQuery.paddingOf(context).top;
     final bool hasActionRow = leading != null || actions.isNotEmpty;
+
+    if (inlineTitle) {
+      return Padding(
+        padding: EdgeInsets.fromLTRB(
+          AppSpacing.lg,
+          topInset + AppSpacing.sm,
+          AppSpacing.sm,
+          AppSpacing.sm,
+        ),
+        child: Row(
+          children: [
+            ?leading,
+            Expanded(
+              child: Row(
+                children: [
+                  Flexible(child: _titleText(context)),
+                  if (titleTrailing != null) ...[
+                    const SizedBox(width: AppSpacing.sm),
+                    titleTrailing!,
+                  ],
+                ],
+              ),
+            ),
+            ...actions,
+          ],
+        ),
+      );
+    }
 
     return Padding(
       padding: EdgeInsets.fromLTRB(
@@ -59,16 +92,7 @@ class PageHeader extends StatelessWidget {
             ),
             child: Row(
               children: [
-                Flexible(
-                  child: Text(
-                    title,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ),
+                Flexible(child: _titleText(context)),
                 if (titleTrailing != null) ...[
                   const SizedBox(width: AppSpacing.sm),
                   titleTrailing!,
@@ -77,6 +101,18 @@ class PageHeader extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  /// Büyük başlık metni (tek satır, taşarsa üç nokta).
+  Widget _titleText(BuildContext context) {
+    return Text(
+      title,
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+      style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+        fontWeight: FontWeight.w700,
       ),
     );
   }

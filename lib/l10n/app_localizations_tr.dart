@@ -791,6 +791,11 @@ class AppLocalizationsTr extends AppLocalizations {
   String get categoryRenameDialogTitle => 'Kategoriyi yeniden adlandır';
 
   @override
+  String categoryDefaultNameHint(String name) {
+    return 'Otomatik sıralama: $name';
+  }
+
+  @override
   String get categoryDeleteAllAction => 'Tümünü sil';
 
   @override

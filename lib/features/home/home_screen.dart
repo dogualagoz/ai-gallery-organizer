@@ -110,6 +110,8 @@ class _HomeHeader extends ConsumerWidget {
     return PageHeader(
       title: context.l10n.galleryTitle,
       titleTrailing: isPro ? const ProBadge() : null,
+      // Başlık ile kota rozeti/eşitleme aynı satırda: üstteki boşluk kalkar.
+      inlineTitle: true,
       actions: [
         if (kDebugMode)
           IconButton(

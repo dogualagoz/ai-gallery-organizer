@@ -791,6 +791,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get categoryRenameDialogTitle => 'Rename category';
 
   @override
+  String categoryDefaultNameHint(String name) {
+    return 'Auto-sorted as: $name';
+  }
+
+  @override
   String get categoryDeleteAllAction => 'Delete all';
 
   @override

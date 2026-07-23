@@ -15,6 +15,7 @@ import '../../gallery/data/screenshot_repository.dart';
 import '../board_detail_screen.dart';
 import '../providers/board_provider.dart';
 import 'board_covers.dart';
+import 'board_edit_actions.dart';
 import 'board_tile.dart';
 import 'long_press_edit_wrapper.dart';
 
@@ -68,11 +69,14 @@ class SystemBoardsGrid extends ConsumerWidget {
         final covers = boardCovers(repo, categoryEntries);
 
         if (editing) {
-          return BoardTileStatic(
-            icon: category.icon,
-            label: label,
-            count: categoryEntries.length,
-            covers: covers,
+          return GestureDetector(
+            onTap: () => showBoardEditActions(context, ref, category: category),
+            child: BoardTileStatic(
+              icon: category.icon,
+              label: label,
+              count: categoryEntries.length,
+              covers: covers,
+            ),
           );
         }
 
