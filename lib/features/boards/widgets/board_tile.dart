@@ -47,38 +47,101 @@ class BoardTile extends StatelessWidget {
         side: BorderSide(color: scheme.outlineVariant),
       ),
       openBuilder: (context, _) => openBuilder(context),
-      closedBuilder: (context, _) => Padding(
-        padding: const EdgeInsets.all(AppSpacing.sm + AppSpacing.xs),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(child: _CoverStrip(covers: covers, icon: icon)),
-            const SizedBox(height: AppSpacing.sm),
-            Row(
-              children: [
-                Icon(icon, size: 16, color: scheme.primary),
-                const SizedBox(width: AppSpacing.xs + 2),
-                Expanded(
-                  child: Text(
-                    label,
-                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+      closedBuilder: (context, _) => BoardTileBody(
+        icon: icon,
+        label: label,
+        count: count,
+        covers: covers,
+      ),
+    );
+  }
+}
+
+/// Düzenleme modunda kullanılan, açılmayan sabit kart: [BoardTile]'ın kapalı
+/// görünümünü (yüzey + kenarlık) OpenContainer olmadan birebir taklit eder.
+class BoardTileStatic extends StatelessWidget {
+  const BoardTileStatic({
+    super.key,
+    required this.icon,
+    required this.label,
+    required this.count,
+    required this.covers,
+  });
+
+  final IconData icon;
+  final String label;
+  final int count;
+  final List<AssetEntity> covers;
+
+  @override
+  Widget build(BuildContext context) {
+    final ColorScheme scheme = Theme.of(context).colorScheme;
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: scheme.surface,
+        borderRadius: BorderRadius.circular(AppRadius.lg),
+        border: Border.all(color: scheme.outlineVariant),
+      ),
+      child: BoardTileBody(
+        icon: icon,
+        label: label,
+        count: count,
+        covers: covers,
+      ),
+    );
+  }
+}
+
+/// Karo iç gövdesi: kapak şeridi + ikon, ad ve sayaç. Hem açılan [BoardTile]
+/// hem sabit [BoardTileStatic] tarafından paylaşılır.
+class BoardTileBody extends StatelessWidget {
+  const BoardTileBody({
+    super.key,
+    required this.icon,
+    required this.label,
+    required this.count,
+    required this.covers,
+  });
+
+  final IconData icon;
+  final String label;
+  final int count;
+  final List<AssetEntity> covers;
+
+  @override
+  Widget build(BuildContext context) {
+    final ColorScheme scheme = Theme.of(context).colorScheme;
+    return Padding(
+      padding: const EdgeInsets.all(AppSpacing.sm + AppSpacing.xs),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(child: _CoverStrip(covers: covers, icon: icon)),
+          const SizedBox(height: AppSpacing.sm),
+          Row(
+            children: [
+              Icon(icon, size: 16, color: scheme.primary),
+              const SizedBox(width: AppSpacing.xs + 2),
+              Expanded(
+                child: Text(
+                  label,
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w600,
                   ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
-              ],
-            ),
-            const SizedBox(height: 2),
-            Text(
-              context.l10n.galleryCount(count),
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: scheme.onSurfaceVariant,
               ),
+            ],
+          ),
+          const SizedBox(height: 2),
+          Text(
+            context.l10n.galleryCount(count),
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: scheme.onSurfaceVariant,
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

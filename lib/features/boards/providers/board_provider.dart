@@ -11,6 +11,19 @@ final boardsProvider = AsyncNotifierProvider<BoardsNotifier, List<Board>>(
   BoardsNotifier.new,
 );
 
+/// Anasayfadaki pano/kategori ızgaralarının "düzenleme modu" (iOS jiggle).
+/// Uzun basınca açılır, "Bitti" ile kapanır; her iki ızgara da paylaşır.
+final boardsEditModeProvider =
+    NotifierProvider<BoardsEditModeNotifier, bool>(BoardsEditModeNotifier.new);
+
+class BoardsEditModeNotifier extends Notifier<bool> {
+  @override
+  bool build() => false;
+
+  void enable() => state = true;
+  void disable() => state = false;
+}
+
 class BoardsNotifier extends AsyncNotifier<List<Board>> {
   Timer? _reloadDebounce;
 

@@ -451,6 +451,9 @@ class AppLocalizationsTr extends AppLocalizations {
   String get boardsLimitTitle => 'Özel panolar Pro\'ya özel';
 
   @override
+  String get boardsEditDone => 'Bitti';
+
+  @override
   String get boardDetailEmpty => 'Burada henüz ekran görüntüsü yok';
 
   @override

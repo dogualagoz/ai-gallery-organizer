@@ -451,6 +451,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get boardsLimitTitle => 'Custom boards are a Pro feature';
 
   @override
+  String get boardsEditDone => 'Done';
+
+  @override
   String get boardDetailEmpty => 'No screenshots here yet';
 
   @override

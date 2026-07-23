@@ -230,6 +230,7 @@
   "boardsDeleteConfirmTitle": "Pano silinsin mi?",
   "boardsDeleteConfirmBody": "İçindeki ekran görüntüleri silinmez, yalnızca pano bağlantıları kaldırılır.",
   "boardsLimitTitle": "Özel panolar Pro'ya özel",
+  "boardsEditDone": "Bitti",
   "boardDetailEmpty": "Burada henüz ekran görüntüsü yok",
   "searchHint": "Etiket, metin veya kategori ara",
   "searchPrompt": "Aramak için yazmaya başla",

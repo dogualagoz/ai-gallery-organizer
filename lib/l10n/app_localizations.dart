@@ -872,6 +872,12 @@ abstract class AppLocalizations {
   /// **'Custom boards are a Pro feature'**
   String get boardsLimitTitle;
 
+  /// No description provided for @boardsEditDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get boardsEditDone;
+
   /// No description provided for @boardDetailEmpty.
   ///
   /// In en, this message translates to:

@@ -230,6 +230,7 @@
   "boardsDeleteConfirmTitle": "Delete this board?",
   "boardsDeleteConfirmBody": "Screenshots inside won't be deleted, only removed from this board.",
   "boardsLimitTitle": "Custom boards are a Pro feature",
+  "boardsEditDone": "Done",
   "boardDetailEmpty": "No screenshots here yet",
   "searchHint": "Search tags, text, or category",
   "searchPrompt": "Start typing to search",

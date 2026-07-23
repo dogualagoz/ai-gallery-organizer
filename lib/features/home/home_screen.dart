@@ -11,6 +11,7 @@ import '../../core/models/screenshot_category.dart';
 import '../../core/models/screenshot_entry.dart';
 import '../../core/router/app_router.dart';
 import '../../core/services/category_names_service.dart';
+import '../../core/services/category_order_service.dart';
 import '../../core/services/entitlement_service.dart';
 import '../../core/services/review_service.dart';
 import '../../core/widgets/page_header.dart';
@@ -284,20 +285,23 @@ class _BoardsSection extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
+    final bool editing = ref.watch(boardsEditModeProvider);
     final List<ScreenshotCategory> nonEmptyCategories = [
       for (final category in ScreenshotCategory.values)
         if (entries.any((entry) => entry.category == category)) category,
     ];
+    // Kayıtlı kullanıcı sırasına göre diz (düzenleme modunda sürüklenebilir).
+    ref.watch(categoryOrderProvider);
+    final List<ScreenshotCategory> sortedCategories = ref
+        .read(categoryOrderProvider.notifier)
+        .sortVisible(nonEmptyCategories);
     final List<Board> boards = ref.watch(boardsProvider).value ?? const [];
     final bool canCreate = ref.watch(entitlementProvider).canCreateBoards;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          l10n.boardsSystemSection,
-          style: Theme.of(context).textTheme.titleMedium,
-        ),
+        _SectionHeader(title: l10n.boardsSystemSection, editing: editing),
         const SizedBox(height: AppSpacing.sm),
         if (nonEmptyCategories.isEmpty)
           Text(
@@ -308,16 +312,13 @@ class _BoardsSection extends ConsumerWidget {
           )
         else
           SystemBoardsGrid(
-            categories: nonEmptyCategories,
+            categories: sortedCategories,
             entries: entries,
             repo: repo,
             categoryNames: ref.watch(categoryNamesProvider),
           ),
         const SizedBox(height: AppSpacing.lg),
-        Text(
-          l10n.boardsCustomSection,
-          style: Theme.of(context).textTheme.titleMedium,
-        ),
+        _SectionHeader(title: l10n.boardsCustomSection, editing: editing),
         const SizedBox(height: AppSpacing.sm),
         CustomBoardsGrid(
           boards: boards,
@@ -325,6 +326,31 @@ class _BoardsSection extends ConsumerWidget {
           repo: repo,
           canCreate: canCreate,
         ),
+      ],
+    );
+  }
+}
+
+/// Bölüm başlığı; düzenleme modunda sağda "Bitti" butonu gösterir.
+class _SectionHeader extends ConsumerWidget {
+  const _SectionHeader({required this.title, required this.editing});
+
+  final String title;
+  final bool editing;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return Row(
+      children: [
+        Expanded(
+          child: Text(title, style: Theme.of(context).textTheme.titleMedium),
+        ),
+        if (editing)
+          TextButton(
+            onPressed: () =>
+                ref.read(boardsEditModeProvider.notifier).disable(),
+            child: Text(context.l10n.boardsEditDone),
+          ),
       ],
     );
   }
