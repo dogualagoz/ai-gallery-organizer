@@ -23,7 +23,7 @@ types:
         index: 6
   Board:
     typeId: 1
-    nextIndex: 3
+    nextIndex: 4
     fields:
       id:
         index: 0
@@ -31,6 +31,8 @@ types:
         index: 1
       createdAt:
         index: 2
+      sortOrder:
+        index: 3
   ScreenshotCategory:
     typeId: 2
     nextIndex: 21

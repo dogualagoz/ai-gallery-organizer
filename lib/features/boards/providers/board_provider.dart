@@ -40,6 +40,10 @@ class BoardsNotifier extends AsyncNotifier<List<Board>> {
   Future<void> rename(String id, String name) =>
       ref.read(boardRepositoryProvider).rename(id, name);
 
+  /// Board'ları [orderedIds] sırasına göre yeniden dizer (sürükle-bırak sonrası).
+  Future<void> reorder(List<String> orderedIds) =>
+      ref.read(boardRepositoryProvider).reorder(orderedIds);
+
   /// Board'u siler; içindeki screenshot kayıtları silinmez, yalnızca
   /// board bağlantıları kaldırılır (kategori görünümlerinde kalmaya devam ederler).
   Future<void> delete(String id) async {

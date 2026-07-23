@@ -19,6 +19,10 @@ abstract final class HiveService {
   static late Box<Board> boards;
   static late Box<String> categoryNames;
 
+  /// Genel amaçlı ayar box'ı (ör. sistem kategori sıralaması). Değer türleri
+  /// karışık olabildiği için tipsiz (dynamic) tutulur.
+  static late Box<dynamic> settings;
+
   static Future<void> init() async {
     await Hive.initFlutter();
     Hive.registerAdapters();
@@ -32,6 +36,7 @@ abstract final class HiveService {
       HiveBoxes.categoryNames,
       cipher,
     );
+    settings = await _openEncrypted<dynamic>(HiveBoxes.settings, cipher);
   }
 
   /// Şifreleme anahtarını Keychain'den okur; ilk açılışta üretip kaydeder.
