@@ -659,7 +659,7 @@ abstract class AppLocalizations {
   /// No description provided for @categoryLockScreen.
   ///
   /// In en, this message translates to:
-  /// **'Lock screen'**
+  /// **'Home & Lock Screen'**
   String get categoryLockScreen;
 
   /// No description provided for @categorySocial.
@@ -799,6 +799,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Categorized screenshots will appear here once analyzed'**
   String get boardsEmptyHint;
+
+  /// No description provided for @boardsNewBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'+{count}'**
+  String boardsNewBadge(int count);
 
   /// No description provided for @boardsCustomSection.
   ///

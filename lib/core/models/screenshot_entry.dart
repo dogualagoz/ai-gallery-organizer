@@ -12,6 +12,7 @@ class ScreenshotEntry {
     this.ocrText,
     this.analyzedAt,
     this.boardId,
+    this.aiCategory,
   });
 
   /// photo_manager `AssetEntity.id` — Photos kütüphanesindeki kalıcı kimlik.
@@ -34,6 +35,11 @@ class ScreenshotEntry {
 
   /// Kullanıcının atadığı özel board (yoksa null — sistem kategorisinde görünür).
   String? boardId;
+
+  /// AI'ın ilk atadığı kategori; kullanıcı elle düzeltse bile korunur.
+  /// `category != aiCategory` ⇒ kullanıcı düzeltmesi olmuş demektir. Cihaz içi
+  /// kişiselleşme sinyalinin (düzeltmeden öğrenme) kaynağıdır.
+  ScreenshotCategory? aiCategory;
 
   /// Analiz kuyruğunda bekleyip beklemediği.
   bool get isPending => analyzedAt == null;

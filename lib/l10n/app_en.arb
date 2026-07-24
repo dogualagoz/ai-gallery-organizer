@@ -194,7 +194,7 @@
   "milestoneCtaPro": "Go Pro — unlimited analysis",
   "milestoneCtaLater": "Continue next week",
   "dismissAction": "Dismiss",
-  "categoryLockScreen": "Lock screen",
+  "categoryLockScreen": "Home & Lock Screen",
   "categorySocial": "Social",
   "categoryNotesPasswords": "Notes & passwords",
   "categoryMessages": "Chats",
@@ -218,6 +218,12 @@
   "cancelAction": "Cancel",
   "boardsSystemSection": "Categories",
   "boardsEmptyHint": "Categorized screenshots will appear here once analyzed",
+  "boardsNewBadge": "+{count}",
+  "@boardsNewBadge": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
   "boardsCustomSection": "My boards",
   "homeRecentsSection": "Recents",
   "boardsNewBoardAction": "New board",

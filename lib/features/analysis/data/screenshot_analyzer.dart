@@ -40,7 +40,10 @@ class ScreenshotAnalyzer {
           for (final ScreenshotCategory category in ScreenshotCategory.values)
             category.wireName,
         ],
-        description: 'Best matching category for the screenshot.',
+        description:
+            'Best matching category for the screenshot. Device home screen '
+            'and lock screen shots must use lock_screen, never a content '
+            'category.',
       ),
       'tags': Schema.array(
         items: Schema.string(),

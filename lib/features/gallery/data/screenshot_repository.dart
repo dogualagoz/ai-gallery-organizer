@@ -9,16 +9,34 @@ import 'package:photo_manager/photo_manager.dart';
 
 import '../../../core/models/screenshot_category.dart';
 import '../../../core/models/screenshot_entry.dart';
+import '../../../core/services/category_priors_service.dart';
 import '../../../core/services/hive_service.dart';
 
 final screenshotRepositoryProvider = Provider<ScreenshotRepository>((ref) {
-  return ScreenshotRepository(HiveService.screenshots);
+  return ScreenshotRepository(
+    HiveService.screenshots,
+    // Kullanıcı düzeltmesi olduğunda cihaz içi kişiselleşme priors'ına yaz.
+    onCorrection: (from, to, tags) => ref
+        .read(categoryPriorsProvider.notifier)
+        .recordCorrection(from: from, to: to, tags: tags),
+  );
 });
 
+/// Kullanıcı bir kategoriyi elle değiştirdiğinde çağrılır ([from] AI'ın kararı,
+/// [to] kullanıcının seçtiği kategori). Kişiselleşme sinyalini kaydetmek için.
+typedef CategoryCorrectionRecorder = Future<void> Function(
+  ScreenshotCategory from,
+  ScreenshotCategory to,
+  List<String> tags,
+);
+
 class ScreenshotRepository {
-  ScreenshotRepository(this._box);
+  ScreenshotRepository(this._box, {this.onCorrection});
 
   final Box<ScreenshotEntry> _box;
+
+  /// Kullanıcı düzeltmelerini öğrenme sinyaline aktaran opsiyonel callback.
+  final CategoryCorrectionRecorder? onCorrection;
 
   /// Thumbnail yüklemek için asset nesneleri bellekte tutulur;
   /// Photos kimliği kalıcı olduğu için oturum boyunca geçerlidir.
@@ -111,10 +129,12 @@ class ScreenshotRepository {
     return const [];
   }
 
-  /// AI analiz sonucunu kaydeder.
+  /// AI analiz sonucunu kaydeder. [aiCategory] modelin ham kararıdır; [category]
+  /// kişiselleşme uygulandıysa farklı olabilir (bkz. analysis_queue_provider).
   Future<void> saveAnalysis({
     required String assetId,
     required ScreenshotCategory category,
+    required ScreenshotCategory aiCategory,
     required List<String> tags,
     String? ocrText,
   }) async {
@@ -122,6 +142,7 @@ class ScreenshotRepository {
     if (entry == null) return;
     entry
       ..category = category
+      ..aiCategory = aiCategory
       ..tags = tags
       ..ocrText = ocrText
       ..analyzedAt = DateTime.now();
@@ -153,11 +174,18 @@ class ScreenshotRepository {
   Future<void> setCategory(String assetId, ScreenshotCategory category) async {
     final ScreenshotEntry? entry = _box.get(assetId);
     if (entry == null) return;
+    // AI'ın ilk kararını sabitle: sonraki düzeltmeler orijinali ezmesin.
+    final ScreenshotCategory? aiOriginal = entry.aiCategory ?? entry.category;
     entry
+      ..aiCategory = aiOriginal
       ..category = category
       ..boardId = null;
     entry.analyzedAt ??= DateTime.now();
     await _box.put(assetId, entry);
+    // Kullanıcı gerçekten AI'ın kararını değiştirdiyse öğrenme sinyali kaydet.
+    if (aiOriginal != null && aiOriginal != category) {
+      await onCorrection?.call(aiOriginal, category, entry.tags);
+    }
   }
 
   /// Kaydın kategori/analiz durumunu verilen değerlere geri yazar. Swipe

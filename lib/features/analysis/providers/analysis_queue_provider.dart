@@ -12,6 +12,7 @@ import '../../../core/constants/ai_constants.dart';
 import '../../../core/constants/ai_rate_profile.dart';
 import '../../../core/models/screenshot_category.dart';
 import '../../../core/models/screenshot_entry.dart';
+import '../../../core/services/category_priors_service.dart';
 import '../../../core/services/daily_quota_tracker.dart';
 import '../../../core/services/entitlement_service.dart';
 import '../../gallery/data/screenshot_repository.dart';
@@ -273,9 +274,15 @@ class AnalysisQueueNotifier extends Notifier<AnalysisQueueState> {
       final AnalysisResult result = await ref
           .read(screenshotAnalyzerProvider)
           .analyze(asset);
+      // Cihaz içi kişiselleşme: kullanıcı düzeltmelerinden öğrenilen net bir
+      // sinyal varsa AI kararını güncelle, yoksa AI'ınkini koru.
+      final ScreenshotCategory refined =
+          ref.read(categoryPriorsProvider.notifier).suggest(result.tags) ??
+          result.category;
       await repo.saveAnalysis(
         assetId: entry.assetId,
-        category: result.category,
+        category: refined,
+        aiCategory: result.category,
         tags: result.tags,
         ocrText: result.ocrText,
       );
@@ -283,7 +290,7 @@ class AnalysisQueueNotifier extends Notifier<AnalysisQueueState> {
       // Sıfırlandıysa analizi kaydettik ama state'i güncelleme.
       if (_runId != runId) return;
       state = state.afterSuccess(
-        AnalyzedItem(assetId: entry.assetId, category: result.category),
+        AnalyzedItem(assetId: entry.assetId, category: refined),
       );
     } on AnalysisRateLimitException catch (error) {
       debugPrint('Günlük kota hatası (${entry.assetId}): $error');
@@ -321,9 +328,13 @@ class AnalysisQueueNotifier extends Notifier<AnalysisQueueState> {
       final AnalysisResult result = await ref
           .read(screenshotAnalyzerProvider)
           .analyze(asset);
+      final ScreenshotCategory refined =
+          ref.read(categoryPriorsProvider.notifier).suggest(result.tags) ??
+          result.category;
       await repo.saveAnalysis(
         assetId: assetId,
-        category: result.category,
+        category: refined,
+        aiCategory: result.category,
         tags: result.tags,
         ocrText: result.ocrText,
       );

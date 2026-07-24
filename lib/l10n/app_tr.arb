@@ -194,7 +194,7 @@
   "milestoneCtaPro": "Pro'ya geç — sınırsız analiz",
   "milestoneCtaLater": "Haftaya devam et",
   "dismissAction": "Kapat",
-  "categoryLockScreen": "Kilit ekranı",
+  "categoryLockScreen": "Ana ve Kilit Ekranı",
   "categorySocial": "Sosyal medya",
   "categoryNotesPasswords": "Not ve şifreler",
   "categoryMessages": "Sohbetler",
@@ -218,6 +218,12 @@
   "cancelAction": "İptal",
   "boardsSystemSection": "Kategoriler",
   "boardsEmptyHint": "Analiz edilen ekran görüntüleri kategorilerine ayrıldıkça burada görünür",
+  "boardsNewBadge": "+{count}",
+  "@boardsNewBadge": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
   "boardsCustomSection": "Panolarım",
   "homeRecentsSection": "Son Görüntüler",
   "boardsNewBoardAction": "Yeni pano",

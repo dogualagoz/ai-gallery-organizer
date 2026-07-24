@@ -341,7 +341,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get dismissAction => 'Dismiss';
 
   @override
-  String get categoryLockScreen => 'Lock screen';
+  String get categoryLockScreen => 'Home & Lock Screen';
 
   @override
   String get categorySocial => 'Social';
@@ -412,6 +412,11 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get boardsEmptyHint =>
       'Categorized screenshots will appear here once analyzed';
+
+  @override
+  String boardsNewBadge(int count) {
+    return '+$count';
+  }
 
   @override
   String get boardsCustomSection => 'My boards';

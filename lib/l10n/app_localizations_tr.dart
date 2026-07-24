@@ -341,7 +341,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get dismissAction => 'Kapat';
 
   @override
-  String get categoryLockScreen => 'Kilit ekranı';
+  String get categoryLockScreen => 'Ana ve Kilit Ekranı';
 
   @override
   String get categorySocial => 'Sosyal medya';
@@ -412,6 +412,11 @@ class AppLocalizationsTr extends AppLocalizations {
   @override
   String get boardsEmptyHint =>
       'Analiz edilen ekran görüntüleri kategorilerine ayrıldıkça burada görünür';
+
+  @override
+  String boardsNewBadge(int count) {
+    return '+$count';
+  }
 
   @override
   String get boardsCustomSection => 'Panolarım';

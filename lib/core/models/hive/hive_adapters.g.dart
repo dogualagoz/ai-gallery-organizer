@@ -24,13 +24,14 @@ class ScreenshotEntryAdapter extends TypeAdapter<ScreenshotEntry> {
       ocrText: fields[4] as String?,
       analyzedAt: fields[5] as DateTime?,
       boardId: fields[6] as String?,
+      aiCategory: fields[7] as ScreenshotCategory?,
     );
   }
 
   @override
   void write(BinaryWriter writer, ScreenshotEntry obj) {
     writer
-      ..writeByte(7)
+      ..writeByte(8)
       ..writeByte(0)
       ..write(obj.assetId)
       ..writeByte(1)
@@ -44,7 +45,9 @@ class ScreenshotEntryAdapter extends TypeAdapter<ScreenshotEntry> {
       ..writeByte(5)
       ..write(obj.analyzedAt)
       ..writeByte(6)
-      ..write(obj.boardId);
+      ..write(obj.boardId)
+      ..writeByte(7)
+      ..write(obj.aiCategory);
   }
 
   @override
