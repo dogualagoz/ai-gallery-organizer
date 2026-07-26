@@ -146,6 +146,26 @@ class _AnalyzeCardState extends ConsumerState<AnalyzeCard>
     _overlayEntry = null;
   }
 
+  /// "Yarıda kes": kalan uçuş/kuyruğu anında kapatır ve özet sayaçlarını turun
+  /// gerçek sonucuna (kaydedilmiş `done`/kategori dağılımı) eşitler. Böylece
+  /// fotoğraflar uçmayı hemen bırakır ama "şimdiye kadar analiz edilenler"
+  /// doğru görünür (uçuş animasyonu atlanmış olsa da veri kayıtlı).
+  void _flushToSummary() {
+    final AnalysisQueueState queue = ref.read(analysisQueueProvider);
+    _spawnQueue.clear();
+    for (final SceneFlight flight in _flights) {
+      flight.controller.dispose();
+    }
+    _flights.clear();
+    _bursts.clear();
+    _landed
+      ..clear()
+      ..addAll(queue.categoryCounts);
+    _landedTotal = queue.done;
+    _overlayEntry?.remove();
+    _overlayEntry = null;
+  }
+
   // ---- Kuyruk → uçuş akışı ------------------------------------------------
 
   void _onQueueChanged(AnalysisQueueState? previous, AnalysisQueueState next) {
@@ -530,9 +550,20 @@ class _AnalyzeCardState extends ConsumerState<AnalyzeCard>
     if (!mounted || choice == null) return;
     switch (choice) {
       case _CancelChoice.stop:
-        // Yarıda kes: yeni istek başlamaz; uçmakta/kuyruktaki analizler
-        // inişini tamamlar ve özet ("All sorted") gösterilir.
-        ref.read(analysisQueueProvider.notifier).cancel();
+        // Yarıda kes: workerları durdur, uçuş/kuyruğu anında kapat, şimdiye
+        // kadar kaydedilenlerle özeti göster. Hiç analiz edilmemişse (done==0)
+        // özet göstermeden boşta duruma dön.
+        final AnalysisQueueNotifier notifier = ref.read(
+          analysisQueueProvider.notifier,
+        );
+        notifier.cancel();
+        if (ref.read(analysisQueueProvider).done == 0) {
+          notifier.reset();
+          setState(_resetLocal);
+        } else {
+          setState(_flushToSummary);
+          _maybeFinish(ref.read(analysisQueueProvider));
+        }
       case _CancelChoice.reset:
         // Sıfırla: turu tamamen iptal et, kartı anında boşta duruma al.
         Haptics.warning();

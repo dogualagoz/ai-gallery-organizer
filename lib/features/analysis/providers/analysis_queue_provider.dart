@@ -274,6 +274,11 @@ class AnalysisQueueNotifier extends Notifier<AnalysisQueueState> {
       final AnalysisResult result = await ref
           .read(screenshotAnalyzerProvider)
           .analyze(asset);
+      // "Yarıda kes" (cancel) ya da "Sıfırla" (reset) istendiyse: kullanıcı
+      // durdurduktan sonra dönen bu in-flight sonucu artık kaydetme ve kredi
+      // harcama — durdurma anında analiz edilmemiş hiçbir screenshot işlenmiş
+      // sayılmamalı.
+      if (_cancelRequested || _runId != runId) return;
       // Cihaz içi kişiselleşme: kullanıcı düzeltmelerinden öğrenilen net bir
       // sinyal varsa AI kararını güncelle, yoksa AI'ınkini koru.
       final ScreenshotCategory refined =
@@ -398,8 +403,15 @@ class AnalysisQueueNotifier extends Notifier<AnalysisQueueState> {
   }
 
   /// Koşan kuyruğu nazikçe durdurur (aktif istek biter, yenisi başlamaz);
-  /// şimdiye inen fotoğraflarla özet gösterilir.
-  void cancel() => _cancelRequested = true;
+  /// şimdiye inen fotoğraflarla özet gösterilir. Kart anında özet moduna
+  /// geçebilsin diye turu hemen tamamlanmış say — arka planda süren `start()`
+  /// daha sonra aynı (completed) statüyü yazar, bu yüzden çakışma olmaz.
+  void cancel() {
+    _cancelRequested = true;
+    if (state.isRunning) {
+      state = state.copyWith(status: AnalysisQueueStatus.completed);
+    }
+  }
 
   /// Turu tamamen sıfırlar: arka planda süren tur da state'i ezemez, kart
   /// anında boşta duruma döner. Çarpı → "Sıfırla" bunu çağırır.
