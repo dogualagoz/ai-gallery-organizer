@@ -768,6 +768,10 @@ class AppLocalizationsTr extends AppLocalizations {
   String get sortingUndo => 'Geri al';
 
   @override
+  String get sortingDeleteDeferred =>
+      'Silme ertelendi. Hazır olduğunda üstteki sil düğmesine dokun.';
+
+  @override
   String sortingPendingDeleteCount(int count) {
     return '$count silinecek';
   }

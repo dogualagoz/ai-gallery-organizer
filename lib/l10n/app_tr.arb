@@ -386,6 +386,7 @@
   "homeRecentsMore": "Daha fazla göster",
   "recentsScreenTitle": "Son ekran görüntüleri",
   "sortingUndo": "Geri al",
+  "sortingDeleteDeferred": "Silme ertelendi. Hazır olduğunda üstteki sil düğmesine dokun.",
   "sortingPendingDeleteCount": "{count} silinecek",
   "@sortingPendingDeleteCount": {
     "placeholders": {

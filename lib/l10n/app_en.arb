@@ -386,6 +386,7 @@
   "homeRecentsMore": "Show more",
   "recentsScreenTitle": "Recent screenshots",
   "sortingUndo": "Undo",
+  "sortingDeleteDeferred": "Deletion paused. Tap the delete button up top when you're ready.",
   "sortingPendingDeleteCount": "{count} to delete",
   "@sortingPendingDeleteCount": {
     "placeholders": {

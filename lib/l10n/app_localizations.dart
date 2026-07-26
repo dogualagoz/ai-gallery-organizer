@@ -1418,6 +1418,12 @@ abstract class AppLocalizations {
   /// **'Undo'**
   String get sortingUndo;
 
+  /// No description provided for @sortingDeleteDeferred.
+  ///
+  /// In en, this message translates to:
+  /// **'Deletion paused. Tap the delete button up top when you\'re ready.'**
+  String get sortingDeleteDeferred;
+
   /// No description provided for @sortingPendingDeleteCount.
   ///
   /// In en, this message translates to:

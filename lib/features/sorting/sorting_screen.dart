@@ -61,6 +61,11 @@ class _SortingScreenState extends ConsumerState<SortingScreen> {
   /// Toplu silme sürerken tekrar tetiklenmeyi önler.
   bool _finishing = false;
 
+  /// Kullanıcı iOS silme onayını iptal etti mi (vazgeçti). true iken sekme
+  /// geçişlerinde OTOMATİK olarak tekrar silme sorulmaz — kullanıcı isterse
+  /// "Bitir" ile bilerek tetikler. Yeni bir kart silmeye kuyruklanınca sıfırlanır.
+  bool _deleteDeclined = false;
+
   /// Sort sekmesi bir önceki karede aktif miydi — çıkışı (aktif→pasif) yakalar.
   bool _wasTabActive = true;
 
@@ -85,7 +90,12 @@ class _SortingScreenState extends ConsumerState<SortingScreen> {
     // onayıyla işleriz. `didChangeDependencies` içinde setState çağırmamak
     // için işlemi kare sonrasına erteleriz.
     final bool active = TickerMode.valuesOf(context).enabled;
-    if (_wasTabActive && !active && _pendingDeletes.isNotEmpty) {
+    // Kullanıcı bir kez iptal ettiyse (_deleteDeclined) sekme geçişinde tekrar
+    // tekrar sormayız — vazgeçmiş sayarız.
+    if (_wasTabActive &&
+        !active &&
+        _pendingDeletes.isNotEmpty &&
+        !_deleteDeclined) {
       WidgetsBinding.instance.addPostFrameCallback((_) => _commitDeletes());
     }
     _wasTabActive = active;
@@ -128,6 +138,7 @@ class _SortingScreenState extends ConsumerState<SortingScreen> {
               canUndo: _history.isNotEmpty,
               onUndo: _undo,
               onPickCategory: _pickCategory,
+              onCommitDeletes: _commitDeletes,
             ),
             Expanded(
               child: !entitlement.canSwipe
@@ -176,6 +187,9 @@ class _SortingScreenState extends ConsumerState<SortingScreen> {
     setState(() {
       _pendingDeletes.add(assetId);
       _history.add(_SwipeAction(_SwipeType.delete, assetId));
+      // Yeni silme niyeti: bir önceki iptal artık geçersiz, otomatik onay
+      // yeniden devreye girsin.
+      _deleteDeclined = false;
     });
     await ref.read(entitlementProvider.notifier).registerSwipe();
     return true; // kart uçup gitsin; gerçek silme "Bitir"de yapılır
@@ -215,7 +229,9 @@ class _SortingScreenState extends ConsumerState<SortingScreen> {
   /// Biriken silme kuyruğunu tek `deleteWithIds` çağrısıyla siler. Onay olarak
   /// iOS'un kendi "N fotoğrafı sil?" sorusu gösterilir — ayrıca Flutter dialogu
   /// açılmaz. Sort sekmesinden çıkışta ve deste bitiş ekranındaki butonda
-  /// çağrılır. Kullanıcı iOS onayını iptal ederse kuyruk olduğu gibi kalır.
+  /// çağrılır. Kullanıcı iOS onayını iptal ederse kuyruk olduğu gibi kalır
+  /// ama [_deleteDeclined] işaretlenir; sekme geçişlerinde bir daha otomatik
+  /// sorulmaz (yalnız "Bitir" ile bilerek tekrar denenir).
   Future<void> _commitDeletes() async {
     if (_pendingDeletes.isEmpty || _finishing || !mounted) return;
     final l10n = context.l10n;
@@ -229,6 +245,21 @@ class _SortingScreenState extends ConsumerState<SortingScreen> {
       if (mounted) {
         setState(() => _finishing = false);
         _showSnack(l10n.sortingDeleteFailed);
+      }
+      return;
+    }
+    // Hiçbir şey silinmedi = kullanıcı iOS onayında "İzin verme"ye bastı →
+    // vazgeçmiş say: kuyruğu koru ama sekme geçişlerinde bir daha otomatik
+    // sorma. Kullanıcı isterse "Bitir" ile bilerek yeniden dener.
+    if (deleted.isEmpty) {
+      if (mounted) {
+        setState(() {
+          _finishing = false;
+          _deleteDeclined = true;
+        });
+        // Kullanıcıyı yönlendir: silmenin nereden tamamlanacağını (üstteki sil
+        // düğmesi) anlasın.
+        _showSnack(l10n.sortingDeleteDeferred);
       }
       return;
     }
@@ -492,6 +523,7 @@ class _SortHeader extends StatelessWidget {
     required this.canUndo,
     required this.onUndo,
     required this.onPickCategory,
+    required this.onCommitDeletes,
   });
 
   final IconData categoryIcon;
@@ -501,6 +533,9 @@ class _SortHeader extends StatelessWidget {
   final bool canUndo;
   final VoidCallback onUndo;
   final VoidCallback onPickCategory;
+
+  /// Bekleyen silme sayacına dokununca toplu silmeyi (iOS onayıyla) tetikler.
+  final VoidCallback onCommitDeletes;
 
   @override
   Widget build(BuildContext context) {
@@ -541,7 +576,10 @@ class _SortHeader extends StatelessWidget {
                     alignment: Alignment.centerRight,
                     child: Padding(
                       padding: const EdgeInsets.only(right: AppSpacing.sm),
-                      child: _PendingDeleteCounter(count: pendingDeleteCount),
+                      child: _PendingDeleteCounter(
+                        count: pendingDeleteCount,
+                        onTap: onCommitDeletes,
+                      ),
                     ),
                   ),
               ],
@@ -625,31 +663,52 @@ class _CategoryChip extends StatelessWidget {
   }
 }
 
-/// App bar'da silmeye kuyruklanan kart sayısını gösteren sayaç (silme ikonu +
-/// adet). Etkileşimsiz — gerçek silme sekmeden çıkışta iOS onayıyla yapılır.
+/// App bar'da silmeye kuyruklanan kart sayısını gösteren, dokununca toplu
+/// silmeyi (iOS onayıyla) başlatan düğme. Belirgin bir aksiyon gibi durur ki
+/// kullanıcı silmeyi nereden tamamlayacağını anlasın — özellikle onayı bir kez
+/// iptal ettikten sonra otomatik sorulmadığında tek "Bitir" yolu budur.
 class _PendingDeleteCounter extends StatelessWidget {
-  const _PendingDeleteCounter({required this.count});
+  const _PendingDeleteCounter({required this.count, required this.onTap});
 
   final int count;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     final ColorScheme scheme = Theme.of(context).colorScheme;
     return Tooltip(
-      message: context.l10n.sortingPendingDeleteCount(count),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(Icons.delete_outline, size: 20, color: scheme.error),
-          const SizedBox(width: AppSpacing.xs),
-          Text(
-            '$count',
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              color: scheme.error,
-              fontWeight: FontWeight.w700,
+      message: context.l10n.sortingFinishAction(count),
+      child: Material(
+        color: scheme.errorContainer,
+        borderRadius: BorderRadius.circular(AppRadius.pill),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.md,
+              vertical: AppSpacing.xs,
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.delete_outline,
+                  size: 18,
+                  color: scheme.onErrorContainer,
+                ),
+                const SizedBox(width: AppSpacing.xs),
+                Text(
+                  '$count',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    color: scheme.onErrorContainer,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
             ),
           ),
-        ],
+        ),
       ),
     );
   }

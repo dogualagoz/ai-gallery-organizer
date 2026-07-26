@@ -768,6 +768,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get sortingUndo => 'Undo';
 
   @override
+  String get sortingDeleteDeferred =>
+      'Deletion paused. Tap the delete button up top when you\'re ready.';
+
+  @override
   String sortingPendingDeleteCount(int count) {
     return '$count to delete';
   }
