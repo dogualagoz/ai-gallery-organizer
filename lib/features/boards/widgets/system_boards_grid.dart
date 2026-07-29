@@ -10,6 +10,7 @@ import '../../../core/models/screenshot_entry.dart';
 import '../../../core/services/category_order_service.dart';
 import '../../../core/widgets/fade_in_up.dart';
 import '../../../core/widgets/reorderable_tile_grid.dart';
+import '../../analysis/providers/recent_distribution_provider.dart';
 import '../../analysis/widgets/category_target_scope.dart';
 import '../../gallery/data/screenshot_repository.dart';
 import '../board_detail_screen.dart';
@@ -47,6 +48,10 @@ class SystemBoardsGrid extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
     final bool editing = ref.watch(boardsEditModeProvider);
+    // Son analizde kategori başına dağıtılan yeni screenshot sayıları (rozet).
+    final Map<ScreenshotCategory, int> newCounts = ref.watch(
+      recentDistributionProvider,
+    );
 
     return ReorderableTileGrid(
       itemCount: categories.length,
@@ -67,6 +72,7 @@ class SystemBoardsGrid extends ConsumerWidget {
             .toList();
         final label = category.displayName(l10n, categoryNames);
         final covers = boardCovers(repo, categoryEntries);
+        final int newCount = newCounts[category] ?? 0;
 
         if (editing) {
           return GestureDetector(
@@ -86,13 +92,18 @@ class SystemBoardsGrid extends ConsumerWidget {
           child: LongPressEditWrapper(
             child: FadeInUp(
               delay: boardStaggerStep * index,
-              child: BoardTile(
-                icon: category.icon,
-                label: label,
-                count: categoryEntries.length,
-                covers: covers,
-                openBuilder: (context) =>
-                    BoardDetailScreen.category(category: category),
+              // Yeni içerik alan karo minik bir zıplamayla dikkat çeker.
+              child: NewTileBounce(
+                active: newCount > 0,
+                child: BoardTile(
+                  icon: category.icon,
+                  label: label,
+                  count: categoryEntries.length,
+                  covers: covers,
+                  newCount: newCount,
+                  openBuilder: (context) =>
+                      BoardDetailScreen.category(category: category),
+                ),
               ),
             ),
           ),

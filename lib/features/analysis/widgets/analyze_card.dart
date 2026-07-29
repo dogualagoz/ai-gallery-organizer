@@ -22,6 +22,7 @@ import '../../../core/services/haptic_service.dart';
 import '../../../core/services/review_service.dart';
 import '../../gallery/data/screenshot_repository.dart';
 import '../providers/analysis_queue_provider.dart';
+import '../providers/recent_distribution_provider.dart';
 import 'analyze_card_content.dart';
 import 'category_target_scope.dart';
 import 'scene_flying_card.dart';
@@ -257,6 +258,10 @@ class _AnalyzeCardState extends ConsumerState<AnalyzeCard>
     if (_landedTotal == 0) return;
 
     _summaryShown = true;
+    // Bu turda inen öğelerin kategori dağılımını kalıcı rozet olarak kaydet:
+    // özet kapansa da anasayfadaki karolar hangi gruba kaç yeni ss geldiğini
+    // gösterir. Kota/limit ile bitmiş turda da inenler dağıtılmış sayılır.
+    ref.read(recentDistributionProvider.notifier).record(state.categoryCounts);
     if (!_successHapticDone && state.status == AnalysisQueueStatus.completed) {
       _successHapticDone = true;
       Haptics.success();

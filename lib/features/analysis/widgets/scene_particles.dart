@@ -395,6 +395,125 @@ class _AiGlowPainter extends CustomPainter {
       oldDelegate.progress != progress || oldDelegate.color != color;
 }
 
+/// Yeni içerik alan board karosunun üstünde yavaşça yanıp sönen beyaz "yıldız
+/// tozu" — mor vurgulu yüzeyin üzerinde parıldayan küçük noktalar. Karo boyunca
+/// sabit konumlu, faz kaymalı sinüs ile ışıldar; tek painter'da çizilir.
+class BoardStardust extends StatefulWidget {
+  const BoardStardust({super.key, this.color = Colors.white, this.count = 14});
+
+  /// Yıldız tozu rengi (mor yüzeyde beyaz belirgin durur).
+  final Color color;
+
+  /// Karo üzerindeki nokta sayısı.
+  final int count;
+
+  @override
+  State<BoardStardust> createState() => _BoardStardustState();
+}
+
+class _BoardStardustState extends State<BoardStardust>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller = AnimationController(
+    vsync: this,
+    duration: const Duration(seconds: 4),
+  )..repeat();
+
+  late final List<_StarDot> _stars;
+
+  @override
+  void initState() {
+    super.initState();
+    final Random random = Random();
+    _stars = List<_StarDot>.generate(
+      widget.count,
+      (_) => _StarDot.random(random),
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return RepaintBoundary(
+      child: AnimatedBuilder(
+        animation: _controller,
+        builder: (context, _) => CustomPaint(
+          size: Size.infinite,
+          painter: _StardustPainter(
+            stars: _stars,
+            progress: _controller.value,
+            color: widget.color,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Tek bir yıldız tozu noktasının sabit parametreleri.
+class _StarDot {
+  _StarDot({
+    required this.x,
+    required this.y,
+    required this.phase,
+    required this.radius,
+    required this.maxAlpha,
+  });
+
+  /// 0..1 normalize konum.
+  final double x;
+  final double y;
+
+  /// 0..1 parıltı faz kayması.
+  final double phase;
+  final double radius;
+  final double maxAlpha;
+
+  factory _StarDot.random(Random r) => _StarDot(
+    x: r.nextDouble(),
+    y: r.nextDouble(),
+    phase: r.nextDouble(),
+    radius: 0.8 + r.nextDouble() * 1.4,
+    maxAlpha: 0.5 + r.nextDouble() * 0.5,
+  );
+}
+
+class _StardustPainter extends CustomPainter {
+  _StardustPainter({
+    required this.stars,
+    required this.progress,
+    required this.color,
+  });
+
+  final List<_StarDot> stars;
+  final double progress;
+  final Color color;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final Paint paint = Paint();
+    for (final _StarDot star in stars) {
+      // Her nokta kendi fazıyla nefes alır: uçlarda söner, ortada parlar.
+      final double t = (progress + star.phase) % 1.0;
+      final double twinkle = sin(t * pi);
+      paint.color = color.withValues(alpha: star.maxAlpha * twinkle);
+      canvas.drawCircle(
+        Offset(size.width * star.x, size.height * star.y),
+        star.radius,
+        paint,
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(_StardustPainter oldDelegate) =>
+      oldDelegate.progress != progress || oldDelegate.color != color;
+}
+
 /// Kart bir şeride indiğinde merkezinden dışa saçılıp sönen zerreler.
 /// Kendi controller'ıyla bir kez oynar ve [onDone] ile kendini kaldırır.
 class LandingBurst extends StatefulWidget {

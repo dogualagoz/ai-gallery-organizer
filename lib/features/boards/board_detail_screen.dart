@@ -20,6 +20,7 @@ import '../../core/widgets/edge_swipe_back.dart';
 import '../../core/widgets/page_header.dart';
 import '../../core/widgets/screenshot_results_grid.dart';
 import '../analysis/providers/analysis_queue_provider.dart';
+import '../analysis/providers/recent_distribution_provider.dart';
 import '../gallery/data/screenshot_repository.dart';
 import '../gallery/providers/gallery_provider.dart';
 import 'providers/board_provider.dart';
@@ -58,6 +59,15 @@ class _BoardDetailScreenState extends ConsumerState<BoardDetailScreen> {
   void initState() {
     super.initState();
     _selectionMode = widget.startInSelection;
+    // Kategori panosu görüldü: anasayfadaki "yeni içerik" rozetini kaldır.
+    final ScreenshotCategory? category = widget.category;
+    if (category != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          ref.read(recentDistributionProvider.notifier).clear(category);
+        }
+      });
+    }
   }
 
   @override
