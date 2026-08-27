@@ -33,6 +33,9 @@ abstract final class AppSizes {
   static const double navBarHeight = 56;
   static const double navBarIcon = 24;
 
+  /// Navbar pilinin yanında yüzen ayrık dairesel Arama butonunun çapı.
+  static const double navBarActionSize = 56;
+
   /// Board kartlarındaki kapak şeridi yüksekliği referansı.
   static const double boardCoverMin = 72;
 
@@ -43,31 +46,31 @@ abstract final class AppSizes {
   static const double edgeSwipeTriggerDistance = 80;
 }
 
-/// Liquid glass (iOS 26) render ayarları — sayısal değerler burada, renk
-/// (glassColor) çağrı yerinde `colorScheme`'den üretilir.
+/// Yüzen buzlu-cam (glassmorphism) yüzey ayarları — navbar pili + ayrık Arama
+/// butonu. Apple News+ tab bar'ı referans: parlak, neredeyse opak buzlu beyaz
+/// kapsül; şeffaflık değil, blur + yumuşak gölge cam hissini verir.
 abstract final class AppGlass {
-  static const double thickness = 24;
-  // Blend (metaball kaynaşma) ile birlikte yüksek blur bozulma yapıyor; sıvı
-  // damla morph'unun temiz görünmesi için düşük tutulur (paket önerisi).
-  static const double blur = 6;
-  static const double lightIntensity = 0.9;
-  static const double refractiveIndex = 1.5;
-  static const double saturation = 1.5;
-  static const double ambientStrength = 0.15;
+  /// Arka planı bulanıklaştıran gauss sigma'sı (frosted yoğunluğu).
+  static const double blurSigma = 24;
 
-  /// Renk sapması (chromatic aberration) — cam kenarlarında hafif prizma.
-  static const double chromaticAberration = 0.03;
+  /// `scheme.surface` üzerine uygulanan cam dolgu opaklığı — açık tema. Yüksek =
+  /// parlak, neredeyse opak (referanstaki gibi), arkadan yalnızca ipucu sızar.
+  static const double fillAlpha = 0.72;
 
-  /// `scheme.surfaceBright` üzerine uygulanan cam dolgu opaklığı; parlak,
-  /// belirgin bir cam yüzeyi için yüksek tutulur (mat/soluk görünmesin diye).
-  static const double tintAlpha = 0.5;
+  /// Cam dolgu opaklığı — koyu tema (biraz daha şeffaf durabilir).
+  static const double fillAlphaDark = 0.6;
 
-  /// Navbar pili, ayrık aksiyon butonu ve kayan gösterge damlasının birbirine
-  /// yaklaşınca sıvı gibi kaynaşma (metaball blend) miktarı. Yüksek = daha akışkan.
-  static const double blend = 32;
+  /// Cam kenarındaki ince parlak çizginin opaklığı (açık / koyu).
+  static const double borderAlpha = 0.06;
+  static const double borderAlphaDark = 0.14;
 
-  /// Seçili sekme altındaki cam damla göstergesinin primary ton opaklığı.
-  static const double indicatorTint = 0.18;
+  /// "Havada durma" gölgesinin opaklığı (açık / koyu).
+  static const double shadowAlpha = 0.14;
+  static const double shadowAlphaDark = 0.44;
+
+  /// Seçili sekmeyi saran düz kapsülün primary ton opaklığı — inceltilmiş, iOS
+  /// tab bar'ında seçim vurgusu belli belirsizdir.
+  static const double indicatorTint = 0.12;
 }
 
 /// Standart opaklık değerleri.

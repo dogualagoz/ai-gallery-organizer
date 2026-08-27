@@ -58,13 +58,6 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
               )
               .toList();
 
-    // Arama bir sekme olduğu için altta yüzen navbar var; son sonuç satırı
-    // camın arkasında kalmasın diye ızgara altına çubuk kadar boşluk bırak.
-    final double bottomInset = MediaQuery.paddingOf(context).bottom;
-    final double navClearance =
-        AppSizes.navBarHeight +
-        (bottomInset > AppSpacing.md ? bottomInset : AppSpacing.md);
-
     return Column(
       children: [
         Padding(
@@ -88,15 +81,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
               ? _SearchMessage(text: l10n.searchPrompt, icon: Icons.search)
               : results.isEmpty
               ? _SearchMessage(text: l10n.searchEmpty, icon: Icons.search_off)
-              : ScreenshotResultsGrid(
-                  entries: results,
-                  padding: EdgeInsets.fromLTRB(
-                    AppSpacing.md,
-                    AppSpacing.md,
-                    AppSpacing.md,
-                    navClearance,
-                  ),
-                ),
+              : ScreenshotResultsGrid(entries: results),
         ),
       ],
     );

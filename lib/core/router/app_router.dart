@@ -2,7 +2,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:liquid_glass_renderer/liquid_glass_renderer.dart';
 
 import '../../features/analysis/milestone_screen.dart';
 import '../../features/detail/detail_screen.dart';
@@ -17,6 +16,7 @@ import '../../features/splash/splash_screen.dart';
 import '../constants/ui_constants.dart';
 import '../l10n/l10n_extension.dart';
 import '../services/preferences_service.dart';
+import '../widgets/glass_action_button.dart';
 import '../widgets/glass_nav_bar.dart';
 
 /// Rota yolları — string tekrarını önlemek için tek yerde.
@@ -98,22 +98,16 @@ final appRouterProvider = Provider<GoRouter>((ref) {
               ),
             ],
           ),
-          // Arama artık ayrık bir aksiyon değil, kendi navigation stack'i olan
-          // 4. sekme (iOS 26 tab bar deseni — Fotoğraflar/App Store gibi).
-          StatefulShellBranch(
-            routes: [
-              GoRoute(
-                path: AppRoutes.search,
-                builder: (context, state) => const SearchScreen(),
-              ),
-            ],
-          ),
         ],
       ),
       GoRoute(
         path: '/detail/:assetId',
         builder: (context, state) =>
             DetailScreen(assetId: state.pathParameters['assetId']!),
+      ),
+      GoRoute(
+        path: AppRoutes.search,
+        builder: (context, state) => const SearchScreen(),
       ),
       GoRoute(
         path: AppRoutes.recents,
@@ -143,8 +137,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
   );
 });
 
-/// Alt sekme çubuğunu barındıran ana kabuk: 4 sekmeli yüzen liquid glass pil
-/// (iOS 26 tab bar deseni — arama en sağda ayrı bir sekme).
+/// Alt sekme çubuğunu barındıran ana kabuk: 3 sekmeli yüzen buzlu-cam pil +
+/// sağında ayrık dairesel Arama butonu (Apple News+ tab bar deseni).
 class _MainShell extends StatelessWidget {
   const _MainShell({required this.navigationShell});
 
@@ -153,7 +147,6 @@ class _MainShell extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final double bottomInset = MediaQuery.paddingOf(context).bottom;
-    final ColorScheme scheme = Theme.of(context).colorScheme;
 
     return Scaffold(
       // İçerik camın arkasından aksın diye gövde navbar'ın altına uzatılır.
@@ -167,55 +160,43 @@ class _MainShell extends StatelessWidget {
           AppSpacing.lg,
           bottomInset > 0 ? bottomInset : AppSpacing.md,
         ),
-        // Pil, ayrık arama butonu ve seçim damlası tek bir LiquidGlassLayer +
-        // BlendGroup içinde: aynı cam ayarlarını paylaşır ve birbirine
-        // yaklaşınca gerçek iOS 26 liquid glass gibi sıvı şekilde kaynaşırlar.
-        child: LiquidGlassLayer(
-          settings: LiquidGlassSettings(
-            thickness: AppGlass.thickness,
-            blur: AppGlass.blur,
-            glassColor: scheme.surfaceBright.withValues(
-              alpha: AppGlass.tintAlpha,
-            ),
-            lightIntensity: AppGlass.lightIntensity,
-            refractiveIndex: AppGlass.refractiveIndex,
-            saturation: AppGlass.saturation,
-            ambientStrength: AppGlass.ambientStrength,
-            chromaticAberration: AppGlass.chromaticAberration,
-          ),
-          child: LiquidGlassBlendGroup(
-            blend: AppGlass.blend,
-            child: GlassNavBar(
-              selectedIndex: navigationShell.currentIndex,
-              onSelected: (index) => navigationShell.goBranch(
-                index,
-                // Aynı sekmeye tekrar basınca kök ekrana döner (iOS davranışı).
-                initialLocation: index == navigationShell.currentIndex,
+        // 3 sekmeli pil solda esner, ayrık dairesel Arama butonu sağda sabit.
+        child: Row(
+          children: [
+            Expanded(
+              child: GlassNavBar(
+                selectedIndex: navigationShell.currentIndex,
+                onSelected: (index) => navigationShell.goBranch(
+                  index,
+                  // Aynı sekmeye tekrar basınca kök ekrana döner (iOS davranışı).
+                  initialLocation: index == navigationShell.currentIndex,
+                ),
+                destinations: [
+                  GlassNavDestination(
+                    icon: Icons.home_outlined,
+                    selectedIcon: Icons.home_rounded,
+                    label: context.l10n.tabHome,
+                  ),
+                  GlassNavDestination(
+                    icon: Icons.swipe_outlined,
+                    selectedIcon: Icons.swipe,
+                    label: context.l10n.tabSort,
+                  ),
+                  GlassNavDestination(
+                    icon: Icons.settings_outlined,
+                    selectedIcon: Icons.settings_rounded,
+                    label: context.l10n.tabSettings,
+                  ),
+                ],
               ),
-              destinations: [
-                GlassNavDestination(
-                  icon: Icons.home_outlined,
-                  selectedIcon: Icons.home_rounded,
-                  label: context.l10n.tabHome,
-                ),
-                GlassNavDestination(
-                  icon: Icons.swipe_outlined,
-                  selectedIcon: Icons.swipe,
-                  label: context.l10n.tabSort,
-                ),
-                GlassNavDestination(
-                  icon: Icons.settings_outlined,
-                  selectedIcon: Icons.settings_rounded,
-                  label: context.l10n.tabSettings,
-                ),
-                GlassNavDestination(
-                  icon: Icons.search_outlined,
-                  selectedIcon: Icons.search_rounded,
-                  label: context.l10n.searchTitle,
-                ),
-              ],
             ),
-          ),
+            const SizedBox(width: AppSpacing.sm),
+            GlassActionButton(
+              icon: Icons.search,
+              tooltip: context.l10n.searchTitle,
+              onPressed: () => context.push(AppRoutes.search),
+            ),
+          ],
         ),
       ),
     );

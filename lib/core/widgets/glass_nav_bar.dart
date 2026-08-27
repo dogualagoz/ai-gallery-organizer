@@ -1,18 +1,18 @@
-// iOS 26 liquid glass yüzen alt gezinme çubuğu: seçili sekmenin altında, barla
-// aynı blend group'ta kaynaşan bir cam "damla" göstergesi kayar (metaball morph);
-// parmak sürüklemesini akıcı takip eder.
+// Yüzen buzlu-cam (glassmorphism) alt gezinme pili: parlak yarı-opak kapsül,
+// seçili sekmeyi camın üstünde duran düz tonlu bir kapsül gösterir, sekmeler
+// arası akıcı kayar ve parmakla yatay sürüklemeyi birebir takip eder.
 import 'package:flutter/material.dart';
-import 'package:liquid_glass_renderer/liquid_glass_renderer.dart';
 
 import '../constants/ui_constants.dart';
 import '../services/haptic_service.dart';
+import 'glass_panel.dart';
 
 /// Sekmeye basılıyken uygulanan çok hafif küçülme (dokunma geri bildirimi).
 /// iOS'ta dokunmada bileşen neredeyse yer değiştirmez — düşük tutulur.
 const double _navItemPressScale = 0.95;
 
 /// Kayan seçim göstergesinin yerleşme eğrisi: hafif "settle" yapar, easeOutBack
-/// gibi çizgi film taşması vermez (iOS 26 tab bar göstergesi hissi).
+/// gibi çizgi film taşması vermez (iOS tab bar göstergesi hissi).
 const Cubic _indicatorSettleCurve = Cubic(0.33, 1.12, 0.66, 1);
 
 /// [GlassNavBar] içindeki tek sekme tanımı.
@@ -28,10 +28,10 @@ class GlassNavDestination {
   final String label;
 }
 
-/// Yüzen buzlu-cam (glassmorphism) gezinme pili. Scaffold'a `extendBody: true`
-/// ile verilmelidir; içerik çubuğun arkasından akar ve [GlassSurface]'in
-/// BackdropFilter'ı onu bulanıklaştırarak frosted etkiyi görünür kılar.
-/// Dokunmanın yanı sıra parmakla yatay kaydırarak sekme değiştirmeyi de destekler.
+/// Yüzen buzlu-cam gezinme pili. Scaffold'a `extendBody: true` ile verilmelidir;
+/// içerik çubuğun arkasından akar ve [GlassPanel]'in BackdropFilter'ı onu
+/// bulanıklaştırarak frosted etkiyi görünür kılar. Dokunmanın yanı sıra parmakla
+/// yatay kaydırarak sekme değiştirmeyi de destekler.
 class GlassNavBar extends StatefulWidget {
   const GlassNavBar({
     super.key,
@@ -77,8 +77,8 @@ class _GlassNavBarState extends State<GlassNavBar> {
 
   @override
   Widget build(BuildContext context) {
-    // Dış boşluk artık paylaşılan tek bir inset olarak _MainShell'de
-    // uygulanıyor (pil + ayrık aksiyon butonu aynı hizada yüzsün diye).
+    // Dış boşluk paylaşılan tek bir inset olarak _MainShell'de uygulanıyor
+    // (pil + ayrık aksiyon butonu aynı hizada yüzsün diye).
     return LayoutBuilder(
       builder: (context, constraints) => GestureDetector(
         behavior: HitTestBehavior.opaque,
@@ -88,55 +88,37 @@ class _GlassNavBarState extends State<GlassNavBar> {
             _handleDragUpdate(details, constraints.maxWidth),
         onHorizontalDragEnd: (_) => _handleDragEnd(),
         onHorizontalDragCancel: () => setState(() => _dragPos = null),
-        child: _buildGlassPill(context),
+        child: _buildPill(context),
       ),
     );
   }
 
-  Widget _buildGlassPill(BuildContext context) {
+  Widget _buildPill(BuildContext context) {
     final ColorScheme scheme = Theme.of(context).colorScheme;
     final double radius = AppSizes.navBarHeight / 2;
     final int count = widget.destinations.length;
     final double pos = _dragPos ?? widget.selectedIndex.toDouble();
     final double x = count == 1 ? 0 : -1 + (2 * pos / (count - 1));
 
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(radius),
-        boxShadow: [
-          BoxShadow(
-            color: scheme.inverseSurface.withValues(alpha: 0.12),
-            blurRadius: 24,
-            offset: const Offset(0, 8),
-          ),
-        ],
-      ),
+    return GlassPanel(
+      borderRadius: BorderRadius.circular(radius),
       child: SizedBox(
         height: AppSizes.navBarHeight,
         child: Stack(
           children: [
-            // Bar zemini — tek cam şekli (blend group'tan miras cam ayarları).
-            Positioned.fill(
-              child: LiquidGlass.grouped(
-                shape: LiquidRoundedSuperellipse(borderRadius: radius),
-                child: const SizedBox.expand(),
-              ),
-            ),
-            // Kayan cam damla göstergesi: barla aynı grupta olduğu için
-            // metaball gibi kaynaşır → sekmeye kayarken sıvı morph efekti.
+            // Kayan seçim göstergesi — düz tonlu kapsül, camın üstünde.
             _dragPos == null
                 ? AnimatedAlign(
                     duration: AppDurations.medium,
                     curve: _indicatorSettleCurve,
                     alignment: Alignment(x, 0),
-                    child: _indicatorBlob(scheme, count),
+                    child: _indicator(scheme, count),
                   )
                 : Align(
                     // Sürüklerken parmağı anında izler (animasyonsuz).
                     alignment: Alignment(x, 0),
-                    child: _indicatorBlob(scheme, count),
+                    child: _indicator(scheme, count),
                   ),
-            // İkon + etiketler camın üstünde (refraksiyona girmez, okunur kalır).
             Row(
               children: [
                 for (int i = 0; i < count; i++)
@@ -158,10 +140,8 @@ class _GlassNavBarState extends State<GlassNavBar> {
     );
   }
 
-  /// Seçili sekmeyi saran, hafif primary tonlu cam "damla" (iOS 26 seçim
-  /// göstergesi). Bar içine dikeyde daha çok girintili bir squircle olarak
-  /// oturur; blend group sayesinde bara metaball gibi kaynaşır.
-  Widget _indicatorBlob(ColorScheme scheme, int count) {
+  /// Seçili sekmeyi saran düz, hafif primary tonlu kapsül (seçim göstergesi).
+  Widget _indicator(ColorScheme scheme, int count) {
     return FractionallySizedBox(
       widthFactor: 1 / count,
       heightFactor: 1,
@@ -170,13 +150,10 @@ class _GlassNavBarState extends State<GlassNavBar> {
           horizontal: AppSpacing.xs,
           vertical: AppSpacing.sm,
         ),
-        child: LiquidGlass.grouped(
-          shape: LiquidRoundedSuperellipse(borderRadius: AppRadius.lg),
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              color: scheme.primary.withValues(alpha: AppGlass.indicatorTint),
-              borderRadius: BorderRadius.circular(AppRadius.lg),
-            ),
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: scheme.primary.withValues(alpha: AppGlass.indicatorTint),
+            borderRadius: BorderRadius.circular(AppRadius.lg),
           ),
         ),
       ),
@@ -184,8 +161,8 @@ class _GlassNavBarState extends State<GlassNavBar> {
   }
 }
 
-/// İkon + etiketten oluşan tek sekme düğmesi. Basılıyken hafifçe küçülür,
-/// seçilince ikon kısa bir "pop" ile büyür — çubuğa canlılık katar.
+/// İkon + etiketten oluşan tek sekme düğmesi. Basılıyken hafifçe küçülür;
+/// seçilince renk primary olur ve ikon dolgulu türüne geçer.
 class _NavItem extends StatefulWidget {
   const _NavItem({
     required this.destination,
@@ -211,9 +188,10 @@ class _NavItemState extends State<_NavItem> {
   @override
   Widget build(BuildContext context) {
     final ColorScheme scheme = Theme.of(context).colorScheme;
+    // Referans tab bar yüksek kontrastlı: seçili değilken de neredeyse tam koyu.
     final Color color = widget.selected
         ? scheme.primary
-        : scheme.onSurfaceVariant;
+        : scheme.onSurface.withValues(alpha: 0.85);
 
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
@@ -232,8 +210,6 @@ class _NavItemState extends State<_NavItem> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // iOS 26'da seçili ikon büyümez; geri bildirim renk + dolgulu
-              // ikona geçiş + alttaki kayan gösterge ile verilir.
               AnimatedSwitcher(
                 duration: AppDurations.fast,
                 switchInCurve: Curves.easeOut,
