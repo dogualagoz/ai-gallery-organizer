@@ -17,7 +17,6 @@ import '../../features/splash/splash_screen.dart';
 import '../constants/ui_constants.dart';
 import '../l10n/l10n_extension.dart';
 import '../services/preferences_service.dart';
-import '../widgets/glass_action_button.dart';
 import '../widgets/glass_nav_bar.dart';
 
 /// Rota yolları — string tekrarını önlemek için tek yerde.
@@ -99,16 +98,22 @@ final appRouterProvider = Provider<GoRouter>((ref) {
               ),
             ],
           ),
+          // Arama artık ayrık bir aksiyon değil, kendi navigation stack'i olan
+          // 4. sekme (iOS 26 tab bar deseni — Fotoğraflar/App Store gibi).
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: AppRoutes.search,
+                builder: (context, state) => const SearchScreen(),
+              ),
+            ],
+          ),
         ],
       ),
       GoRoute(
         path: '/detail/:assetId',
         builder: (context, state) =>
             DetailScreen(assetId: state.pathParameters['assetId']!),
-      ),
-      GoRoute(
-        path: AppRoutes.search,
-        builder: (context, state) => const SearchScreen(),
       ),
       GoRoute(
         path: AppRoutes.recents,
@@ -138,8 +143,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
   );
 });
 
-/// Alt sekme çubuğunu barındıran ana kabuk: yüzen pil (3 sekme) + sağında
-/// ayrık dairesel Arama butonu, iOS 26 tarzı gezinme deseni.
+/// Alt sekme çubuğunu barındıran ana kabuk: 4 sekmeli yüzen liquid glass pil
+/// (iOS 26 tab bar deseni — arama en sağda ayrı bir sekme).
 class _MainShell extends StatelessWidget {
   const _MainShell({required this.navigationShell});
 
@@ -180,40 +185,33 @@ class _MainShell extends StatelessWidget {
           ),
           child: LiquidGlassBlendGroup(
             blend: AppGlass.blend,
-            child: Row(
-              children: [
-                Expanded(
-                  child: GlassNavBar(
-                    selectedIndex: navigationShell.currentIndex,
-                    onSelected: (index) => navigationShell.goBranch(
-                      index,
-                      // Aynı sekmeye tekrar basınca kök ekrana döner (iOS davranışı).
-                      initialLocation: index == navigationShell.currentIndex,
-                    ),
-                    destinations: [
-                      GlassNavDestination(
-                        icon: Icons.home_outlined,
-                        selectedIcon: Icons.home_rounded,
-                        label: context.l10n.tabHome,
-                      ),
-                      GlassNavDestination(
-                        icon: Icons.swipe_outlined,
-                        selectedIcon: Icons.swipe,
-                        label: context.l10n.tabSort,
-                      ),
-                      GlassNavDestination(
-                        icon: Icons.settings_outlined,
-                        selectedIcon: Icons.settings_rounded,
-                        label: context.l10n.tabSettings,
-                      ),
-                    ],
-                  ),
+            child: GlassNavBar(
+              selectedIndex: navigationShell.currentIndex,
+              onSelected: (index) => navigationShell.goBranch(
+                index,
+                // Aynı sekmeye tekrar basınca kök ekrana döner (iOS davranışı).
+                initialLocation: index == navigationShell.currentIndex,
+              ),
+              destinations: [
+                GlassNavDestination(
+                  icon: Icons.home_outlined,
+                  selectedIcon: Icons.home_rounded,
+                  label: context.l10n.tabHome,
                 ),
-                const SizedBox(width: AppSpacing.sm),
-                GlassActionButton(
-                  icon: Icons.search,
-                  tooltip: context.l10n.searchTitle,
-                  onPressed: () => context.push(AppRoutes.search),
+                GlassNavDestination(
+                  icon: Icons.swipe_outlined,
+                  selectedIcon: Icons.swipe,
+                  label: context.l10n.tabSort,
+                ),
+                GlassNavDestination(
+                  icon: Icons.settings_outlined,
+                  selectedIcon: Icons.settings_rounded,
+                  label: context.l10n.tabSettings,
+                ),
+                GlassNavDestination(
+                  icon: Icons.search_outlined,
+                  selectedIcon: Icons.search_rounded,
+                  label: context.l10n.searchTitle,
                 ),
               ],
             ),

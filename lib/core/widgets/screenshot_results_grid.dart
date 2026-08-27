@@ -10,16 +10,20 @@ import '../models/screenshot_entry.dart';
 import '../router/app_router.dart';
 
 class ScreenshotResultsGrid extends ConsumerWidget {
-  const ScreenshotResultsGrid({super.key, required this.entries});
+  const ScreenshotResultsGrid({super.key, required this.entries, this.padding});
 
   final List<ScreenshotEntry> entries;
+
+  /// Izgara iç boşluğu. Verilmezse her yönden [AppSpacing.md]. Yüzen navbar'ın
+  /// altında kalan ekranlar (arama) alt boşluğu buradan büyütür.
+  final EdgeInsetsGeometry? padding;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final ScreenshotRepository repo = ref.watch(screenshotRepositoryProvider);
 
     return GridView.builder(
-      padding: const EdgeInsets.all(AppSpacing.md),
+      padding: padding ?? const EdgeInsets.all(AppSpacing.md),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 3,
         mainAxisSpacing: AppSpacing.xs,

@@ -7,11 +7,13 @@ import 'package:liquid_glass_renderer/liquid_glass_renderer.dart';
 import '../constants/ui_constants.dart';
 import '../services/haptic_service.dart';
 
-/// Sekmeye basılıyken uygulanan hafif küçülme (dokunma geri bildirimi).
-const double _navItemPressScale = 0.9;
+/// Sekmeye basılıyken uygulanan çok hafif küçülme (dokunma geri bildirimi).
+/// iOS'ta dokunmada bileşen neredeyse yer değiştirmez — düşük tutulur.
+const double _navItemPressScale = 0.95;
 
-/// Seçili sekme ikonunun kısa "pop" büyümesi.
-const double _navItemSelectedScale = 1.14;
+/// Kayan seçim göstergesinin yerleşme eğrisi: hafif "settle" yapar, easeOutBack
+/// gibi çizgi film taşması vermez (iOS 26 tab bar göstergesi hissi).
+const Cubic _indicatorSettleCurve = Cubic(0.33, 1.12, 0.66, 1);
 
 /// [GlassNavBar] içindeki tek sekme tanımı.
 class GlassNavDestination {
@@ -125,14 +127,14 @@ class _GlassNavBarState extends State<GlassNavBar> {
             _dragPos == null
                 ? AnimatedAlign(
                     duration: AppDurations.medium,
-                    curve: Curves.easeOutBack,
+                    curve: _indicatorSettleCurve,
                     alignment: Alignment(x, 0),
-                    child: _indicatorBlob(scheme, count, radius),
+                    child: _indicatorBlob(scheme, count),
                   )
                 : Align(
                     // Sürüklerken parmağı anında izler (animasyonsuz).
                     alignment: Alignment(x, 0),
-                    child: _indicatorBlob(scheme, count, radius),
+                    child: _indicatorBlob(scheme, count),
                   ),
             // İkon + etiketler camın üstünde (refraksiyona girmez, okunur kalır).
             Row(
@@ -156,19 +158,24 @@ class _GlassNavBarState extends State<GlassNavBar> {
     );
   }
 
-  /// Tek sekme genişliğinde, hafif primary tonlu cam damla (seçim göstergesi).
-  Widget _indicatorBlob(ColorScheme scheme, int count, double radius) {
+  /// Seçili sekmeyi saran, hafif primary tonlu cam "damla" (iOS 26 seçim
+  /// göstergesi). Bar içine dikeyde daha çok girintili bir squircle olarak
+  /// oturur; blend group sayesinde bara metaball gibi kaynaşır.
+  Widget _indicatorBlob(ColorScheme scheme, int count) {
     return FractionallySizedBox(
       widthFactor: 1 / count,
       heightFactor: 1,
       child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.xs),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.xs,
+          vertical: AppSpacing.sm,
+        ),
         child: LiquidGlass.grouped(
-          shape: LiquidRoundedSuperellipse(borderRadius: radius),
+          shape: LiquidRoundedSuperellipse(borderRadius: AppRadius.lg),
           child: DecoratedBox(
             decoration: BoxDecoration(
               color: scheme.primary.withValues(alpha: AppGlass.indicatorTint),
-              borderRadius: BorderRadius.circular(radius),
+              borderRadius: BorderRadius.circular(AppRadius.lg),
             ),
           ),
         ),
@@ -225,22 +232,19 @@ class _NavItemState extends State<_NavItem> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              AnimatedScale(
-                scale: widget.selected ? _navItemSelectedScale : 1.0,
-                duration: AppDurations.medium,
-                curve: Curves.easeOutBack,
-                child: AnimatedSwitcher(
-                  duration: AppDurations.fast,
-                  switchInCurve: Curves.easeOut,
-                  switchOutCurve: Curves.easeIn,
-                  child: Icon(
-                    widget.selected
-                        ? widget.destination.selectedIcon
-                        : widget.destination.icon,
-                    key: ValueKey(widget.selected),
-                    color: color,
-                    size: AppSizes.navBarIcon,
-                  ),
+              // iOS 26'da seçili ikon büyümez; geri bildirim renk + dolgulu
+              // ikona geçiş + alttaki kayan gösterge ile verilir.
+              AnimatedSwitcher(
+                duration: AppDurations.fast,
+                switchInCurve: Curves.easeOut,
+                switchOutCurve: Curves.easeIn,
+                child: Icon(
+                  widget.selected
+                      ? widget.destination.selectedIcon
+                      : widget.destination.icon,
+                  key: ValueKey(widget.selected),
+                  color: color,
+                  size: AppSizes.navBarIcon,
                 ),
               ),
               const SizedBox(height: 2),
