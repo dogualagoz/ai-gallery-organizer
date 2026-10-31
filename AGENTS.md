@@ -17,7 +17,7 @@ iOS-only Flutter uygulaması: galerideki screenshot'ları Gemini ile kategorize 
 ```
 flutter analyze            # her blok sonunda temiz olmalı
 flutter test
-flutter run -d "iPhone 17" # iOS 26.4 simülatörü
+flutter run -d "iPhone 17" # iOS 27.2 simülatörü (Xcode 27)
 dart run build_runner build --delete-conflicting-outputs  # hive adapter codegen
 ```
 
