@@ -16,6 +16,7 @@ import '../../../core/widgets/pressable.dart';
 import '../../../core/widgets/reorderable_tile_grid.dart';
 import '../../../core/widgets/surface_card.dart';
 import '../../gallery/data/screenshot_repository.dart';
+import '../../paywall/open_paywall.dart';
 import '../providers/board_provider.dart';
 import 'board_context_menu.dart';
 import 'board_covers.dart';
@@ -92,7 +93,7 @@ class _NewBoardTile extends ConsumerWidget {
     return Pressable(
       onPressed: () => canCreate
           ? _showCreateDialog(context, ref)
-          : context.push(AppRoutes.paywall),
+          : openPaywall(context),
       child: SurfaceCard(
         padding: const EdgeInsets.all(AppSpacing.md),
         child: Column(

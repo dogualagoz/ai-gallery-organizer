@@ -23,7 +23,7 @@ import '../../boards/widgets/custom_boards_grid.dart';
 import '../../boards/widgets/system_boards_grid.dart';
 import '../../gallery/data/screenshot_repository.dart';
 import '../../gallery/providers/gallery_provider.dart';
-import '../../gallery/widgets/screenshot_grid_tile.dart';
+import '../../gallery/widgets/screenshot_grid.dart';
 
 /// Bölüm başlığı: Title 3 metin + sağda opsiyonel metin eylemi.
 class LibrarySectionHeader extends StatelessWidget {
@@ -187,41 +187,19 @@ class LibraryRecentsHeader extends StatelessWidget {
   }
 }
 
-/// Son eklenenlerin iki satırlık önizleme ızgarası.
-class LibraryRecentsGrid extends ConsumerWidget {
+/// Son eklenenlerin iki satırlık önizleme ızgarası (kart içi stil).
+class LibraryRecentsGrid extends StatelessWidget {
   const LibraryRecentsGrid({super.key, required this.entries});
 
   final List<ScreenshotEntry> entries;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final ScreenshotRepository repo = ref.watch(screenshotRepositoryProvider);
-    final List<ScreenshotEntry> preview = entries
-        .take(kLibraryRecentsLimit)
-        .toList();
+  Widget build(BuildContext context) {
     return SliverPadding(
-      padding: const EdgeInsets.fromLTRB(
-        AppSpacing.md,
-        AppSpacing.xs,
-        AppSpacing.md,
-        0,
-      ),
-      sliver: SliverGrid.builder(
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: kScreenshotGridColumns,
-          mainAxisSpacing: AppSpacing.xs,
-          crossAxisSpacing: AppSpacing.xs,
-          childAspectRatio: kScreenshotTileAspect,
-        ),
-        itemCount: preview.length,
-        itemBuilder: (context, index) {
-          final ScreenshotEntry entry = preview[index];
-          return ScreenshotGridTile(
-            entry: entry,
-            asset: repo.assetFor(entry.assetId),
-            onTap: () => context.push(AppRoutes.detail(entry.assetId)),
-          );
-        },
+      padding: const EdgeInsets.only(top: AppSpacing.xs),
+      sliver: ScreenshotGrid(
+        entries: entries.take(kLibraryRecentsLimit).toList(),
+        inset: true,
       ),
     );
   }

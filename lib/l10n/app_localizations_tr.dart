@@ -475,9 +475,6 @@ class AppLocalizationsTr extends AppLocalizations {
   }
 
   @override
-  String get bulkDeleteAction => 'Seçilenleri sil';
-
-  @override
   String get bulkDeleteFailed => 'Seçilenler silinemedi. Lütfen tekrar dene.';
 
   @override
@@ -803,4 +800,53 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get analysisGetMoreAction => 'Daha Fazla Al';
+
+  @override
+  String get shareAction => 'Paylaş';
+
+  @override
+  String get deleteAction => 'Sil';
+
+  @override
+  String get undoAction => 'Geri Al';
+
+  @override
+  String get undoFailed => 'Geri alınamadı. Lütfen tekrar dene.';
+
+  @override
+  String get moveFailed => 'Taşınamadı. Lütfen tekrar dene.';
+
+  @override
+  String movedToast(String target) {
+    return 'Taşındı: $target';
+  }
+
+  @override
+  String get selectAllAction => 'Tümünü Seç';
+
+  @override
+  String get deselectAllAction => 'Seçimi Kaldır';
+
+  @override
+  String get selectItemsTitle => 'Öğe Seç';
+
+  @override
+  String get moreActionsLabel => 'Diğer işlemler';
+
+  @override
+  String get pendingDotLegend => 'Noktalı olanlar henüz analiz edilmedi.';
+
+  @override
+  String get screenshotTileLabel => 'Ekran görüntüsü';
+
+  @override
+  String get screenshotPendingLabel => 'Ekran görüntüsü, analiz bekliyor';
+
+  @override
+  String get categoryEmptyBody =>
+      'Analiz edilen ekran görüntüleri buraya kendiliğinden yerleşir.';
+
+  @override
+  String get boardEmptyBody =>
+      'Bir ekran görüntüsüne basılı tut ve Taşı ile bu panoya ekle.';
 }

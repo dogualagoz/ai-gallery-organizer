@@ -3,6 +3,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
+import '../constants/app_icons.dart';
 import '../constants/ui_constants.dart';
 import '../services/haptic_service.dart';
 
@@ -122,17 +123,21 @@ class NavBarButton extends StatelessWidget {
     required IconData this.icon,
     required this.label,
     required this.onPressed,
-  });
+  }) : locked = false;
 
   const NavBarButton.text({
     super.key,
     required this.label,
     required this.onPressed,
+    this.locked = false,
   }) : icon = null;
 
   final IconData? icon;
   final String label;
   final VoidCallback? onPressed;
+
+  /// true ise metnin önünde Pro kilidi glifi durur (dokununca paywall açılır).
+  final bool locked;
 
   @override
   Widget build(BuildContext context) {
@@ -141,7 +146,18 @@ class NavBarButton extends StatelessWidget {
       padding: EdgeInsets.zero,
       minimumSize: const Size.square(kMinInteractiveDimensionCupertino),
       onPressed: onPressed,
-      child: glyph == null ? Text(label) : Icon(glyph, semanticLabel: label),
+      child: glyph != null
+          ? Icon(glyph, semanticLabel: label)
+          : locked
+          ? Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(AppIcons.lock, size: AppSizes.lockGlyph),
+                const SizedBox(width: AppSpacing.xs),
+                Text(label),
+              ],
+            )
+          : Text(label),
     );
   }
 }

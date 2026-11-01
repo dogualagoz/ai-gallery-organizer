@@ -476,9 +476,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get bulkDeleteAction => 'Delete selected';
-
-  @override
   String get bulkDeleteFailed =>
       'Couldn\'t delete the selected screenshots. Please try again.';
 
@@ -804,4 +801,53 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get analysisGetMoreAction => 'Get More';
+
+  @override
+  String get shareAction => 'Share';
+
+  @override
+  String get deleteAction => 'Delete';
+
+  @override
+  String get undoAction => 'Undo';
+
+  @override
+  String get undoFailed => 'Couldn\'t undo. Please try again.';
+
+  @override
+  String get moveFailed => 'Couldn\'t move. Please try again.';
+
+  @override
+  String movedToast(String target) {
+    return 'Moved to $target';
+  }
+
+  @override
+  String get selectAllAction => 'Select All';
+
+  @override
+  String get deselectAllAction => 'Deselect All';
+
+  @override
+  String get selectItemsTitle => 'Select Items';
+
+  @override
+  String get moreActionsLabel => 'More actions';
+
+  @override
+  String get pendingDotLegend => 'Items with a dot haven\'t been analyzed yet.';
+
+  @override
+  String get screenshotTileLabel => 'Screenshot';
+
+  @override
+  String get screenshotPendingLabel => 'Screenshot, waiting for analysis';
+
+  @override
+  String get categoryEmptyBody =>
+      'Analyzed screenshots land here automatically.';
+
+  @override
+  String get boardEmptyBody =>
+      'Touch and hold a screenshot, then choose Move to add it to this board.';
 }

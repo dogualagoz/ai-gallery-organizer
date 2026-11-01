@@ -207,8 +207,39 @@ class ScreenshotRepository {
     await _box.put(assetId, entry);
   }
 
+  /// Kaydın taşıma öncesi yerleşimini birebir geri yazar ("Geri al"). Taşıma
+  /// sırasında kaydedilen kişiselleşme sinyali geri alınmaz; tek düzeltme
+  /// öneri eşiğini tek başına aşamaz.
+  Future<void> restorePlacement(ScreenshotPlacement placement) async {
+    final ScreenshotEntry? entry = _box.get(placement.assetId);
+    if (entry == null) return;
+    entry
+      ..category = placement.category
+      ..aiCategory = placement.aiCategory
+      ..analyzedAt = placement.analyzedAt
+      ..boardId = placement.boardId;
+    await _box.put(placement.assetId, entry);
+  }
+
   /// Metadata kaydını siler (cihazdan silme photo_manager editor ile ayrıca yapılır).
   Future<void> removeEntry(String assetId) => _box.delete(assetId);
 
   ScreenshotEntry? entryFor(String assetId) => _box.get(assetId);
+}
+
+/// Bir kaydın kategori/pano yerleşiminin anlık görüntüsü; taşımayı geri almak
+/// için taşımadan önce alınır.
+class ScreenshotPlacement {
+  ScreenshotPlacement.of(ScreenshotEntry entry)
+    : assetId = entry.assetId,
+      category = entry.category,
+      aiCategory = entry.aiCategory,
+      analyzedAt = entry.analyzedAt,
+      boardId = entry.boardId;
+
+  final String assetId;
+  final ScreenshotCategory? category;
+  final ScreenshotCategory? aiCategory;
+  final DateTime? analyzedAt;
+  final String? boardId;
 }

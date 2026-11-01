@@ -914,12 +914,6 @@ abstract class AppLocalizations {
   /// **'{count} selected'**
   String bulkSelectionCount(int count);
 
-  /// No description provided for @bulkDeleteAction.
-  ///
-  /// In en, this message translates to:
-  /// **'Delete selected'**
-  String get bulkDeleteAction;
-
   /// No description provided for @bulkDeleteFailed.
   ///
   /// In en, this message translates to:
@@ -1471,6 +1465,96 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Get More'**
   String get analysisGetMoreAction;
+
+  /// No description provided for @shareAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Share'**
+  String get shareAction;
+
+  /// No description provided for @deleteAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get deleteAction;
+
+  /// No description provided for @undoAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Undo'**
+  String get undoAction;
+
+  /// No description provided for @undoFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t undo. Please try again.'**
+  String get undoFailed;
+
+  /// No description provided for @moveFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t move. Please try again.'**
+  String get moveFailed;
+
+  /// No description provided for @movedToast.
+  ///
+  /// In en, this message translates to:
+  /// **'Moved to {target}'**
+  String movedToast(String target);
+
+  /// No description provided for @selectAllAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Select All'**
+  String get selectAllAction;
+
+  /// No description provided for @deselectAllAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Deselect All'**
+  String get deselectAllAction;
+
+  /// No description provided for @selectItemsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Items'**
+  String get selectItemsTitle;
+
+  /// No description provided for @moreActionsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'More actions'**
+  String get moreActionsLabel;
+
+  /// No description provided for @pendingDotLegend.
+  ///
+  /// In en, this message translates to:
+  /// **'Items with a dot haven\'t been analyzed yet.'**
+  String get pendingDotLegend;
+
+  /// No description provided for @screenshotTileLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Screenshot'**
+  String get screenshotTileLabel;
+
+  /// No description provided for @screenshotPendingLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Screenshot, waiting for analysis'**
+  String get screenshotPendingLabel;
+
+  /// No description provided for @categoryEmptyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Analyzed screenshots land here automatically.'**
+  String get categoryEmptyBody;
+
+  /// No description provided for @boardEmptyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Touch and hold a screenshot, then choose Move to add it to this board.'**
+  String get boardEmptyBody;
 }
 
 class _AppLocalizationsDelegate

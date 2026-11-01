@@ -1,48 +1,53 @@
-// Tek board/kategori detayı: filtrelenmiş screenshot ızgarası + (özel board'da)
-// yönetim aksiyonları + kategori bazlı toplu silme (Pro).
+// Kategori/pano detayı: büyük başlıklı sıkı ızgara, başlıkta "Seç" ve "…"
+// menüsü; seçim modunda sekme çubuğunun yerini cam araç çubuğu alır.
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:photo_manager/photo_manager.dart';
-import 'package:photo_manager_image_provider/photo_manager_image_provider.dart';
 
+import '../../core/constants/app_icons.dart';
 import '../../core/constants/ui_constants.dart';
 import '../../core/l10n/category_labels.dart';
 import '../../core/l10n/l10n_extension.dart';
 import '../../core/models/board.dart';
 import '../../core/models/screenshot_category.dart';
 import '../../core/models/screenshot_entry.dart';
-import '../../core/router/app_router.dart';
+import '../../core/router/tab_bar_visibility.dart';
 import '../../core/services/category_names_service.dart';
 import '../../core/services/entitlement_service.dart';
-import '../../core/widgets/app_dialogs.dart';
-import '../../core/widgets/page_header.dart';
-import '../../core/widgets/screenshot_results_grid.dart';
-import '../../core/widgets/status_toast.dart';
-import '../analysis/providers/analysis_queue_provider.dart';
+import '../../core/widgets/app_menus.dart';
+import '../../core/widgets/app_nav_scaffold.dart';
+import '../../core/widgets/empty_state_view.dart';
+import '../../core/widgets/selection_toolbar.dart';
+import '../../core/widgets/spring_visibility.dart';
 import '../analysis/providers/recent_distribution_provider.dart';
-import '../gallery/data/screenshot_repository.dart';
 import '../gallery/providers/gallery_provider.dart';
+import '../gallery/screenshot_actions.dart';
+import '../gallery/widgets/screenshot_grid.dart';
+import '../paywall/open_paywall.dart';
 import 'providers/board_provider.dart';
+import 'widgets/board_edit_actions.dart';
 
+/// Bir sistem kategorisinin ya da kullanıcı panosunun ekran görüntüleri;
+/// toplu işlem (seç → paylaş/taşı/sil) Pro'ya bağlıdır.
 class BoardDetailScreen extends ConsumerStatefulWidget {
   const BoardDetailScreen.category({
     super.key,
-    required this.category,
+    required ScreenshotCategory this.category,
     this.startInSelection = false,
   }) : boardId = null;
 
   const BoardDetailScreen.custom({
     super.key,
-    required this.boardId,
+    required String this.boardId,
     this.startInSelection = false,
   }) : category = null;
 
   final ScreenshotCategory? category;
   final String? boardId;
 
-  /// Ekran açılır açılmaz seçim moduna girsin mi (düzenleme aksiyon sayfasından
-  /// "Fotoğrafları seç" ile gelindiğinde true).
+  /// Ekran doğrudan seçim modunda açılsın mı (bağlam menüsündeki "Seç").
   final bool startInSelection;
 
   @override
@@ -50,571 +55,297 @@ class BoardDetailScreen extends ConsumerStatefulWidget {
 }
 
 class _BoardDetailScreenState extends ConsumerState<BoardDetailScreen> {
-  bool _selectionMode = false;
+  /// dispose'da ref kullanılamadığı için baştan alınır.
+  late final TabBarHiddenNotifier _tabBar;
+
   final Set<String> _selectedIds = {};
-  bool _bulkDeleting = false;
+  bool _selecting = false;
+
+  /// Paylaşım dosyaları hazırlanırken ya da silme onayı beklenirken true.
+  bool _busy = false;
 
   @override
   void initState() {
     super.initState();
-    _selectionMode = widget.startInSelection;
-    // Kategori panosu görüldü: anasayfadaki "yeni içerik" rozetini kaldır.
+    _tabBar = ref.read(tabBarHiddenProvider.notifier);
+    if (widget.startInSelection &&
+        ref.read(entitlementProvider).canBulkDelete) {
+      _selecting = true;
+      // initState ağaç kurulurken çalışır; provider bir sonraki mikro görevde
+      // değişir.
+      scheduleMicrotask(_syncTabBar);
+    }
     final ScreenshotCategory? category = widget.category;
     if (category != null) {
+      // Kategori görüldü: Kütüphane'deki "+N" rozeti kalkar.
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) {
-          ref.read(recentDistributionProvider.notifier).clear(category);
-        }
+        if (!mounted) return;
+        ref.read(recentDistributionProvider.notifier).clear(category);
       });
     }
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Dal arka plana geçerse (programatik sekme geçişi) seçim kapanır; gizli
+    // sekme çubuğu başka sekmede asılı kalmasın.
+    if (_selecting && !TickerMode.valuesOf(context).enabled) {
+      scheduleMicrotask(() {
+        if (mounted) _setSelecting(false);
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    // Ağaç kilitliyken provider değişmez; bırakma sonraki mikro göreve kalır.
+    final TabBarHiddenNotifier tabBar = _tabBar;
+    final Object owner = this;
+    scheduleMicrotask(() => tabBar.release(owner));
+    super.dispose();
+  }
+
+  void _syncTabBar() {
+    if (!mounted) return;
+    if (_selecting) {
+      _tabBar.hide(this);
+    } else {
+      _tabBar.release(this);
+    }
+  }
+
+  void _setSelecting(bool selecting) {
+    setState(() {
+      _selecting = selecting;
+      _selectedIds.clear();
+    });
+    _syncTabBar();
+  }
+
+  void _toggle(String assetId) {
+    setState(() {
+      if (!_selectedIds.remove(assetId)) _selectedIds.add(assetId);
+    });
+  }
+
+  /// Panoyu geride bırakan eylemlerden sonra (pano silindi, yeniden analiz
+  /// başladı) Kütüphane'ye döner; analiz modülü orada oynar.
+  void _leave() {
+    if (mounted) context.pop();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final List<ScreenshotEntry> entries =
-        ref.watch(galleryProvider).value ?? const [];
-
-    final List<ScreenshotEntry> filtered = widget.category != null
-        ? entries.where((entry) => entry.category == widget.category).toList()
-        : entries.where((entry) => entry.boardId == widget.boardId).toList();
-
+    final ScreenshotCategory? category = widget.category;
+    final List<ScreenshotEntry> entries = [
+      for (final ScreenshotEntry entry
+          in ref.watch(galleryProvider).value ?? const <ScreenshotEntry>[])
+        if (category != null
+            ? entry.category == category
+            : entry.boardId == widget.boardId)
+          entry,
+    ];
     final Board? board = widget.boardId == null
         ? null
-        : ref
-              .watch(boardsProvider)
-              .value
-              ?.firstWhereOrNull((b) => b.id == widget.boardId);
-
-    final Map<int, String> categoryNames = ref.watch(categoryNamesProvider);
-    final String title = widget.category != null
-        ? widget.category!.displayName(l10n, categoryNames)
+        : (ref.watch(boardsProvider).value ?? const <Board>[])
+              .where((candidate) => candidate.id == widget.boardId)
+              .firstOrNull;
+    final String title = category != null
+        ? category.displayName(l10n, ref.watch(categoryNamesProvider))
         : (board?.name ?? l10n.boardsTitle);
-
-    final bool canBulkDelete = ref.watch(entitlementProvider).canBulkDelete;
+    // Silinen ya da başka yere taşınanlar seçimden kendiliğinden düşer.
+    final List<String> selected = [
+      for (final ScreenshotEntry entry in entries)
+        if (_selectedIds.contains(entry.assetId)) entry.assetId,
+    ];
 
     return PopScope(
-      // Seçim modunda geri jesti/tuşu önce seçimi kapatır, ekrandan çıkmaz.
-      canPop: !_selectionMode,
+      // Seçim modunda geri jesti önce seçimi kapatır, ekrandan çıkmaz.
+      canPop: !_selecting,
       onPopInvokedWithResult: (didPop, _) {
-        if (!didPop) _exitSelection();
+        if (!didPop) _setSelecting(false);
       },
-      child: Scaffold(
-        body: Column(
-          children: [
-            _buildHeader(context, title, filtered, board, canBulkDelete),
-            Expanded(
-              child: filtered.isEmpty
-                  ? _EmptyBoard(text: l10n.boardDetailEmpty)
-                  : _selectionMode
-                  ? _SelectableGrid(
-                      entries: filtered,
-                      selectedIds: _selectedIds,
-                      onToggle: (assetId) => setState(() {
-                        if (!_selectedIds.remove(assetId)) {
-                          _selectedIds.add(assetId);
-                        }
-                      }),
-                    )
-                  : ScreenshotResultsGrid(entries: filtered),
-            ),
-          ],
-        ),
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          AppNavScaffold(
+            title: title,
+            leading: _selecting ? _selectAllButton(entries, selected) : null,
+            trailing: _selecting
+                ? NavBarButton.text(
+                    label: l10n.cancelAction,
+                    onPressed: () => _setSelecting(false),
+                  )
+                : _trailing(entries, board),
+            slivers: _slivers(entries),
+          ),
+          _toolbar(selected),
+        ],
       ),
     );
   }
 
-  /// AppBar yerine sayfaya gömülü header: geri chevron + başlık + aksiyonlar.
-  /// Seçim modunda kapat + "N seçildi" + Taşı/Sil varyantına geçer.
-  Widget _buildHeader(
-    BuildContext context,
-    String title,
-    List<ScreenshotEntry> filtered,
-    Board? board,
-    bool canBulkDelete,
-  ) {
+  /// Normal mod: "Seç" (Pro değilse kilitli) + "…" menüsü.
+  Widget _trailing(List<ScreenshotEntry> entries, Board? board) {
     final l10n = context.l10n;
-    if (_selectionMode) {
-      return PageHeader(
-        title: l10n.bulkSelectionCount(_selectedIds.length),
-        leading: IconButton(
-          icon: const Icon(Icons.close),
-          onPressed: _exitSelection,
-        ),
-        actions: [
-          IconButton(
-            tooltip: l10n.moveAction,
-            icon: const Icon(Icons.drive_file_move_outline),
-            onPressed: _selectedIds.isEmpty || _bulkDeleting
-                ? null
-                : _moveSelected,
+    final bool canSelect = ref.watch(entitlementProvider).canBulkDelete;
+    // Pano henüz yüklenmediyse ya da silindiyse menü gösterilmez.
+    final bool hasTarget = widget.category != null || board != null;
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (entries.isNotEmpty)
+          NavBarButton.text(
+            label: l10n.bulkSelectAction,
+            locked: !canSelect,
+            onPressed: canSelect
+                ? () => _setSelecting(true)
+                : () => openPaywall(context),
           ),
-          IconButton(
-            tooltip: l10n.bulkDeleteAction,
-            icon: _bulkDeleting
-                ? const SizedBox.square(
-                    dimension: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : const Icon(Icons.delete_outline),
-            onPressed: _selectedIds.isEmpty || _bulkDeleting
-                ? null
-                : _bulkDelete,
+        if (hasTarget) ...[
+          const SizedBox(width: AppSpacing.sm),
+          AppMoreMenuButton(
+            label: l10n.moreActionsLabel,
+            actions: boardMenuActions(
+              context,
+              ref,
+              isEmpty: entries.isEmpty,
+              board: board,
+              category: widget.category,
+              onLeave: _leave,
+            ),
           ),
         ],
-      );
-    }
-    return PageHeader(
-      title: title,
-      leading: IconButton(
-        icon: const Icon(Icons.arrow_back_ios_new, size: 20),
-        onPressed: () => Navigator.maybePop(context),
-      ),
-      actions: [
-        if (widget.category != null && filtered.isNotEmpty)
-          IconButton(
-            tooltip: l10n.categoryReanalyzeAction,
-            icon: const Icon(Icons.auto_awesome_outlined),
-            onPressed: () => _reanalyzeCategory(filtered),
-          ),
-        if (filtered.isNotEmpty)
-          IconButton(
-            tooltip: l10n.bulkSelectAction,
-            icon: const Icon(Icons.checklist_outlined),
-            onPressed: () => canBulkDelete
-                ? setState(() => _selectionMode = true)
-                : context.push(AppRoutes.paywall),
-          ),
-        if (widget.boardId != null && board != null)
-          IconButton(
-            tooltip: l10n.boardsRenameAction,
-            icon: const Icon(Icons.edit_outlined),
-            onPressed: () => _showRenameDialog(context, board),
-          ),
-        if (widget.boardId != null)
-          IconButton(
-            tooltip: l10n.boardsDeleteAction,
-            icon: const Icon(Icons.delete_outline),
-            onPressed: () => _showDeleteConfirm(context, widget.boardId!),
-          ),
-        if (widget.category != null)
-          IconButton(
-            icon: const Icon(Icons.more_horiz),
-            onPressed: () => _showCategoryActions(filtered),
-          ),
       ],
     );
   }
 
-  /// Kategori "..." aksiyonları: eski açılır menü yerine iOS-tarzı aksiyon sheet.
-  Future<void> _showCategoryActions(List<ScreenshotEntry> filtered) async {
+  /// Seçim modu: hepsi seçiliyse "Seçimi Kaldır", değilse "Tümünü Seç".
+  Widget _selectAllButton(
+    List<ScreenshotEntry> entries,
+    List<String> selected,
+  ) {
     final l10n = context.l10n;
-    final _CategoryAction? action = await showActionSheet<_CategoryAction>(
-      context,
-      actions: [
-        SheetAction(
-          label: l10n.categoryRenameAction,
-          value: _CategoryAction.rename,
-        ),
-        if (filtered.isNotEmpty)
-          SheetAction(
-            label: l10n.categoryDeleteAllAction,
-            value: _CategoryAction.deleteAll,
-            destructive: true,
+    final bool allSelected =
+        entries.isNotEmpty && selected.length == entries.length;
+    return NavBarButton.text(
+      label: allSelected ? l10n.deselectAllAction : l10n.selectAllAction,
+      onPressed: () => setState(() {
+        _selectedIds.clear();
+        if (!allSelected) {
+          _selectedIds.addAll(entries.map((entry) => entry.assetId));
+        }
+      }),
+    );
+  }
+
+  List<Widget> _slivers(List<ScreenshotEntry> entries) {
+    final l10n = context.l10n;
+    final ScreenshotCategory? category = widget.category;
+    if (entries.isEmpty) {
+      return [
+        SliverFillRemaining(
+          hasScrollBody: false,
+          child: EmptyStateView(
+            icon: category?.icon ?? AppIcons.board,
+            title: l10n.boardDetailEmpty,
+            message: category != null
+                ? l10n.categoryEmptyBody
+                : l10n.boardEmptyBody,
           ),
-      ],
-    );
-    if (action == null || !mounted) return;
-    switch (action) {
-      case _CategoryAction.rename:
-        await _renameCategory(widget.category!);
-      case _CategoryAction.deleteAll:
-        await _deleteAllCategory(filtered);
+        ),
+      ];
     }
+    return [
+      if (entries.any((entry) => entry.isPending))
+        const SliverToBoxAdapter(child: ScreenshotPendingLegend()),
+      ScreenshotGrid(
+        entries: entries,
+        selectedIds: _selecting ? _selectedIds : null,
+        onToggle: _toggle,
+      ),
+    ];
   }
 
-  void _exitSelection() {
-    setState(() {
-      _selectionMode = false;
-      _selectedIds.clear();
-    });
-  }
-
-  /// Kategoriyi yeniden analiz eder: onaydan sonra kayıtları pending'e alıp
-  /// anasayfaya döner; analiz animasyonu orada oynar, haftalık kotadan harcanır.
-  Future<void> _reanalyzeCategory(List<ScreenshotEntry> filtered) async {
+  /// Sekme çubuğunun yerinde duran seçim araç çubuğu; yalnız seçim modunda
+  /// görünür (çubukla aynı yaylı geçişle yer değiştirir).
+  Widget _toolbar(List<String> selected) {
     final l10n = context.l10n;
-    final bool confirmed = await showConfirmAlert(
-      context,
-      title: l10n.categoryReanalyzeConfirmTitle,
-      message: l10n.categoryReanalyzeConfirmBody,
-      confirmLabel: l10n.categoryReanalyzeAction,
+    final bool none = selected.isEmpty;
+    // Kabuk Scaffold'u gövdeden cihaz alt boşluğunu çıkarır; sekme çubuğuyla
+    // aynı hizaya oturmak için pencerenin kendi değeri okunur.
+    final double deviceInset = MediaQueryData.fromView(View.of(context))
+        .padding
+        .bottom;
+    return Positioned(
+      left: AppSpacing.lg,
+      right: AppSpacing.lg,
+      bottom: AppSizes.navBarBottomGap(deviceInset),
+      child: SpringVisibility(
+        visible: _selecting,
+        child: SelectionToolbar(
+          busy: _busy,
+          status: none
+              ? l10n.selectItemsTitle
+              : l10n.bulkSelectionCount(selected.length),
+          leading: [
+            ToolbarAction(
+              icon: AppIcons.share,
+              label: l10n.shareAction,
+              onPressed: none
+                  ? null
+                  : () => _whileBusy(
+                      () => shareScreenshots(context, ref, selected),
+                    ),
+            ),
+          ],
+          trailing: [
+            ToolbarAction(
+              icon: AppIcons.move,
+              label: l10n.moveAction,
+              onPressed: none ? null : () => _move(selected),
+            ),
+            ToolbarAction(
+              icon: AppIcons.delete,
+              label: l10n.deleteAction,
+              destructive: true,
+              onPressed: none ? null : () => _delete(selected),
+            ),
+          ],
+        ),
+      ),
     );
-    if (!confirmed || !mounted) return;
-
-    final ScreenshotRepository repo = ref.read(screenshotRepositoryProvider);
-    final List<String> ids = filtered.map((e) => e.assetId).toList();
-    for (final String assetId in ids) {
-      await repo.markPending(assetId);
-    }
-    if (!mounted) return;
-    // Analiz kartı anasayfada; kullanıcı animasyonu görsün diye geri dön.
-    Navigator.of(context).maybePop();
-    ref.read(analysisQueueProvider.notifier).start(onlyAssetIds: ids);
   }
 
-  /// Kategoriye özel ad verir; varsayılan etiketle aynıysa override'ı temizler.
-  Future<void> _renameCategory(ScreenshotCategory category) async {
-    final l10n = context.l10n;
-    final Map<int, String> names = ref.read(categoryNamesProvider);
-    final String current = names[category.index] ?? category.label(l10n);
-    final String? name = await showTextPrompt(
-      context,
-      title: l10n.categoryRenameDialogTitle,
-      confirmLabel: l10n.categoryRenameAction,
-      initialValue: current,
-      placeholder: l10n.boardsNewBoardHint,
-    );
-    if (name == null || !mounted) return;
-    final CategoryNamesNotifier notifier = ref.read(
-      categoryNamesProvider.notifier,
-    );
-    if (name.trim() == category.label(l10n)) {
-      await notifier.clear(category);
-    } else {
-      await notifier.setName(category, name);
-    }
-  }
-
-  /// Kategorideki tüm fotoğrafları tek onayla (tek deleteWithIds) siler.
-  Future<void> _deleteAllCategory(List<ScreenshotEntry> filtered) async {
-    if (filtered.isEmpty) return;
-    final l10n = context.l10n;
-    final int count = filtered.length;
-    final bool confirmed = await showDestructiveConfirm(
-      context,
-      title: l10n.categoryDeleteAllConfirmTitle(count),
-      message: l10n.categoryDeleteAllConfirmBody,
-      confirmLabel: l10n.categoryDeleteAllAction,
-    );
-    if (!confirmed || !mounted) return;
-
-    setState(() => _bulkDeleting = true);
-    final ScreenshotRepository repo = ref.read(screenshotRepositoryProvider);
-    final List<String> ids = filtered.map((e) => e.assetId).toList();
-    List<String> deleted;
+  Future<void> _whileBusy(Future<void> Function() task) async {
+    setState(() => _busy = true);
     try {
-      deleted = await PhotoManager.editor.deleteWithIds(ids);
-    } catch (error, stackTrace) {
-      debugPrint('Kategori toplu silme hatası: $error\n$stackTrace');
-      if (mounted) {
-        setState(() => _bulkDeleting = false);
-        showStatusToast(
-          context,
-          l10n.bulkDeleteFailed,
-          tone: StatusToastTone.error,
-        );
-      }
-      return;
+      await task();
+    } finally {
+      // Beklenmedik hata olsa da araç çubuğu kilitli kalmaz.
+      if (mounted) setState(() => _busy = false);
     }
-    for (final String assetId in deleted) {
-      await repo.removeEntry(assetId);
-    }
-    if (mounted) setState(() => _bulkDeleting = false);
   }
 
-  /// Seçili fotoğrafları başka bir sistem kategorisine veya özel panoya taşır.
-  Future<void> _moveSelected() async {
-    final List<Board> boards = ref.read(boardsProvider).value ?? const [];
-    final Map<int, String> names = ref.read(categoryNamesProvider);
-    final _MoveTarget? target = await showModalBottomSheet<_MoveTarget>(
-      context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.lg)),
-      ),
-      builder: (_) => _MoveTargetSheet(
-        boards: boards,
-        categoryNames: names,
-        currentCategory: widget.category,
-      ),
-    );
-    if (target == null || !mounted) return;
-
-    final ScreenshotRepository repo = ref.read(screenshotRepositoryProvider);
-    for (final String assetId in _selectedIds) {
-      if (target.category != null) {
-        await repo.setCategory(assetId, target.category!);
-      } else if (target.boardId != null) {
-        await repo.assignToBoard(assetId, target.boardId);
-      }
-    }
-    if (!mounted) return;
-    setState(() {
-      _selectionMode = false;
-      _selectedIds.clear();
-    });
-  }
-
-  Future<void> _bulkDelete() async {
-    final String failureMessage = context.l10n.bulkDeleteFailed;
-    setState(() => _bulkDeleting = true);
-    final ScreenshotRepository repo = ref.read(screenshotRepositoryProvider);
-    List<String> deleted;
-    try {
-      deleted = await PhotoManager.editor.deleteWithIds(_selectedIds.toList());
-    } catch (error, stackTrace) {
-      debugPrint('Toplu silme hatası: $error\n$stackTrace');
-      if (mounted) {
-        setState(() => _bulkDeleting = false);
-        showStatusToast(context, failureMessage, tone: StatusToastTone.error);
-      }
-      return;
-    }
-    for (final String assetId in deleted) {
-      await repo.removeEntry(assetId);
-    }
-    if (!mounted) return;
-    setState(() {
-      _bulkDeleting = false;
-      _selectionMode = false;
-      _selectedIds.clear();
-    });
-  }
-
-  Future<void> _showRenameDialog(BuildContext context, Board board) async {
-    final l10n = context.l10n;
-    final String? name = await showTextPrompt(
+  Future<void> _move(List<String> ids) async {
+    final bool moved = await moveScreenshots(
       context,
-      title: l10n.boardsRenameDialogTitle,
-      confirmLabel: l10n.boardsRenameAction,
-      initialValue: board.name,
-      placeholder: l10n.boardsNewBoardHint,
+      ref,
+      ids,
+      currentCategory: widget.category,
+      currentBoardId: widget.boardId,
     );
-    if (name == null) return;
-    await ref.read(boardsProvider.notifier).rename(board.id, name);
+    if (moved && mounted) _setSelecting(false);
   }
 
-  Future<void> _showDeleteConfirm(BuildContext context, String boardId) async {
-    final l10n = context.l10n;
-    final bool confirmed = await showDestructiveConfirm(
-      context,
-      title: l10n.boardsDeleteConfirmTitle,
-      message: l10n.boardsDeleteConfirmBody,
-      confirmLabel: l10n.boardsDeleteAction,
-    );
-    if (!confirmed) return;
-    await ref.read(boardsProvider.notifier).delete(boardId);
-    if (context.mounted) Navigator.of(context).pop();
-  }
-}
-
-/// Kategori "..." action sheet'inden seçilen işlem.
-enum _CategoryAction { rename, deleteAll }
-
-extension _FirstWhereOrNull<T> on List<T> {
-  T? firstWhereOrNull(bool Function(T) test) {
-    for (final T element in this) {
-      if (test(element)) return element;
-    }
-    return null;
-  }
-}
-
-/// Taşıma hedefi: ya bir sistem kategorisi ya da bir özel pano.
-class _MoveTarget {
-  const _MoveTarget.category(this.category) : boardId = null;
-  const _MoveTarget.board(this.boardId) : category = null;
-
-  final ScreenshotCategory? category;
-  final String? boardId;
-}
-
-/// Seçili fotoğrafların taşınacağı hedefi seçtiren alt sayfa: sistem
-/// kategorileri + özel panolar.
-class _MoveTargetSheet extends StatelessWidget {
-  const _MoveTargetSheet({
-    required this.boards,
-    required this.categoryNames,
-    required this.currentCategory,
-  });
-
-  final List<Board> boards;
-  final Map<int, String> categoryNames;
-  final ScreenshotCategory? currentCategory;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = context.l10n;
-    final TextTheme textTheme = Theme.of(context).textTheme;
-    final List<ScreenshotCategory> categories = ScreenshotCategory.values
-        .where((c) => c != currentCategory)
-        .toList();
-
-    return SafeArea(
-      child: ConstrainedBox(
-        constraints: BoxConstraints(
-          maxHeight: MediaQuery.sizeOf(context).height * 0.7,
-        ),
-        child: ListView(
-          shrinkWrap: true,
-          padding: const EdgeInsets.all(AppSpacing.md),
-          children: [
-            Text(l10n.moveSheetTitle, style: textTheme.titleMedium),
-            const SizedBox(height: AppSpacing.sm),
-            Text(
-              l10n.moveSectionCategories,
-              style: textTheme.labelMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
-            ),
-            for (final ScreenshotCategory category in categories)
-              ListTile(
-                leading: Icon(category.icon),
-                title: Text(category.displayName(l10n, categoryNames)),
-                onTap: () =>
-                    Navigator.of(context).pop(_MoveTarget.category(category)),
-              ),
-            if (boards.isNotEmpty) ...[
-              const SizedBox(height: AppSpacing.sm),
-              Text(
-                l10n.moveSectionBoards,
-                style: textTheme.labelMedium?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
-              ),
-              for (final Board board in boards)
-                ListTile(
-                  leading: const Icon(Icons.folder_outlined),
-                  title: Text(board.name),
-                  onTap: () =>
-                      Navigator.of(context).pop(_MoveTarget.board(board.id)),
-                ),
-            ],
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-/// Seçim modunda gösterilen ızgara: dokununca navigasyon yerine seçimi değiştirir.
-class _SelectableGrid extends ConsumerWidget {
-  const _SelectableGrid({
-    required this.entries,
-    required this.selectedIds,
-    required this.onToggle,
-  });
-
-  final List<ScreenshotEntry> entries;
-  final Set<String> selectedIds;
-  final void Function(String assetId) onToggle;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final ScreenshotRepository repo = ref.watch(screenshotRepositoryProvider);
-
-    return GridView.builder(
-      padding: const EdgeInsets.all(AppSpacing.md),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 3,
-        mainAxisSpacing: AppSpacing.xs,
-        crossAxisSpacing: AppSpacing.xs,
-        childAspectRatio: 9 / 16,
-      ),
-      itemCount: entries.length,
-      itemBuilder: (context, index) {
-        final ScreenshotEntry entry = entries[index];
-        final bool selected = selectedIds.contains(entry.assetId);
-        return _SelectableTile(
-          asset: repo.assetFor(entry.assetId),
-          selected: selected,
-          onTap: () => onToggle(entry.assetId),
-        );
-      },
-    );
-  }
-}
-
-class _SelectableTile extends StatelessWidget {
-  const _SelectableTile({
-    required this.asset,
-    required this.selected,
-    required this.onTap,
-  });
-
-  final AssetEntity? asset;
-  final bool selected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final ColorScheme scheme = Theme.of(context).colorScheme;
-
-    return GestureDetector(
-      onTap: onTap,
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(AppRadius.sm),
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            if (asset != null)
-              AssetEntityImage(
-                asset!,
-                isOriginal: false,
-                thumbnailSize: const ThumbnailSize.square(300),
-                fit: BoxFit.cover,
-              )
-            else
-              ColoredBox(color: scheme.surfaceContainerHighest),
-            if (selected)
-              Container(color: scheme.primary.withValues(alpha: 0.35)),
-            Positioned(
-              top: AppSpacing.xs,
-              right: AppSpacing.xs,
-              child: Icon(
-                selected ? Icons.check_circle : Icons.circle_outlined,
-                color: selected ? scheme.primary : Colors.white,
-                shadows: const [Shadow(color: Colors.black45, blurRadius: 4)],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-/// Board/kategori boşken gösterilen sade durum.
-class _EmptyBoard extends StatelessWidget {
-  const _EmptyBoard({required this.text});
-
-  final String text;
-
-  @override
-  Widget build(BuildContext context) {
-    final ColorScheme scheme = Theme.of(context).colorScheme;
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.xl),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              Icons.photo_outlined,
-              size: 40,
-              color: scheme.onSurfaceVariant.withValues(alpha: 0.4),
-            ),
-            const SizedBox(height: AppSpacing.md),
-            Text(
-              text,
-              style: Theme.of(context).textTheme.bodyMedium
-                  ?.copyWith(color: scheme.onSurfaceVariant),
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
-      ),
-    );
+  /// Onayı iOS'un kendi silme diyaloğu ister; silindiyse seçim kapanır.
+  Future<void> _delete(List<String> ids) async {
+    int deleted = 0;
+    await _whileBusy(() async {
+      deleted = await deleteScreenshots(context, ref, ids);
+    });
+    if (deleted > 0 && mounted) _setSelecting(false);
   }
 }

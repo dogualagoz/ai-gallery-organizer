@@ -247,7 +247,6 @@
       "count": {"type": "int"}
     }
   },
-  "bulkDeleteAction": "Seçilenleri sil",
   "bulkDeleteFailed": "Seçilenler silinemedi. Lütfen tekrar dene.",
   "paywallWelcomeTitle": "Bir daha ekran görüntüsü kaybolmasın",
   "paywallSubtitle": "Snaply Pro tüm ekran görüntülerini otomatik olarak gruplandırır",
@@ -409,5 +408,25 @@
   "analysisPauseAction": "Duraklat",
   "analysisContinueAction": "Devam Et",
   "analysisTrialQuotaUsed": "Deneme analiz hakların bitti",
-  "analysisGetMoreAction": "Daha Fazla Al"
+  "analysisGetMoreAction": "Daha Fazla Al",
+  "shareAction": "Paylaş",
+  "deleteAction": "Sil",
+  "undoAction": "Geri Al",
+  "undoFailed": "Geri alınamadı. Lütfen tekrar dene.",
+  "moveFailed": "Taşınamadı. Lütfen tekrar dene.",
+  "movedToast": "Taşındı: {target}",
+  "@movedToast": {
+    "placeholders": {
+      "target": {"type": "String"}
+    }
+  },
+  "selectAllAction": "Tümünü Seç",
+  "deselectAllAction": "Seçimi Kaldır",
+  "selectItemsTitle": "Öğe Seç",
+  "moreActionsLabel": "Diğer işlemler",
+  "pendingDotLegend": "Noktalı olanlar henüz analiz edilmedi.",
+  "screenshotTileLabel": "Ekran görüntüsü",
+  "screenshotPendingLabel": "Ekran görüntüsü, analiz bekliyor",
+  "categoryEmptyBody": "Analiz edilen ekran görüntüleri buraya kendiliğinden yerleşir.",
+  "boardEmptyBody": "Bir ekran görüntüsüne basılı tut ve Taşı ile bu panoya ekle."
 }

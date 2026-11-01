@@ -2,7 +2,6 @@
 // sola sil / sağa atla / yukarı seçili kategoriye ata kart akışı.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:photo_manager/photo_manager.dart';
 
 import '../../core/constants/ui_constants.dart';
@@ -10,7 +9,6 @@ import '../../core/l10n/category_labels.dart';
 import '../../core/l10n/l10n_extension.dart';
 import '../../core/models/screenshot_category.dart';
 import '../../core/models/screenshot_entry.dart';
-import '../../core/router/app_router.dart';
 import '../../core/services/category_names_service.dart';
 import '../../core/services/entitlement_service.dart';
 import '../../core/services/haptic_service.dart';
@@ -18,6 +16,7 @@ import '../../core/services/review_service.dart';
 import '../../core/widgets/status_toast.dart';
 import '../gallery/data/screenshot_repository.dart';
 import '../gallery/providers/gallery_provider.dart';
+import '../paywall/open_paywall.dart';
 import 'widgets/category_picker_sheet.dart';
 import 'widgets/swipe_card.dart';
 
@@ -870,7 +869,7 @@ class _SortingLimit extends StatelessWidget {
             ),
             const SizedBox(height: AppSpacing.lg),
             FilledButton(
-              onPressed: () => context.push(AppRoutes.paywall),
+              onPressed: () => openPaywall(context),
               child: Text(l10n.paywallTitle),
             ),
           ],

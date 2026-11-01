@@ -80,6 +80,38 @@ abstract final class AppSizes {
 
   /// Analiz modülündeki satır ikonlarının boyutu.
   static const double statusIcon = 22;
+
+  /// Pro'ya bağlı eylemlerin yanındaki küçük kilit glifi.
+  static const double lockGlyph = 13;
+}
+
+/// Ekran görüntüsü ızgarası ve karosu.
+abstract final class AppGridTile {
+  /// Karolar arası boşluk: Fotoğraflar gibi sıkı. Kart içi önizlemelerde
+  /// (Kütüphane) yerine [AppSpacing.xs] kullanılır.
+  static const double gap = 2;
+
+  /// İstenen küçük resim çözünürlüğü (px, kare) — bellek dostu.
+  static const int thumbnailPx = 300;
+
+  /// Analiz bekliyor noktası ve çevresindeki ayırıcı halka.
+  static const double pendingDot = 8;
+  static const double pendingDotBorder = 1.5;
+
+  /// Seçim modundaki işaret dairesi, içindeki tik ve halka kalınlığı.
+  static const double badgeSize = 22;
+  static const double badgeCheck = 13;
+  static const double badgeBorder = 1.5;
+
+  /// Fotoğraf üstünde okunabilsin diye işaretin altındaki yumuşak gölge.
+  static const double badgeShadowBlur = 4;
+  static const double badgeShadowAlpha = 0.3;
+
+  /// Seçilmemiş işaret dairesinin hafif koyu dolgusu.
+  static const double emptyBadgeAlpha = 0.15;
+
+  /// Seçili karonun üstüne düşen açık örtü (Fotoğraflar'daki gibi).
+  static const double selectionWash = 0.3;
 }
 
 /// Düzenleme modunda sürüklenmek üzere kaldırılan karonun görünümü.

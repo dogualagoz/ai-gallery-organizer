@@ -3,16 +3,15 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../../core/constants/app_icons.dart';
 import '../../../core/constants/ui_constants.dart';
 import '../../../core/l10n/l10n_extension.dart';
-import '../../../core/router/app_router.dart';
 import '../../../core/services/entitlement_service.dart';
 import '../../../core/services/preferences_service.dart';
 import '../../../core/widgets/app_nav_scaffold.dart';
 import '../../../core/widgets/surface_card.dart';
+import '../../paywall/open_paywall.dart';
 
 class AutoSortHint extends ConsumerWidget {
   const AutoSortHint({super.key});
@@ -63,7 +62,7 @@ class AutoSortHint extends ConsumerWidget {
                       0,
                       kMinInteractiveDimensionCupertino,
                     ),
-                    onPressed: () => context.push(AppRoutes.paywall),
+                    onPressed: () => openPaywall(context),
                     child: Text(
                       l10n.autoSortHintAction,
                       style: text.bodyMedium?.copyWith(color: scheme.primary),

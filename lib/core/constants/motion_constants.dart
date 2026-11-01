@@ -127,4 +127,8 @@ abstract final class AppMotion {
   /// Komşu karoların titreşim fazını birbirinden ayıran çarpan (tur oranı);
   /// irrasyonele yakın değer, ardışık karoların eşleşmesini önler.
   static const double jigglePhaseSpread = 0.37;
+
+  /// Yer değiştiren alt çubukların (sekme çubuğu ↔ seçim araç çubuğu) gizliyken
+  /// küçüldüğü oran: biri sönerken diğeri aynı yerde belirir.
+  static const double chromeHiddenScale = 0.94;
 }

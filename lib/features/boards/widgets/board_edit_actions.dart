@@ -1,11 +1,12 @@
-// Pano/kategori yönetim eylemleri: düzenleme modunda karoya dokununca açılan
-// action sheet ve bağlam menüsünün paylaştığı yeniden adlandır, yeniden analiz
+// Pano/kategori yönetim eylemleri: düzenleme modu action sheet'i, karo bağlam
+// menüsü ve detaydaki "…" menüsünün paylaştığı yeniden adlandır, yeniden analiz
 // et, seç (toplu sil/taşı), tümünü sil ve panoyu sil işlemleri.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:photo_manager/photo_manager.dart';
 
+import '../../../core/constants/app_icons.dart';
 import '../../../core/l10n/category_labels.dart';
 import '../../../core/l10n/l10n_extension.dart';
 import '../../../core/models/board.dart';
@@ -15,10 +16,12 @@ import '../../../core/router/app_router.dart';
 import '../../../core/services/category_names_service.dart';
 import '../../../core/services/entitlement_service.dart';
 import '../../../core/widgets/app_dialogs.dart';
+import '../../../core/widgets/app_menus.dart';
 import '../../../core/widgets/status_toast.dart';
 import '../../analysis/providers/analysis_queue_provider.dart';
 import '../../gallery/data/screenshot_repository.dart';
 import '../../gallery/providers/gallery_provider.dart';
+import '../../paywall/open_paywall.dart';
 import '../providers/board_provider.dart';
 
 /// Düzenleme modu aksiyon sayfasından seçilen işlem.
@@ -96,6 +99,65 @@ Future<void> showBoardEditActions(
   }
 }
 
+/// Bağlam menüsü ve detaydaki "…" menüsünün ortak eylem listesi. Build içinde
+/// çağrılır (Pro durumunu izler). [onSelect] verilirse "Seç" eklenir; Pro
+/// değilse kilit glifiyle görünür. [onLeave], panoyu geride bırakan
+/// eylemlerden (pano silindi, yeniden analiz başladı) sonra çağrılır.
+List<AppMenuAction> boardMenuActions(
+  BuildContext context,
+  WidgetRef ref, {
+  required bool isEmpty,
+  Board? board,
+  ScreenshotCategory? category,
+  VoidCallback? onSelect,
+  VoidCallback? onLeave,
+}) {
+  final l10n = context.l10n;
+  final bool canSelect = ref.watch(entitlementProvider).canBulkDelete;
+  return [
+    AppMenuAction(
+      label: l10n.boardsRenameAction,
+      icon: AppIcons.edit,
+      onPressed: () =>
+          renameBoard(context, ref, board: board, category: category),
+    ),
+    if (category != null && !isEmpty)
+      AppMenuAction(
+        label: l10n.categoryReanalyzeAction,
+        icon: AppIcons.reanalyze,
+        onPressed: () async {
+          if (await reanalyzeCategory(context, ref, category)) onLeave?.call();
+        },
+      ),
+    if (onSelect != null && !isEmpty)
+      AppMenuAction(
+        label: l10n.bulkSelectAction,
+        icon: canSelect ? AppIcons.select : AppIcons.lock,
+        onPressed: onSelect,
+      ),
+    if (board != null)
+      AppMenuAction(
+        label: l10n.boardsDeleteAction,
+        icon: AppIcons.delete,
+        destructive: true,
+        onPressed: () async {
+          if (await deleteBoard(context, ref, board)) onLeave?.call();
+        },
+      )
+    else if (!isEmpty)
+      AppMenuAction(
+        label: l10n.categoryDeleteAllAction,
+        icon: AppIcons.delete,
+        destructive: true,
+        onPressed: () => deleteAllInBoard(
+          context,
+          ref,
+          boardEntries(ref, category: category),
+        ),
+      ),
+  ];
+}
+
 /// [board] ya da [category] içindeki kayıtlar (galeri sırasıyla).
 List<ScreenshotEntry> boardEntries(
   WidgetRef ref, {
@@ -153,29 +215,31 @@ Future<void> renameBoard(
 
 /// Kategoriyi yeniden analiz eder: onaydan sonra kayıtları bekleyen yapıp
 /// kuyruğu yalnız onlarla başlatır; animasyon Kütüphane'deki modülde oynar ve
-/// haftalık kotadan harcanır.
-Future<void> reanalyzeCategory(
+/// haftalık kotadan harcanır. Analiz başladıysa true.
+Future<bool> reanalyzeCategory(
   BuildContext context,
   WidgetRef ref,
   ScreenshotCategory category,
 ) async {
   final l10n = context.l10n;
   final List<ScreenshotEntry> filtered = boardEntries(ref, category: category);
-  if (filtered.isEmpty) return;
+  if (filtered.isEmpty) return false;
   final bool confirmed = await showConfirmAlert(
     context,
     title: l10n.categoryReanalyzeConfirmTitle,
     message: l10n.categoryReanalyzeConfirmBody,
     confirmLabel: l10n.categoryReanalyzeAction,
   );
-  if (!confirmed || !context.mounted) return;
+  if (!confirmed || !context.mounted) return false;
 
   final ScreenshotRepository repo = ref.read(screenshotRepositoryProvider);
+  final AnalysisQueueNotifier queue = ref.read(analysisQueueProvider.notifier);
   final List<String> ids = filtered.map((e) => e.assetId).toList();
   for (final String assetId in ids) {
     await repo.markPending(assetId);
   }
-  ref.read(analysisQueueProvider.notifier).start(onlyAssetIds: ids);
+  queue.start(onlyAssetIds: ids);
+  return true;
 }
 
 /// Board/kategori detayını doğrudan seçim modunda açar (toplu sil/taşı).
@@ -187,7 +251,7 @@ void openBoardSelection(
   ScreenshotCategory? category,
 }) {
   if (!ref.read(entitlementProvider).canBulkDelete) {
-    context.push(AppRoutes.paywall);
+    openPaywall(context);
     return;
   }
   context.push(
@@ -233,7 +297,8 @@ Future<void> deleteAllInBoard(
 }
 
 /// Özel board'u siler (içindeki fotoğraflar galeride kalır, bağ kaldırılır).
-Future<void> deleteBoard(
+/// Silindiyse true.
+Future<bool> deleteBoard(
   BuildContext context,
   WidgetRef ref,
   Board board,
@@ -245,6 +310,7 @@ Future<void> deleteBoard(
     message: l10n.boardsDeleteConfirmBody,
     confirmLabel: l10n.boardsDeleteAction,
   );
-  if (!confirmed || !context.mounted) return;
+  if (!confirmed || !context.mounted) return false;
   await ref.read(boardsProvider.notifier).delete(board.id);
+  return true;
 }

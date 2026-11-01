@@ -21,6 +21,7 @@ import '../../../core/services/haptic_service.dart';
 import '../../../core/services/review_service.dart';
 import '../../../core/widgets/app_dialogs.dart';
 import '../../gallery/data/screenshot_repository.dart';
+import '../../paywall/open_paywall.dart';
 import '../providers/analysis_queue_provider.dart';
 import '../providers/analysis_summary_provider.dart';
 import 'analysis_flights.dart';
@@ -156,7 +157,7 @@ class _AnalysisStatusModuleState extends ConsumerState<AnalysisStatusModule> {
     _flights?.clear();
   }
 
-  void _openPacks() => context.push(AppRoutes.paywallPacks);
+  void _openPacks() => openPaywall(context, packs: true);
 
   void _dismissResult() => ref.read(analysisQueueProvider.notifier).dismiss();
 

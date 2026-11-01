@@ -1,18 +1,17 @@
 // Arama ekranı: tag + OCR + kategori üzerinde bellek içi arama (Pro).
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../core/constants/ui_constants.dart';
 import '../../core/l10n/category_labels.dart';
 import '../../core/l10n/l10n_extension.dart';
 import '../../core/models/screenshot_entry.dart';
-import '../../core/router/app_router.dart';
 import '../../core/services/category_names_service.dart';
 import '../../core/services/entitlement_service.dart';
 import '../../core/utils/text_normalize.dart';
-import '../../core/widgets/screenshot_results_grid.dart';
 import '../gallery/providers/gallery_provider.dart';
+import '../gallery/widgets/screenshot_grid.dart';
+import '../paywall/open_paywall.dart';
 
 class SearchScreen extends ConsumerStatefulWidget {
   const SearchScreen({super.key});
@@ -81,7 +80,17 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
               ? _SearchMessage(text: l10n.searchPrompt, icon: Icons.search)
               : results.isEmpty
               ? _SearchMessage(text: l10n.searchEmpty, icon: Icons.search_off)
-              : ScreenshotResultsGrid(entries: results),
+              : CustomScrollView(
+                  slivers: [
+                    ScreenshotGrid(entries: results),
+                    // Yüzen sekme çubuğu son satırı örtmesin.
+                    SliverToBoxAdapter(
+                      child: SizedBox(
+                        height: MediaQuery.paddingOf(context).bottom,
+                      ),
+                    ),
+                  ],
+                ),
         ),
       ],
     );
@@ -181,7 +190,7 @@ class _LockedSearch extends StatelessWidget {
             ),
             const SizedBox(height: AppSpacing.lg),
             FilledButton(
-              onPressed: () => context.push(AppRoutes.paywall),
+              onPressed: () => openPaywall(context),
               child: Text(l10n.paywallTitle),
             ),
           ],

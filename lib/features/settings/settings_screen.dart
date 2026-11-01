@@ -8,7 +8,6 @@ import 'package:package_info_plus/package_info_plus.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/constants/ui_constants.dart';
 import '../../core/l10n/l10n_extension.dart';
-import '../../core/router/app_router.dart';
 import '../../core/services/entitlement_service.dart';
 import '../../core/services/haptic_service.dart';
 import '../../core/services/preferences_service.dart';
@@ -17,6 +16,7 @@ import '../../core/widgets/app_nav_scaffold.dart';
 import '../../core/widgets/page_header.dart';
 import '../../core/widgets/status_toast.dart';
 import '../analysis/providers/analysis_queue_provider.dart';
+import '../paywall/open_paywall.dart';
 import '../paywall/providers/purchase_provider.dart';
 
 /// Uygulama sürüm bilgisi (tek seferlik platform sorgusu).
@@ -159,7 +159,7 @@ class _ProStatusCard extends ConsumerWidget {
           ),
         ),
         child: InkWell(
-          onTap: isPro ? null : () => context.push(AppRoutes.paywall),
+          onTap: isPro ? null : () => openPaywall(context),
           child: Padding(
             padding: const EdgeInsets.all(AppSpacing.md),
             child: Row(
@@ -336,7 +336,7 @@ class _AutoSortSection extends ConsumerWidget {
               _SettingsTile(
                 icon: Icons.lock_outline,
                 label: l10n.settingsAutoSortTitle,
-                onTap: () => context.push(AppRoutes.paywall),
+                onTap: () => openPaywall(context),
               ),
           ],
         ),

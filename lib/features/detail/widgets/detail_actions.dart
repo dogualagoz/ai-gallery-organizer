@@ -10,10 +10,10 @@ import 'package:share_plus/share_plus.dart';
 import '../../../core/constants/ui_constants.dart';
 import '../../../core/l10n/l10n_extension.dart';
 import '../../../core/models/screenshot_entry.dart';
-import '../../../core/router/app_router.dart';
 import '../../../core/widgets/status_toast.dart';
 import '../../analysis/providers/analysis_queue_provider.dart';
 import '../../gallery/data/screenshot_repository.dart';
+import '../../paywall/open_paywall.dart';
 
 class DetailActions extends ConsumerStatefulWidget {
   const DetailActions({super.key, required this.entry, required this.asset});
@@ -87,7 +87,7 @@ class _DetailActionsState extends ConsumerState<DetailActions> {
       case SingleAnalysisOutcome.success:
         break; // Box değişimi galeri/detayı zaten tazeler.
       case SingleAnalysisOutcome.limitReached:
-        context.push(AppRoutes.paywallPacks);
+        openPaywall(context, packs: true);
       case SingleAnalysisOutcome.failed:
         _showError(context.l10n.analysisFailedBanner);
     }

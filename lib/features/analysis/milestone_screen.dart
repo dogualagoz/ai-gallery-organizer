@@ -10,9 +10,9 @@ import '../../core/constants/ui_constants.dart';
 import '../../core/l10n/category_labels.dart';
 import '../../core/l10n/l10n_extension.dart';
 import '../../core/models/screenshot_category.dart';
-import '../../core/router/app_router.dart';
 import '../../core/services/entitlement_service.dart';
 import '../../core/services/haptic_service.dart';
+import '../paywall/open_paywall.dart';
 import 'providers/analysis_queue_provider.dart';
 import 'widgets/milestone_celebration.dart';
 
@@ -143,12 +143,12 @@ class _MilestoneCtas extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         FilledButton(
-          onPressed: () => context.push(AppRoutes.paywallPacks),
+          onPressed: () => openPaywall(context, packs: true),
           child: Text(l10n.milestoneCtaPacks),
         ),
         const SizedBox(height: AppSpacing.sm),
         OutlinedButton(
-          onPressed: () => context.push(AppRoutes.paywall),
+          onPressed: () => openPaywall(context),
           child: Text(l10n.milestoneCtaPro),
         ),
         TextButton(

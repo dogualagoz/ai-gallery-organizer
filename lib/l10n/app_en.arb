@@ -247,7 +247,6 @@
       "count": {"type": "int"}
     }
   },
-  "bulkDeleteAction": "Delete selected",
   "bulkDeleteFailed": "Couldn't delete the selected screenshots. Please try again.",
   "paywallWelcomeTitle": "Never lose a screenshot again",
   "paywallSubtitle": "Snaply Pro sorts every screenshot for you, automatically",
@@ -409,5 +408,25 @@
   "analysisPauseAction": "Pause",
   "analysisContinueAction": "Keep Going",
   "analysisTrialQuotaUsed": "Trial analyses used up",
-  "analysisGetMoreAction": "Get More"
+  "analysisGetMoreAction": "Get More",
+  "shareAction": "Share",
+  "deleteAction": "Delete",
+  "undoAction": "Undo",
+  "undoFailed": "Couldn't undo. Please try again.",
+  "moveFailed": "Couldn't move. Please try again.",
+  "movedToast": "Moved to {target}",
+  "@movedToast": {
+    "placeholders": {
+      "target": {"type": "String"}
+    }
+  },
+  "selectAllAction": "Select All",
+  "deselectAllAction": "Deselect All",
+  "selectItemsTitle": "Select Items",
+  "moreActionsLabel": "More actions",
+  "pendingDotLegend": "Items with a dot haven't been analyzed yet.",
+  "screenshotTileLabel": "Screenshot",
+  "screenshotPendingLabel": "Screenshot, waiting for analysis",
+  "categoryEmptyBody": "Analyzed screenshots land here automatically.",
+  "boardEmptyBody": "Touch and hold a screenshot, then choose Move to add it to this board."
 }

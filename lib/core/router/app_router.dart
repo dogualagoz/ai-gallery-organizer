@@ -22,6 +22,8 @@ import '../services/preferences_service.dart';
 import '../widgets/app_sheet.dart';
 import '../widgets/glass_action_button.dart';
 import '../widgets/glass_nav_bar.dart';
+import '../widgets/spring_visibility.dart';
+import 'tab_bar_visibility.dart';
 
 /// Ana kabuğun sekmeleri. Sıra, [StatefulShellRoute] dal sırasıyla aynıdır.
 enum AppTab { library, clean, search }
@@ -110,9 +112,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const OnboardingScreen(),
       ),
       // Ana kabuk: yüzen sekme çubuğu, her sekme kendi navigation stack'inde.
-      StatefulShellRoute.indexedStack(
+      StatefulShellRoute(
         builder: (context, state, navigationShell) =>
             _MainShell(navigationShell: navigationShell),
+        navigatorContainerBuilder: (context, navigationShell, children) =>
+            _BranchStack(
+              currentIndex: navigationShell.currentIndex,
+              children: children,
+            ),
         branches: [
           StatefulShellBranch(routes: [_libraryRoute()]),
           StatefulShellBranch(
@@ -218,58 +225,96 @@ class _MainShell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = context.l10n;
-    final double bottomInset = MediaQuery.paddingOf(context).bottom;
-    final int current = navigationShell.currentIndex;
-
     return Scaffold(
       // İçerik camın arkasından aksın diye gövde navbar'ın altına uzatılır.
       extendBody: true,
       body: navigationShell,
-      bottomNavigationBar: MediaQuery.withClampedTextScaling(
-        maxScaleFactor: AppSizes.navBarMaxTextScale,
-        child: BackdropGroup(
-          backdropKey: _backdropKey,
-          child: Padding(
-            // Home indicator varsa onun üstünde, yoksa kenardan sabit boşlukla.
-            padding: EdgeInsets.fromLTRB(
-              AppSpacing.lg,
-              AppSizes.navBarTopGap,
-              AppSpacing.lg,
-              AppSizes.navBarBottomGap(bottomInset),
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: GlassNavBar(
-                    selectedIndex: current,
-                    onSelected: _goTab,
-                    destinations: [
-                      GlassNavDestination(
-                        icon: AppIcons.library,
-                        selectedIcon: AppIcons.libraryFill,
-                        label: l10n.tabLibrary,
-                      ),
-                      GlassNavDestination(
-                        icon: AppIcons.clean,
-                        selectedIcon: AppIcons.cleanFill,
-                        label: l10n.tabClean,
-                      ),
-                    ],
-                  ),
+      // Seçim modu gibi ekranlar çubuğu kendi araç çubuğuyla yer değiştirir;
+      // yerleşim korunur ki gövdenin alt boşluğu değişmesin.
+      bottomNavigationBar: Consumer(
+        builder: (context, ref, bar) => SpringVisibility(
+          visible: !ref.watch(tabBarHiddenProvider),
+          child: bar!,
+        ),
+        child: _tabBar(context),
+      ),
+    );
+  }
+
+  Widget _tabBar(BuildContext context) {
+    final l10n = context.l10n;
+    final double bottomInset = MediaQuery.paddingOf(context).bottom;
+    final int current = navigationShell.currentIndex;
+    return MediaQuery.withClampedTextScaling(
+      maxScaleFactor: AppSizes.navBarMaxTextScale,
+      child: BackdropGroup(
+        backdropKey: _backdropKey,
+        child: Padding(
+          // Home indicator varsa onun üstünde, yoksa kenardan sabit boşlukla.
+          padding: EdgeInsets.fromLTRB(
+            AppSpacing.lg,
+            AppSizes.navBarTopGap,
+            AppSpacing.lg,
+            AppSizes.navBarBottomGap(bottomInset),
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: GlassNavBar(
+                  selectedIndex: current,
+                  onSelected: _goTab,
+                  destinations: [
+                    GlassNavDestination(
+                      icon: AppIcons.library,
+                      selectedIcon: AppIcons.libraryFill,
+                      label: l10n.tabLibrary,
+                    ),
+                    GlassNavDestination(
+                      icon: AppIcons.clean,
+                      selectedIcon: AppIcons.cleanFill,
+                      label: l10n.tabClean,
+                    ),
+                  ],
                 ),
-                const SizedBox(width: AppSpacing.sm),
-                GlassActionButton(
-                  icon: AppIcons.search,
-                  label: l10n.searchTitle,
-                  selected: current == AppTab.search.index,
-                  onPressed: () => _goTab(AppTab.search.index),
-                ),
-              ],
-            ),
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              GlassActionButton(
+                icon: AppIcons.search,
+                label: l10n.searchTitle,
+                selected: current == AppTab.search.index,
+                onPressed: () => _goTab(AppTab.search.index),
+              ),
+            ],
           ),
         ),
       ),
+    );
+  }
+}
+
+/// Sekme dallarının kabı: etkin olmayan dallar ekran dışı, ticker'sız ve
+/// Hero'suz tutulur. Hero kapatılmazsa iki dalda aynı ekran görüntüsü varken
+/// (ör. Kütüphane ve Ara) kök rotaya geçişte etiketler çakışır.
+class _BranchStack extends StatelessWidget {
+  const _BranchStack({required this.currentIndex, required this.children});
+
+  final int currentIndex;
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) {
+    return IndexedStack(
+      index: currentIndex,
+      children: [
+        for (int i = 0; i < children.length; i++)
+          Offstage(
+            offstage: i != currentIndex,
+            child: TickerMode(
+              enabled: i == currentIndex,
+              child: HeroMode(enabled: i == currentIndex, child: children[i]),
+            ),
+          ),
+      ],
     );
   }
 }
