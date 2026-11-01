@@ -5,9 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/constants/app_constants.dart';
+import '../../../core/constants/app_icons.dart';
 import '../../../core/constants/ui_constants.dart';
 import '../../../core/l10n/l10n_extension.dart';
 import '../../../core/services/entitlement_service.dart';
+import '../../../core/widgets/status_toast.dart';
 
 class WeeklyLimitBadge extends ConsumerWidget {
   const WeeklyLimitBadge({super.key});
@@ -81,8 +83,6 @@ class WeeklyLimitBadge extends ConsumerWidget {
               .clamp(1, FreeLimits.aiAnalysisWindow.inDays);
       message = l10n.homeWeeklyLimitResetIn(daysLeft);
     }
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(SnackBar(content: Text(message)));
+    showStatusToast(context, message, icon: AppIcons.quota);
   }
 }

@@ -20,6 +20,7 @@ import '../../../core/router/app_router.dart';
 import '../../../core/services/entitlement_service.dart';
 import '../../../core/services/haptic_service.dart';
 import '../../../core/services/review_service.dart';
+import '../../../core/widgets/app_dialogs.dart';
 import '../../gallery/data/screenshot_repository.dart';
 import '../providers/analysis_queue_provider.dart';
 import '../providers/recent_distribution_provider.dart';
@@ -507,24 +508,14 @@ class _AnalyzeCardState extends ConsumerState<AnalyzeCard>
   /// Haftalık hak dolduğunda: durumu anlatan + Pro'ya yükselt seçenekli pop-up.
   Future<void> _showQuotaDialog() async {
     final l10n = context.l10n;
-    final bool? goPro = await showDialog<bool>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: Text(l10n.analyzeUngroupedQuotaTitle),
-        content: Text(l10n.analyzeUngroupedQuotaBody),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: Text(l10n.analyzeUngroupedQuotaNotNow),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: Text(l10n.analyzeUngroupedQuotaUpgrade),
-          ),
-        ],
-      ),
+    final bool goPro = await showConfirmAlert(
+      context,
+      title: l10n.analyzeUngroupedQuotaTitle,
+      message: l10n.analyzeUngroupedQuotaBody,
+      confirmLabel: l10n.analyzeUngroupedQuotaUpgrade,
+      cancelLabel: l10n.analyzeUngroupedQuotaNotNow,
     );
-    if (goPro == true && mounted) context.push(AppRoutes.paywall);
+    if (goPro && mounted) context.push(AppRoutes.paywall);
   }
 
   /// Analiz sürerken kart içeriği: başlık/ilerleme + kaynak fotoğraf yığını.

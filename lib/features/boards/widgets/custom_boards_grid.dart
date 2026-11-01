@@ -10,6 +10,7 @@ import '../../../core/l10n/l10n_extension.dart';
 import '../../../core/models/board.dart';
 import '../../../core/models/screenshot_entry.dart';
 import '../../../core/router/app_router.dart';
+import '../../../core/widgets/app_dialogs.dart';
 import '../../../core/widgets/fade_in_up.dart';
 import '../../../core/widgets/reorderable_tile_grid.dart';
 import '../../gallery/data/screenshot_repository.dart';
@@ -17,7 +18,6 @@ import '../board_detail_screen.dart';
 import '../providers/board_provider.dart';
 import 'board_covers.dart';
 import 'board_edit_actions.dart';
-import 'board_name_dialog.dart';
 import 'board_tile.dart';
 import 'long_press_edit_wrapper.dart';
 import 'system_boards_grid.dart' show boardStaggerStep, boardCardAspectRatio;
@@ -177,14 +177,13 @@ class _NewBoardTile extends ConsumerWidget {
 
   Future<void> _showCreateDialog(BuildContext context, WidgetRef ref) async {
     final l10n = context.l10n;
-    final String? name = await showDialog<String>(
-      context: context,
-      builder: (_) => BoardNameDialog(
-        title: l10n.boardsNewBoardDialogTitle,
-        confirmLabel: l10n.boardsCreateAction,
-      ),
+    final String? name = await showTextPrompt(
+      context,
+      title: l10n.boardsNewBoardDialogTitle,
+      confirmLabel: l10n.boardsCreateAction,
+      placeholder: l10n.boardsNewBoardHint,
     );
-    if (name == null || name.isEmpty) return;
+    if (name == null) return;
     await ref.read(boardsProvider.notifier).create(name);
   }
 }

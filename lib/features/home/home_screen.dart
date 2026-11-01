@@ -16,6 +16,7 @@ import '../../core/services/entitlement_service.dart';
 import '../../core/services/review_service.dart';
 import '../../core/widgets/page_header.dart';
 import '../../core/widgets/pro_badge.dart';
+import '../../core/widgets/status_toast.dart';
 import '../analysis/providers/analysis_queue_provider.dart';
 import '../analysis/providers/auto_sort_provider.dart';
 import '../analysis/widgets/analyze_card.dart';
@@ -78,7 +79,7 @@ class HomeScreen extends ConsumerWidget {
     );
   }
 
-  /// Eşitlemeyi çalıştırır; hata olursa kullanıcıya snackbar gösterir.
+  /// Eşitlemeyi çalıştırır; hata olursa kullanıcıya durum bildirimi gösterir.
   static Future<void> _syncWithFeedback(
     BuildContext context,
     WidgetRef ref,
@@ -89,8 +90,7 @@ class HomeScreen extends ConsumerWidget {
     } catch (error, stackTrace) {
       debugPrint('Galeri manuel eşitleme hatası: $error\n$stackTrace');
       if (!context.mounted) return;
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(failureMessage)));
+      showStatusToast(context, failureMessage, tone: StatusToastTone.error);
     }
   }
 }

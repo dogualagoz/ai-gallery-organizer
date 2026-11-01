@@ -14,6 +14,7 @@ import '../../core/services/haptic_service.dart';
 import '../../core/services/preferences_service.dart';
 import '../../core/utils/link_opener.dart';
 import '../../core/widgets/page_header.dart';
+import '../../core/widgets/status_toast.dart';
 import '../paywall/providers/purchase_provider.dart';
 
 /// Uygulama sürüm bilgisi (tek seferlik platform sorgusu).
@@ -95,13 +96,17 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       case PurchaseFlowStatus.success:
         _restoreRequested = false;
         Haptics.purchaseSuccess();
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(context.l10n.settingsRestoreSuccess)),
+        showStatusToast(
+          context,
+          context.l10n.settingsRestoreSuccess,
+          tone: StatusToastTone.success,
         );
       case PurchaseFlowStatus.error:
         _restoreRequested = false;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(context.l10n.paywallPurchaseFailed)),
+        showStatusToast(
+          context,
+          context.l10n.paywallPurchaseFailed,
+          tone: StatusToastTone.error,
         );
         ref.read(purchaseFlowProvider.notifier).dismissError();
       case PurchaseFlowStatus.idle:

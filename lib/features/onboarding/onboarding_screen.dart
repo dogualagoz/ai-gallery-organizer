@@ -10,6 +10,7 @@ import '../../core/l10n/l10n_extension.dart';
 import '../../core/services/haptic_service.dart';
 import '../../core/services/photo_permission_service.dart';
 import '../../core/services/preferences_service.dart';
+import '../../core/widgets/app_dialogs.dart';
 import 'widgets/access_illustration.dart';
 import 'widgets/privacy_illustration.dart';
 import 'widgets/quota_illustration.dart';
@@ -122,28 +123,16 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     }
   }
 
-  Future<void> _showDeniedDialog() {
+  Future<void> _showDeniedDialog() async {
     final l10n = context.l10n;
-    return showDialog<void>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: Text(l10n.permissionDeniedTitle),
-        content: Text(l10n.permissionDeniedBody),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(),
-            child: Text(l10n.notNow),
-          ),
-          FilledButton(
-            onPressed: () {
-              Navigator.of(dialogContext).pop();
-              PhotoPermissionService.openSystemSettings();
-            },
-            child: Text(l10n.openSettings),
-          ),
-        ],
-      ),
+    final bool openSettings = await showConfirmAlert(
+      context,
+      title: l10n.permissionDeniedTitle,
+      message: l10n.permissionDeniedBody,
+      confirmLabel: l10n.openSettings,
+      cancelLabel: l10n.notNow,
     );
+    if (openSettings) await PhotoPermissionService.openSystemSettings();
   }
 }
 

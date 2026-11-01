@@ -15,6 +15,7 @@ import '../../core/services/category_names_service.dart';
 import '../../core/services/entitlement_service.dart';
 import '../../core/services/haptic_service.dart';
 import '../../core/services/review_service.dart';
+import '../../core/widgets/status_toast.dart';
 import '../gallery/data/screenshot_repository.dart';
 import '../gallery/providers/gallery_provider.dart';
 import 'widgets/category_picker_sheet.dart';
@@ -244,7 +245,7 @@ class _SortingScreenState extends ConsumerState<SortingScreen> {
       debugPrint('Toplu swipe sil hatası: $error\n$stackTrace');
       if (mounted) {
         setState(() => _finishing = false);
-        _showSnack(l10n.sortingDeleteFailed);
+        _showSnack(l10n.sortingDeleteFailed, tone: StatusToastTone.error);
       }
       return;
     }
@@ -304,9 +305,11 @@ class _SortingScreenState extends ConsumerState<SortingScreen> {
     }
   }
 
-  void _showSnack(String message) {
-    ScaffoldMessenger.of(context)
-        .showSnackBar(SnackBar(content: Text(message)));
+  void _showSnack(
+    String message, {
+    StatusToastTone tone = StatusToastTone.neutral,
+  }) {
+    showStatusToast(context, message, tone: tone);
   }
 }
 

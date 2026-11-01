@@ -9,6 +9,7 @@ import '../../core/constants/ui_constants.dart';
 import '../../core/l10n/l10n_extension.dart';
 import '../../core/services/haptic_service.dart';
 import '../../core/utils/link_opener.dart';
+import '../../core/widgets/status_toast.dart';
 import 'providers/purchase_provider.dart';
 import 'widgets/feature_list.dart';
 import 'widgets/pack_section.dart';
@@ -36,8 +37,10 @@ class PaywallScreen extends ConsumerWidget {
         if (credits != null) {
           // Paket alımı Pro açmaz — ekranı kapatmadan kredi eklendiğini bildir.
           if (context.mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(l10n.paywallPackPurchased(credits))),
+            showStatusToast(
+              context,
+              l10n.paywallPackPurchased(credits),
+              tone: StatusToastTone.success,
             );
           }
         } else if (context.mounted) {
@@ -46,9 +49,9 @@ class PaywallScreen extends ConsumerWidget {
       } else if (next.status == PurchaseFlowStatus.error) {
         Haptics.warning();
         final String message = next.errorMessage ?? l10n.paywallPurchaseFailed;
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(message)));
+        if (context.mounted) {
+          showStatusToast(context, message, tone: StatusToastTone.error);
+        }
         ref.read(purchaseFlowProvider.notifier).dismissError();
       }
     });

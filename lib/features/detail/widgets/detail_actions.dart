@@ -11,6 +11,7 @@ import '../../../core/constants/ui_constants.dart';
 import '../../../core/l10n/l10n_extension.dart';
 import '../../../core/models/screenshot_entry.dart';
 import '../../../core/router/app_router.dart';
+import '../../../core/widgets/status_toast.dart';
 import '../../analysis/providers/analysis_queue_provider.dart';
 import '../../gallery/data/screenshot_repository.dart';
 
@@ -88,7 +89,7 @@ class _DetailActionsState extends ConsumerState<DetailActions> {
       case SingleAnalysisOutcome.limitReached:
         context.push(AppRoutes.paywallPacks);
       case SingleAnalysisOutcome.failed:
-        _showSnack(context.l10n.analysisFailedBanner);
+        _showError(context.l10n.analysisFailedBanner);
     }
   }
 
@@ -100,7 +101,7 @@ class _DetailActionsState extends ConsumerState<DetailActions> {
     if (!mounted) return;
     setState(() => _busy = false);
     if (file == null) {
-      _showSnack(failureMessage);
+      _showError(failureMessage);
       return;
     }
     await SharePlus.instance.share(ShareParams(files: [XFile(file.path)]));
@@ -114,7 +115,7 @@ class _DetailActionsState extends ConsumerState<DetailActions> {
       deleted = await PhotoManager.editor.deleteWithIds([widget.entry.assetId]);
     } catch (error, stackTrace) {
       debugPrint('Silme hatası (${widget.entry.assetId}): $error\n$stackTrace');
-      if (mounted) _showSnack(failureMessage);
+      if (mounted) _showError(failureMessage);
       return;
     }
     // Boş liste = kullanıcı sistem onayını reddetti; sessiz geçilir.
@@ -125,8 +126,7 @@ class _DetailActionsState extends ConsumerState<DetailActions> {
     if (mounted) context.pop();
   }
 
-  void _showSnack(String message) {
-    ScaffoldMessenger.of(context)
-        .showSnackBar(SnackBar(content: Text(message)));
+  void _showError(String message) {
+    showStatusToast(context, message, tone: StatusToastTone.error);
   }
 }

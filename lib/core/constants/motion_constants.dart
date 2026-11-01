@@ -6,6 +6,13 @@ import 'package:flutter/physics.dart';
 /// 1 − damping oranı. Varsayılan sekmesizdir; sekme yalnız momentumlu
 /// jestlerden (fırlatma, sürükleme bırakma) sonra kullanılır.
 abstract final class AppSprings {
+  /// Basış anı: neredeyse anlık (CSS `:active` 100ms) — tepki parmak değdiği
+  /// karede görünsün, kısa dokunuşlarda bile basılı hal fark edilsin.
+  static final SpringDescription press =
+      SpringDescription.withDurationAndBounce(
+        duration: const Duration(milliseconds: 100),
+      );
+
   /// Küçük, hızlı geri bildirimler (basış bırakma, toggle). Damping 1.0.
   static final SpringDescription snappy =
       SpringDescription.withDurationAndBounce(
@@ -38,6 +45,16 @@ abstract final class AppSprings {
 abstract final class AppMotion {
   /// Basılı tutulan öğenin ölçeği — dokunuşun ilk karesinde uygulanır.
   static const double pressScale = 0.97;
+
+  /// Reduce Motion açıkken ölçek yerine kullanılan basılı opaklık.
+  static const double pressedOpacity = 0.6;
+
+  /// Kaydırılabilir içerikte basılı görünümün gecikmesi (UIScrollView
+  /// `delaysContentTouches`): kaydırmaya başlayan parmak karoyu kırpıştırmaz.
+  static const Duration scrollPressDelay = Duration(milliseconds: 100);
+
+  /// Gecikme dolmadan biten hızlı dokunuşta basılı halin görünür kalma süresi.
+  static const Duration pressFlash = Duration(milliseconds: 100);
 
   /// Bir yöne kilitlenmeden önce gereken hareket (yanlış tetiklemeyi önler).
   static const double hysteresis = 10;

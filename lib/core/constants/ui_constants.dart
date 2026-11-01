@@ -71,9 +71,49 @@ abstract final class AppGlass {
   static const double shadowAlpha = 0.14;
   static const double shadowAlphaDark = 0.44;
 
+  /// Büyük başlıklı gezinme barının içerik altına girince aldığı opaklık.
+  static const double navBarFillAlpha = 0.8;
+
+  /// Gölgenin yayılımı ve aşağı kayması (px) — büyük yüzey = kalın malzeme.
+  static const double shadowBlur = 22;
+  static const double shadowOffsetY = 8;
+
+  /// Camın arkasındaki renkleri canlandıran doygunluk çarpanı (iOS ~%180).
+  static const double saturation = 1.8;
+
+  /// Üst kenarda ışığı yakalayan parlak çizginin opaklığı; aşağı doğru
+  /// [rimAlphaBottom]'a söner (Apple malzemelerindeki "light catching" kenar).
+  static const double rimAlphaTop = 0.5;
+  static const double rimAlphaTopDark = 0.22;
+  static const double rimAlphaBottom = 0.04;
+  static const double rimWidth = 0.75;
+
   /// Seçili sekmeyi saran düz kapsülün primary ton opaklığı — inceltilmiş, iOS
   /// tab bar'ında seçim vurgusu belli belirsizdir.
   static const double indicatorTint = 0.12;
+}
+
+/// Üstten kayan durum bildirimi (StatusToast) ayarları.
+abstract final class AppToast {
+  /// Ekranda kalma süresi; aksiyonlu bildirim okunup basılabilsin diye uzun.
+  static const Duration duration = Duration(seconds: 3);
+  static const Duration durationWithAction = Duration(seconds: 5);
+
+  /// Kapsülün en geniş hali (büyük ekranda satır gibi yayılmasın).
+  static const double maxWidth = 420;
+
+  /// Kapsülün asgari yüksekliği (44pt dokunma hedefi).
+  static const double minHeight = 48;
+  static const double iconSize = 20;
+}
+
+/// Boş durum görünümü ölçüleri.
+abstract final class AppEmptyState {
+  /// Başlığın üstündeki ikon (ContentUnavailableView'daki büyük sembol).
+  static const double iconSize = 48;
+
+  /// Metin satırlarının en geniş hali (okunabilir satır uzunluğu).
+  static const double maxTextWidth = 320;
 }
 
 /// Standart opaklık değerleri.

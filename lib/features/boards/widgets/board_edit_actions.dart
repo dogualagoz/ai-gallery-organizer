@@ -1,4 +1,4 @@
-// Jiggle düzenleme modunda bir karoya dokununca açılan yönetim aksiyon sayfası:
+// Jiggle düzenleme modunda bir karoya dokununca açılan yönetim action sheet'i:
 // yeniden adlandır, fotoğrafları seç (toplu sil/taşı), tümünü sil ve (özel
 // board'da) panoyu sil. Sistem kategorilerinde varsayılan amaç bilgi olarak kalır.
 import 'package:flutter/material.dart';
@@ -6,7 +6,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:photo_manager/photo_manager.dart';
 
-import '../../../core/constants/ui_constants.dart';
 import '../../../core/l10n/category_labels.dart';
 import '../../../core/l10n/l10n_extension.dart';
 import '../../../core/models/board.dart';
@@ -15,12 +14,12 @@ import '../../../core/models/screenshot_entry.dart';
 import '../../../core/router/app_router.dart';
 import '../../../core/services/category_names_service.dart';
 import '../../../core/services/entitlement_service.dart';
-import '../../../core/widgets/confirm_sheet.dart';
+import '../../../core/widgets/app_dialogs.dart';
+import '../../../core/widgets/status_toast.dart';
 import '../../gallery/data/screenshot_repository.dart';
 import '../../gallery/providers/gallery_provider.dart';
 import '../board_detail_screen.dart';
 import '../providers/board_provider.dart';
-import 'board_name_dialog.dart';
 
 /// Düzenleme modu aksiyon sayfasından seçilen işlem.
 enum _BoardEditAction { rename, select, deleteAll, deleteBoard }
@@ -38,7 +37,6 @@ Future<void> showBoardEditActions(
     'Tam olarak board ya da category verilmeli.',
   );
   final l10n = context.l10n;
-  final ColorScheme scheme = Theme.of(context).colorScheme;
   final List<ScreenshotEntry> entries =
       ref.read(galleryProvider).value ?? const [];
   final List<ScreenshotEntry> filtered = category != null
@@ -54,81 +52,35 @@ Future<void> showBoardEditActions(
       ? l10n.categoryDefaultNameHint(category.label(l10n))
       : null;
 
-  final _BoardEditAction? action = await showModalBottomSheet<_BoardEditAction>(
-    context: context,
-    showDragHandle: true,
-    builder: (sheetContext) => SafeArea(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(
-              AppSpacing.lg,
-              0,
-              AppSpacing.lg,
-              AppSpacing.sm,
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: Theme.of(sheetContext).textTheme.titleMedium,
-                ),
-                if (subtitle != null) ...[
-                  const SizedBox(height: 2),
-                  Text(
-                    subtitle,
-                    style: Theme.of(sheetContext).textTheme.bodySmall?.copyWith(
-                      color: scheme.onSurfaceVariant,
-                    ),
-                  ),
-                ],
-              ],
-            ),
-          ),
-          ListTile(
-            leading: const Icon(Icons.edit_outlined),
-            title: Text(
-              category != null
-                  ? l10n.categoryRenameAction
-                  : l10n.boardsRenameAction,
-            ),
-            onTap: () =>
-                Navigator.of(sheetContext).pop(_BoardEditAction.rename),
-          ),
-          if (filtered.isNotEmpty)
-            ListTile(
-              leading: const Icon(Icons.checklist_outlined),
-              title: Text(l10n.bulkSelectAction),
-              onTap: () =>
-                  Navigator.of(sheetContext).pop(_BoardEditAction.select),
-            ),
-          if (filtered.isNotEmpty)
-            ListTile(
-              leading: Icon(Icons.delete_sweep_outlined, color: scheme.error),
-              title: Text(
-                l10n.categoryDeleteAllAction,
-                style: TextStyle(color: scheme.error),
-              ),
-              onTap: () =>
-                  Navigator.of(sheetContext).pop(_BoardEditAction.deleteAll),
-            ),
-          if (board != null)
-            ListTile(
-              leading: Icon(Icons.delete_outline, color: scheme.error),
-              title: Text(
-                l10n.boardsDeleteAction,
-                style: TextStyle(color: scheme.error),
-              ),
-              onTap: () =>
-                  Navigator.of(sheetContext).pop(_BoardEditAction.deleteBoard),
-            ),
-          const SizedBox(height: AppSpacing.sm),
-        ],
+  final _BoardEditAction? action = await showActionSheet<_BoardEditAction>(
+    context,
+    title: title,
+    message: subtitle,
+    actions: [
+      SheetAction(
+        label: category != null
+            ? l10n.categoryRenameAction
+            : l10n.boardsRenameAction,
+        value: _BoardEditAction.rename,
       ),
-    ),
+      if (filtered.isNotEmpty)
+        SheetAction(
+          label: l10n.bulkSelectAction,
+          value: _BoardEditAction.select,
+        ),
+      if (filtered.isNotEmpty)
+        SheetAction(
+          label: l10n.categoryDeleteAllAction,
+          value: _BoardEditAction.deleteAll,
+          destructive: true,
+        ),
+      if (board != null)
+        SheetAction(
+          label: l10n.boardsDeleteAction,
+          value: _BoardEditAction.deleteBoard,
+          destructive: true,
+        ),
+    ],
   );
 
   if (action == null || !context.mounted) return;
@@ -155,13 +107,12 @@ Future<void> _rename(
   if (category != null) {
     final Map<int, String> names = ref.read(categoryNamesProvider);
     final String current = names[category.index] ?? category.label(l10n);
-    final String? name = await showDialog<String>(
-      context: context,
-      builder: (_) => BoardNameDialog(
-        title: l10n.categoryRenameDialogTitle,
-        confirmLabel: l10n.categoryRenameAction,
-        initialValue: current,
-      ),
+    final String? name = await showTextPrompt(
+      context,
+      title: l10n.categoryRenameDialogTitle,
+      confirmLabel: l10n.categoryRenameAction,
+      initialValue: current,
+      placeholder: l10n.boardsNewBoardHint,
     );
     if (name == null) return;
     final CategoryNamesNotifier notifier = ref.read(
@@ -176,16 +127,15 @@ Future<void> _rename(
     return;
   }
 
-  final String? name = await showDialog<String>(
-    context: context,
-    builder: (_) => BoardNameDialog(
-      title: l10n.boardsRenameDialogTitle,
-      confirmLabel: l10n.boardsRenameAction,
-      initialValue: board!.name,
-    ),
+  final String? name = await showTextPrompt(
+    context,
+    title: l10n.boardsRenameDialogTitle,
+    confirmLabel: l10n.boardsRenameAction,
+    initialValue: board!.name,
+    placeholder: l10n.boardsNewBoardHint,
   );
-  if (name == null || name.isEmpty) return;
-  await ref.read(boardsProvider.notifier).rename(board!.id, name);
+  if (name == null) return;
+  await ref.read(boardsProvider.notifier).rename(board.id, name);
 }
 
 /// Board/kategori detayını doğrudan seçim modunda açar (toplu sil/taşı).
@@ -223,13 +173,11 @@ Future<void> _deleteAll(
 ) async {
   if (filtered.isEmpty) return;
   final l10n = context.l10n;
-  final bool confirmed = await showConfirmSheet(
+  final bool confirmed = await showDestructiveConfirm(
     context,
     title: l10n.categoryDeleteAllConfirmTitle(filtered.length),
-    body: l10n.categoryDeleteAllConfirmBody,
+    message: l10n.categoryDeleteAllConfirmBody,
     confirmLabel: l10n.categoryDeleteAllAction,
-    icon: Icons.delete_sweep_outlined,
-    destructive: true,
   );
   if (!confirmed || !context.mounted) return;
 
@@ -243,8 +191,11 @@ Future<void> _deleteAll(
   } catch (error, stackTrace) {
     debugPrint('Düzenleme modu toplu silme hatası: $error\n$stackTrace');
     if (context.mounted) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(l10n.bulkDeleteFailed)));
+      showStatusToast(
+        context,
+        l10n.bulkDeleteFailed,
+        tone: StatusToastTone.error,
+      );
     }
   }
 }
@@ -256,13 +207,11 @@ Future<void> _deleteBoard(
   Board board,
 ) async {
   final l10n = context.l10n;
-  final bool confirmed = await showConfirmSheet(
+  final bool confirmed = await showDestructiveConfirm(
     context,
     title: l10n.boardsDeleteConfirmTitle,
-    body: l10n.boardsDeleteConfirmBody,
+    message: l10n.boardsDeleteConfirmBody,
     confirmLabel: l10n.boardsDeleteAction,
-    icon: Icons.delete_outline,
-    destructive: true,
   );
   if (!confirmed) return;
   await ref.read(boardsProvider.notifier).delete(board.id);

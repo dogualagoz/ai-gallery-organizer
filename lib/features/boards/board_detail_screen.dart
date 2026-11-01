@@ -15,16 +15,16 @@ import '../../core/models/screenshot_entry.dart';
 import '../../core/router/app_router.dart';
 import '../../core/services/category_names_service.dart';
 import '../../core/services/entitlement_service.dart';
-import '../../core/widgets/confirm_sheet.dart';
+import '../../core/widgets/app_dialogs.dart';
 import '../../core/widgets/edge_swipe_back.dart';
 import '../../core/widgets/page_header.dart';
 import '../../core/widgets/screenshot_results_grid.dart';
+import '../../core/widgets/status_toast.dart';
 import '../analysis/providers/analysis_queue_provider.dart';
 import '../analysis/providers/recent_distribution_provider.dart';
 import '../gallery/data/screenshot_repository.dart';
 import '../gallery/providers/gallery_provider.dart';
 import 'providers/board_provider.dart';
-import 'widgets/board_name_dialog.dart';
 
 class BoardDetailScreen extends ConsumerStatefulWidget {
   const BoardDetailScreen.category({
@@ -208,39 +208,28 @@ class _BoardDetailScreenState extends ConsumerState<BoardDetailScreen> {
   /// Kategori "..." aksiyonları: eski açılır menü yerine iOS-tarzı aksiyon sheet.
   Future<void> _showCategoryActions(List<ScreenshotEntry> filtered) async {
     final l10n = context.l10n;
-    final ColorScheme scheme = Theme.of(context).colorScheme;
-    await showModalBottomSheet<void>(
-      context: context,
-      showDragHandle: true,
-      builder: (sheetContext) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: const Icon(Icons.edit_outlined),
-              title: Text(l10n.categoryRenameAction),
-              onTap: () {
-                Navigator.of(sheetContext).pop();
-                _renameCategory(widget.category!);
-              },
-            ),
-            if (filtered.isNotEmpty)
-              ListTile(
-                leading: Icon(Icons.delete_outline, color: scheme.error),
-                title: Text(
-                  l10n.categoryDeleteAllAction,
-                  style: TextStyle(color: scheme.error),
-                ),
-                onTap: () {
-                  Navigator.of(sheetContext).pop();
-                  _deleteAllCategory(filtered);
-                },
-              ),
-            const SizedBox(height: AppSpacing.sm),
-          ],
+    final _CategoryAction? action = await showActionSheet<_CategoryAction>(
+      context,
+      actions: [
+        SheetAction(
+          label: l10n.categoryRenameAction,
+          value: _CategoryAction.rename,
         ),
-      ),
+        if (filtered.isNotEmpty)
+          SheetAction(
+            label: l10n.categoryDeleteAllAction,
+            value: _CategoryAction.deleteAll,
+            destructive: true,
+          ),
+      ],
     );
+    if (action == null || !mounted) return;
+    switch (action) {
+      case _CategoryAction.rename:
+        await _renameCategory(widget.category!);
+      case _CategoryAction.deleteAll:
+        await _deleteAllCategory(filtered);
+    }
   }
 
   void _exitSelection() {
@@ -254,12 +243,11 @@ class _BoardDetailScreenState extends ConsumerState<BoardDetailScreen> {
   /// anasayfaya döner; analiz animasyonu orada oynar, haftalık kotadan harcanır.
   Future<void> _reanalyzeCategory(List<ScreenshotEntry> filtered) async {
     final l10n = context.l10n;
-    final bool confirmed = await showConfirmSheet(
+    final bool confirmed = await showConfirmAlert(
       context,
       title: l10n.categoryReanalyzeConfirmTitle,
-      body: l10n.categoryReanalyzeConfirmBody,
+      message: l10n.categoryReanalyzeConfirmBody,
       confirmLabel: l10n.categoryReanalyzeAction,
-      icon: Icons.auto_awesome_outlined,
     );
     if (!confirmed || !mounted) return;
 
@@ -279,13 +267,12 @@ class _BoardDetailScreenState extends ConsumerState<BoardDetailScreen> {
     final l10n = context.l10n;
     final Map<int, String> names = ref.read(categoryNamesProvider);
     final String current = names[category.index] ?? category.label(l10n);
-    final String? name = await showDialog<String>(
-      context: context,
-      builder: (_) => BoardNameDialog(
-        title: l10n.categoryRenameDialogTitle,
-        confirmLabel: l10n.categoryRenameAction,
-        initialValue: current,
-      ),
+    final String? name = await showTextPrompt(
+      context,
+      title: l10n.categoryRenameDialogTitle,
+      confirmLabel: l10n.categoryRenameAction,
+      initialValue: current,
+      placeholder: l10n.boardsNewBoardHint,
     );
     if (name == null || !mounted) return;
     final CategoryNamesNotifier notifier = ref.read(
@@ -303,13 +290,11 @@ class _BoardDetailScreenState extends ConsumerState<BoardDetailScreen> {
     if (filtered.isEmpty) return;
     final l10n = context.l10n;
     final int count = filtered.length;
-    final bool confirmed = await showConfirmSheet(
+    final bool confirmed = await showDestructiveConfirm(
       context,
       title: l10n.categoryDeleteAllConfirmTitle(count),
-      body: l10n.categoryDeleteAllConfirmBody,
+      message: l10n.categoryDeleteAllConfirmBody,
       confirmLabel: l10n.categoryDeleteAllAction,
-      icon: Icons.delete_sweep_outlined,
-      destructive: true,
     );
     if (!confirmed || !mounted) return;
 
@@ -323,8 +308,11 @@ class _BoardDetailScreenState extends ConsumerState<BoardDetailScreen> {
       debugPrint('Kategori toplu silme hatası: $error\n$stackTrace');
       if (mounted) {
         setState(() => _bulkDeleting = false);
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(l10n.bulkDeleteFailed)));
+        showStatusToast(
+          context,
+          l10n.bulkDeleteFailed,
+          tone: StatusToastTone.error,
+        );
       }
       return;
     }
@@ -378,8 +366,7 @@ class _BoardDetailScreenState extends ConsumerState<BoardDetailScreen> {
       debugPrint('Toplu silme hatası: $error\n$stackTrace');
       if (mounted) {
         setState(() => _bulkDeleting = false);
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(failureMessage)));
+        showStatusToast(context, failureMessage, tone: StatusToastTone.error);
       }
       return;
     }
@@ -396,42 +383,33 @@ class _BoardDetailScreenState extends ConsumerState<BoardDetailScreen> {
 
   Future<void> _showRenameDialog(BuildContext context, Board board) async {
     final l10n = context.l10n;
-    final String? name = await showDialog<String>(
-      context: context,
-      builder: (_) => BoardNameDialog(
-        title: l10n.boardsRenameDialogTitle,
-        confirmLabel: l10n.boardsRenameAction,
-        initialValue: board.name,
-      ),
+    final String? name = await showTextPrompt(
+      context,
+      title: l10n.boardsRenameDialogTitle,
+      confirmLabel: l10n.boardsRenameAction,
+      initialValue: board.name,
+      placeholder: l10n.boardsNewBoardHint,
     );
-    if (name == null || name.isEmpty) return;
+    if (name == null) return;
     await ref.read(boardsProvider.notifier).rename(board.id, name);
   }
 
   Future<void> _showDeleteConfirm(BuildContext context, String boardId) async {
     final l10n = context.l10n;
-    final bool? confirmed = await showDialog<bool>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: Text(l10n.boardsDeleteConfirmTitle),
-        content: Text(l10n.boardsDeleteConfirmBody),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: Text(l10n.cancelAction),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: Text(l10n.boardsDeleteAction),
-          ),
-        ],
-      ),
+    final bool confirmed = await showDestructiveConfirm(
+      context,
+      title: l10n.boardsDeleteConfirmTitle,
+      message: l10n.boardsDeleteConfirmBody,
+      confirmLabel: l10n.boardsDeleteAction,
     );
-    if (confirmed != true) return;
+    if (!confirmed) return;
     await ref.read(boardsProvider.notifier).delete(boardId);
     if (context.mounted) Navigator.of(context).pop();
   }
 }
+
+/// Kategori "..." action sheet'inden seçilen işlem.
+enum _CategoryAction { rename, deleteAll }
 
 extension _FirstWhereOrNull<T> on List<T> {
   T? firstWhereOrNull(bool Function(T) test) {
