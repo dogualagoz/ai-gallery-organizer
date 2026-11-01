@@ -122,12 +122,6 @@ abstract class AppLocalizations {
   /// **'Done'**
   String get doneAction;
 
-  /// No description provided for @galleryTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Screenshots'**
-  String get galleryTitle;
-
   /// No description provided for @boardsTitle.
   ///
   /// In en, this message translates to:
@@ -187,12 +181,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Turkish'**
   String get settingsLanguageTurkish;
-
-  /// No description provided for @autoSortPausedChip.
-  ///
-  /// In en, this message translates to:
-  /// **'Auto-sort paused — upgrade to Pro'**
-  String get autoSortPausedChip;
 
   /// No description provided for @settingsSectionAutoSort.
   ///
@@ -308,12 +296,6 @@ abstract class AppLocalizations {
   /// **'Not now'**
   String get notNow;
 
-  /// No description provided for @gallerySyncTooltip.
-  ///
-  /// In en, this message translates to:
-  /// **'Sync library'**
-  String get gallerySyncTooltip;
-
   /// No description provided for @galleryEmptyTitle.
   ///
   /// In en, this message translates to:
@@ -410,12 +392,6 @@ abstract class AppLocalizations {
   /// **'{done} of {total} analyzed'**
   String analysisProgress(int done, int total);
 
-  /// No description provided for @analysisCancelAction.
-  ///
-  /// In en, this message translates to:
-  /// **'Cancel'**
-  String get analysisCancelAction;
-
   /// No description provided for @analysisCompleted.
   ///
   /// In en, this message translates to:
@@ -494,12 +470,6 @@ abstract class AppLocalizations {
   /// **'Snaply organizes {count} screenshots for free each week — your quota renews automatically. Packs and Pro are there when you need more.'**
   String onboardingBodyQuota(int count);
 
-  /// No description provided for @analyzeHeroTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Analyze {count} screenshots'**
-  String analyzeHeroTitle(int count);
-
   /// No description provided for @analyzeHeroQuotaHint.
   ///
   /// In en, this message translates to:
@@ -524,65 +494,11 @@ abstract class AppLocalizations {
   /// **'{count} trial analyses left'**
   String analyzeHeroTrialHint(int count);
 
-  /// No description provided for @analyzeCardTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Organize your screenshots'**
-  String get analyzeCardTitle;
-
-  /// No description provided for @analyzeCardPending.
-  ///
-  /// In en, this message translates to:
-  /// **'Pending'**
-  String get analyzeCardPending;
-
-  /// No description provided for @analyzeCardAnalyzed.
-  ///
-  /// In en, this message translates to:
-  /// **'Analyzed'**
-  String get analyzeCardAnalyzed;
-
-  /// No description provided for @analyzeCardRemaining.
-  ///
-  /// In en, this message translates to:
-  /// **'Remaining'**
-  String get analyzeCardRemaining;
-
-  /// No description provided for @analyzeCardUnlimited.
-  ///
-  /// In en, this message translates to:
-  /// **'Unlimited'**
-  String get analyzeCardUnlimited;
-
   /// No description provided for @analyzeUngroupedBar.
   ///
   /// In en, this message translates to:
   /// **'{count} new screenshots to organize'**
   String analyzeUngroupedBar(int count);
-
-  /// No description provided for @analyzeUngroupedQuotaTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Weekly limit reached'**
-  String get analyzeUngroupedQuotaTitle;
-
-  /// No description provided for @analyzeUngroupedQuotaBody.
-  ///
-  /// In en, this message translates to:
-  /// **'You\'ve used all your free analyses this week. Go Pro for unlimited analysis, or grab an analysis pack.'**
-  String get analyzeUngroupedQuotaBody;
-
-  /// No description provided for @analyzeUngroupedQuotaUpgrade.
-  ///
-  /// In en, this message translates to:
-  /// **'Go Pro'**
-  String get analyzeUngroupedQuotaUpgrade;
-
-  /// No description provided for @analyzeUngroupedQuotaNotNow.
-  ///
-  /// In en, this message translates to:
-  /// **'Not now'**
-  String get analyzeUngroupedQuotaNotNow;
 
   /// No description provided for @analysisExperienceTitle.
   ///
@@ -1322,59 +1238,11 @@ abstract class AppLocalizations {
   /// **'The link couldn\'t be opened. Please try again.'**
   String get settingsLinkFailed;
 
-  /// No description provided for @homeWeeklyLimitUnlimited.
-  ///
-  /// In en, this message translates to:
-  /// **'Unlimited'**
-  String get homeWeeklyLimitUnlimited;
-
-  /// No description provided for @homeWeeklyLimitRemaining.
-  ///
-  /// In en, this message translates to:
-  /// **'{count} left'**
-  String homeWeeklyLimitRemaining(int count);
-
   /// No description provided for @homeWeeklyLimitResetIn.
   ///
   /// In en, this message translates to:
   /// **'Weekly quota renews in {days} days.'**
   String homeWeeklyLimitResetIn(int days);
-
-  /// No description provided for @homeWeeklyLimitUnlimitedHint.
-  ///
-  /// In en, this message translates to:
-  /// **'You have unlimited analyses with Pro.'**
-  String get homeWeeklyLimitUnlimitedHint;
-
-  /// No description provided for @analysisCancelSheetTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Stop analysis?'**
-  String get analysisCancelSheetTitle;
-
-  /// No description provided for @analysisCancelStop.
-  ///
-  /// In en, this message translates to:
-  /// **'Stop here'**
-  String get analysisCancelStop;
-
-  /// No description provided for @analysisCancelStopHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Keep the screenshots analyzed so far.'**
-  String get analysisCancelStopHint;
-
-  /// No description provided for @analysisCancelReset.
-  ///
-  /// In en, this message translates to:
-  /// **'Reset'**
-  String get analysisCancelReset;
-
-  /// No description provided for @analysisCancelResetHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Discard this run and start over.'**
-  String get analysisCancelResetHint;
 
   /// No description provided for @categoryReanalyzeAction.
   ///
@@ -1399,12 +1267,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'There\'s nothing to re-analyze here.'**
   String get categoryReanalyzeEmpty;
-
-  /// No description provided for @homeRecentsMore.
-  ///
-  /// In en, this message translates to:
-  /// **'Show more'**
-  String get homeRecentsMore;
 
   /// No description provided for @recentsScreenTitle.
   ///
@@ -1513,6 +1375,102 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Boards'**
   String get moveSectionBoards;
+
+  /// No description provided for @librarySeeAll.
+  ///
+  /// In en, this message translates to:
+  /// **'See All'**
+  String get librarySeeAll;
+
+  /// No description provided for @boardsEditAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get boardsEditAction;
+
+  /// No description provided for @autoSortHintTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sort new screenshots automatically'**
+  String get autoSortHintTitle;
+
+  /// No description provided for @autoSortHintBody.
+  ///
+  /// In en, this message translates to:
+  /// **'With Pro, Snaply organizes new screenshots as soon as they arrive.'**
+  String get autoSortHintBody;
+
+  /// No description provided for @autoSortHintAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Explore Pro'**
+  String get autoSortHintAction;
+
+  /// No description provided for @limitedAccessBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Snaply can only see the photos you selected.'**
+  String get limitedAccessBody;
+
+  /// No description provided for @limitedAccessAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Select More'**
+  String get limitedAccessAction;
+
+  /// No description provided for @galleryLoadFailedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load your library'**
+  String get galleryLoadFailedTitle;
+
+  /// No description provided for @galleryLoadFailedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong while reading your screenshots.'**
+  String get galleryLoadFailedBody;
+
+  /// No description provided for @retryAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Try Again'**
+  String get retryAction;
+
+  /// No description provided for @analysisPauseTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Pause analysis?'**
+  String get analysisPauseTitle;
+
+  /// No description provided for @analysisPauseBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Screenshots analyzed so far are kept. You can continue with the rest anytime.'**
+  String get analysisPauseBody;
+
+  /// No description provided for @analysisPauseAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Pause'**
+  String get analysisPauseAction;
+
+  /// No description provided for @analysisContinueAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep Going'**
+  String get analysisContinueAction;
+
+  /// No description provided for @analysisTrialQuotaUsed.
+  ///
+  /// In en, this message translates to:
+  /// **'Trial analyses used up'**
+  String get analysisTrialQuotaUsed;
+
+  /// No description provided for @analysisGetMoreAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Get More'**
+  String get analysisGetMoreAction;
 }
 
 class _AppLocalizationsDelegate

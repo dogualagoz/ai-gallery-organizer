@@ -22,9 +22,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get doneAction => 'Done';
 
   @override
-  String get galleryTitle => 'Screenshots';
-
-  @override
   String get boardsTitle => 'Boards';
 
   @override
@@ -53,9 +50,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsLanguageTurkish => 'Turkish';
-
-  @override
-  String get autoSortPausedChip => 'Auto-sort paused — upgrade to Pro';
 
   @override
   String get settingsSectionAutoSort => 'Auto-sort';
@@ -120,9 +114,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get notNow => 'Not now';
 
   @override
-  String get gallerySyncTooltip => 'Sync library';
-
-  @override
   String get galleryEmptyTitle => 'No screenshots yet';
 
   @override
@@ -179,9 +170,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String analysisProgress(int done, int total) {
     return '$done of $total analyzed';
   }
-
-  @override
-  String get analysisCancelAction => 'Cancel';
 
   @override
   String analysisCompleted(int count) {
@@ -241,11 +229,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String analyzeHeroTitle(int count) {
-    return 'Analyze $count screenshots';
-  }
-
-  @override
   String analyzeHeroQuotaHint(int remaining, int limit) {
     return '$remaining of $limit free analyses left this week';
   }
@@ -264,37 +247,9 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get analyzeCardTitle => 'Organize your screenshots';
-
-  @override
-  String get analyzeCardPending => 'Pending';
-
-  @override
-  String get analyzeCardAnalyzed => 'Analyzed';
-
-  @override
-  String get analyzeCardRemaining => 'Remaining';
-
-  @override
-  String get analyzeCardUnlimited => 'Unlimited';
-
-  @override
   String analyzeUngroupedBar(int count) {
     return '$count new screenshots to organize';
   }
-
-  @override
-  String get analyzeUngroupedQuotaTitle => 'Weekly limit reached';
-
-  @override
-  String get analyzeUngroupedQuotaBody =>
-      'You\'ve used all your free analyses this week. Go Pro for unlimited analysis, or grab an analysis pack.';
-
-  @override
-  String get analyzeUngroupedQuotaUpgrade => 'Go Pro';
-
-  @override
-  String get analyzeUngroupedQuotaNotNow => 'Not now';
 
   @override
   String get analysisExperienceTitle => 'Organizing your screenshots';
@@ -714,36 +669,9 @@ class AppLocalizationsEn extends AppLocalizations {
       'The link couldn\'t be opened. Please try again.';
 
   @override
-  String get homeWeeklyLimitUnlimited => 'Unlimited';
-
-  @override
-  String homeWeeklyLimitRemaining(int count) {
-    return '$count left';
-  }
-
-  @override
   String homeWeeklyLimitResetIn(int days) {
     return 'Weekly quota renews in $days days.';
   }
-
-  @override
-  String get homeWeeklyLimitUnlimitedHint =>
-      'You have unlimited analyses with Pro.';
-
-  @override
-  String get analysisCancelSheetTitle => 'Stop analysis?';
-
-  @override
-  String get analysisCancelStop => 'Stop here';
-
-  @override
-  String get analysisCancelStopHint => 'Keep the screenshots analyzed so far.';
-
-  @override
-  String get analysisCancelReset => 'Reset';
-
-  @override
-  String get analysisCancelResetHint => 'Discard this run and start over.';
 
   @override
   String get categoryReanalyzeAction => 'Re-analyze';
@@ -757,9 +685,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get categoryReanalyzeEmpty => 'There\'s nothing to re-analyze here.';
-
-  @override
-  String get homeRecentsMore => 'Show more';
 
   @override
   String get recentsScreenTitle => 'Recent screenshots';
@@ -827,4 +752,56 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get moveSectionBoards => 'Boards';
+
+  @override
+  String get librarySeeAll => 'See All';
+
+  @override
+  String get boardsEditAction => 'Edit';
+
+  @override
+  String get autoSortHintTitle => 'Sort new screenshots automatically';
+
+  @override
+  String get autoSortHintBody =>
+      'With Pro, Snaply organizes new screenshots as soon as they arrive.';
+
+  @override
+  String get autoSortHintAction => 'Explore Pro';
+
+  @override
+  String get limitedAccessBody =>
+      'Snaply can only see the photos you selected.';
+
+  @override
+  String get limitedAccessAction => 'Select More';
+
+  @override
+  String get galleryLoadFailedTitle => 'Couldn\'t load your library';
+
+  @override
+  String get galleryLoadFailedBody =>
+      'Something went wrong while reading your screenshots.';
+
+  @override
+  String get retryAction => 'Try Again';
+
+  @override
+  String get analysisPauseTitle => 'Pause analysis?';
+
+  @override
+  String get analysisPauseBody =>
+      'Screenshots analyzed so far are kept. You can continue with the rest anytime.';
+
+  @override
+  String get analysisPauseAction => 'Pause';
+
+  @override
+  String get analysisContinueAction => 'Keep Going';
+
+  @override
+  String get analysisTrialQuotaUsed => 'Trial analyses used up';
+
+  @override
+  String get analysisGetMoreAction => 'Get More';
 }

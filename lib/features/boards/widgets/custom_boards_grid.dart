@@ -1,27 +1,28 @@
-// Kullanıcı board'ları ızgarası + yeni board kartı — Home ekranında kullanılır.
-// Düzenleme modunda: sürükle-sırala + karo köşesinden silme/yeniden adlandırma.
+// Kullanıcı panoları ızgarası + sonda "Yeni pano" kartı — Kütüphane'de
+// kullanılır. Davranış sistem kategorileriyle aynı: dokun → aç, uzun bas →
+// bağlam menüsü; düzenleme modunda sürükle-sırala ve yönetim sayfası.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:photo_manager/photo_manager.dart';
 
+import '../../../core/constants/app_icons.dart';
 import '../../../core/constants/ui_constants.dart';
 import '../../../core/l10n/l10n_extension.dart';
 import '../../../core/models/board.dart';
 import '../../../core/models/screenshot_entry.dart';
 import '../../../core/router/app_router.dart';
 import '../../../core/widgets/app_dialogs.dart';
-import '../../../core/widgets/fade_in_up.dart';
+import '../../../core/widgets/pressable.dart';
 import '../../../core/widgets/reorderable_tile_grid.dart';
+import '../../../core/widgets/surface_card.dart';
 import '../../gallery/data/screenshot_repository.dart';
 import '../providers/board_provider.dart';
+import 'board_context_menu.dart';
 import 'board_covers.dart';
 import 'board_edit_actions.dart';
 import 'board_tile.dart';
-import 'long_press_edit_wrapper.dart';
-import 'system_boards_grid.dart' show boardStaggerStep, boardCardAspectRatio;
 
-/// Kullanıcı board'ları + sonuna eklenen "yeni pano" kartı.
+/// Kullanıcı panoları + sonuna eklenen "yeni pano" kartı.
 class CustomBoardsGrid extends ConsumerWidget {
   const CustomBoardsGrid({
     super.key,
@@ -43,16 +44,9 @@ class CustomBoardsGrid extends ConsumerWidget {
     return ReorderableTileGrid(
       itemCount: boards.length,
       editing: editing,
-      crossAxisCount: 2,
-      childAspectRatio: boardCardAspectRatio,
       keyBuilder: (index) => ValueKey<String>(boards[index].id),
-      // Düzenleme modunda "yeni pano" kartı gizlenir (iOS jiggle davranışı).
-      trailing: editing
-          ? null
-          : FadeInUp(
-              delay: boardStaggerStep * boards.length,
-              child: _NewBoardTile(canCreate: canCreate),
-            ),
+      // Düzenleme modunda "yeni pano" kartı gizlenir (yalnız sıralama).
+      trailing: editing ? null : _NewBoardTile(canCreate: canCreate),
       onReorder: (from, to) {
         final List<String> ids = boards.map((b) => b.id).toList();
         final String moved = ids.removeAt(from);
@@ -64,61 +58,27 @@ class CustomBoardsGrid extends ConsumerWidget {
         final List<ScreenshotEntry> boardEntries = entries
             .where((entry) => entry.boardId == board.id)
             .toList();
-        final covers = boardCovers(repo, boardEntries);
-
-        if (editing) {
-          return _EditableBoardTile(
-            board: board,
-            count: boardEntries.length,
-            covers: covers,
-          );
-        }
-
-        return LongPressEditWrapper(
-          child: FadeInUp(
-            delay: boardStaggerStep * index,
-            child: BoardTile(
-              icon: Icons.folder_outlined,
-              label: board.name,
-              count: boardEntries.length,
-              covers: covers,
-              onOpen: () => context.push(AppRoutes.board(board.id)),
-            ),
-          ),
+        final Widget tile = BoardTile(
+          icon: AppIcons.board,
+          label: board.name,
+          count: boardEntries.length,
+          covers: boardCovers(repo, boardEntries),
+          onPressed: editing
+              ? () => showBoardEditActions(context, ref, board: board)
+              : () => context.push(AppRoutes.board(board.id)),
+        );
+        if (editing) return tile;
+        return BoardContextMenu(
+          board: board,
+          isEmpty: boardEntries.isEmpty,
+          child: tile,
         );
       },
     );
   }
 }
 
-/// Düzenleme modundaki özel pano karosu: sabit kart; dokununca yönetim aksiyon
-/// sayfası açılır (yeniden adlandır / fotoğrafları seç / tümünü sil / panoyu sil).
-class _EditableBoardTile extends ConsumerWidget {
-  const _EditableBoardTile({
-    required this.board,
-    required this.count,
-    required this.covers,
-  });
-
-  final Board board;
-  final int count;
-  final List<AssetEntity> covers;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return GestureDetector(
-      onTap: () => showBoardEditActions(context, ref, board: board),
-      child: BoardTileStatic(
-        icon: Icons.folder_outlined,
-        label: board.name,
-        count: count,
-        covers: covers,
-      ),
-    );
-  }
-}
-
-/// Yeni board oluşturma kartı; Pro değilse kilitli görünür ve paywall'a yönlendirir.
+/// Yeni pano kartı; Pro değilse kilitli görünür ve paywall'a yönlendirir.
 class _NewBoardTile extends ConsumerWidget {
   const _NewBoardTile({required this.canCreate});
 
@@ -129,45 +89,31 @@ class _NewBoardTile extends ConsumerWidget {
     final l10n = context.l10n;
     final ColorScheme scheme = Theme.of(context).colorScheme;
 
-    return InkWell(
-      borderRadius: BorderRadius.circular(AppRadius.lg),
-      onTap: () => canCreate
+    return Pressable(
+      onPressed: () => canCreate
           ? _showCreateDialog(context, ref)
           : context.push(AppRoutes.paywall),
-      child: Container(
-        decoration: BoxDecoration(
-          border: Border.all(color: scheme.outline),
-          borderRadius: BorderRadius.circular(AppRadius.lg),
-        ),
-        child: Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: scheme.primary.withValues(alpha: 0.08),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  canCreate ? Icons.add : Icons.lock_outline,
-                  size: 20,
-                  color: scheme.primary,
-                ),
+      child: SurfaceCard(
+        padding: const EdgeInsets.all(AppSpacing.md),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              canCreate ? AppIcons.add : AppIcons.lock,
+              size: AppSizes.statusIcon,
+              color: scheme.primary,
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            Text(
+              canCreate ? l10n.boardsNewBoardAction : l10n.boardsLimitTitle,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: canCreate ? scheme.primary : scheme.onSurfaceVariant,
               ),
-              const SizedBox(height: AppSpacing.sm),
-              Text(
-                canCreate ? l10n.boardsNewBoardAction : l10n.boardsLimitTitle,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: scheme.onSurfaceVariant,
-                ),
-                textAlign: TextAlign.center,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ],
-          ),
+              textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
         ),
       ),
     );
@@ -181,7 +127,7 @@ class _NewBoardTile extends ConsumerWidget {
       confirmLabel: l10n.boardsCreateAction,
       placeholder: l10n.boardsNewBoardHint,
     );
-    if (name == null) return;
+    if (name == null || !context.mounted) return;
     await ref.read(boardsProvider.notifier).create(name);
   }
 }

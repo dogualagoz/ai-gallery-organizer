@@ -25,6 +25,7 @@ abstract final class PrefKeys {
   static const String analysisCredits = 'analysis_credits';
   static const String deliveredPackTxIds = 'delivered_pack_tx_ids';
   static const String autoSortEnabled = 'auto_sort_enabled';
+  static const String autoSortHintDismissed = 'auto_sort_hint_dismissed';
   static const String appLocale = 'app_locale';
   static const String lastReviewRequestMs = 'last_review_request_ms';
   static const String appOpenCount = 'app_open_count';
@@ -109,6 +110,35 @@ class AutoSortEnabledNotifier extends Notifier<bool> {
     await ref
         .read(sharedPreferencesProvider)
         .setBool(PrefKeys.autoSortEnabled, enabled);
+  }
+}
+
+/// Free kullanıcıya Kütüphane'de gösterilen otomatik sıralama ipucu bir kez
+/// kapatılınca bir daha çıkmaz.
+final autoSortHintDismissedProvider =
+    NotifierProvider<AutoSortHintDismissedNotifier, bool>(
+      AutoSortHintDismissedNotifier.new,
+    );
+
+class AutoSortHintDismissedNotifier extends Notifier<bool> {
+  @override
+  bool build() {
+    return ref
+            .read(sharedPreferencesProvider)
+            .getBool(PrefKeys.autoSortHintDismissed) ??
+        false;
+  }
+
+  Future<void> dismiss() async {
+    state = true;
+    try {
+      await ref
+          .read(sharedPreferencesProvider)
+          .setBool(PrefKeys.autoSortHintDismissed, true);
+    } catch (error, stackTrace) {
+      // Bu oturumda gizli kalır; kalıcı yazılamadıysa sonraki açılışta döner.
+      debugPrint('İpucu kapatma kaydedilemedi: $error\n$stackTrace');
+    }
   }
 }
 

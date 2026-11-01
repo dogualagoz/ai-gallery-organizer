@@ -16,6 +16,7 @@ import '../../core/utils/link_opener.dart';
 import '../../core/widgets/app_nav_scaffold.dart';
 import '../../core/widgets/page_header.dart';
 import '../../core/widgets/status_toast.dart';
+import '../analysis/providers/analysis_queue_provider.dart';
 import '../paywall/providers/purchase_provider.dart';
 
 /// Uygulama sürüm bilgisi (tek seferlik platform sorgusu).
@@ -459,6 +460,13 @@ class _DebugSection extends ConsumerWidget {
               label: 'Reset analysis usage & credits (debug)',
               onTap: () =>
                   ref.read(entitlementProvider.notifier).resetUsageForDebug(),
+            ),
+            // Kütüphane'deki analiz modülünü ve uçuşları gerçek istek atmadan
+            // oynatır; sheet kapatılınca animasyon izlenir.
+            _SettingsTile(
+              icon: Icons.science_outlined,
+              label: 'Simulate analysis (debug)',
+              onTap: () => ref.read(analysisQueueProvider.notifier).simulate(),
             ),
             _SettingsTile(
               icon: Icons.replay,

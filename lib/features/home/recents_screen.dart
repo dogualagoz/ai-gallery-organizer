@@ -1,6 +1,5 @@
-// Tüm son ekran görüntülerini 3 sütunlu ızgarada gösteren tam ekran.
-// Anasayfadaki "Daha fazla" bu ekranı açar; iOS push olduğu için native
-// soldan-sağa geri kaydırma kendiliğinden çalışır.
+// Tüm son ekran görüntülerini ızgarada gösteren tam ekran. Kütüphane'deki
+// "Son eklenenler" başlığının "Tümü" bağlantısı bu ekranı açar.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -35,10 +34,10 @@ class RecentsScreen extends ConsumerWidget {
           ),
           sliver: SliverGrid.builder(
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 3,
+              crossAxisCount: kScreenshotGridColumns,
               mainAxisSpacing: AppSpacing.xs,
               crossAxisSpacing: AppSpacing.xs,
-              childAspectRatio: 9 / 16,
+              childAspectRatio: kScreenshotTileAspect,
             ),
             itemCount: entries.length,
             itemBuilder: (context, index) {

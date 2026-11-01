@@ -1,10 +1,13 @@
-// iOS ana ekran "düzenleme modu" titreşimi: [enabled] iken çocuğu hafifçe
-// sağa-sola yalpalatır. Komşu karolar ters fazda sallansın diye [seed] parite'si
-// dönüş yönünü ters çevirir; böylece ızgara daha organik görünür.
-import 'package:flutter/material.dart';
+// iOS düzenleme modu titreşimi: yumuşak sinüs yalpalaması. Genlik açılışta ve
+// kapanışta yayla büyüyüp söner (ani başlama/durma yok); Reduce Motion'da hiç
+// titremez. Ağaç yapısı hep aynı kalır, çocuğun state'i sıfırlanmaz.
+import 'dart:math' as math;
 
-/// Titreşimin tepe açısı (radyan) — ~1.4°.
-const double _kJiggleAngle = 0.025;
+import 'package:flutter/physics.dart';
+import 'package:flutter/widgets.dart';
+
+import '../constants/motion_constants.dart';
+import '../utils/motion_physics.dart';
 
 class Jiggle extends StatefulWidget {
   const Jiggle({
@@ -16,63 +19,90 @@ class Jiggle extends StatefulWidget {
 
   final Widget child;
 
-  /// true iken titreşir; false iken çocuk hareketsiz gösterilir.
+  /// true iken titreşir; false iken genlik yayla sıfıra iner.
   final bool enabled;
 
-  /// Komşu karolar arasında faz farkı için (genelde ızgara index'i).
+  /// Komşu karolar arasında faz/yön farkı için (genelde ızgara index'i).
   final int seed;
 
   @override
   State<Jiggle> createState() => _JiggleState();
 }
 
-class _JiggleState extends State<Jiggle>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _controller = AnimationController(
+class _JiggleState extends State<Jiggle> with TickerProviderStateMixin {
+  /// Sürekli dönen faz: periyot başına 0→1 bir tur.
+  late final AnimationController _phase = AnimationController(
     vsync: this,
-    // Her karo biraz farklı hızda sallanır — mekanik senkron kırılsın.
-    duration: Duration(milliseconds: 160 + (widget.seed % 3) * 30),
+    duration: AppMotion.jigglePeriod,
   );
 
+  /// Genlik zarfı (0 = durgun, 1 = tam titreşim).
+  late final AnimationController _amplitude = AnimationController.unbounded(
+    vsync: this,
+  );
+
+  late final Listenable _animation = Listenable.merge([_phase, _amplitude]);
+
+  bool get _active => widget.enabled && !context.reduceMotion;
+
   @override
-  void initState() {
-    super.initState();
-    if (widget.enabled) _controller.repeat(reverse: true);
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _sync();
   }
 
   @override
-  void didUpdateWidget(covariant Jiggle oldWidget) {
+  void didUpdateWidget(Jiggle oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.enabled && !_controller.isAnimating) {
-      _controller.repeat(reverse: true);
-    } else if (!widget.enabled && _controller.isAnimating) {
-      _controller
-        ..stop()
-        ..value = 0;
-    }
+    if (oldWidget.enabled != widget.enabled) _sync();
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    _phase.dispose();
+    _amplitude.dispose();
     super.dispose();
+  }
+
+  /// Genliği hedefe yaylar; sönünce faz döngüsü de durur (boşta ticker yok).
+  void _sync() {
+    final bool active = _active;
+    if (active && !_phase.isAnimating) _phase.repeat();
+    final double target = active ? 1 : 0;
+    if (_amplitude.value == target && !_amplitude.isAnimating) {
+      if (!active) _phase.stop();
+      return;
+    }
+    _amplitude
+        .animateWith(
+          SpringSimulation(
+            AppSprings.standard,
+            _amplitude.value,
+            target,
+            _amplitude.velocity,
+          ),
+        )
+        .whenCompleteOrCancel(() {
+          if (mounted && !_active) _phase.stop();
+        });
   }
 
   @override
   Widget build(BuildContext context) {
-    if (!widget.enabled) return widget.child;
-    // Komşu karolar ters yönde başlasın.
+    // Komşular ters yönde ve farklı fazda başlar: ızgara mekanik görünmez.
     final double direction = widget.seed.isEven ? 1 : -1;
+    final double offset = (widget.seed * AppMotion.jigglePhaseSpread) % 1;
     return AnimatedBuilder(
-      animation: _controller,
-      builder: (context, child) {
-        // reverse:true ile değer 0→1→0 gider; -1..1'e taşıyıp açıya çevir.
-        return Transform.rotate(
-          angle: _kJiggleAngle * direction * (_controller.value * 2 - 1),
-          child: child,
-        );
-      },
+      animation: _animation,
       child: widget.child,
+      builder: (context, child) => Transform.rotate(
+        angle:
+            AppMotion.jiggleAngle *
+            direction *
+            _amplitude.value *
+            math.sin(2 * math.pi * (_phase.value + offset)),
+        child: child,
+      ),
     );
   }
 }

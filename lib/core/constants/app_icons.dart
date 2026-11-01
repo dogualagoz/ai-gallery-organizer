@@ -31,6 +31,7 @@ abstract final class AppIcons {
   static const IconData sync = CupertinoIcons.arrow_2_circlepath;
   static const IconData skip = CupertinoIcons.arrow_up;
   static const IconData stop = CupertinoIcons.stop_circle;
+  static const IconData pause = CupertinoIcons.pause_circle;
   static const IconData select = CupertinoIcons.checkmark_circle;
   static const IconData redeem = CupertinoIcons.gift;
 

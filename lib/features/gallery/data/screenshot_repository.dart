@@ -11,6 +11,7 @@ import '../../../core/models/screenshot_category.dart';
 import '../../../core/models/screenshot_entry.dart';
 import '../../../core/services/category_priors_service.dart';
 import '../../../core/services/hive_service.dart';
+import '../../../core/services/photo_permission_service.dart';
 
 final screenshotRepositoryProvider = Provider<ScreenshotRepository>((ref) {
   return ScreenshotRepository(
@@ -57,6 +58,7 @@ class ScreenshotRepository {
 
   /// Cihazdaki screenshot'ları Hive ile eşitler.
   /// Yeni asset'ler `pending` olarak eklenir, silinmiş asset kayıtları düşülür.
+  /// Erişim yoksa [PhotoAccessDeniedException] fırlatır.
   /// Dönen değer: yeni eklenen kayıt sayısı.
   Future<int> syncLibrary() async {
     final List<AssetEntity> assets = await _fetchScreenshotAssets();
@@ -91,7 +93,8 @@ class ScreenshotRepository {
   Future<List<AssetEntity>> _fetchScreenshotAssets() async {
     final PermissionState permission =
         await PhotoManager.requestPermissionExtend();
-    if (!permission.hasAccess) return const [];
+    // Boş liste dönülmez: erişimsizlik "hiç ekran görüntüsü yok" sanılmasın.
+    if (!permission.hasAccess) throw const PhotoAccessDeniedException();
 
     final List<AssetPathEntity> paths = await PhotoManager.getAssetPathList(
       type: RequestType.image,

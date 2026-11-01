@@ -22,9 +22,6 @@ class AppLocalizationsTr extends AppLocalizations {
   String get doneAction => 'Bitti';
 
   @override
-  String get galleryTitle => 'Ekran Görüntüleri';
-
-  @override
   String get boardsTitle => 'Panolar';
 
   @override
@@ -53,10 +50,6 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get settingsLanguageTurkish => 'Türkçe';
-
-  @override
-  String get autoSortPausedChip =>
-      'Otomatik düzenleme duraklatıldı — Pro\'ya geç';
 
   @override
   String get settingsSectionAutoSort => 'Otomatik düzenleme';
@@ -122,9 +115,6 @@ class AppLocalizationsTr extends AppLocalizations {
   String get notNow => 'Şimdi değil';
 
   @override
-  String get gallerySyncTooltip => 'Kütüphaneyi eşitle';
-
-  @override
   String get galleryEmptyTitle => 'Henüz ekran görüntüsü yok';
 
   @override
@@ -179,9 +169,6 @@ class AppLocalizationsTr extends AppLocalizations {
   String analysisProgress(int done, int total) {
     return '$done/$total analiz edildi';
   }
-
-  @override
-  String get analysisCancelAction => 'İptal';
 
   @override
   String analysisCompleted(int count) {
@@ -241,11 +228,6 @@ class AppLocalizationsTr extends AppLocalizations {
   }
 
   @override
-  String analyzeHeroTitle(int count) {
-    return '$count ekran görüntüsünü analiz et';
-  }
-
-  @override
   String analyzeHeroQuotaHint(int remaining, int limit) {
     return 'Bu hafta $remaining/$limit ücretsiz analiz hakkın var';
   }
@@ -264,37 +246,9 @@ class AppLocalizationsTr extends AppLocalizations {
   }
 
   @override
-  String get analyzeCardTitle => 'Ekran görüntülerini düzenle';
-
-  @override
-  String get analyzeCardPending => 'Bekleyen';
-
-  @override
-  String get analyzeCardAnalyzed => 'Analiz edildi';
-
-  @override
-  String get analyzeCardRemaining => 'Kalan hak';
-
-  @override
-  String get analyzeCardUnlimited => 'Sınırsız';
-
-  @override
   String analyzeUngroupedBar(int count) {
     return '$count yeni ekran görüntüsü gruplanmayı bekliyor';
   }
-
-  @override
-  String get analyzeUngroupedQuotaTitle => 'Haftalık hakkın doldu';
-
-  @override
-  String get analyzeUngroupedQuotaBody =>
-      'Bu haftaki ücretsiz analiz hakkını kullandın. Sınırsız analiz için Pro\'ya geç ya da analiz paketi al.';
-
-  @override
-  String get analyzeUngroupedQuotaUpgrade => 'Pro\'ya yükselt';
-
-  @override
-  String get analyzeUngroupedQuotaNotNow => 'Şimdi değil';
 
   @override
   String get analysisExperienceTitle => 'Ekran görüntülerin gruplandırılıyor';
@@ -712,36 +666,9 @@ class AppLocalizationsTr extends AppLocalizations {
   String get settingsLinkFailed => 'Bağlantı açılamadı. Lütfen tekrar dene.';
 
   @override
-  String get homeWeeklyLimitUnlimited => 'Sınırsız';
-
-  @override
-  String homeWeeklyLimitRemaining(int count) {
-    return '$count kaldı';
-  }
-
-  @override
   String homeWeeklyLimitResetIn(int days) {
     return 'Haftalık kota $days gün sonra yenilenir.';
   }
-
-  @override
-  String get homeWeeklyLimitUnlimitedHint =>
-      'Pro ile sınırsız analiz hakkın var.';
-
-  @override
-  String get analysisCancelSheetTitle => 'Analiz durdurulsun mu?';
-
-  @override
-  String get analysisCancelStop => 'Yarıda kes';
-
-  @override
-  String get analysisCancelStopHint => 'Şimdiye kadar analiz edilenler kalsın.';
-
-  @override
-  String get analysisCancelReset => 'Sıfırla';
-
-  @override
-  String get analysisCancelResetHint => 'Bu turu iptal et, baştan başla.';
 
   @override
   String get categoryReanalyzeAction => 'Yeniden analiz et';
@@ -757,9 +684,6 @@ class AppLocalizationsTr extends AppLocalizations {
   @override
   String get categoryReanalyzeEmpty =>
       'Burada yeniden analiz edilecek bir şey yok.';
-
-  @override
-  String get homeRecentsMore => 'Daha fazla göster';
 
   @override
   String get recentsScreenTitle => 'Son ekran görüntüleri';
@@ -827,4 +751,56 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get moveSectionBoards => 'Panolar';
+
+  @override
+  String get librarySeeAll => 'Tümü';
+
+  @override
+  String get boardsEditAction => 'Düzenle';
+
+  @override
+  String get autoSortHintTitle => 'Yeni ekran görüntülerini otomatik düzenle';
+
+  @override
+  String get autoSortHintBody =>
+      'Pro ile Snaply yeni ekran görüntülerini geldikleri anda düzenler.';
+
+  @override
+  String get autoSortHintAction => 'Pro\'yu İncele';
+
+  @override
+  String get limitedAccessBody =>
+      'Snaply yalnızca seçtiğin fotoğrafları görebiliyor.';
+
+  @override
+  String get limitedAccessAction => 'Daha Fazla Seç';
+
+  @override
+  String get galleryLoadFailedTitle => 'Kütüphane yüklenemedi';
+
+  @override
+  String get galleryLoadFailedBody =>
+      'Ekran görüntülerin okunurken bir sorun oluştu.';
+
+  @override
+  String get retryAction => 'Tekrar Dene';
+
+  @override
+  String get analysisPauseTitle => 'Analiz duraklatılsın mı?';
+
+  @override
+  String get analysisPauseBody =>
+      'Şimdiye kadar analiz edilenler korunur. Kalanlara istediğin zaman devam edebilirsin.';
+
+  @override
+  String get analysisPauseAction => 'Duraklat';
+
+  @override
+  String get analysisContinueAction => 'Devam Et';
+
+  @override
+  String get analysisTrialQuotaUsed => 'Deneme analiz hakların bitti';
+
+  @override
+  String get analysisGetMoreAction => 'Daha Fazla Al';
 }

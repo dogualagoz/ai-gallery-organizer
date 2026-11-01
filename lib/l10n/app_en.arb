@@ -4,7 +4,6 @@
   "tabLibrary": "Library",
   "tabClean": "Clean",
   "doneAction": "Done",
-  "galleryTitle": "Screenshots",
   "boardsTitle": "Boards",
   "settingsTitle": "Settings",
   "settingsTheme": "Appearance",
@@ -15,7 +14,6 @@
   "settingsLanguageSystem": "System",
   "settingsLanguageEnglish": "English",
   "settingsLanguageTurkish": "Turkish",
-  "autoSortPausedChip": "Auto-sort paused — upgrade to Pro",
   "settingsSectionAutoSort": "Auto-sort",
   "settingsAutoSortTitle": "Automatically sort new screenshots",
   "settingsAutoSortSubtitle": "Runs in the background whenever new screenshots appear",
@@ -35,7 +33,6 @@
   "permissionDeniedBody": "Snaply can't see your screenshots without permission. You can enable access in Settings.",
   "openSettings": "Open Settings",
   "notNow": "Not now",
-  "gallerySyncTooltip": "Sync library",
   "galleryEmptyTitle": "No screenshots yet",
   "galleryEmptyBody": "Take a screenshot, or sync your library to bring existing ones in.",
   "gallerySyncAction": "Sync now",
@@ -68,7 +65,6 @@
       "total": {"type": "int"}
     }
   },
-  "analysisCancelAction": "Cancel",
   "analysisCompleted": "{count} screenshots analyzed",
   "@analysisCompleted": {
     "placeholders": {
@@ -118,12 +114,6 @@
       "count": {"type": "int"}
     }
   },
-  "analyzeHeroTitle": "Analyze {count} screenshots",
-  "@analyzeHeroTitle": {
-    "placeholders": {
-      "count": {"type": "int"}
-    }
-  },
   "analyzeHeroQuotaHint": "{remaining} of {limit} free analyses left this week",
   "@analyzeHeroQuotaHint": {
     "placeholders": {
@@ -146,21 +136,12 @@
       "count": {"type": "int"}
     }
   },
-  "analyzeCardTitle": "Organize your screenshots",
-  "analyzeCardPending": "Pending",
-  "analyzeCardAnalyzed": "Analyzed",
-  "analyzeCardRemaining": "Remaining",
-  "analyzeCardUnlimited": "Unlimited",
   "analyzeUngroupedBar": "{count} new screenshots to organize",
   "@analyzeUngroupedBar": {
     "placeholders": {
       "count": {"type": "int"}
     }
   },
-  "analyzeUngroupedQuotaTitle": "Weekly limit reached",
-  "analyzeUngroupedQuotaBody": "You've used all your free analyses this week. Go Pro for unlimited analysis, or grab an analysis pack.",
-  "analyzeUngroupedQuotaUpgrade": "Go Pro",
-  "analyzeUngroupedQuotaNotNow": "Not now",
   "analysisExperienceTitle": "Organizing your screenshots",
   "analysisSceneSummaryTitle": "All sorted",
   "analysisSceneSummary": "{count} screenshots settled into {categories} categories",
@@ -360,30 +341,16 @@
     }
   },
   "settingsLinkFailed": "The link couldn't be opened. Please try again.",
-  "homeWeeklyLimitUnlimited": "Unlimited",
-  "homeWeeklyLimitRemaining": "{count} left",
-  "@homeWeeklyLimitRemaining": {
-    "placeholders": {
-      "count": {"type": "int"}
-    }
-  },
   "homeWeeklyLimitResetIn": "Weekly quota renews in {days} days.",
   "@homeWeeklyLimitResetIn": {
     "placeholders": {
       "days": {"type": "int"}
     }
   },
-  "homeWeeklyLimitUnlimitedHint": "You have unlimited analyses with Pro.",
-  "analysisCancelSheetTitle": "Stop analysis?",
-  "analysisCancelStop": "Stop here",
-  "analysisCancelStopHint": "Keep the screenshots analyzed so far.",
-  "analysisCancelReset": "Reset",
-  "analysisCancelResetHint": "Discard this run and start over.",
   "categoryReanalyzeAction": "Re-analyze",
   "categoryReanalyzeConfirmTitle": "Re-analyze this category?",
   "categoryReanalyzeConfirmBody": "The screenshots in this group will be sent to AI again. This uses your weekly analysis quota.",
   "categoryReanalyzeEmpty": "There's nothing to re-analyze here.",
-  "homeRecentsMore": "Show more",
   "recentsScreenTitle": "Recent screenshots",
   "sortingUndo": "Undo",
   "sortingDeleteDeferred": "Deletion paused. Tap the delete button up top when you're ready.",
@@ -426,5 +393,21 @@
   "moveAction": "Move",
   "moveSheetTitle": "Move to",
   "moveSectionCategories": "Categories",
-  "moveSectionBoards": "Boards"
+  "moveSectionBoards": "Boards",
+  "librarySeeAll": "See All",
+  "boardsEditAction": "Edit",
+  "autoSortHintTitle": "Sort new screenshots automatically",
+  "autoSortHintBody": "With Pro, Snaply organizes new screenshots as soon as they arrive.",
+  "autoSortHintAction": "Explore Pro",
+  "limitedAccessBody": "Snaply can only see the photos you selected.",
+  "limitedAccessAction": "Select More",
+  "galleryLoadFailedTitle": "Couldn't load your library",
+  "galleryLoadFailedBody": "Something went wrong while reading your screenshots.",
+  "retryAction": "Try Again",
+  "analysisPauseTitle": "Pause analysis?",
+  "analysisPauseBody": "Screenshots analyzed so far are kept. You can continue with the rest anytime.",
+  "analysisPauseAction": "Pause",
+  "analysisContinueAction": "Keep Going",
+  "analysisTrialQuotaUsed": "Trial analyses used up",
+  "analysisGetMoreAction": "Get More"
 }

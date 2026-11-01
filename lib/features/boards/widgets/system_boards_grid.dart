@@ -1,5 +1,7 @@
-// Sistem kategorileri (içerik içerenler) ızgarası — Home ekranında kullanılır.
-// Düzenleme modunda kategoriler sürüklenerek yeniden sıralanabilir (silme/ad yok).
+// Sistem kategorileri (içerik içerenler) ızgarası — Kütüphane'de kullanılır.
+// Normalde dokununca kategori açılır, uzun basınca bağlam menüsü gelir;
+// düzenleme modunda karolar titrer, basılı tutulup sürüklenerek sıralanır ve
+// dokununca yönetim sayfası açılır.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -10,25 +12,18 @@ import '../../../core/models/screenshot_category.dart';
 import '../../../core/models/screenshot_entry.dart';
 import '../../../core/router/app_router.dart';
 import '../../../core/services/category_order_service.dart';
-import '../../../core/widgets/fade_in_up.dart';
 import '../../../core/widgets/reorderable_tile_grid.dart';
 import '../../analysis/providers/recent_distribution_provider.dart';
-import '../../analysis/widgets/category_target_scope.dart';
+import '../../analysis/widgets/analysis_flights.dart';
 import '../../gallery/data/screenshot_repository.dart';
 import '../providers/board_provider.dart';
+import 'board_context_menu.dart';
 import 'board_covers.dart';
 import 'board_edit_actions.dart';
 import 'board_tile.dart';
-import 'long_press_edit_wrapper.dart';
 
-/// Kademeli giriş için kartlar arası gecikme.
-const Duration boardStaggerStep = Duration(milliseconds: 40);
-
-/// Kapak thumbnail'lı kartlar için kart oranı.
-const double boardCardAspectRatio = 1.05;
-
-/// [categories] listesindeki (genelde içerik>0 olan) sistem kategorileri ızgarası.
-/// Liste çağıran tarafça [categoryOrderProvider] ile sıralanmış gelir.
+/// [categories] listesindeki sistem kategorileri ızgarası. Liste çağıran
+/// tarafça [categoryOrderProvider] ile sıralanmış gelir.
 class SystemBoardsGrid extends ConsumerWidget {
   const SystemBoardsGrid({
     super.key,
@@ -49,16 +44,15 @@ class SystemBoardsGrid extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
     final bool editing = ref.watch(boardsEditModeProvider);
-    // Son analizde kategori başına dağıtılan yeni screenshot sayıları (rozet).
+    // Son analizde kategori başına gelen yeni ekran görüntüsü sayıları (rozet).
     final Map<ScreenshotCategory, int> newCounts = ref.watch(
       recentDistributionProvider,
     );
+    final AnalysisFlights? flights = AnalysisFlightScope.of(context);
 
     return ReorderableTileGrid(
       itemCount: categories.length,
       editing: editing,
-      crossAxisCount: 2,
-      childAspectRatio: boardCardAspectRatio,
       keyBuilder: (index) => ValueKey<int>(categories[index].index),
       onReorder: (from, to) {
         final List<ScreenshotCategory> reordered = [...categories];
@@ -71,43 +65,27 @@ class SystemBoardsGrid extends ConsumerWidget {
         final List<ScreenshotEntry> categoryEntries = entries
             .where((entry) => entry.category == category)
             .toList();
-        final label = category.displayName(l10n, categoryNames);
-        final covers = boardCovers(repo, categoryEntries);
-        final int newCount = newCounts[category] ?? 0;
-
-        if (editing) {
-          return GestureDetector(
-            onTap: () => showBoardEditActions(context, ref, category: category),
-            child: BoardTileStatic(
-              icon: category.icon,
-              label: label,
-              count: categoryEntries.length,
-              covers: covers,
-            ),
-          );
-        }
-
-        // Uçan fotoğrafların ineceği hedef olarak kategori karosunu kaydeder.
+        final Widget tile = BoardTile(
+          icon: category.icon,
+          label: category.displayName(l10n, categoryNames),
+          count: categoryEntries.length,
+          covers: boardCovers(repo, categoryEntries),
+          newCount: newCounts[category] ?? 0,
+          onPressed: editing
+              ? () => showBoardEditActions(context, ref, category: category)
+              : () => context.push(AppRoutes.category(category)),
+        );
+        // Uçuş hedefi anahtarı menünün dışında: menü önizlemesi çocuğu
+        // yeniden kurar, içeride kalsa GlobalKey çakışırdı.
         return KeyedSubtree(
-          key: CategoryTargetScope.of(context)?.keyFor(category),
-          child: LongPressEditWrapper(
-            child: FadeInUp(
-              delay: boardStaggerStep * index,
-              // Yeni içerik alan karo minik bir zıplamayla dikkat çeker.
-              child: NewTileBounce(
-                active: newCount > 0,
-                child: BoardTile(
-                  icon: category.icon,
-                  label: label,
-                  count: categoryEntries.length,
-                  covers: covers,
-                  newCount: newCount,
-                  onOpen: () =>
-                      context.push(AppRoutes.category(category)),
+          key: flights?.targetKeyFor(category),
+          child: editing
+              ? tile
+              : BoardContextMenu(
+                  category: category,
+                  isEmpty: categoryEntries.isEmpty,
+                  child: tile,
                 ),
-              ),
-            ),
-          ),
         );
       },
     );

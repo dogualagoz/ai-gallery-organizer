@@ -1,9 +1,13 @@
 // UI sabitleri: boşluk, köşe yarıçapı ve animasyon süreleri.
 // Magic number kullanmamak için tüm widget'lar bu değerleri kullanır.
 
-/// Anasayfada "son görüntüler" ızgarasında gösterilen en fazla karo (3 sütun ×
-/// 7 satır); fazlası "Daha fazla" ile tam ekran Recents'te açılır.
-const int kHomeRecentsLimit = 21;
+/// Kütüphane'deki "Son eklenenler" bölümünde gösterilen karo sayısı (3 sütun ×
+/// 2 satır); tamamı başlıktaki "Tümü" ile tam ekran Recents'te açılır.
+const int kLibraryRecentsLimit = 6;
+
+/// Ekran görüntüsü ızgaralarının sütun sayısı ve karo oranı (dikey screenshot).
+const int kScreenshotGridColumns = 3;
+const double kScreenshotTileAspect = 9 / 16;
 
 /// Standart boşluk ölçeği (4pt grid).
 abstract final class AppSpacing {
@@ -43,11 +47,50 @@ abstract final class AppSizes {
   /// Navbar pilinin yanında yüzen ayrık dairesel Arama butonunun çapı.
   static const double navBarActionSize = 56;
 
+  /// Yüzen sekme çubuğunun kabuktaki iç boşlukları: üstte sabit, altta home
+  /// indicator yoksa kenardan bırakılan pay.
+  static const double navBarTopGap = AppSpacing.sm;
+  static const double navBarEdgeGap = AppSpacing.md;
+
+  /// Sekme çubuğunun altındaki boşluk: home indicator varsa onun yüksekliği.
+  static double navBarBottomGap(double bottomInset) =>
+      bottomInset > 0 ? bottomInset : navBarEdgeGap;
+
   /// Birincil (dolgulu) buton yüksekliği — iOS büyük buton ölçüsü.
   static const double buttonHeight = 50;
 
   /// Board kartlarındaki kapak şeridi yüksekliği referansı.
   static const double boardCoverMin = 72;
+
+  /// Pano/kategori karosunun en-boy oranı (kapak + iki satır metin).
+  static const double boardTileAspect = 1.05;
+
+  /// Karo etiketinin yanındaki küçük kategori ikonu.
+  static const double boardTileIcon = 15;
+
+  /// Kapak küçük resimlerinin istendiği çözünürlük (px, kare).
+  static const int coverThumbnailPx = 200;
+
+  /// Analiz modülündeki ince ilerleme çubuğu kalınlığı.
+  static const double progressBarHeight = 4;
+
+  /// Analiz modülünün başındaki kaynak küçük resim (uçuşların çıkış noktası).
+  static const double analysisSourceWidth = 34;
+  static const double analysisSourceHeight = 52;
+
+  /// Analiz modülündeki satır ikonlarının boyutu.
+  static const double statusIcon = 22;
+}
+
+/// Düzenleme modunda sürüklenmek üzere kaldırılan karonun görünümü.
+abstract final class AppLift {
+  /// Kaldırılan karonun büyüme oranı (parmağın altına yükselme hissi).
+  static const double scale = 1.05;
+
+  /// Kaldırma gölgesi: bulanıklık, aşağı kayma ve opaklık.
+  static const double shadowBlur = 18;
+  static const double shadowOffsetY = 8;
+  static const double shadowAlpha = 0.22;
 }
 
 /// Yüzen buzlu-cam (glassmorphism) yüzey ayarları — navbar pili + ayrık Arama
@@ -121,6 +164,9 @@ abstract final class AppEmptyState {
 abstract final class AppOpacities {
   /// Pro kullanıcının app bar'ındaki incelikli gradient tonunun opaklığı.
   static const double proAppBarTint = 0.12;
+
+  /// Aksan rengiyle hafifçe tonlanmış kart zemini (öneri/eylem kartları).
+  static const double accentTint = 0.08;
 }
 
 /// Standart animasyon süreleri.

@@ -234,9 +234,9 @@ class _MainShell extends StatelessWidget {
             // Home indicator varsa onun üstünde, yoksa kenardan sabit boşlukla.
             padding: EdgeInsets.fromLTRB(
               AppSpacing.lg,
-              AppSpacing.sm,
+              AppSizes.navBarTopGap,
               AppSpacing.lg,
-              bottomInset > 0 ? bottomInset : AppSpacing.md,
+              AppSizes.navBarBottomGap(bottomInset),
             ),
             child: Row(
               children: [

@@ -1,6 +1,6 @@
-// Jiggle düzenleme modunda bir karoya dokununca açılan yönetim action sheet'i:
-// yeniden adlandır, fotoğrafları seç (toplu sil/taşı), tümünü sil ve (özel
-// board'da) panoyu sil. Sistem kategorilerinde varsayılan amaç bilgi olarak kalır.
+// Pano/kategori yönetim eylemleri: düzenleme modunda karoya dokununca açılan
+// action sheet ve bağlam menüsünün paylaştığı yeniden adlandır, yeniden analiz
+// et, seç (toplu sil/taşı), tümünü sil ve panoyu sil işlemleri.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -16,6 +16,7 @@ import '../../../core/services/category_names_service.dart';
 import '../../../core/services/entitlement_service.dart';
 import '../../../core/widgets/app_dialogs.dart';
 import '../../../core/widgets/status_toast.dart';
+import '../../analysis/providers/analysis_queue_provider.dart';
 import '../../gallery/data/screenshot_repository.dart';
 import '../../gallery/providers/gallery_provider.dart';
 import '../providers/board_provider.dart';
@@ -36,11 +37,11 @@ Future<void> showBoardEditActions(
     'Tam olarak board ya da category verilmeli.',
   );
   final l10n = context.l10n;
-  final List<ScreenshotEntry> entries =
-      ref.read(galleryProvider).value ?? const [];
-  final List<ScreenshotEntry> filtered = category != null
-      ? entries.where((entry) => entry.category == category).toList()
-      : entries.where((entry) => entry.boardId == board!.id).toList();
+  final List<ScreenshotEntry> filtered = boardEntries(
+    ref,
+    board: board,
+    category: category,
+  );
   final Map<int, String> names = ref.read(categoryNamesProvider);
   final String title = category != null
       ? category.displayName(l10n, names)
@@ -85,18 +86,31 @@ Future<void> showBoardEditActions(
   if (action == null || !context.mounted) return;
   switch (action) {
     case _BoardEditAction.rename:
-      await _rename(context, ref, board: board, category: category);
+      await renameBoard(context, ref, board: board, category: category);
     case _BoardEditAction.select:
-      _openSelection(context, ref, board: board, category: category);
+      openBoardSelection(context, ref, board: board, category: category);
     case _BoardEditAction.deleteAll:
-      await _deleteAll(context, ref, filtered);
+      await deleteAllInBoard(context, ref, filtered);
     case _BoardEditAction.deleteBoard:
-      await _deleteBoard(context, ref, board!);
+      await deleteBoard(context, ref, board!);
   }
 }
 
+/// [board] ya da [category] içindeki kayıtlar (galeri sırasıyla).
+List<ScreenshotEntry> boardEntries(
+  WidgetRef ref, {
+  Board? board,
+  ScreenshotCategory? category,
+}) {
+  final List<ScreenshotEntry> entries =
+      ref.read(galleryProvider).value ?? const [];
+  return category != null
+      ? entries.where((entry) => entry.category == category).toList()
+      : entries.where((entry) => entry.boardId == board!.id).toList();
+}
+
 /// Yeniden adlandırma: sistem kategorisinde ad override'ı, özel board'da isim.
-Future<void> _rename(
+Future<void> renameBoard(
   BuildContext context,
   WidgetRef ref, {
   Board? board,
@@ -113,7 +127,7 @@ Future<void> _rename(
       initialValue: current,
       placeholder: l10n.boardsNewBoardHint,
     );
-    if (name == null) return;
+    if (name == null || !context.mounted) return;
     final CategoryNamesNotifier notifier = ref.read(
       categoryNamesProvider.notifier,
     );
@@ -133,13 +147,40 @@ Future<void> _rename(
     initialValue: board!.name,
     placeholder: l10n.boardsNewBoardHint,
   );
-  if (name == null) return;
+  if (name == null || !context.mounted) return;
   await ref.read(boardsProvider.notifier).rename(board.id, name);
+}
+
+/// Kategoriyi yeniden analiz eder: onaydan sonra kayıtları bekleyen yapıp
+/// kuyruğu yalnız onlarla başlatır; animasyon Kütüphane'deki modülde oynar ve
+/// haftalık kotadan harcanır.
+Future<void> reanalyzeCategory(
+  BuildContext context,
+  WidgetRef ref,
+  ScreenshotCategory category,
+) async {
+  final l10n = context.l10n;
+  final List<ScreenshotEntry> filtered = boardEntries(ref, category: category);
+  if (filtered.isEmpty) return;
+  final bool confirmed = await showConfirmAlert(
+    context,
+    title: l10n.categoryReanalyzeConfirmTitle,
+    message: l10n.categoryReanalyzeConfirmBody,
+    confirmLabel: l10n.categoryReanalyzeAction,
+  );
+  if (!confirmed || !context.mounted) return;
+
+  final ScreenshotRepository repo = ref.read(screenshotRepositoryProvider);
+  final List<String> ids = filtered.map((e) => e.assetId).toList();
+  for (final String assetId in ids) {
+    await repo.markPending(assetId);
+  }
+  ref.read(analysisQueueProvider.notifier).start(onlyAssetIds: ids);
 }
 
 /// Board/kategori detayını doğrudan seçim modunda açar (toplu sil/taşı).
 /// Toplu işlem Pro'ya bağlı; değilse paywall'a yönlendirir.
-void _openSelection(
+void openBoardSelection(
   BuildContext context,
   WidgetRef ref, {
   Board? board,
@@ -157,7 +198,7 @@ void _openSelection(
 }
 
 /// Board/kategorideki tüm fotoğrafları tek onayla galeriden kalıcı siler.
-Future<void> _deleteAll(
+Future<void> deleteAllInBoard(
   BuildContext context,
   WidgetRef ref,
   List<ScreenshotEntry> filtered,
@@ -180,7 +221,7 @@ Future<void> _deleteAll(
       await repo.removeEntry(assetId);
     }
   } catch (error, stackTrace) {
-    debugPrint('Düzenleme modu toplu silme hatası: $error\n$stackTrace');
+    debugPrint('Pano toplu silme hatası: $error\n$stackTrace');
     if (context.mounted) {
       showStatusToast(
         context,
@@ -192,7 +233,7 @@ Future<void> _deleteAll(
 }
 
 /// Özel board'u siler (içindeki fotoğraflar galeride kalır, bağ kaldırılır).
-Future<void> _deleteBoard(
+Future<void> deleteBoard(
   BuildContext context,
   WidgetRef ref,
   Board board,
@@ -204,6 +245,6 @@ Future<void> _deleteBoard(
     message: l10n.boardsDeleteConfirmBody,
     confirmLabel: l10n.boardsDeleteAction,
   );
-  if (!confirmed) return;
+  if (!confirmed || !context.mounted) return;
   await ref.read(boardsProvider.notifier).delete(board.id);
 }

@@ -4,7 +4,6 @@
   "tabLibrary": "Kütüphane",
   "tabClean": "Temizle",
   "doneAction": "Bitti",
-  "galleryTitle": "Ekran Görüntüleri",
   "boardsTitle": "Panolar",
   "settingsTitle": "Ayarlar",
   "settingsTheme": "Görünüm",
@@ -15,7 +14,6 @@
   "settingsLanguageSystem": "Sistem",
   "settingsLanguageEnglish": "İngilizce",
   "settingsLanguageTurkish": "Türkçe",
-  "autoSortPausedChip": "Otomatik düzenleme duraklatıldı — Pro'ya geç",
   "settingsSectionAutoSort": "Otomatik düzenleme",
   "settingsAutoSortTitle": "Yeni ekran görüntülerini otomatik sırala",
   "settingsAutoSortSubtitle": "Yeni ekran görüntüsü geldiğinde arka planda çalışır",
@@ -35,7 +33,6 @@
   "permissionDeniedBody": "İzin olmadan Snaply ekran görüntülerini göremez. Erişimi Ayarlar'dan açabilirsin.",
   "openSettings": "Ayarları Aç",
   "notNow": "Şimdi değil",
-  "gallerySyncTooltip": "Kütüphaneyi eşitle",
   "galleryEmptyTitle": "Henüz ekran görüntüsü yok",
   "galleryEmptyBody": "Bir ekran görüntüsü al ya da mevcut olanları getirmek için kütüphaneni eşitle.",
   "gallerySyncAction": "Şimdi eşitle",
@@ -68,7 +65,6 @@
       "total": {"type": "int"}
     }
   },
-  "analysisCancelAction": "İptal",
   "analysisCompleted": "{count} ekran görüntüsü analiz edildi",
   "@analysisCompleted": {
     "placeholders": {
@@ -118,12 +114,6 @@
       "count": {"type": "int"}
     }
   },
-  "analyzeHeroTitle": "{count} ekran görüntüsünü analiz et",
-  "@analyzeHeroTitle": {
-    "placeholders": {
-      "count": {"type": "int"}
-    }
-  },
   "analyzeHeroQuotaHint": "Bu hafta {remaining}/{limit} ücretsiz analiz hakkın var",
   "@analyzeHeroQuotaHint": {
     "placeholders": {
@@ -146,21 +136,12 @@
       "count": {"type": "int"}
     }
   },
-  "analyzeCardTitle": "Ekran görüntülerini düzenle",
-  "analyzeCardPending": "Bekleyen",
-  "analyzeCardAnalyzed": "Analiz edildi",
-  "analyzeCardRemaining": "Kalan hak",
-  "analyzeCardUnlimited": "Sınırsız",
   "analyzeUngroupedBar": "{count} yeni ekran görüntüsü gruplanmayı bekliyor",
   "@analyzeUngroupedBar": {
     "placeholders": {
       "count": {"type": "int"}
     }
   },
-  "analyzeUngroupedQuotaTitle": "Haftalık hakkın doldu",
-  "analyzeUngroupedQuotaBody": "Bu haftaki ücretsiz analiz hakkını kullandın. Sınırsız analiz için Pro'ya geç ya da analiz paketi al.",
-  "analyzeUngroupedQuotaUpgrade": "Pro'ya yükselt",
-  "analyzeUngroupedQuotaNotNow": "Şimdi değil",
   "analysisExperienceTitle": "Ekran görüntülerin gruplandırılıyor",
   "analysisSceneSummaryTitle": "Hepsi yerleşti",
   "analysisSceneSummary": "{count} ekran görüntüsü {categories} kategoriye yerleşti",
@@ -360,30 +341,16 @@
     }
   },
   "settingsLinkFailed": "Bağlantı açılamadı. Lütfen tekrar dene.",
-  "homeWeeklyLimitUnlimited": "Sınırsız",
-  "homeWeeklyLimitRemaining": "{count} kaldı",
-  "@homeWeeklyLimitRemaining": {
-    "placeholders": {
-      "count": {"type": "int"}
-    }
-  },
   "homeWeeklyLimitResetIn": "Haftalık kota {days} gün sonra yenilenir.",
   "@homeWeeklyLimitResetIn": {
     "placeholders": {
       "days": {"type": "int"}
     }
   },
-  "homeWeeklyLimitUnlimitedHint": "Pro ile sınırsız analiz hakkın var.",
-  "analysisCancelSheetTitle": "Analiz durdurulsun mu?",
-  "analysisCancelStop": "Yarıda kes",
-  "analysisCancelStopHint": "Şimdiye kadar analiz edilenler kalsın.",
-  "analysisCancelReset": "Sıfırla",
-  "analysisCancelResetHint": "Bu turu iptal et, baştan başla.",
   "categoryReanalyzeAction": "Yeniden analiz et",
   "categoryReanalyzeConfirmTitle": "Bu kategori yeniden analiz edilsin mi?",
   "categoryReanalyzeConfirmBody": "Bu gruptaki ekran görüntüleri AI'a yeniden gönderilir. Bu, haftalık analiz hakkından harcar.",
   "categoryReanalyzeEmpty": "Burada yeniden analiz edilecek bir şey yok.",
-  "homeRecentsMore": "Daha fazla göster",
   "recentsScreenTitle": "Son ekran görüntüleri",
   "sortingUndo": "Geri al",
   "sortingDeleteDeferred": "Silme ertelendi. Hazır olduğunda üstteki sil düğmesine dokun.",
@@ -426,5 +393,21 @@
   "moveAction": "Taşı",
   "moveSheetTitle": "Şuraya taşı",
   "moveSectionCategories": "Kategoriler",
-  "moveSectionBoards": "Panolar"
+  "moveSectionBoards": "Panolar",
+  "librarySeeAll": "Tümü",
+  "boardsEditAction": "Düzenle",
+  "autoSortHintTitle": "Yeni ekran görüntülerini otomatik düzenle",
+  "autoSortHintBody": "Pro ile Snaply yeni ekran görüntülerini geldikleri anda düzenler.",
+  "autoSortHintAction": "Pro'yu İncele",
+  "limitedAccessBody": "Snaply yalnızca seçtiğin fotoğrafları görebiliyor.",
+  "limitedAccessAction": "Daha Fazla Seç",
+  "galleryLoadFailedTitle": "Kütüphane yüklenemedi",
+  "galleryLoadFailedBody": "Ekran görüntülerin okunurken bir sorun oluştu.",
+  "retryAction": "Tekrar Dene",
+  "analysisPauseTitle": "Analiz duraklatılsın mı?",
+  "analysisPauseBody": "Şimdiye kadar analiz edilenler korunur. Kalanlara istediğin zaman devam edebilirsin.",
+  "analysisPauseAction": "Duraklat",
+  "analysisContinueAction": "Devam Et",
+  "analysisTrialQuotaUsed": "Deneme analiz hakların bitti",
+  "analysisGetMoreAction": "Daha Fazla Al"
 }
