@@ -88,6 +88,13 @@ abstract final class AppFlight {
 
   /// Güvenlik sınırı: hedef ölçülemese de kart bu süreden uzun uçmaz.
   static const Duration maxDuration = Duration(seconds: 2);
+
+  /// Hedef karo henüz kurulmamışken (kategorinin ilk öğesi; karo galeri
+  /// yenilenince gelir) sıranın başının kalkmadan bekleyebileceği süre.
+  static const Duration targetGrace = Duration(milliseconds: 400);
+
+  /// Karo bu mesafeden (px) fazla yer değiştirince uçuş yeniden hedeflenir.
+  static const double retargetTolerance = 0.5;
 }
 
 /// Jest ve geri bildirim sabitleri.

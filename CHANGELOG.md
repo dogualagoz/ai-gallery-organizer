@@ -62,6 +62,9 @@ Interfaces* ilkeleri). Free/Pro kuralları değişmedi.
 - Pano detayında native geri kaydırmayla çakışan özel kenar kaydırması.
 - Büyük yazıda plan kartı, Ayarlar satırları, analiz satırları ve çiplerdeki
   taşmalar.
+- Analiz uçuşları: kategorinin ilk ekran görüntüsü karosu kurulmadan kalkıp
+  sekme çubuğuna düşüyordu; ızgara akınca havadaki kartlar eski yere iniyordu.
+  Kart artık karosunu kısa süre bekliyor ve yer değişince yolda dönüyor.
 
 ### Bakım
 - `audioplayers` ve `animations` bağımlılıkları, kullanılmayan l10n anahtarları

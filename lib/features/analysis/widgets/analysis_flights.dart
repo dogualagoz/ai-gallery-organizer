@@ -1,8 +1,9 @@
 // Analiz uçuşları: analiz edilen ekran görüntülerinin küçük resimleri durum
 // modülünden kalkıp ilgili kategori karosuna süzülür. Yol, X ve Y eksenlerinde
 // ayrı kritik sönümlü yaylardan ve kalkıştaki yukarı atış hızından doğar
-// (sabit süreli eğri yok). Katman Kütüphane'nin üstünde, sekme çubuğunun
-// altında çizilir; Reduce Motion'da uçuş olmaz.
+// (sabit süreli eğri yok). Karo her karede yeniden ölçülür; yeri değişirse
+// yay o anki konum ve hızından yeni yerine döner. Katman Kütüphane'nin
+// üstünde, sekme çubuğunun altında çizilir; Reduce Motion'da uçuş olmaz.
 import 'dart:math' as math;
 import 'dart:ui' show lerpDouble;
 
@@ -85,6 +86,14 @@ class _AnalysisFlightScopeState extends State<AnalysisFlightScope>
 
   Duration _elapsed = Duration.zero;
   Duration? _lastSpawn;
+
+  /// Sıranın başı hedef karosunu beklemeye başladığı an (bkz.
+  /// [_shouldHoldForTarget]); beklemiyorsa null.
+  Duration? _headWaitStart;
+
+  /// Bekleme süresinde karosu gelmeyen kategoriler: bu akıştaki sonraki
+  /// öğeleri yeniden beklemeden kalkar (karo gelirse yolda hedeflenir).
+  final Set<ScreenshotCategory> _unreachable = {};
   int _landedCount = 0;
   bool _reduceMotion = false;
 
@@ -111,6 +120,8 @@ class _AnalysisFlightScopeState extends State<AnalysisFlightScope>
     _busy.value = true;
     if (!_ticker.isActive) {
       _lastSpawn = null;
+      _headWaitStart = null;
+      _unreachable.clear();
       _ticker.start();
     }
   }
@@ -118,6 +129,8 @@ class _AnalysisFlightScopeState extends State<AnalysisFlightScope>
   @override
   void clear() {
     _waiting.clear();
+    _headWaitStart = null;
+    _unreachable.clear();
     _syncNext();
     _flights.clear();
     _stop();
@@ -155,44 +168,55 @@ class _AnalysisFlightScopeState extends State<AnalysisFlightScope>
       // Modül görünmüyor (kaydırılıp gitti): sıradakiler uçmadan iner,
       // tur özeti beklemede kalmaz.
       _waiting.clear();
+      _headWaitStart = null;
       _syncNext();
       return;
     }
-    final FlightRequest request = _waiting.removeAt(0);
+    final FlightRequest request = _waiting.first;
+    final Offset? landing = _landingFor(request.category);
+    if (landing == null && _shouldHoldForTarget(request.category)) return;
+    _waiting.removeAt(0);
+    _headWaitStart = null;
     _syncNext();
-    final double floor = _floorY();
-    final Offset target =
-        _centerOf(targetKeyFor(request.category)) ?? Offset(source.dx, floor);
-    final Offset end = Offset(target.dx, math.min(target.dy, floor));
     final double lateral =
         (_random.nextDouble() * 2 - 1) * AppFlight.lateralJitter;
     _flights.add(
       _Flight(
         asset: request.asset,
+        category: request.category,
         start: source,
-        end: end,
+        end: landing ?? Offset(source.dx, _floorY()),
         born: _elapsed,
-        x: SpringSimulation(AppSprings.flight, source.dx, end.dx, lateral),
-        y: SpringSimulation(
-          AppSprings.flight,
-          source.dy,
-          end.dy,
-          -AppFlight.launchSpeed,
-        ),
+        velocity: Offset(lateral, -AppFlight.launchSpeed),
       ),
     );
     _lastSpawn = _elapsed;
   }
 
+  /// Kategorinin ilk öğesinde karo henüz yok (galeri yenilenince kurulur):
+  /// sıranın başı kalkmadan kısa süre bekler ki boşluğa uçmasın. İlk
+  /// çağrı bekleme sayacını başlatır; süre dolarsa (karo kaydırılıp gitti)
+  /// kategori ulaşılamaz sayılır ve kart sekme çubuğunun üstüne iner.
+  bool _shouldHoldForTarget(ScreenshotCategory category) {
+    if (_unreachable.contains(category)) return false;
+    final Duration since = _headWaitStart ??= _elapsed;
+    if (_elapsed - since < AppFlight.targetGrace) return true;
+    _unreachable.add(category);
+    return false;
+  }
+
   void _advance() {
     _flights.removeWhere((flight) {
-      final double t =
-          (_elapsed - flight.born).inMicroseconds /
-          Duration.microsecondsPerSecond;
-      flight.update(t);
+      // Araya yeni kategori girdi, ızgara aktı ya da sayfa kaydı: kart
+      // karonun o anki yerine yönelir. Ölçüm önceki karenin yerleşimidir
+      // (ticker build'den önce çalışır); bir karelik gecikme görünmez.
+      // Karo ağaçtan çıktıysa son bilinen hedefe devam edilir.
+      final Offset? landing = _landingFor(flight.category);
+      if (landing != null) flight.retarget(landing, _elapsed);
+      flight.update(_elapsed);
+      // Süre sınırı kalkıştan sayılır: sayfa sürekli kaysa da kart takılmaz.
       final bool landed =
-          flight.progress >= AppFlight.landedAt ||
-          _elapsed - flight.born >= AppFlight.maxDuration;
+          flight.arrived || _elapsed - flight.born >= AppFlight.maxDuration;
       if (landed) _onLanded();
       return landed;
     });
@@ -228,6 +252,14 @@ class _AnalysisFlightScopeState extends State<AnalysisFlightScope>
   }
 
   Offset? _toLayer(Offset global) => _box(_layerKey)?.globalToLocal(global);
+
+  /// Kategori karosunun iniş noktası (sekme çubuğunun üstüyle sınırlı);
+  /// karo kurulmamışsa null.
+  Offset? _landingFor(ScreenshotCategory category) {
+    final Offset? center = _centerOf(targetKeyFor(category));
+    if (center == null) return null;
+    return Offset(center.dx, math.min(center.dy, _floorY()));
+  }
 
   /// Kartın inebileceği en alt nokta: sekme çubuğunun üstü. Kabuk
   /// `extendBody` kullandığı için gövdenin alt boşluğu çubuğu zaten içerir.
@@ -280,29 +312,69 @@ class _FlightScopeData extends InheritedWidget {
 class _Flight {
   _Flight({
     required this.asset,
+    required this.category,
     required this.start,
-    required this.end,
+    required Offset end,
     required this.born,
-    required this.x,
-    required this.y,
-  }) : position = start;
+    required Offset velocity,
+  }) : position = start,
+       _end = end,
+       _legStart = born,
+       _legDistance = (end - start).distance,
+       _x = SpringSimulation(AppSprings.flight, start.dx, end.dx, velocity.dx),
+       _y = SpringSimulation(AppSprings.flight, start.dy, end.dy, velocity.dy);
 
   final AssetEntity? asset;
+  final ScreenshotCategory category;
   final Offset start;
-  final Offset end;
   final Duration born;
-  final SpringSimulation x;
-  final SpringSimulation y;
+
+  Offset _end;
+
+  /// Geçerli yayların başladığı an; her yeniden hedeflemede ilerler.
+  Duration _legStart;
+  SpringSimulation _x;
+  SpringSimulation _y;
+
+  /// Geçerli bacağın başındaki uzaklık ve o ana kadarki görsel ilerleme:
+  /// kalan solma payı yeni bacağa yayılır.
+  double _legDistance;
+  double _legBase = 0;
+
+  /// Geçerli bacağın tamamlanan oranı (atış başında negatife inebilir).
+  double _leg = 0;
 
   Offset position;
 
-  /// Hedefe kalan yolun tamamlanan oranı (atış başında negatife inebilir).
+  /// Küçülme/solma için yolun tamamlanan oranı (0-1). Yalnız artar: karo
+  /// kayınca solmaya başlamış kart yeniden belirmez.
   double progress = 0;
 
-  void update(double seconds) {
-    position = Offset(x.x(seconds), y.x(seconds));
-    final double total = (end - start).distance;
-    progress = total < 1 ? 1 : 1 - (end - position).distance / total;
+  /// Kart geçerli hedefine vardı (yay kuyruğu beklenmez).
+  bool get arrived => _leg >= AppFlight.landedAt;
+
+  static double _seconds(Duration duration) =>
+      duration.inMicroseconds / Duration.microsecondsPerSecond;
+
+  /// Hedef kaydıysa yayları [now] anındaki konum ve hızdan yeni hedefe
+  /// kurar: yol kırılmadan döner, kart sıçramaz.
+  void retarget(Offset end, Duration now) {
+    if ((end - _end).distance <= AppFlight.retargetTolerance) return;
+    final double t = _seconds(now - _legStart);
+    final Offset from = Offset(_x.x(t), _y.x(t));
+    _x = SpringSimulation(AppSprings.flight, from.dx, end.dx, _x.dx(t));
+    _y = SpringSimulation(AppSprings.flight, from.dy, end.dy, _y.dx(t));
+    _end = end;
+    _legStart = now;
+    _legDistance = (end - from).distance;
+    _legBase = progress;
+  }
+
+  void update(Duration now) {
+    final double t = _seconds(now - _legStart);
+    position = Offset(_x.x(t), _y.x(t));
+    _leg = _legDistance < 1 ? 1 : 1 - (_end - position).distance / _legDistance;
+    progress = math.max(progress, _legBase + (1 - _legBase) * _leg);
   }
 }
 
