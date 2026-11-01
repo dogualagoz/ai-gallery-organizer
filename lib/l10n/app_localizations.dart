@@ -218,18 +218,6 @@ abstract class AppLocalizations {
   /// **'Go Pro'**
   String get paywallTitle;
 
-  /// No description provided for @detailTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Details'**
-  String get detailTitle;
-
-  /// No description provided for @comingSoon.
-  ///
-  /// In en, this message translates to:
-  /// **'Coming soon'**
-  String get comingSoon;
-
   /// No description provided for @onboardingTitle1.
   ///
   /// In en, this message translates to:
@@ -349,18 +337,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Analyze now'**
   String get detailAnalyzeNow;
-
-  /// No description provided for @detailShare.
-  ///
-  /// In en, this message translates to:
-  /// **'Share'**
-  String get detailShare;
-
-  /// No description provided for @detailDelete.
-  ///
-  /// In en, this message translates to:
-  /// **'Delete'**
-  String get detailDelete;
 
   /// No description provided for @detailShareFailed.
   ///
@@ -1555,6 +1531,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Touch and hold a screenshot, then choose Move to add it to this board.'**
   String get boardEmptyBody;
+
+  /// No description provided for @viewerBackLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Back'**
+  String get viewerBackLabel;
+
+  /// No description provided for @infoAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Info'**
+  String get infoAction;
+
+  /// No description provided for @viewerMissingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Screenshot not found'**
+  String get viewerMissingTitle;
+
+  /// No description provided for @viewerMissingBody.
+  ///
+  /// In en, this message translates to:
+  /// **'It may have been deleted from your photo library.'**
+  String get viewerMissingBody;
+
+  /// No description provided for @viewerPendingBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Analyze it to sort it into a category and make its text searchable.'**
+  String get viewerPendingBody;
+
+  /// No description provided for @copyTextAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy Text'**
+  String get copyTextAction;
+
+  /// No description provided for @textCopiedToast.
+  ///
+  /// In en, this message translates to:
+  /// **'Text copied'**
+  String get textCopiedToast;
+
+  /// No description provided for @textCopyFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t copy the text. Please try again.'**
+  String get textCopyFailed;
+
+  /// No description provided for @infoCategoryLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Category'**
+  String get infoCategoryLabel;
+
+  /// No description provided for @infoBoardLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Board'**
+  String get infoBoardLabel;
+
+  /// No description provided for @searchTagLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Search for {tag}'**
+  String searchTagLabel(String tag);
 }
 
 class _AppLocalizationsDelegate

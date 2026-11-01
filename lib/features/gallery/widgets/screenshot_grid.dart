@@ -1,14 +1,14 @@
 // Tüm koleksiyon ekranlarının ortak ekran görüntüsü ızgarası (sliver):
-// Fotoğraflar gibi sıkı aralık. Normalde dokunuş görüntüleyiciyi açar ve uzun
-// basış bağlam menüsü getirir; seçim modunda dokunuş seçimi değiştirir.
+// Fotoğraflar gibi sıkı aralık. Normalde dokunuş görüntüleyiciyi bu ızgaranın
+// sırasıyla açar ve uzun basış bağlam menüsü getirir; seçim modunda dokunuş
+// seçimi değiştirir.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../../core/constants/ui_constants.dart';
 import '../../../core/l10n/l10n_extension.dart';
 import '../../../core/models/screenshot_entry.dart';
-import '../../../core/router/app_router.dart';
+import '../../detail/open_viewer.dart';
 import '../data/screenshot_repository.dart';
 import 'screenshot_context_menu.dart';
 import 'screenshot_grid_tile.dart';
@@ -70,7 +70,11 @@ class ScreenshotGrid extends ConsumerWidget {
             selected: selection?.contains(entry.assetId),
             onPressed: selection != null
                 ? () => onToggle?.call(entry.assetId)
-                : () => context.push(AppRoutes.detail(entry.assetId)),
+                : () => openViewer(
+                    context,
+                    entry.assetId,
+                    scope: [for (final item in entries) item.assetId],
+                  ),
           );
           if (selection != null) return tile;
           return ScreenshotContextMenu(key: key, entry: entry, child: tile);

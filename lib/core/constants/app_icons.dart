@@ -34,14 +34,17 @@ abstract final class AppIcons {
   static const IconData pause = CupertinoIcons.pause_circle;
   static const IconData select = CupertinoIcons.checkmark_circle;
   static const IconData redeem = CupertinoIcons.gift;
+  static const IconData copy = CupertinoIcons.doc_on_doc;
 
   // Durum ve gezinme.
+  static const IconData back = CupertinoIcons.chevron_left;
   static const IconData chevronRight = CupertinoIcons.chevron_right;
   static const IconData chevronDown = CupertinoIcons.chevron_down;
   static const IconData check = CupertinoIcons.checkmark;
   static const IconData checkCircleFill = CupertinoIcons.checkmark_circle_fill;
   static const IconData circle = CupertinoIcons.circle;
   static const IconData info = CupertinoIcons.info_circle;
+  static const IconData infoFill = CupertinoIcons.info_circle_fill;
   static const IconData error = CupertinoIcons.exclamationmark_circle;
   static const IconData warning = CupertinoIcons.exclamationmark_triangle;
   static const IconData lock = CupertinoIcons.lock_fill;

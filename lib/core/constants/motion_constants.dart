@@ -132,3 +132,42 @@ abstract final class AppMotion {
   /// küçüldüğü oran: biri sönerken diğeri aynı yerde belirir.
   static const double chromeHiddenScale = 0.94;
 }
+
+/// Fotoğraf görüntüleyicinin geçiş, yakınlaştırma ve jest sabitleri.
+abstract final class AppViewer {
+  /// Açılış/kapanış süresi: zemin bu sürede solar, Hero uçuşu yolunu yay
+  /// eğrisiyle aynı sürede tamamlar.
+  static const Duration transition = Duration(milliseconds: 450);
+
+  /// En fazla yakınlaştırma ve çift dokunuşun hedef ölçeği.
+  static const double maxZoom = 4;
+  static const double doubleTapZoom = 2.5;
+
+  /// Bu ölçeğin üstü "yakınlaştırılmış" sayılır: sayfa kaydırma ve aşağı
+  /// çekip kapatma kilitlenir, sürükleme görseli gezdirir.
+  static const double zoomedThreshold = 1.01;
+
+  /// Aşağı çekişte kapanma için gereken öngörülen mesafe (px): konum +
+  /// bırakış hızının projeksiyonu bu eşiği geçerse görüntüleyici kapanır.
+  static const double dismissDistance = 120;
+
+  /// Ekran yüksekliğinin bu oranı kadar çekilince zemin tamamen saydamlaşır
+  /// ve görsel en küçük ölçeğine iner.
+  static const double dismissFadeSpan = 0.35;
+  static const double dismissMinScale = 0.7;
+
+  /// Bilgi panelinin ekran yüksekliğine oranı.
+  static const double infoPanelFraction = 0.55;
+
+  /// Panel sürüklemesi bırakılınca öngörülen açıklık bu oranı geçerse açılır.
+  static const double infoOpenThreshold = 0.5;
+
+  /// Tam çözünürlüklü görselin uzun kenar sınırı (px): bellek tavanı.
+  static const int fullImageMaxPx = 2880;
+
+  /// Boyutu bilinmeyen varlık için tam görsel ölçüsü (dikey ekran oranı).
+  static const Size fallbackFullSize = Size(1080, 1920);
+
+  /// Bulunamayan görüntü ekranının kendiliğinden kapanma gecikmesi.
+  static const Duration missingAutoClose = Duration(seconds: 2);
+}

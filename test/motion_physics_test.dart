@@ -70,4 +70,30 @@ void main() {
       expect(nearestSnap(-40, [0, 100, 300]), 0);
     });
   });
+
+  group('SpringCurve', () {
+    test('uçlarda 0 ve 1, arada tekdüze artar', () {
+      final SpringCurve curve = SpringCurve(
+        AppSprings.standard,
+        AppViewer.transition,
+      );
+      expect(curve.transform(0), 0);
+      expect(curve.transform(1), 1);
+      double previous = 0;
+      for (int i = 1; i <= 20; i++) {
+        final double value = curve.transform(i / 20);
+        expect(value, greaterThanOrEqualTo(previous));
+        expect(value, lessThanOrEqualTo(1));
+        previous = value;
+      }
+    });
+
+    test('yay gibi önden yüklü: yarı sürede yolun çoğu alınır', () {
+      final SpringCurve curve = SpringCurve(
+        AppSprings.standard,
+        AppViewer.transition,
+      );
+      expect(curve.transform(0.5), greaterThan(0.75));
+    });
+  });
 }

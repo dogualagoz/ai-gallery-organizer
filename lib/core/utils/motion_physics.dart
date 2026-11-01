@@ -1,5 +1,6 @@
 // Akışkan arayüz fiziği: momentum projeksiyonu, lastik bant, hız normalize.
 import 'package:flutter/foundation.dart';
+import 'package:flutter/physics.dart';
 import 'package:flutter/widgets.dart';
 
 import '../constants/motion_constants.dart';
@@ -45,6 +46,25 @@ double nearestSnap(double value, List<double> points) {
     if ((point - value).abs() < (best - value).abs()) best = point;
   }
   return best;
+}
+
+/// Yayı, sabit süre isteyen API'lerin (Hero uçuşu, rota geçişi) kullanacağı
+/// bir eğriye çevirir: [duration] boyunca yayın 0→1 yolu izlenir, son değer
+/// tam 1'e normalize edilir (yerleşme kuyruğu kesilir). Sekmesiz yaylarla
+/// kullanılmalı; sekmeli yayda eğri 1'i aşar.
+class SpringCurve extends Curve {
+  SpringCurve(SpringDescription spring, Duration duration)
+    : _simulation = SpringSimulation(spring, 0, 1, 0),
+      _seconds = duration.inMicroseconds / Duration.microsecondsPerSecond;
+
+  final SpringSimulation _simulation;
+  final double _seconds;
+
+  /// Süre sonunda yayın vardığı nokta; eğri bununla bölünerek 1'de biter.
+  late final double _end = _simulation.x(_seconds);
+
+  @override
+  double transformInternal(double t) => _simulation.x(t * _seconds) / _end;
 }
 
 /// Reduce Motion tercihine kısa erişim.

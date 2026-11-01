@@ -72,12 +72,6 @@ class AppLocalizationsTr extends AppLocalizations {
   String get paywallTitle => 'Pro\'ya Geç';
 
   @override
-  String get detailTitle => 'Detay';
-
-  @override
-  String get comingSoon => 'Çok yakında';
-
-  @override
   String get onboardingTitle1 => 'Ekran görüntülerin nihayet düzenli';
 
   @override
@@ -143,12 +137,6 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get detailAnalyzeNow => 'Şimdi analiz et';
-
-  @override
-  String get detailShare => 'Paylaş';
-
-  @override
-  String get detailDelete => 'Sil';
 
   @override
   String get detailShareFailed => 'Paylaşım açılamadı. Lütfen tekrar dene.';
@@ -849,4 +837,40 @@ class AppLocalizationsTr extends AppLocalizations {
   @override
   String get boardEmptyBody =>
       'Bir ekran görüntüsüne basılı tut ve Taşı ile bu panoya ekle.';
+
+  @override
+  String get viewerBackLabel => 'Geri';
+
+  @override
+  String get infoAction => 'Bilgi';
+
+  @override
+  String get viewerMissingTitle => 'Ekran görüntüsü bulunamadı';
+
+  @override
+  String get viewerMissingBody => 'Fotoğraf kütüphanenden silinmiş olabilir.';
+
+  @override
+  String get viewerPendingBody =>
+      'Analiz edince bir kategoriye yerleşir ve içindeki metin aranabilir olur.';
+
+  @override
+  String get copyTextAction => 'Metni Kopyala';
+
+  @override
+  String get textCopiedToast => 'Metin kopyalandı';
+
+  @override
+  String get textCopyFailed => 'Metin kopyalanamadı. Lütfen tekrar dene.';
+
+  @override
+  String get infoCategoryLabel => 'Kategori';
+
+  @override
+  String get infoBoardLabel => 'Pano';
+
+  @override
+  String searchTagLabel(String tag) {
+    return '$tag için ara';
+  }
 }

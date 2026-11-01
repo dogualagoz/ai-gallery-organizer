@@ -36,6 +36,12 @@ class ScreenshotGridTile extends StatelessWidget {
   /// null: seçim modu kapalı. true/false: köşede seçim işareti görünür.
   final bool? selected;
 
+  /// Hero uçuşunda karşı uçtaki karonun köşe yarıçapı ([heroContext] bir
+  /// karonun içinde değilse 0); uçan görsel bu yarıçapla açılıp kapanır.
+  static double radiusOf(BuildContext heroContext) =>
+      heroContext.findAncestorWidgetOfExactType<ScreenshotGridTile>()?.radius ??
+      0;
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;

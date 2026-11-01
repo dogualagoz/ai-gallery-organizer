@@ -20,8 +20,6 @@
   "searchTitle": "Search",
   "sortingTitle": "Sort",
   "paywallTitle": "Go Pro",
-  "detailTitle": "Details",
-  "comingSoon": "Coming soon",
   "onboardingTitle1": "Your screenshots, finally sorted",
   "onboardingBody1": "Snaply finds every screenshot in your library and files it into tidy boards — automatically.",
   "onboardingTitle2": "Private by design",
@@ -47,8 +45,6 @@
   "detailTagsTitle": "Tags",
   "detailOcrTitle": "Text in screenshot",
   "detailAnalyzeNow": "Analyze now",
-  "detailShare": "Share",
-  "detailDelete": "Delete",
   "detailShareFailed": "Couldn't open the share sheet. Please try again.",
   "detailDeleteFailed": "Couldn't delete the screenshot. Please try again.",
   "analysisPendingBanner": "{count} screenshots waiting for analysis",
@@ -428,5 +424,21 @@
   "screenshotTileLabel": "Screenshot",
   "screenshotPendingLabel": "Screenshot, waiting for analysis",
   "categoryEmptyBody": "Analyzed screenshots land here automatically.",
-  "boardEmptyBody": "Touch and hold a screenshot, then choose Move to add it to this board."
+  "boardEmptyBody": "Touch and hold a screenshot, then choose Move to add it to this board.",
+  "viewerBackLabel": "Back",
+  "infoAction": "Info",
+  "viewerMissingTitle": "Screenshot not found",
+  "viewerMissingBody": "It may have been deleted from your photo library.",
+  "viewerPendingBody": "Analyze it to sort it into a category and make its text searchable.",
+  "copyTextAction": "Copy Text",
+  "textCopiedToast": "Text copied",
+  "textCopyFailed": "Couldn't copy the text. Please try again.",
+  "infoCategoryLabel": "Category",
+  "infoBoardLabel": "Board",
+  "searchTagLabel": "Search for {tag}",
+  "@searchTagLabel": {
+    "placeholders": {
+      "tag": {"type": "String"}
+    }
+  }
 }

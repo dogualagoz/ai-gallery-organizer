@@ -71,12 +71,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get paywallTitle => 'Go Pro';
 
   @override
-  String get detailTitle => 'Details';
-
-  @override
-  String get comingSoon => 'Coming soon';
-
-  @override
   String get onboardingTitle1 => 'Your screenshots, finally sorted';
 
   @override
@@ -143,12 +137,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get detailAnalyzeNow => 'Analyze now';
-
-  @override
-  String get detailShare => 'Share';
-
-  @override
-  String get detailDelete => 'Delete';
 
   @override
   String get detailShareFailed =>
@@ -850,4 +838,41 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get boardEmptyBody =>
       'Touch and hold a screenshot, then choose Move to add it to this board.';
+
+  @override
+  String get viewerBackLabel => 'Back';
+
+  @override
+  String get infoAction => 'Info';
+
+  @override
+  String get viewerMissingTitle => 'Screenshot not found';
+
+  @override
+  String get viewerMissingBody =>
+      'It may have been deleted from your photo library.';
+
+  @override
+  String get viewerPendingBody =>
+      'Analyze it to sort it into a category and make its text searchable.';
+
+  @override
+  String get copyTextAction => 'Copy Text';
+
+  @override
+  String get textCopiedToast => 'Text copied';
+
+  @override
+  String get textCopyFailed => 'Couldn\'t copy the text. Please try again.';
+
+  @override
+  String get infoCategoryLabel => 'Category';
+
+  @override
+  String get infoBoardLabel => 'Board';
+
+  @override
+  String searchTagLabel(String tag) {
+    return 'Search for $tag';
+  }
 }

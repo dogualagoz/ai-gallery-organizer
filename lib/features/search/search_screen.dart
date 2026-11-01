@@ -1,4 +1,6 @@
 // Arama ekranı: tag + OCR + kategori üzerinde bellek içi arama (Pro).
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -12,6 +14,7 @@ import '../../core/utils/text_normalize.dart';
 import '../gallery/providers/gallery_provider.dart';
 import '../gallery/widgets/screenshot_grid.dart';
 import '../paywall/open_paywall.dart';
+import 'search_request_provider.dart';
 
 class SearchScreen extends ConsumerStatefulWidget {
   const SearchScreen({super.key});
@@ -25,6 +28,34 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   String _query = '';
 
   @override
+  void initState() {
+    super.initState();
+    // Sekme ilk kez bir istekle açılıyorsa (etikete dokunma) alan dolu gelir.
+    final SearchRequest? request = ref.read(searchRequestProvider);
+    if (request != null) {
+      _controller.text = request.query;
+      _query = request.query;
+      _consumeRequest();
+    }
+  }
+
+  void _applyRequest(SearchRequest? request) {
+    if (request == null) return;
+    _controller.text = request.query;
+    setState(() => _query = request.query);
+    _consumeRequest();
+  }
+
+  /// Provider kurulum/dinleme sırasında değiştirilemez; temizlik bir sonraki
+  /// mikro göreve bırakılır.
+  void _consumeRequest() {
+    final SearchRequestNotifier notifier = ref.read(
+      searchRequestProvider.notifier,
+    );
+    scheduleMicrotask(notifier.clear);
+  }
+
+  @override
   void dispose() {
     _controller.dispose();
     super.dispose();
@@ -34,6 +65,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final bool canSearch = ref.watch(entitlementProvider).canSearch;
+    ref.listen(searchRequestProvider, (_, request) => _applyRequest(request));
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.searchTitle)),
@@ -63,7 +95,8 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
           padding: const EdgeInsets.all(AppSpacing.md),
           child: TextField(
             controller: _controller,
-            autofocus: true,
+            // Etiketle gelindiyse klavye sonuçları örtmesin.
+            autofocus: _query.isEmpty,
             textInputAction: TextInputAction.search,
             decoration: InputDecoration(
               prefixIcon: const Icon(Icons.search),

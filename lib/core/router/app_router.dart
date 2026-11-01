@@ -7,6 +7,8 @@ import 'package:go_router/go_router.dart';
 import '../../features/analysis/milestone_screen.dart';
 import '../../features/boards/board_detail_screen.dart';
 import '../../features/detail/detail_screen.dart';
+import '../../features/detail/open_viewer.dart';
+import '../../features/detail/viewer_page.dart';
 import '../../features/home/home_screen.dart';
 import '../../features/home/recents_screen.dart';
 import '../../features/onboarding/onboarding_screen.dart';
@@ -143,8 +145,16 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       // Görüntüleyici kök navigator'da: sekme çubuğunu örter (Fotoğraflar gibi).
       GoRoute(
         path: '${AppRoutes.detailBase}/:$_assetIdParam',
-        builder: (context, state) =>
-            DetailScreen(assetId: state.pathParameters[_assetIdParam]!),
+        pageBuilder: (context, state) => ViewerPage<void>(
+          key: state.pageKey,
+          child: DetailScreen(
+            assetId: state.pathParameters[_assetIdParam]!,
+            scope: switch (state.extra) {
+              ViewerScope(:final assetIds) => assetIds,
+              _ => null,
+            },
+          ),
+        ),
       ),
       GoRoute(
         path: AppRoutes.settings,

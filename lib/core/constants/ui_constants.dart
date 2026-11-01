@@ -83,6 +83,14 @@ abstract final class AppSizes {
 
   /// Pro'ya bağlı eylemlerin yanındaki küçük kilit glifi.
   static const double lockGlyph = 13;
+
+  /// Sürüklenebilir panellerin üstündeki tutamak (iOS grabber ölçüsü).
+  static const double grabberWidth = 36;
+  static const double grabberHeight = 5;
+
+  /// Etiket kapsülünün iç boşlukları.
+  static const double chipPaddingH = 12;
+  static const double chipPaddingV = 6;
 }
 
 /// Ekran görüntüsü ızgarası ve karosu.
