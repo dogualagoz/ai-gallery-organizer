@@ -106,6 +106,14 @@ abstract final class AppSizes {
 
   /// Çipteki ikon.
   static const double chipIcon = 15;
+
+  /// Ayarlar'daki Pro satırının dolgulu ikon karosu ve içindeki glif.
+  static const double settingsProTile = 40;
+  static const double settingsProGlyph = 24;
+
+  /// Onboarding sayfa göstergesi: pasif nokta ve etkin kapsül genişliği.
+  static const double pageDot = 8;
+  static const double pageDotActive = 24;
 }
 
 /// Ekran görüntüsü ızgarası ve karosu.
@@ -261,6 +269,9 @@ abstract final class AppOpacities {
 
   /// Aksan rengiyle hafifçe tonlanmış kart zemini (öneri/eylem kartları).
   static const double accentTint = 0.08;
+
+  /// Onboarding sayfa göstergesindeki pasif noktaların opaklığı.
+  static const double pageDotIdle = 0.3;
 }
 
 /// Standart animasyon süreleri.

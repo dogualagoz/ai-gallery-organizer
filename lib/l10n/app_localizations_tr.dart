@@ -55,14 +55,6 @@ class AppLocalizationsTr extends AppLocalizations {
   String get settingsSectionAutoSort => 'Otomatik düzenleme';
 
   @override
-  String get settingsAutoSortTitle =>
-      'Yeni ekran görüntülerini otomatik sırala';
-
-  @override
-  String get settingsAutoSortSubtitle =>
-      'Yeni ekran görüntüsü geldiğinde arka planda çalışır';
-
-  @override
   String get searchTitle => 'Ara';
 
   @override
@@ -101,9 +93,6 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get openSettings => 'Ayarları Aç';
-
-  @override
-  String get notNow => 'Şimdi değil';
 
   @override
   String get galleryEmptyTitle => 'Henüz ekran görüntüsü yok';
@@ -664,12 +653,64 @@ class AppLocalizationsTr extends AppLocalizations {
   String get settingsAboutSection => 'Hakkında';
 
   @override
-  String settingsVersion(String version) {
-    return 'Sürüm $version';
-  }
+  String get settingsLinkFailed => 'Bağlantı açılamadı. Lütfen tekrar dene.';
 
   @override
-  String get settingsLinkFailed => 'Bağlantı açılamadı. Lütfen tekrar dene.';
+  String get settingsSectionAnalysis => 'Analiz';
+
+  @override
+  String get settingsAutoSortFooter =>
+      'Yeni ekran görüntüleri arka planda analiz edilip panolarına yerleştirilir.';
+
+  @override
+  String get settingsWeeklyQuota => 'Bu haftaki ücretsiz hak';
+
+  @override
+  String get settingsCredits => 'Paket kredisi';
+
+  @override
+  String get settingsTrialQuota => 'Deneme hakkı';
+
+  @override
+  String get settingsTrialFooter =>
+      'Deneme haftası bitince analiz sınırsız olur.';
+
+  @override
+  String get settingsAnalysisRow => 'AI analizi';
+
+  @override
+  String get settingsUnlimited => 'Sınırsız';
+
+  @override
+  String get settingsManageSubscription => 'Aboneliği yönet';
+
+  @override
+  String get settingsSupportSection => 'Destek';
+
+  @override
+  String get settingsFeedback => 'Geri bildirim gönder';
+
+  @override
+  String get settingsRate => 'App Store\'da değerlendir';
+
+  @override
+  String get settingsVersionTitle => 'Sürüm';
+
+  @override
+  String get settingsAiDataFooter =>
+      'Ekran görüntülerin cihazında saklanır. Yalnızca analiz edilirken etiketlenmek üzere Google Gemini\'ye gönderilir. Ayrıntılar Gizlilik Politikası\'nda.';
+
+  @override
+  String get onboardingLimitedNote =>
+      'İstersen yalnızca seçtiğin fotoğrafları paylaşabilirsin; Snaply sadece onları görür. Seçimini sonra Kütüphane\'den değiştirebilirsin.';
+
+  @override
+  String get onboardingSkipForNow => 'Şimdilik geç';
+
+  @override
+  String settingsFeedbackSubject(String appName, String version) {
+    return '$appName geri bildirimi ($version)';
+  }
 
   @override
   String homeWeeklyLimitResetIn(int days) {

@@ -91,3 +91,25 @@ abstract final class LegalUrls {
   static const String termsOfUse =
       'https://dogualagoz.github.io/ai-gallery-organizer/terms.html';
 }
+
+/// Destek ve App Store bağlantıları (Ayarlar > Destek / Satın alımlar).
+abstract final class SupportUrls {
+  /// App Store'daki sayısal uygulama kimliği.
+  static const String appStoreId = '6788483738';
+
+  /// Geri bildirim e-postası (destek sayfasındaki adresle aynı).
+  static const String feedbackEmail = 'dogualagoz@icloud.com';
+
+  /// Mail uygulaması yoksa açılan destek sayfası.
+  static const String supportPage =
+      'https://dogualagoz.github.io/ai-gallery-organizer/support.html';
+
+  /// Doğrudan "değerlendirme yaz" ekranı. Apple, butona bağlı değerlendirme
+  /// için `requestReview` yerine bu adresi önerir (istem kotası harcanmaz).
+  static const String writeReview =
+      'https://apps.apple.com/app/id$appStoreId?action=write-review';
+
+  /// App Store'un abonelik yönetimi sayfası (iptal / plan değişikliği).
+  static const String manageSubscriptions =
+      'https://apps.apple.com/account/subscriptions';
+}

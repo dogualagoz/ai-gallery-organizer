@@ -1,21 +1,25 @@
-// 4 sayfalık animasyonlu onboarding: değer önerisi, gizlilik, haftalık
-// ücretsiz kota ve izin isteme. İzin verilince onboarding bayrağı
-// işaretlenir; router otomatik galeriye alır.
+// 4 sayfalık onboarding: değer önerisi, gizlilik, haftalık ücretsiz kota ve
+// izin isteme. İzin verilince bayrak işaretlenir, router Kütüphane'ye alır;
+// reddedilirse aynı sayfada "Ayarları Aç" / "Şimdilik geç" çıkar.
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/constants/app_constants.dart';
+import '../../core/constants/motion_constants.dart';
 import '../../core/constants/ui_constants.dart';
 import '../../core/l10n/l10n_extension.dart';
-import '../../core/services/haptic_service.dart';
 import '../../core/services/photo_permission_service.dart';
 import '../../core/services/preferences_service.dart';
-import '../../core/widgets/app_dialogs.dart';
+import '../../core/utils/motion_physics.dart';
 import 'widgets/access_illustration.dart';
+import 'widgets/onboarding_page.dart';
+import 'widgets/page_dots.dart';
 import 'widgets/privacy_illustration.dart';
 import 'widgets/quota_illustration.dart';
 import 'widgets/sort_illustration.dart';
 
+/// İlk açılış akışı; tamamlanınca bir daha gösterilmez.
 class OnboardingScreen extends ConsumerStatefulWidget {
   const OnboardingScreen({super.key});
 
@@ -25,13 +29,31 @@ class OnboardingScreen extends ConsumerStatefulWidget {
 
 class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   static const int _pageCount = 4;
+  static const int _accessPage = _pageCount - 1;
+
+  /// "Devam" ile sayfa geçişi: sekmesiz yay; kullanıcı sürüklerse kesilir.
+  static final Curve _pageCurve = SpringCurve(
+    AppSprings.standard,
+    AppDurations.slow,
+  );
 
   final PageController _pageController = PageController();
+  late final AppLifecycleListener _lifecycle;
   int _currentPage = 0;
-  bool _requestingPermission = false;
+  bool _requesting = false;
+
+  /// İzin reddedildi: erişim sayfası Ayarlar'a yönlendiren hale geçer.
+  bool _denied = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _lifecycle = AppLifecycleListener(onResume: _recheckAccess);
+  }
 
   @override
   void dispose() {
+    _lifecycle.dispose();
     _pageController.dispose();
     super.dispose();
   }
@@ -39,7 +61,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-
+    final bool deniedHere = _denied && _currentPage == _accessPage;
+    final List<Widget> pages = _pages(l10n);
+    assert(pages.length == _pageCount, 'Sayfa sayısı _pageCount ile eşleşmeli');
     return Scaffold(
       body: SafeArea(
         child: Column(
@@ -47,35 +71,11 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             Expanded(
               child: PageView(
                 controller: _pageController,
-                onPageChanged: (page) {
-                  Haptics.tap();
-                  setState(() => _currentPage = page);
-                },
-                children: [
-                  _OnboardingPage(
-                    illustration: const SortIllustration(),
-                    title: l10n.onboardingTitle1,
-                    body: l10n.onboardingBody1,
-                  ),
-                  _OnboardingPage(
-                    illustration: const PrivacyIllustration(),
-                    title: l10n.onboardingTitle2,
-                    body: l10n.onboardingBody2,
-                  ),
-                  _OnboardingPage(
-                    illustration: const QuotaIllustration(),
-                    title: l10n.onboardingTitleQuota(FreeLimits.aiAnalysis),
-                    body: l10n.onboardingBodyQuota(FreeLimits.aiAnalysis),
-                  ),
-                  _OnboardingPage(
-                    illustration: const AccessIllustration(),
-                    title: l10n.onboardingTitle3,
-                    body: l10n.onboardingBody3,
-                  ),
-                ],
+                onPageChanged: (page) => setState(() => _currentPage = page),
+                children: pages,
               ),
             ),
-            _PageDots(count: _pageCount, current: _currentPage),
+            OnboardingPageDots(controller: _pageController, count: _pageCount),
             Padding(
               padding: const EdgeInsets.fromLTRB(
                 AppSpacing.lg,
@@ -83,10 +83,14 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 AppSpacing.lg,
                 AppSpacing.md,
               ),
-              child: FilledButton(
-                onPressed: _requestingPermission ? null : _onButtonPressed,
-                child: Text(l10n.onboardingContinue),
-              ),
+              child: deniedHere
+                  ? _deniedActions(l10n)
+                  // Son sayfada da "Devam": izin öncesi ekranda "İzin ver"
+                  // gibi bir etiket App Store 5.1.1(iv) reddi getirdi.
+                  : FilledButton(
+                      onPressed: _requesting ? null : _next,
+                      child: Text(l10n.onboardingContinue),
+                    ),
             ),
           ],
         ),
@@ -94,11 +98,58 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     );
   }
 
-  Future<void> _onButtonPressed() async {
-    if (_currentPage < _pageCount - 1) {
-      await _pageController.nextPage(
-        duration: AppDurations.medium,
-        curve: Curves.easeOutCubic,
+  List<Widget> _pages(AppLocalizations l10n) => [
+    OnboardingPage(
+      illustration: const SortIllustration(),
+      title: l10n.onboardingTitle1,
+      body: l10n.onboardingBody1,
+    ),
+    OnboardingPage(
+      illustration: const PrivacyIllustration(),
+      title: l10n.onboardingTitle2,
+      body: l10n.onboardingBody2,
+    ),
+    OnboardingPage(
+      illustration: const QuotaIllustration(),
+      title: l10n.onboardingTitleQuota(FreeLimits.aiAnalysis),
+      body: l10n.onboardingBodyQuota(FreeLimits.aiAnalysis),
+    ),
+    OnboardingPage(
+      illustration: const AccessIllustration(),
+      title: _denied ? l10n.permissionDeniedTitle : l10n.onboardingTitle3,
+      body: _denied ? l10n.permissionDeniedBody : l10n.onboardingBody3,
+      note: _denied ? null : l10n.onboardingLimitedNote,
+    ),
+  ];
+
+  Widget _deniedActions(AppLocalizations l10n) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        FilledButton(
+          onPressed: PhotoPermissionService.openSystemSettings,
+          child: Text(l10n.openSettings),
+        ),
+        CupertinoButton(
+          onPressed: _complete,
+          child: Text(l10n.onboardingSkipForNow),
+        ),
+      ],
+    );
+  }
+
+  Future<void> _next() async {
+    if (_currentPage < _accessPage) {
+      final int target = _currentPage + 1;
+      if (context.reduceMotion) {
+        _pageController.jumpToPage(target);
+        return;
+      }
+      await _pageController.animateToPage(
+        target,
+        duration: AppDurations.slow,
+        curve: _pageCurve,
       );
       return;
     }
@@ -106,145 +157,31 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   }
 
   Future<void> _requestPermission() async {
-    setState(() => _requestingPermission = true);
+    setState(() => _requesting = true);
     try {
       final PhotoPermissionResult result =
           await PhotoPermissionService.request();
       if (!mounted) return;
-
       if (result == PhotoPermissionResult.granted) {
-        // Bayrak işaretlenince router redirect'i galeriye yönlendirir.
-        await ref.read(onboardingCompleteProvider.notifier).markComplete();
+        await _complete();
       } else {
-        await _showDeniedDialog();
+        setState(() => _denied = true);
       }
     } finally {
-      if (mounted) setState(() => _requestingPermission = false);
+      if (mounted) setState(() => _requesting = false);
     }
   }
 
-  Future<void> _showDeniedDialog() async {
-    final l10n = context.l10n;
-    final bool openSettings = await showConfirmAlert(
-      context,
-      title: l10n.permissionDeniedTitle,
-      message: l10n.permissionDeniedBody,
-      confirmLabel: l10n.openSettings,
-      cancelLabel: l10n.notNow,
-    );
-    if (openSettings) await PhotoPermissionService.openSystemSettings();
-  }
-}
+  /// Bayrak işaretlenince router redirect'i Kütüphane'ye yönlendirir. "Şimdilik
+  /// geç" de buraya gelir: Kütüphane izin eksikliğini kendi ekranında anlatır.
+  Future<void> _complete() =>
+      ref.read(onboardingCompleteProvider.notifier).markComplete();
 
-/// Tek onboarding sayfası: üstte illüstrasyon, altta başlık + açıklama.
-class _OnboardingPage extends StatelessWidget {
-  const _OnboardingPage({
-    required this.illustration,
-    required this.title,
-    required this.body,
-  });
-
-  final Widget illustration;
-  final String title;
-  final String body;
-
-  @override
-  Widget build(BuildContext context) {
-    final TextTheme textTheme = Theme.of(context).textTheme;
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
-      child: Column(
-        children: [
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: AppSpacing.xl),
-              child: illustration,
-            ),
-          ),
-          _FadeSlideIn(
-            child: Text(
-              title,
-              style: textTheme.headlineLarge?.copyWith(
-                fontWeight: FontWeight.w700,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ),
-          const SizedBox(height: AppSpacing.md),
-          _FadeSlideIn(
-            delayFraction: 0.25,
-            child: Text(
-              body,
-              style: textTheme.bodyLarge?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-                height: 1.5,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ),
-          const SizedBox(height: AppSpacing.xl),
-        ],
-      ),
-    );
-  }
-}
-
-/// Sayfa ilk kurulduğunda başlık/gövdeyi aşağıdan yumuşakça getirir.
-/// [delayFraction] ile ikinci satır kademeli (staggered) başlar.
-class _FadeSlideIn extends StatelessWidget {
-  const _FadeSlideIn({required this.child, this.delayFraction = 0});
-
-  final Widget child;
-  final double delayFraction;
-
-  @override
-  Widget build(BuildContext context) {
-    return TweenAnimationBuilder<double>(
-      tween: Tween(begin: 0, end: 1),
-      duration: AppDurations.slow,
-      curve: Interval(delayFraction, 1, curve: Curves.easeOutCubic),
-      builder: (context, t, child) => Opacity(
-        opacity: t,
-        child: Transform.translate(
-          offset: Offset(0, (1 - t) * AppSpacing.md),
-          child: child,
-        ),
-      ),
-      child: child,
-    );
-  }
-}
-
-/// Aktif sayfası genişleyen nokta göstergesi.
-class _PageDots extends StatelessWidget {
-  const _PageDots({required this.count, required this.current});
-
-  final int count;
-  final int current;
-
-  @override
-  Widget build(BuildContext context) {
-    final ColorScheme scheme = Theme.of(context).colorScheme;
-
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        for (int i = 0; i < count; i++)
-          AnimatedContainer(
-            duration: AppDurations.medium,
-            curve: Curves.easeOutCubic,
-            margin: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
-            width: i == current ? AppSpacing.lg : AppSpacing.sm,
-            height: AppSpacing.sm,
-            decoration: BoxDecoration(
-              color: i == current
-                  ? scheme.primary
-                  : scheme.onSurfaceVariant.withValues(alpha: 0.3),
-              borderRadius: BorderRadius.circular(AppRadius.sm),
-            ),
-          ),
-      ],
-    );
+  /// Ayarlar'dan dönüşte: izin verildiyse kullanıcı beklemeden devam eder.
+  Future<void> _recheckAccess() async {
+    if (!_denied) return;
+    final PhotoAccess access = await PhotoPermissionService.currentAccess();
+    if (!mounted || access == PhotoAccess.denied) return;
+    await _complete();
   }
 }

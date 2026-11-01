@@ -5,6 +5,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import '../../../core/constants/ui_constants.dart';
+import 'illustration_loop.dart';
 
 /// Tek bir mini kartın dağınık ve düzenli konum/rotasyon çifti.
 class _CardPose {
@@ -32,11 +33,25 @@ class SortIllustration extends StatefulWidget {
 }
 
 class _SortIllustrationState extends State<SortIllustration>
-    with SingleTickerProviderStateMixin {
+    with SingleTickerProviderStateMixin, IllustrationLoop<SortIllustration> {
   late final AnimationController _controller;
+
+  @override
+  AnimationController get controller => _controller;
+
+  /// Hareket azaltıldığında düzenli ızgara gösterilir (sayfanın vaadi).
+  @override
+  double get stillValue => 1;
+
+  // Sürekli git-gel: dağınık <-> düzenli.
+  @override
+  void play() => _controller.repeat(reverse: true);
 
   // Kart oranı ~ iPhone ekranı; ızgara 3 sütun x 2 satır.
   static const double _cardAspect = 9 / 16;
+
+  /// Kart genişliğinin sahne genişliğine oranı (3 sütun + aralıklar).
+  static const double _cardWidthFraction = 0.24;
   static const List<_CardPose> _poses = [
     _CardPose(
       scattered: Offset(0.05, 0.12),
@@ -73,11 +88,11 @@ class _SortIllustrationState extends State<SortIllustration>
   @override
   void initState() {
     super.initState();
-    // Sürekli git-gel: dağınık <-> düzenli. Sakin bir tempo için uzun süre.
+    // Sakin bir tempo için uzun süre.
     _controller = AnimationController(
       vsync: this,
       duration: AppDurations.scene * 2,
-    )..repeat(reverse: true);
+    );
   }
 
   @override
@@ -92,7 +107,7 @@ class _SortIllustrationState extends State<SortIllustration>
       builder: (context, constraints) {
         final double width = constraints.maxWidth;
         final double height = constraints.maxHeight;
-        final double cardWidth = width * 0.24;
+        final double cardWidth = width * _cardWidthFraction;
         final double cardHeight = cardWidth / _cardAspect;
 
         return AnimatedBuilder(
@@ -119,10 +134,13 @@ class _SortIllustrationState extends State<SortIllustration>
   ) {
     final _CardPose pose = _poses[index];
     // Kartlar sırayla harekete başlasın diye hafif kaydırılmış aralıklar.
-    final double t = CurvedAnimation(
-      parent: _controller,
-      curve: Interval(index * 0.05, 1, curve: Curves.easeInOutCubic),
-    ).value;
+    // Eğri doğrudan uygulanır: her karede CurvedAnimation kurmak dinleyici
+    // sızdırır.
+    final double t = Interval(
+      index * 0.05,
+      1,
+      curve: Curves.easeInOutCubic,
+    ).transform(_controller.value);
 
     final Offset position = Offset.lerp(pose.scattered, pose.tidy, t)!;
     final double angle = pose.scatteredAngle * (1 - t);

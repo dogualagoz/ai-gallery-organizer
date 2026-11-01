@@ -35,13 +35,7 @@ class _MilestoneScreenState extends ConsumerState<MilestoneScreen> {
     final l10n = context.l10n;
     final AnalysisQueueState queue = ref.watch(analysisQueueProvider);
     final EntitlementState entitlement = ref.watch(entitlementProvider);
-    // Kalan gün yukarı yuvarlanır: pencere içinde her zaman en az 1 gösterilir.
-    final int daysLeft = (entitlement.nextWeeklyReset
-                .difference(DateTime.now())
-                .inHours /
-            24)
-        .ceil()
-        .clamp(1, FreeLimits.aiAnalysisWindow.inDays);
+    final int daysLeft = entitlement.daysUntilWeeklyReset;
 
     return Scaffold(
       body: SafeArea(

@@ -188,18 +188,6 @@ abstract class AppLocalizations {
   /// **'Auto-sort'**
   String get settingsSectionAutoSort;
 
-  /// No description provided for @settingsAutoSortTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Automatically sort new screenshots'**
-  String get settingsAutoSortTitle;
-
-  /// No description provided for @settingsAutoSortSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Runs in the background whenever new screenshots appear'**
-  String get settingsAutoSortSubtitle;
-
   /// No description provided for @searchTitle.
   ///
   /// In en, this message translates to:
@@ -271,12 +259,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Open Settings'**
   String get openSettings;
-
-  /// No description provided for @notNow.
-  ///
-  /// In en, this message translates to:
-  /// **'Not now'**
-  String get notNow;
 
   /// No description provided for @galleryEmptyTitle.
   ///
@@ -1226,17 +1208,113 @@ abstract class AppLocalizations {
   /// **'About'**
   String get settingsAboutSection;
 
-  /// No description provided for @settingsVersion.
-  ///
-  /// In en, this message translates to:
-  /// **'Version {version}'**
-  String settingsVersion(String version);
-
   /// No description provided for @settingsLinkFailed.
   ///
   /// In en, this message translates to:
   /// **'The link couldn\'t be opened. Please try again.'**
   String get settingsLinkFailed;
+
+  /// No description provided for @settingsSectionAnalysis.
+  ///
+  /// In en, this message translates to:
+  /// **'Analysis'**
+  String get settingsSectionAnalysis;
+
+  /// No description provided for @settingsAutoSortFooter.
+  ///
+  /// In en, this message translates to:
+  /// **'New screenshots are analyzed in the background and placed in their boards.'**
+  String get settingsAutoSortFooter;
+
+  /// No description provided for @settingsWeeklyQuota.
+  ///
+  /// In en, this message translates to:
+  /// **'Free this week'**
+  String get settingsWeeklyQuota;
+
+  /// No description provided for @settingsCredits.
+  ///
+  /// In en, this message translates to:
+  /// **'Pack credits'**
+  String get settingsCredits;
+
+  /// No description provided for @settingsTrialQuota.
+  ///
+  /// In en, this message translates to:
+  /// **'Trial analyses'**
+  String get settingsTrialQuota;
+
+  /// No description provided for @settingsTrialFooter.
+  ///
+  /// In en, this message translates to:
+  /// **'After the trial week, analysis is unlimited.'**
+  String get settingsTrialFooter;
+
+  /// No description provided for @settingsAnalysisRow.
+  ///
+  /// In en, this message translates to:
+  /// **'AI analysis'**
+  String get settingsAnalysisRow;
+
+  /// No description provided for @settingsUnlimited.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlimited'**
+  String get settingsUnlimited;
+
+  /// No description provided for @settingsManageSubscription.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage subscription'**
+  String get settingsManageSubscription;
+
+  /// No description provided for @settingsSupportSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Support'**
+  String get settingsSupportSection;
+
+  /// No description provided for @settingsFeedback.
+  ///
+  /// In en, this message translates to:
+  /// **'Send feedback'**
+  String get settingsFeedback;
+
+  /// No description provided for @settingsRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Rate on the App Store'**
+  String get settingsRate;
+
+  /// No description provided for @settingsVersionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Version'**
+  String get settingsVersionTitle;
+
+  /// No description provided for @settingsAiDataFooter.
+  ///
+  /// In en, this message translates to:
+  /// **'Your screenshots stay on your device. They\'re sent to Google Gemini only while being analyzed, to be tagged. Details are in the Privacy Policy.'**
+  String get settingsAiDataFooter;
+
+  /// No description provided for @onboardingLimitedNote.
+  ///
+  /// In en, this message translates to:
+  /// **'You can also share only selected photos — Snaply will see just those. You can change this later from the Library.'**
+  String get onboardingLimitedNote;
+
+  /// No description provided for @onboardingSkipForNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip for now'**
+  String get onboardingSkipForNow;
+
+  /// No description provided for @settingsFeedbackSubject.
+  ///
+  /// In en, this message translates to:
+  /// **'{appName} feedback ({version})'**
+  String settingsFeedbackSubject(String appName, String version);
 
   /// No description provided for @homeWeeklyLimitResetIn.
   ///

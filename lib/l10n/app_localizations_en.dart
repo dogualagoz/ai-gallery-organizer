@@ -55,13 +55,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsSectionAutoSort => 'Auto-sort';
 
   @override
-  String get settingsAutoSortTitle => 'Automatically sort new screenshots';
-
-  @override
-  String get settingsAutoSortSubtitle =>
-      'Runs in the background whenever new screenshots appear';
-
-  @override
   String get searchTitle => 'Search';
 
   @override
@@ -100,9 +93,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get openSettings => 'Open Settings';
-
-  @override
-  String get notNow => 'Not now';
 
   @override
   String get galleryEmptyTitle => 'No screenshots yet';
@@ -672,13 +662,65 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsAboutSection => 'About';
 
   @override
-  String settingsVersion(String version) {
-    return 'Version $version';
-  }
-
-  @override
   String get settingsLinkFailed =>
       'The link couldn\'t be opened. Please try again.';
+
+  @override
+  String get settingsSectionAnalysis => 'Analysis';
+
+  @override
+  String get settingsAutoSortFooter =>
+      'New screenshots are analyzed in the background and placed in their boards.';
+
+  @override
+  String get settingsWeeklyQuota => 'Free this week';
+
+  @override
+  String get settingsCredits => 'Pack credits';
+
+  @override
+  String get settingsTrialQuota => 'Trial analyses';
+
+  @override
+  String get settingsTrialFooter =>
+      'After the trial week, analysis is unlimited.';
+
+  @override
+  String get settingsAnalysisRow => 'AI analysis';
+
+  @override
+  String get settingsUnlimited => 'Unlimited';
+
+  @override
+  String get settingsManageSubscription => 'Manage subscription';
+
+  @override
+  String get settingsSupportSection => 'Support';
+
+  @override
+  String get settingsFeedback => 'Send feedback';
+
+  @override
+  String get settingsRate => 'Rate on the App Store';
+
+  @override
+  String get settingsVersionTitle => 'Version';
+
+  @override
+  String get settingsAiDataFooter =>
+      'Your screenshots stay on your device. They\'re sent to Google Gemini only while being analyzed, to be tagged. Details are in the Privacy Policy.';
+
+  @override
+  String get onboardingLimitedNote =>
+      'You can also share only selected photos — Snaply will see just those. You can change this later from the Library.';
+
+  @override
+  String get onboardingSkipForNow => 'Skip for now';
+
+  @override
+  String settingsFeedbackSubject(String appName, String version) {
+    return '$appName feedback ($version)';
+  }
 
   @override
   String homeWeeklyLimitResetIn(int days) {

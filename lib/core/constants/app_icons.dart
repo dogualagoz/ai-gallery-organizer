@@ -69,4 +69,6 @@ abstract final class AppIcons {
   static const IconData notifications = CupertinoIcons.bell;
   static const IconData rate = CupertinoIcons.star;
   static const IconData feedback = CupertinoIcons.envelope;
+  static const IconData terms = CupertinoIcons.doc_text;
+  static const IconData subscription = CupertinoIcons.creditcard;
 }

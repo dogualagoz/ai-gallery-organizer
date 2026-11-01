@@ -26,6 +26,7 @@ class AppNavScaffold extends StatelessWidget {
     this.scrollable = true,
     this.searchField,
     this.onSearchActiveChanged,
+    this.automaticallyImplyLeading = true,
   });
 
   /// Büyük başlık; küçülünce barın ortasında aynı metin görünür.
@@ -60,6 +61,10 @@ class AppNavScaffold extends StatelessWidget {
 
   /// Arama etkinleşince true, "İptal" ile false.
   final ValueChanged<bool>? onSearchActiveChanged;
+
+  /// false ise otomatik geri chevron'u konmaz. Sheet rotaları kök navigator'da
+  /// geri gidebilir göründüğü için kapatmayı kendi "Bitti" butonuna bırakır.
+  final bool automaticallyImplyLeading;
 
   @override
   Widget build(BuildContext context) {
@@ -122,6 +127,7 @@ class AppNavScaffold extends StatelessWidget {
         middle: Text(title),
         alwaysShowMiddle: false,
         leading: leading,
+        automaticallyImplyLeading: automaticallyImplyLeading,
         trailing: trailing,
         backgroundColor: background,
         border: border,
@@ -133,6 +139,7 @@ class AppNavScaffold extends StatelessWidget {
       middle: Text(title),
       alwaysShowMiddle: false,
       leading: leading,
+      automaticallyImplyLeading: automaticallyImplyLeading,
       trailing: trailing,
       backgroundColor: background,
       border: border,

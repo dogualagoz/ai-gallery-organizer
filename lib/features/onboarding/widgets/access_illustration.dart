@@ -3,6 +3,23 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/constants/ui_constants.dart';
+import '../../../core/l10n/category_labels.dart';
+import '../../../core/models/screenshot_category.dart';
+import 'illustration_loop.dart';
+
+/// Izgara: sütun sayısı, karo ve ikon boyutu.
+const int _columns = 3;
+const double _tileSize = 80;
+const double _tileIcon = 30;
+
+/// Karonun belirirken başladığı ölçek.
+const double _enterScale = 0.6;
+
+/// Kademeli giriş: her karonun başlangıç gecikmesi, ilk karonun bitişi ve
+/// bitişin karo başına kayması (zaman çizelgesinin oranı).
+const double _staggerStart = 0.08;
+const double _firstEnd = 0.6;
+const double _staggerEnd = 0.04;
 
 class AccessIllustration extends StatefulWidget {
   const AccessIllustration({super.key});
@@ -12,28 +29,40 @@ class AccessIllustration extends StatefulWidget {
 }
 
 class _AccessIllustrationState extends State<AccessIllustration>
-    with SingleTickerProviderStateMixin {
+    with SingleTickerProviderStateMixin, IllustrationLoop<AccessIllustration> {
   late final AnimationController _controller;
 
-  // Kategori setini çağrıştıran ikonlar (sistem kategorileriyle uyumlu).
-  static const List<IconData> _icons = [
-    Icons.lock_outline,
-    Icons.chat_bubble_outline,
-    Icons.shopping_bag_outlined,
-    Icons.sticky_note_2_outlined,
-    Icons.receipt_long_outlined,
-    Icons.photo_outlined,
-    Icons.alternate_email,
-    Icons.qr_code_2,
-    Icons.confirmation_number_outlined,
+  // Kutucuklar gerçek sistem kategorilerinin ikonlarını taşır.
+  static const List<ScreenshotCategory> _categories = [
+    ScreenshotCategory.lockScreen,
+    ScreenshotCategory.messages,
+    ScreenshotCategory.shopping,
+    ScreenshotCategory.notesPasswords,
+    ScreenshotCategory.receipts,
+    ScreenshotCategory.other,
+    ScreenshotCategory.social,
+    ScreenshotCategory.qrCodes,
+    ScreenshotCategory.tickets,
   ];
+
+  @override
+  AnimationController get controller => _controller;
+
+  /// Hareket azaltıldığında ızgara doğrudan tamamlanmış görünür.
+  @override
+  double get stillValue => 1;
+
+  // Sayfa görünür olduğunda tek seferlik giriş animasyonu oynar.
+  @override
+  void play() => _controller.forward();
 
   @override
   void initState() {
     super.initState();
-    // Sayfa görünür olduğunda tek seferlik giriş animasyonu oynar.
-    _controller = AnimationController(vsync: this, duration: AppDurations.scene)
-      ..forward();
+    _controller = AnimationController(
+      vsync: this,
+      duration: AppDurations.scene,
+    );
   }
 
   @override
@@ -48,7 +77,7 @@ class _AccessIllustrationState extends State<AccessIllustration>
 
     return Center(
       child: SizedBox(
-        width: 264,
+        width: _columns * _tileSize + (_columns - 1) * AppSpacing.sm,
         child: AnimatedBuilder(
           animation: _controller,
           builder: (context, _) {
@@ -56,7 +85,8 @@ class _AccessIllustrationState extends State<AccessIllustration>
               spacing: AppSpacing.sm,
               runSpacing: AppSpacing.sm,
               children: [
-                for (int i = 0; i < _icons.length; i++) _buildTile(i, scheme),
+                for (int i = 0; i < _categories.length; i++)
+                  _buildTile(i, scheme),
               ],
             );
           },
@@ -66,32 +96,33 @@ class _AccessIllustrationState extends State<AccessIllustration>
   }
 
   Widget _buildTile(int index, ColorScheme scheme) {
-    // Kutucuklar soldan sağa, yukarıdan aşağıya sırayla belirir.
-    final double t = CurvedAnimation(
-      parent: _controller,
-      curve: Interval(
-        index * 0.08,
-        0.6 + index * 0.04,
-        curve: Curves.easeOutBack,
-      ),
-    ).value;
+    // Kutucuklar soldan sağa, yukarıdan aşağıya sırayla belirir. Eğri
+    // doğrudan uygulanır: her karede CurvedAnimation kurmak dinleyici sızdırır.
+    final double t = Interval(
+      index * _staggerStart,
+      _firstEnd + index * _staggerEnd,
+      curve: Curves.easeOutCubic,
+    ).transform(_controller.value);
 
     return Transform.scale(
-      scale: 0.6 + 0.4 * t,
+      scale: _enterScale + (1 - _enterScale) * t,
       child: Opacity(
         opacity: t.clamp(0, 1),
         child: Container(
-          width: 80,
-          height: 80,
+          width: _tileSize,
+          height: _tileSize,
           decoration: BoxDecoration(
             color: scheme.surface,
             borderRadius: BorderRadius.circular(AppRadius.lg),
             border: Border.all(color: scheme.outline),
           ),
           child: Icon(
-            _icons[index],
-            color: index % 3 == 1 ? scheme.primary : scheme.onSurfaceVariant,
-            size: 30,
+            _categories[index].icon,
+            // Her satırın ortası aksan renginde.
+            color: index % _columns == 1
+                ? scheme.primary
+                : scheme.onSurfaceVariant,
+            size: _tileIcon,
           ),
         ),
       ),

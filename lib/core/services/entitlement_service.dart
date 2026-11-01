@@ -79,6 +79,14 @@ class EntitlementState {
       DateTime.fromMillisecondsSinceEpoch(weekStartMs)
           .add(FreeLimits.aiAnalysisWindow);
 
+  /// Haftalık kotanın yenilenmesine kalan gün; yukarı yuvarlanır, pencere
+  /// içinde en az 1 gösterilir.
+  int get daysUntilWeeklyReset =>
+      (nextWeeklyReset.difference(DateTime.now()).inHours /
+              Duration.hoursPerDay)
+          .ceil()
+          .clamp(1, FreeLimits.aiAnalysisWindow.inDays);
+
   /// Free kota + satın alınan kredilerin toplamı.
   int get totalRemainingAnalysis => remainingFreeAnalysis + analysisCredits;
 

@@ -2,7 +2,22 @@
 // etrafında yumuşakça genişleyip sönen halkalar.
 import 'package:flutter/material.dart';
 
+import '../../../core/constants/app_icons.dart';
 import '../../../core/constants/ui_constants.dart';
+import 'illustration_loop.dart';
+
+/// Kalkan dairesi, içindeki glif ve zemin tonu.
+const double _hubSize = 140;
+const double _shieldSize = 64;
+const double _hubTint = 0.1;
+
+/// Halkanın döngü boyunca büyüdüğü pay, başlangıç opaklığı ve kalınlığı.
+const double _ringGrowth = 120;
+const double _ringAlpha = 0.35;
+const double _ringWidth = 2;
+
+/// İkinci halkanın faz kayması (yarım tur).
+const double _ringPhase = 0.5;
 
 class PrivacyIllustration extends StatefulWidget {
   const PrivacyIllustration({super.key});
@@ -12,8 +27,18 @@ class PrivacyIllustration extends StatefulWidget {
 }
 
 class _PrivacyIllustrationState extends State<PrivacyIllustration>
-    with SingleTickerProviderStateMixin {
+    with SingleTickerProviderStateMixin, IllustrationLoop<PrivacyIllustration> {
   late final AnimationController _controller;
+
+  @override
+  AnimationController get controller => _controller;
+
+  /// Hareket azaltıldığında halkalar yarı açılmış halde durur.
+  @override
+  double get stillValue => 0.3;
+
+  @override
+  void play() => _controller.repeat();
 
   @override
   void initState() {
@@ -21,7 +46,7 @@ class _PrivacyIllustrationState extends State<PrivacyIllustration>
     _controller = AnimationController(
       vsync: this,
       duration: AppDurations.scene * 2,
-    )..repeat();
+    );
   }
 
   @override
@@ -44,7 +69,7 @@ class _PrivacyIllustrationState extends State<PrivacyIllustration>
               // İki halka yarım tur arayla genişler; ikincisi faz kaydırmalı.
               _PulseRing(progress: _controller.value, scheme: scheme),
               _PulseRing(
-                progress: (_controller.value + 0.5) % 1.0,
+                progress: (_controller.value + _ringPhase) % 1.0,
                 scheme: scheme,
               ),
               child!,
@@ -52,13 +77,17 @@ class _PrivacyIllustrationState extends State<PrivacyIllustration>
           );
         },
         child: Container(
-          width: 140,
-          height: 140,
+          width: _hubSize,
+          height: _hubSize,
           decoration: BoxDecoration(
-            color: scheme.primary.withValues(alpha: 0.1),
+            color: scheme.primary.withValues(alpha: _hubTint),
             shape: BoxShape.circle,
           ),
-          child: Icon(Icons.shield_outlined, size: 64, color: scheme.primary),
+          child: Icon(
+            AppIcons.shield,
+            size: _shieldSize,
+            color: scheme.primary,
+          ),
         ),
       ),
     );
@@ -75,8 +104,8 @@ class _PulseRing extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double size = 140 + progress * 120;
-    final double opacity = (1 - progress) * 0.35;
+    final double size = _hubSize + progress * _ringGrowth;
+    final double opacity = (1 - progress) * _ringAlpha;
 
     return Container(
       width: size,
@@ -85,7 +114,7 @@ class _PulseRing extends StatelessWidget {
         shape: BoxShape.circle,
         border: Border.all(
           color: scheme.primary.withValues(alpha: opacity),
-          width: 2,
+          width: _ringWidth,
         ),
       ),
     );

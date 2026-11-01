@@ -196,13 +196,7 @@ class _AnalysisStatusModuleState extends ConsumerState<AnalysisStatusModule> {
   String _quotaExhaustedDetail(EntitlementState e) {
     final l10n = context.l10n;
     if (e.isInTrialWindow) return l10n.analysisTrialQuotaUsed;
-    // Kalan gün yukarı yuvarlanır: pencere içinde en az 1 gösterilir.
-    final int days =
-        (e.nextWeeklyReset.difference(DateTime.now()).inHours /
-                Duration.hoursPerDay)
-            .ceil()
-            .clamp(1, FreeLimits.aiAnalysisWindow.inDays);
-    return l10n.homeWeeklyLimitResetIn(days);
+    return l10n.homeWeeklyLimitResetIn(e.daysUntilWeeklyReset);
   }
 
   /// Kaynak küçük resim: sıradaki uçuşun görseli (kalkınca karosuna

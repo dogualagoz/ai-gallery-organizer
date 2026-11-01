@@ -15,8 +15,6 @@
   "settingsLanguageEnglish": "English",
   "settingsLanguageTurkish": "Turkish",
   "settingsSectionAutoSort": "Auto-sort",
-  "settingsAutoSortTitle": "Automatically sort new screenshots",
-  "settingsAutoSortSubtitle": "Runs in the background whenever new screenshots appear",
   "searchTitle": "Search",
   "paywallTitle": "Go Pro",
   "onboardingTitle1": "Your screenshots, finally sorted",
@@ -29,7 +27,6 @@
   "permissionDeniedTitle": "Photo access needed",
   "permissionDeniedBody": "Snaply can't see your screenshots without permission. You can enable access in Settings.",
   "openSettings": "Open Settings",
-  "notNow": "Not now",
   "galleryEmptyTitle": "No screenshots yet",
   "galleryEmptyBody": "Take a screenshot, or sync your library to bring existing ones in.",
   "gallerySyncAction": "Sync now",
@@ -344,13 +341,30 @@
   "settingsRestoreSuccess": "Purchases restored.",
   "redeemSettingsLabel": "Redeem a code",
   "settingsAboutSection": "About",
-  "settingsVersion": "Version {version}",
-  "@settingsVersion": {
+  "settingsLinkFailed": "The link couldn't be opened. Please try again.",
+  "settingsSectionAnalysis": "Analysis",
+  "settingsAutoSortFooter": "New screenshots are analyzed in the background and placed in their boards.",
+  "settingsWeeklyQuota": "Free this week",
+  "settingsCredits": "Pack credits",
+  "settingsTrialQuota": "Trial analyses",
+  "settingsTrialFooter": "After the trial week, analysis is unlimited.",
+  "settingsAnalysisRow": "AI analysis",
+  "settingsUnlimited": "Unlimited",
+  "settingsManageSubscription": "Manage subscription",
+  "settingsSupportSection": "Support",
+  "settingsFeedback": "Send feedback",
+  "settingsRate": "Rate on the App Store",
+  "settingsVersionTitle": "Version",
+  "settingsAiDataFooter": "Your screenshots stay on your device. They're sent to Google Gemini only while being analyzed, to be tagged. Details are in the Privacy Policy.",
+  "onboardingLimitedNote": "You can also share only selected photos — Snaply will see just those. You can change this later from the Library.",
+  "onboardingSkipForNow": "Skip for now",
+  "settingsFeedbackSubject": "{appName} feedback ({version})",
+  "@settingsFeedbackSubject": {
     "placeholders": {
+      "appName": {"type": "String"},
       "version": {"type": "String"}
     }
   },
-  "settingsLinkFailed": "The link couldn't be opened. Please try again.",
   "homeWeeklyLimitResetIn": "Weekly quota renews in {days} days.",
   "@homeWeeklyLimitResetIn": {
     "placeholders": {

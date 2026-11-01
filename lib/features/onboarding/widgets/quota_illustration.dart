@@ -5,7 +5,18 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import '../../../core/constants/app_constants.dart';
+import '../../../core/constants/app_icons.dart';
 import '../../../core/constants/ui_constants.dart';
+import 'illustration_loop.dart';
+
+/// Kota halkası: çap, çizgi kalınlığı ve çizginin kenardan içeri payı.
+const double _ringSize = 168;
+const double _ringStroke = 10;
+const double _ringInset = _ringStroke / 2 + 1;
+
+/// Halkaya süzülen mini kartın boyutu ve hafta çipindeki ikon.
+const Size _miniCardSize = Size(44, 76);
+const double _weekIcon = 22;
 
 class QuotaIllustration extends StatefulWidget {
   const QuotaIllustration({super.key});
@@ -15,7 +26,7 @@ class QuotaIllustration extends StatefulWidget {
 }
 
 class _QuotaIllustrationState extends State<QuotaIllustration>
-    with SingleTickerProviderStateMixin {
+    with SingleTickerProviderStateMixin, IllustrationLoop<QuotaIllustration> {
   static const int _cardCount = 5;
 
   /// Kartların sahne kenarlarındaki başlangıç konumları (0-1 oran).
@@ -31,7 +42,18 @@ class _QuotaIllustrationState extends State<QuotaIllustration>
     vsync: this,
     // Tek yönlü döngü: dolum → duraklama → hafta dönüşü → tazelenme.
     duration: AppDurations.scene * 3,
-  )..repeat();
+  );
+
+  @override
+  AnimationController get controller => _controller;
+
+  /// Hareket azaltıldığında halka dolu, kartlar emilmiş halde durur
+  /// (tazelenme fazından hemen önceki kare).
+  @override
+  double get stillValue => 0.61;
+
+  @override
+  void play() => _controller.repeat();
 
   @override
   void dispose() {
@@ -40,7 +62,11 @@ class _QuotaIllustrationState extends State<QuotaIllustration>
   }
 
   /// [begin]-[end] aralığını 0-1'e normalleyip eğri uygular.
-  double _phase(double begin, double end, {Curve curve = Curves.easeInOutCubic}) {
+  double _phase(
+    double begin,
+    double end, {
+    Curve curve = Curves.easeInOutCubic,
+  }) {
     final double t = ((_controller.value - begin) / (end - begin)).clamp(0, 1);
     return curve.transform(t);
   }
@@ -110,8 +136,8 @@ class _QuotaIllustrationState extends State<QuotaIllustration>
             shape: BoxShape.circle,
           ),
           child: Icon(
-            Icons.event_repeat_outlined,
-            size: 22,
+            AppIcons.sync,
+            size: _weekIcon,
             color: scheme.onSecondaryContainer,
           ),
         ),
@@ -133,8 +159,8 @@ class _QuotaRing extends StatelessWidget {
     final int count = (fill * FreeLimits.aiAnalysis).round();
 
     return SizedBox(
-      width: 168,
-      height: 168,
+      width: _ringSize,
+      height: _ringSize,
       child: CustomPaint(
         painter: _RingPainter(
           fill: fill,
@@ -148,15 +174,13 @@ class _QuotaRing extends StatelessWidget {
             children: [
               Text(
                 '$count',
-                style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                  fontWeight: FontWeight.w700,
-                ),
+                style: Theme.of(context).textTheme.headlineLarge
+                    ?.copyWith(fontWeight: FontWeight.w700),
               ),
               Text(
                 '/ ${FreeLimits.aiAnalysis}',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: scheme.onSurfaceVariant,
-                ),
+                style: Theme.of(context).textTheme.bodySmall
+                    ?.copyWith(color: scheme.onSurfaceVariant),
               ),
             ],
           ),
@@ -184,17 +208,17 @@ class _RingPainter extends CustomPainter {
     final Rect rect = Offset.zero & size;
     final Paint track = Paint()
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 10
+      ..strokeWidth = _ringStroke
       ..color = trackColor;
     final Paint arc = Paint()
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 10
+      ..strokeWidth = _ringStroke
       ..strokeCap = StrokeCap.round
       ..color = fillColor;
 
-    canvas.drawArc(rect.deflate(6), 0, 2 * math.pi, false, track);
+    canvas.drawArc(rect.deflate(_ringInset), 0, 2 * math.pi, false, track);
     canvas.drawArc(
-      rect.deflate(6),
+      rect.deflate(_ringInset),
       -math.pi / 2 + sweepShift,
       2 * math.pi * fill,
       false,
@@ -217,8 +241,8 @@ class _MiniCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final ColorScheme scheme = Theme.of(context).colorScheme;
     return Container(
-      width: 44,
-      height: 76,
+      width: _miniCardSize.width,
+      height: _miniCardSize.height,
       padding: const EdgeInsets.all(AppSpacing.xs),
       decoration: BoxDecoration(
         color: scheme.surface,

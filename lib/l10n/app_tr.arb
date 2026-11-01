@@ -15,8 +15,6 @@
   "settingsLanguageEnglish": "İngilizce",
   "settingsLanguageTurkish": "Türkçe",
   "settingsSectionAutoSort": "Otomatik düzenleme",
-  "settingsAutoSortTitle": "Yeni ekran görüntülerini otomatik sırala",
-  "settingsAutoSortSubtitle": "Yeni ekran görüntüsü geldiğinde arka planda çalışır",
   "searchTitle": "Ara",
   "paywallTitle": "Pro'ya Geç",
   "onboardingTitle1": "Ekran görüntülerin nihayet düzenli",
@@ -29,7 +27,6 @@
   "permissionDeniedTitle": "Fotoğraf erişimi gerekli",
   "permissionDeniedBody": "İzin olmadan Snaply ekran görüntülerini göremez. Erişimi Ayarlar'dan açabilirsin.",
   "openSettings": "Ayarları Aç",
-  "notNow": "Şimdi değil",
   "galleryEmptyTitle": "Henüz ekran görüntüsü yok",
   "galleryEmptyBody": "Bir ekran görüntüsü al ya da mevcut olanları getirmek için kütüphaneni eşitle.",
   "gallerySyncAction": "Şimdi eşitle",
@@ -344,13 +341,30 @@
   "settingsRestoreSuccess": "Satın alımlar geri yüklendi.",
   "redeemSettingsLabel": "Kodu kullan",
   "settingsAboutSection": "Hakkında",
-  "settingsVersion": "Sürüm {version}",
-  "@settingsVersion": {
+  "settingsLinkFailed": "Bağlantı açılamadı. Lütfen tekrar dene.",
+  "settingsSectionAnalysis": "Analiz",
+  "settingsAutoSortFooter": "Yeni ekran görüntüleri arka planda analiz edilip panolarına yerleştirilir.",
+  "settingsWeeklyQuota": "Bu haftaki ücretsiz hak",
+  "settingsCredits": "Paket kredisi",
+  "settingsTrialQuota": "Deneme hakkı",
+  "settingsTrialFooter": "Deneme haftası bitince analiz sınırsız olur.",
+  "settingsAnalysisRow": "AI analizi",
+  "settingsUnlimited": "Sınırsız",
+  "settingsManageSubscription": "Aboneliği yönet",
+  "settingsSupportSection": "Destek",
+  "settingsFeedback": "Geri bildirim gönder",
+  "settingsRate": "App Store'da değerlendir",
+  "settingsVersionTitle": "Sürüm",
+  "settingsAiDataFooter": "Ekran görüntülerin cihazında saklanır. Yalnızca analiz edilirken etiketlenmek üzere Google Gemini'ye gönderilir. Ayrıntılar Gizlilik Politikası'nda.",
+  "onboardingLimitedNote": "İstersen yalnızca seçtiğin fotoğrafları paylaşabilirsin; Snaply sadece onları görür. Seçimini sonra Kütüphane'den değiştirebilirsin.",
+  "onboardingSkipForNow": "Şimdilik geç",
+  "settingsFeedbackSubject": "{appName} geri bildirimi ({version})",
+  "@settingsFeedbackSubject": {
     "placeholders": {
+      "appName": {"type": "String"},
       "version": {"type": "String"}
     }
   },
-  "settingsLinkFailed": "Bağlantı açılamadı. Lütfen tekrar dene.",
   "homeWeeklyLimitResetIn": "Haftalık kota {days} gün sonra yenilenir.",
   "@homeWeeklyLimitResetIn": {
     "placeholders": {
