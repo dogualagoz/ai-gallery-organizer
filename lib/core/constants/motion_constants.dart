@@ -171,3 +171,46 @@ abstract final class AppViewer {
   /// Bulunamayan görüntü ekranının kendiliğinden kapanma gecikmesi.
   static const Duration missingAutoClose = Duration(seconds: 2);
 }
+
+/// Temizle destesindeki kart jestinin sabitleri.
+abstract final class AppSwipe {
+  /// Karar eşiği (px): konum + bırakış hızının projeksiyonu baskın yönde bunu
+  /// geçerse kart gider. Sürüklerken aynı eşik ipucu ve haptiği belirler.
+  static const double threshold = 120;
+
+  /// Kısa mesafeli fırlatmanın projeksiyon yavaşlaması.
+  static const double deceleration = AppMotion.decelerationFast;
+
+  /// Parmak gidiş yönünün tersine bu hızdan (px/s) hızlı dönüyorsa kullanıcı
+  /// vazgeçiyor sayılır: eşik geçilmiş olsa da kart yerine döner.
+  static const double cancelVelocity = 100;
+
+  /// Eşikte gidip gelen parmağın haptiği tekrar tekrar tetiklemesini önleyen
+  /// pay (px): bölgeden çıkmak için eşiğin bu kadar gerisine dönmek gerekir.
+  static const double armHysteresis = AppMotion.hysteresis;
+
+  /// Kartın bir kart genişliği kadar yatay yolda döndüğü açı (radyan).
+  static const double rotationPerWidth = 0.18;
+
+  /// Merkezden bu oran kadar uzaktan tutulan kart tam devrilir; ortadan
+  /// tutulan kart dönmez (tutulan nokta mil olur).
+  static const double leanSpan = 0.25;
+
+  /// Butonla fırlatılan kartın tutulmuş sayıldığı dikey konum (0 üst, 1 alt):
+  /// üst çeyrekten tutulmuş gibi gittiği yöne devrilir.
+  static const double buttonGrip = 0.25;
+
+  /// Gidişteki asgari hız (px/s): butonla ya da yavaş bırakışla giden kart da
+  /// kararlı biçimde ekrandan çıkar. Hızlı fırlatmanın hızı aynen korunur.
+  static const double minThrowSpeed = 1800;
+
+  /// Giden kartın hedeflendiği uzaklık (ekran boyutunun katı): yay hedefe
+  /// yaklaşırken yavaşladığı için hedef ekranın epey dışında seçilir.
+  static const double exitDistanceFactor = 1.5;
+
+  /// Giden kartın ağaçta kaldığı süre; bu sürede ekrandan çıkmış olur.
+  static const Duration exitDuration = Duration(milliseconds: 500);
+
+  /// Arkadaki kartın dinlenme ölçeği; üstteki kart gittikçe 1'e büyür.
+  static const double nextCardScale = 0.94;
+}

@@ -65,9 +65,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get searchTitle => 'Search';
 
   @override
-  String get sortingTitle => 'Sort';
-
-  @override
   String get paywallTitle => 'Go Pro';
 
   @override
@@ -421,25 +418,19 @@ class AppLocalizationsEn extends AppLocalizations {
       'Go Pro to search across tags and screenshot text.';
 
   @override
-  String get sortingEmptyTitle => 'Nothing left to sort';
+  String get sortingEmptyTitle => 'Nothing left to clean';
 
   @override
   String get sortingEmptyBody => 'All your screenshots look organized.';
 
   @override
-  String get sortingLimitTitle => 'Your free sorting quota is used up';
+  String get sortingLimitTitle => 'You\'ve used this week\'s free swipes';
 
   @override
-  String get sortingLimitBody => 'Go Pro for unlimited sorting.';
-
-  @override
-  String get sortingAssignSheetTitle => 'Which board should this go to?';
+  String get sortingLimitBody => 'Go Pro for unlimited swipes.';
 
   @override
   String get sortingHintDelete => 'Delete';
-
-  @override
-  String get sortingHintAssign => 'Add to board';
 
   @override
   String get sortingHintSkip => 'Skip';
@@ -451,9 +442,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String sortingRemainingCount(int count) {
     return '$count left';
   }
-
-  @override
-  String get sortingDeleteFailed => 'Couldn\'t delete the screenshot.';
 
   @override
   String get bulkSelectAction => 'Select';
@@ -675,13 +663,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get recentsScreenTitle => 'Recent screenshots';
 
   @override
-  String get sortingUndo => 'Undo';
-
-  @override
-  String get sortingDeleteDeferred =>
-      'Deletion paused. Tap the delete button up top when you\'re ready.';
-
-  @override
   String sortingPendingDeleteCount(int count) {
     return '$count to delete';
   }
@@ -689,11 +670,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String sortingFinishAction(int count) {
     return 'Delete $count';
-  }
-
-  @override
-  String sortingFinishConfirmTitle(int count) {
-    return 'Delete $count screenshots?';
   }
 
   @override
@@ -875,4 +851,73 @@ class AppLocalizationsEn extends AppLocalizations {
   String searchTagLabel(String tag) {
     return 'Search for $tag';
   }
+
+  @override
+  String cleanStatusWithSwipes(int remaining, int swipes) {
+    return '$remaining left · Free swipes: $swipes';
+  }
+
+  @override
+  String cleanTargetLabel(String name) {
+    return 'Swipe-up category: $name';
+  }
+
+  @override
+  String get cleanTargetFooter =>
+      'Screenshots you swipe up move to this category.';
+
+  @override
+  String get cleanInfoTitle => 'How Clean Works';
+
+  @override
+  String get cleanInfoIntro =>
+      'The deck shows screenshots that haven\'t been analyzed yet or landed in Other, and aren\'t on a board.';
+
+  @override
+  String get cleanInfoLeftTitle => 'Swipe left to delete';
+
+  @override
+  String get cleanInfoLeftBody =>
+      'It\'s added to the delete list. Nothing is deleted until you confirm.';
+
+  @override
+  String get cleanInfoUpTitle => 'Swipe up to categorize';
+
+  @override
+  String get cleanInfoUpBody =>
+      'It moves to the category shown above the card. Tap that category to change it.';
+
+  @override
+  String get cleanInfoRightTitle => 'Swipe right to skip';
+
+  @override
+  String get cleanInfoRightBody =>
+      'It stays where it is and comes back next time.';
+
+  @override
+  String get cleanInfoUndoFooter =>
+      'Tap the arrow at the top left to undo your last swipe.';
+
+  @override
+  String cleanInfoFreeFooter(int count) {
+    return 'Tap the arrow at the top left to undo your last swipe. On the free plan you get $count swipes a week; skipping doesn\'t use one.';
+  }
+
+  @override
+  String get cleanDoneTitle => 'All Done';
+
+  @override
+  String cleanSkippedBody(int count) {
+    return 'You skipped $count. Want another look?';
+  }
+
+  @override
+  String get cleanShowSkipped => 'Show Skipped';
+
+  @override
+  String get cleanBackToLibrary => 'Back to Library';
+
+  @override
+  String get cleanAssignFailed =>
+      'Couldn\'t move the screenshot. It\'s back in the deck.';
 }

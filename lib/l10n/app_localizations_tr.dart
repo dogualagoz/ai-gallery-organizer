@@ -66,9 +66,6 @@ class AppLocalizationsTr extends AppLocalizations {
   String get searchTitle => 'Ara';
 
   @override
-  String get sortingTitle => 'Sırala';
-
-  @override
   String get paywallTitle => 'Pro\'ya Geç';
 
   @override
@@ -420,25 +417,19 @@ class AppLocalizationsTr extends AppLocalizations {
       'Etiket ve görsel metinlerinde arama yapmak için Pro\'ya geç.';
 
   @override
-  String get sortingEmptyTitle => 'Sıralanacak bir şey kalmadı';
+  String get sortingEmptyTitle => 'Temizlenecek bir şey kalmadı';
 
   @override
   String get sortingEmptyBody => 'Tüm ekran görüntülerin düzenli görünüyor.';
 
   @override
-  String get sortingLimitTitle => 'Ücretsiz sıralama hakkın doldu';
+  String get sortingLimitTitle => 'Bu haftaki ücretsiz kaydırma hakkın doldu';
 
   @override
-  String get sortingLimitBody => 'Sınırsız sıralama için Pro\'ya geç.';
-
-  @override
-  String get sortingAssignSheetTitle => 'Hangi panoya eklensin?';
+  String get sortingLimitBody => 'Sınırsız kaydırma için Pro\'ya geç.';
 
   @override
   String get sortingHintDelete => 'Sil';
-
-  @override
-  String get sortingHintAssign => 'Panoya ekle';
 
   @override
   String get sortingHintSkip => 'Atla';
@@ -450,9 +441,6 @@ class AppLocalizationsTr extends AppLocalizations {
   String sortingRemainingCount(int count) {
     return '$count kaldı';
   }
-
-  @override
-  String get sortingDeleteFailed => 'Ekran görüntüsü silinemedi.';
 
   @override
   String get bulkSelectAction => 'Seç';
@@ -674,13 +662,6 @@ class AppLocalizationsTr extends AppLocalizations {
   String get recentsScreenTitle => 'Son ekran görüntüleri';
 
   @override
-  String get sortingUndo => 'Geri al';
-
-  @override
-  String get sortingDeleteDeferred =>
-      'Silme ertelendi. Hazır olduğunda üstteki sil düğmesine dokun.';
-
-  @override
   String sortingPendingDeleteCount(int count) {
     return '$count silinecek';
   }
@@ -688,11 +669,6 @@ class AppLocalizationsTr extends AppLocalizations {
   @override
   String sortingFinishAction(int count) {
     return '$count sil';
-  }
-
-  @override
-  String sortingFinishConfirmTitle(int count) {
-    return '$count ekran görüntüsü silinsin mi?';
   }
 
   @override
@@ -873,4 +849,73 @@ class AppLocalizationsTr extends AppLocalizations {
   String searchTagLabel(String tag) {
     return '$tag için ara';
   }
+
+  @override
+  String cleanStatusWithSwipes(int remaining, int swipes) {
+    return '$remaining kaldı · Ücretsiz hak: $swipes';
+  }
+
+  @override
+  String cleanTargetLabel(String name) {
+    return 'Yukarı kaydırma kategorisi: $name';
+  }
+
+  @override
+  String get cleanTargetFooter =>
+      'Yukarı kaydırdığın ekran görüntüleri bu kategoriye taşınır.';
+
+  @override
+  String get cleanInfoTitle => 'Temizle Nasıl Çalışır';
+
+  @override
+  String get cleanInfoIntro =>
+      'Deste, henüz analiz edilmemiş ya da Diğer\'e düşmüş ve bir panoda olmayan ekran görüntülerini gösterir.';
+
+  @override
+  String get cleanInfoLeftTitle => 'Silmek için sola kaydır';
+
+  @override
+  String get cleanInfoLeftBody =>
+      'Silinecekler listesine eklenir. Sen onaylayana kadar hiçbir şey silinmez.';
+
+  @override
+  String get cleanInfoUpTitle => 'Kategoriye atamak için yukarı kaydır';
+
+  @override
+  String get cleanInfoUpBody =>
+      'Kartın üstünde gösterilen kategoriye taşınır. Değiştirmek için o kategoriye dokun.';
+
+  @override
+  String get cleanInfoRightTitle => 'Atlamak için sağa kaydır';
+
+  @override
+  String get cleanInfoRightBody =>
+      'Olduğu yerde kalır, bir dahaki sefere yine gelir.';
+
+  @override
+  String get cleanInfoUndoFooter =>
+      'Son hareketi geri almak için sol üstteki oka dokun.';
+
+  @override
+  String cleanInfoFreeFooter(int count) {
+    return 'Son hareketi geri almak için sol üstteki oka dokun. Ücretsiz planda haftada $count kaydırma hakkın var; atlamak hakkından düşmez.';
+  }
+
+  @override
+  String get cleanDoneTitle => 'Hepsi Bu Kadar';
+
+  @override
+  String cleanSkippedBody(int count) {
+    return '$count ekran görüntüsünü atladın. Bir daha bakmak ister misin?';
+  }
+
+  @override
+  String get cleanShowSkipped => 'Atlananları Göster';
+
+  @override
+  String get cleanBackToLibrary => 'Kütüphane\'ye Dön';
+
+  @override
+  String get cleanAssignFailed =>
+      'Ekran görüntüsü taşınamadı, desteye geri döndü.';
 }

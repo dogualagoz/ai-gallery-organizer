@@ -29,12 +29,14 @@ abstract final class AppIcons {
   static const IconData reanalyze = CupertinoIcons.arrow_clockwise;
   static const IconData restore = CupertinoIcons.arrow_counterclockwise;
   static const IconData sync = CupertinoIcons.arrow_2_circlepath;
-  static const IconData skip = CupertinoIcons.arrow_up;
+  static const IconData skip = CupertinoIcons.arrow_right;
+  static const IconData swipeUp = CupertinoIcons.arrow_up;
   static const IconData stop = CupertinoIcons.stop_circle;
   static const IconData pause = CupertinoIcons.pause_circle;
   static const IconData select = CupertinoIcons.checkmark_circle;
   static const IconData redeem = CupertinoIcons.gift;
   static const IconData copy = CupertinoIcons.doc_on_doc;
+  static const IconData done = CupertinoIcons.checkmark_seal;
 
   // Durum ve gezinme.
   static const IconData back = CupertinoIcons.chevron_left;

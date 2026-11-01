@@ -1,24 +1,40 @@
-// Swipe sıralama ekranı: analiz edilmemiş/"diğer" screenshot'lar için
-// sola sil / sağa atla / yukarı seçili kategoriye ata kart akışı.
+// Temizle sekmesi: analiz bekleyen ya da "Diğer"e düşmüş ekran görüntüleri
+// için kart destesi — sola sil (onaylanana kadar bekler), sağa atla, yukarı
+// seçili kategoriye ata. Bekleyen silmeler sekme değişse de korunur.
+import 'dart:math' as math;
+
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:photo_manager/photo_manager.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../core/constants/app_constants.dart';
+import '../../core/constants/app_icons.dart';
 import '../../core/constants/ui_constants.dart';
 import '../../core/l10n/category_labels.dart';
 import '../../core/l10n/l10n_extension.dart';
 import '../../core/models/screenshot_category.dart';
 import '../../core/models/screenshot_entry.dart';
+import '../../core/router/app_router.dart';
 import '../../core/services/category_names_service.dart';
 import '../../core/services/entitlement_service.dart';
 import '../../core/services/haptic_service.dart';
+import '../../core/services/photo_permission_service.dart';
 import '../../core/services/review_service.dart';
+import '../../core/widgets/app_nav_scaffold.dart';
+import '../../core/widgets/empty_state_view.dart';
+import '../../core/widgets/spring_visibility.dart';
 import '../../core/widgets/status_toast.dart';
 import '../gallery/data/screenshot_repository.dart';
 import '../gallery/providers/gallery_provider.dart';
+import '../gallery/screenshot_actions.dart';
 import '../paywall/open_paywall.dart';
+import 'providers/clean_session_provider.dart';
+import 'swipe_decision.dart';
 import 'widgets/category_picker_sheet.dart';
-import 'widgets/swipe_card.dart';
+import 'widgets/clean_controls.dart';
+import 'widgets/clean_info_sheet.dart';
+import 'widgets/swipe_deck.dart';
 
 class SortingScreen extends ConsumerStatefulWidget {
   const SortingScreen({super.key});
@@ -27,53 +43,16 @@ class SortingScreen extends ConsumerStatefulWidget {
   ConsumerState<SortingScreen> createState() => _SortingScreenState();
 }
 
-/// Bu oturumdaki tek swipe hareketi — "Geri al" için kaydedilir.
-enum _SwipeType { delete, skip, assign }
-
-class _SwipeAction {
-  const _SwipeAction(
-    this.type,
-    this.assetId, {
-    this.prevCategory,
-    this.prevAnalyzedAt,
-  });
-
-  final _SwipeType type;
-  final String assetId;
-
-  /// Kategori-atama öncesi durum (yalnız [_SwipeType.assign] için) — geri
-  /// alınınca kartı birebir eski haline döndürmek için saklanır.
-  final ScreenshotCategory? prevCategory;
-  final DateTime? prevAnalyzedAt;
-}
-
 class _SortingScreenState extends ConsumerState<SortingScreen> {
-  /// Bu oturumda "atla" denen kartlar — kalıcı değil, ekran kapanınca sıfırlanır.
-  final Set<String> _skippedIds = {};
+  final SwipeDeckController _deck = SwipeDeckController();
 
-  /// Sola kaydırılıp silmeye kuyruklanan (henüz silinMEmiş) kartlar. Tek iOS
-  /// onayıyla toplu silinmek üzere biriktirilir.
-  final Set<String> _pendingDeletes = {};
+  /// Yukarı kaydırmanın hedefi; destenin üstündeki kapsülden değiştirilir.
+  ScreenshotCategory _target = ScreenshotCategory.social;
 
-  /// Son swipe'ları geri almak için hareket geçmişi.
-  final List<_SwipeAction> _history = [];
+  /// Son çizilen deste sırası: kart gidince kimliği kayda çevirmek için.
+  List<ScreenshotEntry> _queue = const [];
 
-  /// Toplu silme sürerken tekrar tetiklenmeyi önler.
-  bool _finishing = false;
-
-  /// Kullanıcı iOS silme onayını iptal etti mi (vazgeçti). true iken sekme
-  /// geçişlerinde OTOMATİK olarak tekrar silme sorulmaz — kullanıcı isterse
-  /// "Bitir" ile bilerek tetikler. Yeni bir kart silmeye kuyruklanınca sıfırlanır.
-  bool _deleteDeclined = false;
-
-  /// Sort sekmesi bir önceki karede aktif miydi — çıkışı (aktif→pasif) yakalar.
-  bool _wasTabActive = true;
-
-  /// Yukarı kaydırmanın hedef kategorisi; üstteki chip'ten değiştirilir.
-  ScreenshotCategory _selectedCategory = ScreenshotCategory.social;
-
-  /// Alttaki aksiyon butonlarının üstteki karta jest gönderebilmesi için.
-  final SwipeCardController _cardController = SwipeCardController();
+  bool _deleting = false;
 
   @override
   void initState() {
@@ -83,798 +62,342 @@ class _SortingScreenState extends ConsumerState<SortingScreen> {
   }
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    // go_router sekme dallarını `TickerMode` ile sarar: Sort sekmesinden
-    // çıkınca aktiflik false'a döner. O an biriken silmeleri iOS'un kendi
-    // onayıyla işleriz. `didChangeDependencies` içinde setState çağırmamak
-    // için işlemi kare sonrasına erteleriz.
-    final bool active = TickerMode.valuesOf(context).enabled;
-    // Kullanıcı bir kez iptal ettiyse (_deleteDeclined) sekme geçişinde tekrar
-    // tekrar sormayız — vazgeçmiş sayarız.
-    if (_wasTabActive &&
-        !active &&
-        _pendingDeletes.isNotEmpty &&
-        !_deleteDeclined) {
-      WidgetsBinding.instance.addPostFrameCallback((_) => _commitDeletes());
-    }
-    _wasTabActive = active;
-  }
-
-  @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final bool canUndo = ref.watch(
+      cleanSessionProvider.select((session) => session.canUndo),
+    );
+    final AsyncValue<List<ScreenshotEntry>> gallery = ref.watch(
+      galleryProvider,
+    );
+    return AppNavScaffold(
+      title: l10n.tabClean,
+      scrollable: false,
+      leading: NavBarButton.icon(
+        icon: AppIcons.undo,
+        label: l10n.undoAction,
+        // Silme sürerken geri alınan kart silinip yine desteye dönmesin.
+        onPressed: canUndo && !_deleting ? _undo : null,
+      ),
+      trailing: NavBarButton.icon(
+        icon: AppIcons.info,
+        label: l10n.cleanInfoTitle,
+        onPressed: _showInfo,
+      ),
+      slivers: [
+        SliverFillRemaining(
+          child: Padding(
+            // Alt boşluk yüzen sekme çubuğu kadar (kabuk bunu padding'e yazar).
+            padding: EdgeInsets.fromLTRB(
+              AppSpacing.md,
+              0,
+              AppSpacing.md,
+              MediaQuery.paddingOf(context).bottom,
+            ),
+            child: gallery.when(
+              skipLoadingOnReload: true,
+              loading: () => const Center(child: CupertinoActivityIndicator()),
+              error: (error, _) => error is PhotoAccessDeniedException
+                  ? const PermissionDeniedView()
+                  : EmptyStateView(
+                      icon: AppIcons.error,
+                      title: l10n.galleryLoadFailedTitle,
+                      message: l10n.galleryLoadFailedBody,
+                      actionLabel: l10n.retryAction,
+                      onAction: () => ref.invalidate(galleryProvider),
+                    ),
+              data: _content,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// Galeri yüklüyken gövde: deste ve altındaki bitiş katmanı (deste bitti
+  /// ya da kota doldu). Deste hep kurulu kalır: kotanın son kartı da uçuşunu
+  /// tamamlar.
+  Widget _content(List<ScreenshotEntry> entries) {
+    final CleanSession session = ref.watch(cleanSessionProvider);
     final EntitlementState entitlement = ref.watch(entitlementProvider);
-    final List<ScreenshotEntry> entries =
-        ref.watch(galleryProvider).value ?? const [];
-    final ScreenshotRepository repo = ref.watch(screenshotRepositoryProvider);
-
-    final List<ScreenshotEntry> queue = entries
-        .where(
-          (entry) =>
-              entry.boardId == null &&
-              (entry.isPending || entry.category == ScreenshotCategory.other) &&
-              !_skippedIds.contains(entry.assetId) &&
-              !_pendingDeletes.contains(entry.assetId),
-        )
-        .toList();
-
-    final Map<int, String> categoryNames = ref.watch(categoryNamesProvider);
-    final String categoryLabel = _selectedCategory.displayName(
-      l10n,
-      categoryNames,
-    );
-
-    return Scaffold(
-      body: SafeArea(
-        bottom: false,
-        child: Column(
-          children: [
-            _SortHeader(
-              categoryIcon: _selectedCategory.icon,
-              categoryLabel: categoryLabel,
-              remaining: queue.length,
-              pendingDeleteCount: _pendingDeletes.length,
-              canUndo: _history.isNotEmpty,
-              onUndo: _undo,
-              onPickCategory: _pickCategory,
-              onCommitDeletes: _commitDeletes,
-            ),
-            Expanded(
-              child: !entitlement.canSwipe
-                  ? const _SortingLimit()
-                  : queue.isEmpty
-                  ? (_pendingDeletes.isEmpty
-                        ? const _SortingEmpty()
-                        : _SortingFinishPrompt(
-                            count: _pendingDeletes.length,
-                            deleting: _finishing,
-                            onFinish: _commitDeletes,
-                          ))
-                  : _SortingDeck(
-                      top: queue.first,
-                      next: queue.length > 1 ? queue[1] : null,
-                      asset: repo.assetFor(queue.first.assetId),
-                      controller: _cardController,
-                      categoryIcon: _selectedCategory.icon,
-                      categoryLabel: categoryLabel,
-                      onDelete: () => _queueDelete(queue.first.assetId),
-                      onSkip: () => _skipCard(queue.first.assetId),
-                      onAssign: () => _assignToCategory(queue.first),
-                    ),
-            ),
-          ],
-        ),
-      ),
+    final int pending = ref.watch(pendingDeleteIdsProvider).length;
+    final List<ScreenshotEntry> queue = session.queue(entries);
+    _queue = queue;
+    final bool locked = queue.isNotEmpty && !entitlement.canSwipe;
+    return _deckLayout(
+      queue: locked ? const [] : queue,
+      finished: locked
+          ? const _LimitView()
+          : queue.isEmpty
+          ? _finished(session, entries, pending)
+          : null,
+      // Deste bitince bekleyenler bitiş görünümünün kendi CTA'sında.
+      showPending: queue.isNotEmpty && pending > 0,
+      pending: pending,
+      freeSwipesLeft: entitlement.isPro
+          ? null
+          : math.max(0, FreeLimits.swipeSorts - entitlement.swipesUsed),
     );
   }
 
-  /// Yukarı-atama hedef kategorisini seçtirir.
-  Future<void> _pickCategory() async {
-    Haptics.tap();
-    final ScreenshotCategory? selected = await showCategoryPickerSheet(
-      context,
-      selected: _selectedCategory,
-    );
-    if (selected != null && mounted) {
-      setState(() => _selectedCategory = selected);
-    }
-  }
-
-  /// Sola kaydırma: hemen silmez, silinecekler kümesine ekler (tek onay için).
-  Future<bool> _queueDelete(String assetId) async {
-    Haptics.confirm();
-    setState(() {
-      _pendingDeletes.add(assetId);
-      _history.add(_SwipeAction(_SwipeType.delete, assetId));
-      // Yeni silme niyeti: bir önceki iptal artık geçersiz, otomatik onay
-      // yeniden devreye girsin.
-      _deleteDeclined = false;
-    });
-    await ref.read(entitlementProvider.notifier).registerSwipe();
-    return true; // kart uçup gitsin; gerçek silme "Bitir"de yapılır
-  }
-
-  void _skipCard(String assetId) {
-    Haptics.tap();
-    setState(() {
-      _skippedIds.add(assetId);
-      _history.add(_SwipeAction(_SwipeType.skip, assetId));
-    });
-  }
-
-  /// Son hareketi geri alır: silme/atlama kuyruğundan çıkarır, atamayı bozar.
-  Future<void> _undo() async {
-    if (_history.isEmpty) return;
-    Haptics.tap();
-    final _SwipeAction action = _history.removeLast();
-    switch (action.type) {
-      case _SwipeType.delete:
-        setState(() => _pendingDeletes.remove(action.assetId));
-      case _SwipeType.skip:
-        setState(() => _skippedIds.remove(action.assetId));
-      case _SwipeType.assign:
-        // Atama öncesi kategori/analiz durumuna geri dön → kart deste başına düşer.
-        await ref
-            .read(screenshotRepositoryProvider)
-            .restoreCategoryState(
-              action.assetId,
-              category: action.prevCategory,
-              analyzedAt: action.prevAnalyzedAt,
-            );
-        if (mounted) setState(() {});
-    }
-  }
-
-  /// Biriken silme kuyruğunu tek `deleteWithIds` çağrısıyla siler. Onay olarak
-  /// iOS'un kendi "N fotoğrafı sil?" sorusu gösterilir — ayrıca Flutter dialogu
-  /// açılmaz. Sort sekmesinden çıkışta ve deste bitiş ekranındaki butonda
-  /// çağrılır. Kullanıcı iOS onayını iptal ederse kuyruk olduğu gibi kalır
-  /// ama [_deleteDeclined] işaretlenir; sekme geçişlerinde bir daha otomatik
-  /// sorulmaz (yalnız "Bitir" ile bilerek tekrar denenir).
-  Future<void> _commitDeletes() async {
-    if (_pendingDeletes.isEmpty || _finishing || !mounted) return;
-    final l10n = context.l10n;
-    setState(() => _finishing = true);
-    final List<String> ids = _pendingDeletes.toList();
-    List<String> deleted;
-    try {
-      deleted = await PhotoManager.editor.deleteWithIds(ids);
-    } catch (error, stackTrace) {
-      debugPrint('Toplu swipe sil hatası: $error\n$stackTrace');
-      if (mounted) {
-        setState(() => _finishing = false);
-        _showSnack(l10n.sortingDeleteFailed, tone: StatusToastTone.error);
-      }
-      return;
-    }
-    // Hiçbir şey silinmedi = kullanıcı iOS onayında "İzin verme"ye bastı →
-    // vazgeçmiş say: kuyruğu koru ama sekme geçişlerinde bir daha otomatik
-    // sorma. Kullanıcı isterse "Bitir" ile bilerek yeniden dener.
-    if (deleted.isEmpty) {
-      if (mounted) {
-        setState(() {
-          _finishing = false;
-          _deleteDeclined = true;
-        });
-        // Kullanıcıyı yönlendir: silmenin nereden tamamlanacağını (üstteki sil
-        // düğmesi) anlasın.
-        _showSnack(l10n.sortingDeleteDeferred);
-      }
-      return;
-    }
-    final ScreenshotRepository repo = ref.read(screenshotRepositoryProvider);
-    for (final String assetId in deleted) {
-      await repo.removeEntry(assetId);
-    }
-    if (!mounted) return;
-    setState(() {
-      _finishing = false;
-      _pendingDeletes.removeAll(deleted);
-      _history.removeWhere(
-        (a) => a.type == _SwipeType.delete && deleted.contains(a.assetId),
-      );
-    });
-    // Temizlik sonrası olumlu an: değerlendirme iste (cooldown'lı).
-    if (deleted.isNotEmpty) {
-      ref.read(reviewServiceProvider).requestIfAppropriate();
-    }
-  }
-
-  /// Yukarı kaydırma: kartı üstte seçili kategoriye atar. Atama öncesi durum
-  /// geri-al için saklanır; setCategory pending kartı "işlendi" yapıp kuyruktan
-  /// düşürür.
-  Future<void> _assignToCategory(ScreenshotEntry entry) async {
-    Haptics.tick();
-    await ref
-        .read(screenshotRepositoryProvider)
-        .setCategory(entry.assetId, _selectedCategory);
-    await ref.read(entitlementProvider.notifier).registerSwipe();
-    if (mounted) {
-      setState(
-        () => _history.add(
-          _SwipeAction(
-            _SwipeType.assign,
-            entry.assetId,
-            prevCategory: entry.category,
-            prevAnalyzedAt: entry.analyzedAt,
-          ),
-        ),
-      );
-    }
-  }
-
-  void _showSnack(
-    String message, {
-    StatusToastTone tone = StatusToastTone.neutral,
+  /// Durum satırı + deste + bekleyen silme yuvası + eylem satırı. Satırlar
+  /// deste bitince de yer kaplar: son kart uçarken kart boyu değişmez.
+  Widget _deckLayout({
+    required List<ScreenshotEntry> queue,
+    required Widget? finished,
+    required bool showPending,
+    required int pending,
+    required int? freeSwipesLeft,
   }) {
-    showStatusToast(context, message, tone: tone);
-  }
-}
-
-/// Üstteki (etkileşimli) kart + arkada beliren bir sonraki kartın önizlemesi
-/// + altta her zaman görünen, jestin anlamını açıklayan aksiyon butonları.
-class _SortingDeck extends StatelessWidget {
-  const _SortingDeck({
-    required this.top,
-    required this.next,
-    required this.asset,
-    required this.controller,
-    required this.categoryIcon,
-    required this.categoryLabel,
-    required this.onDelete,
-    required this.onSkip,
-    required this.onAssign,
-  });
-
-  final ScreenshotEntry top;
-  final ScreenshotEntry? next;
-  final AssetEntity? asset;
-  final SwipeCardController controller;
-  final IconData categoryIcon;
-  final String categoryLabel;
-  final Future<bool> Function() onDelete;
-  final VoidCallback onSkip;
-  final VoidCallback onAssign;
-
-  @override
-  Widget build(BuildContext context) {
-    final double bottomInset = MediaQuery.paddingOf(context).bottom;
-    // _MainShell'deki navbar boşluğunun BİREBİR aynısı: sm(üst) + pil + alt
-    // boşluk. Fazla pay bırakmak kartı yukarı kaydırıp altta boş alan
-    // bırakıyor, azı ise kartın altını pilin arkasında saklıyordu.
-    final double navBarClearance =
-        AppSpacing.sm +
-        AppSizes.navBarHeight +
-        (bottomInset > AppSpacing.md ? bottomInset : AppSpacing.md);
-
-    return Padding(
-      padding: EdgeInsets.fromLTRB(
-        AppSpacing.lg,
-        AppSpacing.lg,
-        AppSpacing.lg,
-        navBarClearance,
-      ),
-      child: Column(
-        children: [
-          Expanded(
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                // 9:16 kartın sığdığı en büyük dikdörtgen — Center yerine
-                // kesin genişlik/yükseklik vererek Stack'in kendi boyutuna
-                // göre içeriği kısıp kartı sola yaslamasının önüne geçer.
-                double cardHeight = constraints.maxHeight;
-                double cardWidth = cardHeight * 9 / 16;
-                if (cardWidth > constraints.maxWidth) {
-                  cardWidth = constraints.maxWidth;
-                  cardHeight = cardWidth * 16 / 9;
-                }
-                return Center(
-                  child: SizedBox(
-                    width: cardWidth,
-                    height: cardHeight,
-                    child: Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        if (next != null)
-                          Transform.scale(
-                            scale: 0.94,
-                            child: Opacity(
-                              opacity: 0.6,
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(
-                                  AppRadius.lg,
-                                ),
-                                child: ColoredBox(
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .surfaceContainerHighest,
-                                ),
-                              ),
-                            ),
-                          ),
-                        SwipeCard(
-                          key: ValueKey(top.assetId),
-                          asset: asset,
-                          controller: controller,
-                          assignIcon: categoryIcon,
-                          assignLabel: categoryLabel,
-                          onDelete: onDelete,
-                          onSkip: onSkip,
-                          onAssign: onAssign,
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              },
-            ),
-          ),
-          const SizedBox(height: AppSpacing.lg),
-          _SortingActionRow(
-            categoryIcon: categoryIcon,
-            categoryLabel: categoryLabel,
-            onDelete: controller.triggerDelete,
-            onSkip: controller.triggerSkip,
-            onAssign: controller.triggerAssign,
-          ),
-        ],
-      ),
+    final ScreenshotRepository repo = ref.watch(screenshotRepositoryProvider);
+    final String targetLabel = _target.displayName(
+      context.l10n,
+      ref.watch(categoryNamesProvider),
     );
-  }
-}
+    final bool hasCards = queue.isNotEmpty;
+    SwipeDeckItem? item(int index) => index < queue.length
+        ? SwipeDeckItem(
+            queue[index].assetId,
+            repo.assetFor(queue[index].assetId),
+          )
+        : null;
 
-/// Her zaman görünen aksiyon satırı: sol/orta/sağ konumu ilgili jest yönüyle
-/// eşleşir (sil-sol, kategori-yukarı, atla-sağ), böylece kullanıcı jesti
-/// denemeden önce ne işe yaradığını görür; dokunarak da tetiklenebilir.
-class _SortingActionRow extends StatelessWidget {
-  const _SortingActionRow({
-    required this.categoryIcon,
-    required this.categoryLabel,
-    required this.onDelete,
-    required this.onSkip,
-    required this.onAssign,
-  });
-
-  final IconData categoryIcon;
-  final String categoryLabel;
-  final VoidCallback onDelete;
-  final VoidCallback onSkip;
-  final VoidCallback onAssign;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = context.l10n;
-    final ColorScheme scheme = Theme.of(context).colorScheme;
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: [
-        _SortingActionButton(
-          icon: Icons.delete_outline,
-          label: l10n.sortingHintDelete,
-          color: Colors.red,
-          onTap: onDelete,
-        ),
-        _SortingActionButton(
-          icon: categoryIcon,
-          label: categoryLabel,
-          color: scheme.primary,
-          onTap: onAssign,
-        ),
-        _SortingActionButton(
-          icon: Icons.arrow_forward,
-          label: l10n.sortingHintSkip,
-          color: Colors.blueGrey,
-          onTap: onSkip,
-        ),
-      ],
-    );
-  }
-}
-
-class _SortingActionButton extends StatelessWidget {
-  const _SortingActionButton({
-    required this.icon,
-    required this.label,
-    required this.color,
-    required this.onTap,
-  });
-
-  final IconData icon;
-  final String label;
-  final Color color;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
     return Column(
-      mainAxisSize: MainAxisSize.min,
       children: [
-        Material(
-          color: color.withValues(alpha: 0.12),
-          shape: const CircleBorder(),
-          child: InkWell(
-            customBorder: const CircleBorder(),
-            onTap: onTap,
-            child: Padding(
-              padding: const EdgeInsets.all(AppSpacing.md),
-              child: Icon(icon, color: color, size: 26),
+        SpringVisibility(
+          visible: hasCards,
+          child: _DeckStatus(
+            remaining: queue.length,
+            freeSwipesLeft: freeSwipesLeft,
+            targetLabel: targetLabel,
+            onPickTarget: _pickTarget,
+          ),
+        ),
+        const SizedBox(height: AppSpacing.sm),
+        Expanded(
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              ?finished,
+              SwipeDeck(
+                top: item(0),
+                next: item(1),
+                controller: _deck,
+                onSwipe: _onSwipe,
+                assignIcon: _target.icon,
+                assignLabel: targetLabel,
+              ),
+            ],
+          ),
+        ),
+        _pendingSlot(pending, visible: showPending),
+        SpringVisibility(
+          visible: hasCards,
+          child: CleanActionRow(
+            assignIcon: _target.icon,
+            assignLabel: targetLabel,
+            onSwipe: hasCards ? _deck.swipe : null,
+          ),
+        ),
+        const SizedBox(height: AppSpacing.sm),
+      ],
+    );
+  }
+
+  /// Bekleyen silme kapsülünün sabit yuvası (yer hep ayrılır).
+  Widget _pendingSlot(int pending, {required bool visible}) {
+    return SizedBox(
+      height: AppDeck.pendingSlot,
+      child: Center(
+        child: SpringVisibility(
+          visible: visible,
+          child: PendingDeleteBar(
+            count: pending,
+            deleting: _deleting,
+            onDelete: _commitDeletes,
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Deste bitti: bekleyen silme varsa tamamlatır, atlanan varsa yeniden
+  /// gösterir, yoksa Kütüphane'ye yönlendirir.
+  Widget _finished(
+    CleanSession session,
+    List<ScreenshotEntry> entries,
+    int pending,
+  ) {
+    final l10n = context.l10n;
+    if (pending > 0) {
+      return EmptyStateView(
+        icon: AppIcons.delete,
+        title: l10n.sortingPendingDeleteCount(pending),
+        message: l10n.sortingFinishConfirmBody,
+        actionLabel: l10n.sortingFinishAction(pending),
+        onAction: _deleting ? null : _commitDeletes,
+        secondaryActionLabel: l10n.sortingFinishKeep,
+        onSecondaryAction: _deleting
+            ? null
+            : ref.read(cleanSessionProvider.notifier).keepPendingDeletes,
+      );
+    }
+    final int skipped = entries
+        .where((entry) => session.skipped.contains(entry.assetId))
+        .length;
+    void backToLibrary() => context.go(AppRoutes.library);
+    if (skipped > 0) {
+      return EmptyStateView(
+        icon: AppIcons.done,
+        title: l10n.cleanDoneTitle,
+        message: l10n.cleanSkippedBody(skipped),
+        actionLabel: l10n.cleanShowSkipped,
+        onAction: ref.read(cleanSessionProvider.notifier).resetSkipped,
+        secondaryActionLabel: l10n.cleanBackToLibrary,
+        onSecondaryAction: backToLibrary,
+      );
+    }
+    return EmptyStateView(
+      icon: AppIcons.done,
+      title: l10n.sortingEmptyTitle,
+      message: l10n.sortingEmptyBody,
+      actionLabel: l10n.cleanBackToLibrary,
+      onAction: backToLibrary,
+    );
+  }
+
+  /// Deste kartı gönderdi: haptik aynı karede, kayıt hemen işlenir.
+  void _onSwipe(String id, SwipeDirection direction) {
+    final ScreenshotEntry? entry = _queue
+        .where((candidate) => candidate.assetId == id)
+        .firstOrNull;
+    if (entry == null) return;
+    switch (direction) {
+      case SwipeDirection.left:
+        Haptics.confirm();
+      case SwipeDirection.up:
+        Haptics.tick();
+      case SwipeDirection.right:
+        Haptics.tap();
+    }
+    _applySwipe(entry, direction);
+  }
+
+  Future<void> _applySwipe(
+    ScreenshotEntry entry,
+    SwipeDirection direction,
+  ) async {
+    final StatusToaster toaster = StatusToaster.of(context);
+    final String failure = context.l10n.cleanAssignFailed;
+    final bool applied = await ref
+        .read(cleanSessionProvider.notifier)
+        .swipe(entry, direction, _target);
+    if (!applied) toaster.show(failure, tone: StatusToastTone.error);
+  }
+
+  /// Son kaydırmayı geri alır: kart çıktığı kenardan desteye döner.
+  Future<void> _undo() async {
+    final CleanMove? move = ref.read(cleanSessionProvider).history.lastOrNull;
+    if (move == null) return;
+    Haptics.tap();
+    final StatusToaster toaster = StatusToaster.of(context);
+    final String failure = context.l10n.undoFailed;
+    final bool restored = await ref
+        .read(cleanSessionProvider.notifier)
+        .undo(onReturn: () => _deck.expectReturn(move.assetId, move.direction));
+    if (!restored) toaster.show(failure, tone: StatusToastTone.error);
+  }
+
+  /// Bekleyenleri siler; onayı iOS'un kendi diyaloğu ister. Kullanıcı
+  /// vazgeçerse liste olduğu gibi kalır (yeniden sorulmaz, çubuk durur).
+  Future<void> _commitDeletes() async {
+    final List<String> ids = ref.read(pendingDeleteIdsProvider);
+    if (ids.isEmpty || _deleting) return;
+    // Oturum widget'tan bağımsız: ekran kapansa da silinenler düşmeli (ref
+    // dispose sonrası kullanılamaz, notifier önceden alınır).
+    final CleanSessionNotifier session = ref.read(
+      cleanSessionProvider.notifier,
+    );
+    setState(() => _deleting = true);
+    final List<String> deleted = await deleteScreenshots(context, ref, ids);
+    session.markDeleted(deleted);
+    if (!mounted) return;
+    setState(() => _deleting = false);
+    if (deleted.isEmpty) return;
+    Haptics.confirm();
+    // Temizlik sonrası olumlu an: değerlendirme iste (cooldown'lı).
+    ref.read(reviewServiceProvider).requestIfAppropriate();
+  }
+
+  Future<void> _pickTarget() async {
+    final ScreenshotCategory? picked = await showCategoryPickerSheet(
+      context,
+      selected: _target,
+    );
+    if (picked != null && mounted) setState(() => _target = picked);
+  }
+
+  void _showInfo() {
+    final bool isPro = ref.read(entitlementProvider).isPro;
+    showCleanInfoSheet(
+      context,
+      freeSwipes: isPro ? null : FreeLimits.swipeSorts,
+    );
+  }
+}
+
+/// Destenin üstü: kalan sayı (ücretsizde kalan hak) + yukarı hedefi.
+class _DeckStatus extends StatelessWidget {
+  const _DeckStatus({
+    required this.remaining,
+    required this.freeSwipesLeft,
+    required this.targetLabel,
+    required this.onPickTarget,
+  });
+
+  final int remaining;
+  final int? freeSwipesLeft;
+  final String targetLabel;
+  final VoidCallback onPickTarget;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final int? swipes = freeSwipesLeft;
+    return Row(
+      children: [
+        Expanded(
+          child: Text(
+            swipes == null
+                ? l10n.sortingRemainingCount(remaining)
+                : l10n.cleanStatusWithSwipes(remaining, swipes),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
           ),
         ),
-        const SizedBox(height: AppSpacing.xs),
-        Text(
-          label,
-          style: Theme.of(context).textTheme.bodySmall
-              ?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
-        ),
+        const SizedBox(width: AppSpacing.sm),
+        CleanTargetChip(label: targetLabel, onPressed: onPickTarget),
       ],
     );
   }
 }
 
-/// Sort ekranının üst başlığı (AppBar yerine): solda geri-al, ortada seçili
-/// kategori chip'i (dokununca değiştirir), sağda silme sayacı; altında kalan
-/// kart sayısı ince bir gösterge olarak. Üstte belirgin düz başlık yoktur.
-class _SortHeader extends StatelessWidget {
-  const _SortHeader({
-    required this.categoryIcon,
-    required this.categoryLabel,
-    required this.remaining,
-    required this.pendingDeleteCount,
-    required this.canUndo,
-    required this.onUndo,
-    required this.onPickCategory,
-    required this.onCommitDeletes,
-  });
-
-  final IconData categoryIcon;
-  final String categoryLabel;
-  final int remaining;
-  final int pendingDeleteCount;
-  final bool canUndo;
-  final VoidCallback onUndo;
-  final VoidCallback onPickCategory;
-
-  /// Bekleyen silme sayacına dokununca toplu silmeyi (iOS onayıyla) tetikler.
-  final VoidCallback onCommitDeletes;
+/// Ücretsiz haftalık kaydırma hakkı bitti.
+class _LimitView extends StatelessWidget {
+  const _LimitView();
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final ColorScheme scheme = Theme.of(context).colorScheme;
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(
-        AppSpacing.sm,
-        AppSpacing.sm,
-        AppSpacing.sm,
-        0,
-      ),
-      child: Column(
-        children: [
-          SizedBox(
-            height: 48,
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                Center(
-                  child: _CategoryChip(
-                    icon: categoryIcon,
-                    label: categoryLabel,
-                    onTap: onPickCategory,
-                  ),
-                ),
-                if (canUndo)
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: IconButton(
-                      tooltip: l10n.sortingUndo,
-                      icon: const Icon(Icons.undo),
-                      onPressed: onUndo,
-                    ),
-                  ),
-                if (pendingDeleteCount > 0)
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: Padding(
-                      padding: const EdgeInsets.only(right: AppSpacing.sm),
-                      child: _PendingDeleteCounter(
-                        count: pendingDeleteCount,
-                        onTap: onCommitDeletes,
-                      ),
-                    ),
-                  ),
-              ],
-            ),
-          ),
-          if (remaining > 0)
-            Padding(
-              padding: const EdgeInsets.only(top: AppSpacing.xs),
-              child: Text(
-                l10n.sortingRemainingCount(remaining),
-                style: Theme.of(
-                  context,
-                ).textTheme.labelMedium?.copyWith(color: scheme.onSurfaceVariant),
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-}
-
-/// Seçili yukarı-atama kategorisini gösteren, dokununca değiştiren pill.
-class _CategoryChip extends StatelessWidget {
-  const _CategoryChip({
-    required this.icon,
-    required this.label,
-    required this.onTap,
-  });
-
-  final IconData icon;
-  final String label;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final ColorScheme scheme = Theme.of(context).colorScheme;
-    return Material(
-      color: scheme.primaryContainer,
-      borderRadius: BorderRadius.circular(AppRadius.pill),
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: onTap,
-        child: ConstrainedBox(
-          // Uzun özel adlar undo/sayaç ile çakışmasın diye ekranın %60'ıyla sınırla.
-          constraints: BoxConstraints(
-            maxWidth: MediaQuery.sizeOf(context).width * 0.6,
-          ),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.md,
-              vertical: AppSpacing.sm,
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(icon, size: 18, color: scheme.onPrimaryContainer),
-                const SizedBox(width: AppSpacing.xs),
-                Flexible(
-                  child: Text(
-                    label,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                      color: scheme.onPrimaryContainer,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: AppSpacing.xs),
-                Icon(
-                  Icons.expand_more,
-                  size: 18,
-                  color: scheme.onPrimaryContainer,
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/// App bar'da silmeye kuyruklanan kart sayısını gösteren, dokununca toplu
-/// silmeyi (iOS onayıyla) başlatan düğme. Belirgin bir aksiyon gibi durur ki
-/// kullanıcı silmeyi nereden tamamlayacağını anlasın — özellikle onayı bir kez
-/// iptal ettikten sonra otomatik sorulmadığında tek "Bitir" yolu budur.
-class _PendingDeleteCounter extends StatelessWidget {
-  const _PendingDeleteCounter({required this.count, required this.onTap});
-
-  final int count;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final ColorScheme scheme = Theme.of(context).colorScheme;
-    return Tooltip(
-      message: context.l10n.sortingFinishAction(count),
-      child: Material(
-        color: scheme.errorContainer,
-        borderRadius: BorderRadius.circular(AppRadius.pill),
-        clipBehavior: Clip.antiAlias,
-        child: InkWell(
-          onTap: onTap,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.md,
-              vertical: AppSpacing.xs,
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  Icons.delete_outline,
-                  size: 18,
-                  color: scheme.onErrorContainer,
-                ),
-                const SizedBox(width: AppSpacing.xs),
-                Text(
-                  '$count',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    color: scheme.onErrorContainer,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/// Deste bitince, bekleyen silmeleri tek onayla tamamlamaya davet eden ekran.
-class _SortingFinishPrompt extends StatelessWidget {
-  const _SortingFinishPrompt({
-    required this.count,
-    required this.deleting,
-    required this.onFinish,
-  });
-
-  final int count;
-  final bool deleting;
-  final VoidCallback onFinish;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = context.l10n;
-    final ColorScheme scheme = Theme.of(context).colorScheme;
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.xl),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 96,
-              height: 96,
-              decoration: BoxDecoration(
-                color: scheme.errorContainer,
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                Icons.delete_sweep_outlined,
-                size: 40,
-                color: scheme.onErrorContainer,
-              ),
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            Text(
-              l10n.sortingPendingDeleteCount(count),
-              style: Theme.of(context).textTheme.titleLarge,
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: AppSpacing.sm),
-            Text(
-              l10n.sortingFinishConfirmBody,
-              style: Theme.of(context).textTheme.bodyMedium
-                  ?.copyWith(color: scheme.onSurfaceVariant),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            FilledButton.icon(
-              onPressed: deleting ? null : onFinish,
-              icon: deleting
-                  ? const SizedBox.square(
-                      dimension: 18,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : const Icon(Icons.delete_outline),
-              label: Text(l10n.sortingFinishAction(count)),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _SortingEmpty extends StatelessWidget {
-  const _SortingEmpty();
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = context.l10n;
-    final ColorScheme scheme = Theme.of(context).colorScheme;
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.xl),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 96,
-              height: 96,
-              decoration: BoxDecoration(
-                color: scheme.primary.withValues(alpha: 0.08),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                Icons.checklist_rtl_outlined,
-                size: 40,
-                color: scheme.primary,
-              ),
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            Text(
-              l10n.sortingEmptyTitle,
-              style: Theme.of(context).textTheme.titleLarge,
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: AppSpacing.sm),
-            Text(
-              l10n.sortingEmptyBody,
-              style: Theme.of(context).textTheme.bodyMedium
-                  ?.copyWith(color: scheme.onSurfaceVariant),
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _SortingLimit extends StatelessWidget {
-  const _SortingLimit();
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = context.l10n;
-    final ColorScheme scheme = Theme.of(context).colorScheme;
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.xl),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 96,
-              height: 96,
-              decoration: BoxDecoration(
-                color: scheme.primary.withValues(alpha: 0.08),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                Icons.workspace_premium_outlined,
-                size: 40,
-                color: scheme.primary,
-              ),
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            Text(
-              l10n.sortingLimitTitle,
-              style: Theme.of(context).textTheme.titleLarge,
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: AppSpacing.sm),
-            Text(
-              l10n.sortingLimitBody,
-              style: Theme.of(context).textTheme.bodyMedium
-                  ?.copyWith(color: scheme.onSurfaceVariant),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            FilledButton(
-              onPressed: () => openPaywall(context),
-              child: Text(l10n.paywallTitle),
-            ),
-          ],
-        ),
-      ),
+    return EmptyStateView(
+      icon: AppIcons.lock,
+      title: l10n.sortingLimitTitle,
+      message: l10n.sortingLimitBody,
+      actionLabel: l10n.paywallTitle,
+      onAction: () => openPaywall(context),
     );
   }
 }

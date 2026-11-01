@@ -342,10 +342,10 @@ class _BoardDetailScreenState extends ConsumerState<BoardDetailScreen> {
 
   /// Onayı iOS'un kendi silme diyaloğu ister; silindiyse seçim kapanır.
   Future<void> _delete(List<String> ids) async {
-    int deleted = 0;
+    List<String> deleted = const [];
     await _whileBusy(() async {
       deleted = await deleteScreenshots(context, ref, ids);
     });
-    if (deleted > 0 && mounted) _setSelecting(false);
+    if (deleted.isNotEmpty && mounted) _setSelecting(false);
   }
 }

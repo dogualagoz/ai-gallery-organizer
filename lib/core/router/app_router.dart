@@ -15,6 +15,7 @@ import '../../features/onboarding/onboarding_screen.dart';
 import '../../features/paywall/paywall_screen.dart';
 import '../../features/search/search_screen.dart';
 import '../../features/settings/settings_screen.dart';
+import '../../features/sorting/providers/clean_session_provider.dart';
 import '../../features/sorting/sorting_screen.dart';
 import '../constants/app_icons.dart';
 import '../constants/ui_constants.dart';
@@ -270,21 +271,32 @@ class _MainShell extends StatelessWidget {
           child: Row(
             children: [
               Expanded(
-                child: GlassNavBar(
-                  selectedIndex: current,
-                  onSelected: _goTab,
-                  destinations: [
-                    GlassNavDestination(
-                      icon: AppIcons.library,
-                      selectedIcon: AppIcons.libraryFill,
-                      label: l10n.tabLibrary,
-                    ),
-                    GlassNavDestination(
-                      icon: AppIcons.clean,
-                      selectedIcon: AppIcons.cleanFill,
-                      label: l10n.tabClean,
-                    ),
-                  ],
+                // Temizle rozeti: sekmeden çıkınca da bekleyen silmeler
+                // unutulmasın (onay sürpriz diyalogla değil, buradan hatırlanır).
+                child: Consumer(
+                  builder: (context, ref, _) {
+                    final int pending = ref
+                        .watch(pendingDeleteIdsProvider)
+                        .length;
+                    return GlassNavBar(
+                      selectedIndex: current,
+                      onSelected: _goTab,
+                      destinations: [
+                        GlassNavDestination(
+                          icon: AppIcons.library,
+                          selectedIcon: AppIcons.libraryFill,
+                          label: l10n.tabLibrary,
+                        ),
+                        GlassNavDestination(
+                          icon: AppIcons.clean,
+                          selectedIcon: AppIcons.cleanFill,
+                          label: l10n.tabClean,
+                          badgeCount: pending,
+                          badgeLabel: l10n.sortingPendingDeleteCount(pending),
+                        ),
+                      ],
+                    );
+                  },
                 ),
               ),
               const SizedBox(width: AppSpacing.sm),

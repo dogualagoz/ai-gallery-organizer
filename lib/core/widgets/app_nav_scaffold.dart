@@ -23,6 +23,7 @@ class AppNavScaffold extends StatelessWidget {
     this.trailing,
     this.onRefresh,
     this.controller,
+    this.scrollable = true,
   });
 
   /// Büyük başlık; küçülünce barın ortasında aynı metin görünür.
@@ -45,6 +46,11 @@ class AppNavScaffold extends StatelessWidget {
 
   final ScrollController? controller;
 
+  /// false ise sayfa kaymaz (ör. jest sahnesi): içerik tek
+  /// `SliverFillRemaining` olarak verilir, dikey sürüklemeler içeriğe kalır.
+  /// Alt boşluğu içerik kendisi bırakır.
+  final bool scrollable;
+
   @override
   Widget build(BuildContext context) {
     final ColorScheme scheme = Theme.of(context).colorScheme;
@@ -58,9 +64,11 @@ class AppNavScaffold extends StatelessWidget {
         child: CustomScrollView(
           controller: controller,
           // Kısa içerikte de büyük başlık küçülebilsin ve yenileme çekilebilsin.
-          physics: const AlwaysScrollableScrollPhysics(
-            parent: BouncingScrollPhysics(),
-          ),
+          physics: scrollable
+              ? const AlwaysScrollableScrollPhysics(
+                  parent: BouncingScrollPhysics(),
+                )
+              : const NeverScrollableScrollPhysics(),
           slivers: [
             CupertinoSliverNavigationBar(
               largeTitle: _largeTitle(),
@@ -78,7 +86,7 @@ class AppNavScaffold extends StatelessWidget {
               // aynı varsayılan hero tag'li birden çok bar çakışırdı.
               transitionBetweenRoutes: false,
             ),
-            if (refresh != null)
+            if (refresh != null && scrollable)
               CupertinoSliverRefreshControl(
                 onRefresh: () {
                   // Haptic yenilemenin tetiklendiği karede (görselle uyumlu).
@@ -87,9 +95,10 @@ class AppNavScaffold extends StatelessWidget {
                 },
               ),
             ...slivers,
-            SliverToBoxAdapter(
-              child: SizedBox(height: bottomInset + AppSpacing.md),
-            ),
+            if (scrollable)
+              SliverToBoxAdapter(
+                child: SizedBox(height: bottomInset + AppSpacing.md),
+              ),
           ],
         ),
       ),

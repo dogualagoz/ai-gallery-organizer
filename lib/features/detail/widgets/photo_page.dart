@@ -250,9 +250,16 @@ class ViewerThumbnail extends StatelessWidget {
 /// Görüntüleyici görseli: önce küçük resim, tam çözünürlük çözülünce
 /// üstüne biner (aynı içerik olduğundan geçiş fark edilmez, yalnız keskinleşir).
 class ViewerImage extends StatelessWidget {
-  const ViewerImage({super.key, required this.asset});
+  const ViewerImage({
+    super.key,
+    required this.asset,
+    this.maxPx = AppViewer.fullImageMaxPx,
+  });
 
   final AssetEntity? asset;
+
+  /// Keskin görselin uzun kenar sınırı (px); küçük yüzeyler daha azını ister.
+  final int maxPx;
 
   @override
   Widget build(BuildContext context) {
@@ -265,7 +272,7 @@ class ViewerImage extends StatelessWidget {
         AssetEntityImage(
           image,
           isOriginal: false,
-          thumbnailSize: viewerFullSize(image),
+          thumbnailSize: viewerFullSize(image, maxPx: maxPx),
           fit: BoxFit.cover,
           gaplessPlayback: true,
           frameBuilder: (context, child, frame, wasSynchronouslyLoaded) =>
@@ -284,9 +291,12 @@ class ViewerImage extends StatelessWidget {
 }
 
 /// Görüntüleyicide istenen tam çözünürlük: varlığın kendi ölçüsü, uzun kenarı
-/// [AppViewer.fullImageMaxPx] ile sınırlı. Ön yükleme de aynı ölçüyü kullanır
-/// (önbellek anahtarı eşleşsin).
-ThumbnailSize viewerFullSize(AssetEntity asset) {
+/// [maxPx] ile sınırlı. Ön yükleme de aynı ölçüyü kullanır (önbellek anahtarı
+/// eşleşsin).
+ThumbnailSize viewerFullSize(
+  AssetEntity asset, {
+  int maxPx = AppViewer.fullImageMaxPx,
+}) {
   final int longest = math.max(asset.width, asset.height);
   if (longest <= 0) {
     return ThumbnailSize(
@@ -294,7 +304,7 @@ ThumbnailSize viewerFullSize(AssetEntity asset) {
       AppViewer.fallbackFullSize.height.round(),
     );
   }
-  final double scale = math.min(1, AppViewer.fullImageMaxPx / longest);
+  final double scale = math.min(1, maxPx / longest);
   return ThumbnailSize(
     (asset.width * scale).round(),
     (asset.height * scale).round(),

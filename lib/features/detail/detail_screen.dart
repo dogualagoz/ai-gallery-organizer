@@ -492,10 +492,10 @@ class _DetailScreenState extends ConsumerState<DetailScreen>
   /// Onayı iOS'un kendi silme diyaloğu ister. Kapsamda görüntü kalmadıysa
   /// görüntüleyici kapanır; kaldıysa sıradaki gelir.
   Future<void> _delete(String assetId) async {
-    final int deleted = await _whileBusy(
+    final List<String> deleted = await _whileBusy(
       () => deleteScreenshots(context, ref, [assetId]),
     );
-    if (deleted == 0 || !mounted) return;
+    if (deleted.isEmpty || !mounted) return;
     final ScreenshotRepository repo = ref.read(screenshotRepositoryProvider);
     if (_scope.every((id) => repo.entryFor(id) == null)) _close();
   }

@@ -18,7 +18,6 @@
   "settingsAutoSortTitle": "Automatically sort new screenshots",
   "settingsAutoSortSubtitle": "Runs in the background whenever new screenshots appear",
   "searchTitle": "Search",
-  "sortingTitle": "Sort",
   "paywallTitle": "Go Pro",
   "onboardingTitle1": "Your screenshots, finally sorted",
   "onboardingBody1": "Snaply finds every screenshot in your library and files it into tidy boards — automatically.",
@@ -220,13 +219,11 @@
   "searchEmpty": "No results found",
   "searchLockedTitle": "Search is a Pro feature",
   "searchLockedBody": "Go Pro to search across tags and screenshot text.",
-  "sortingEmptyTitle": "Nothing left to sort",
+  "sortingEmptyTitle": "Nothing left to clean",
   "sortingEmptyBody": "All your screenshots look organized.",
-  "sortingLimitTitle": "Your free sorting quota is used up",
-  "sortingLimitBody": "Go Pro for unlimited sorting.",
-  "sortingAssignSheetTitle": "Which board should this go to?",
+  "sortingLimitTitle": "You've used this week's free swipes",
+  "sortingLimitBody": "Go Pro for unlimited swipes.",
   "sortingHintDelete": "Delete",
-  "sortingHintAssign": "Add to board",
   "sortingHintSkip": "Skip",
   "sortCategoryPickerTitle": "Assign to category",
   "sortingRemainingCount": "{count} left",
@@ -235,7 +232,6 @@
       "count": {"type": "int"}
     }
   },
-  "sortingDeleteFailed": "Couldn't delete the screenshot.",
   "bulkSelectAction": "Select",
   "bulkSelectionCount": "{count} selected",
   "@bulkSelectionCount": {
@@ -347,8 +343,6 @@
   "categoryReanalyzeConfirmBody": "The screenshots in this group will be sent to AI again. This uses your weekly analysis quota.",
   "categoryReanalyzeEmpty": "There's nothing to re-analyze here.",
   "recentsScreenTitle": "Recent screenshots",
-  "sortingUndo": "Undo",
-  "sortingDeleteDeferred": "Deletion paused. Tap the delete button up top when you're ready.",
   "sortingPendingDeleteCount": "{count} to delete",
   "@sortingPendingDeleteCount": {
     "placeholders": {
@@ -357,12 +351,6 @@
   },
   "sortingFinishAction": "Delete {count}",
   "@sortingFinishAction": {
-    "placeholders": {
-      "count": {"type": "int"}
-    }
-  },
-  "sortingFinishConfirmTitle": "Delete {count} screenshots?",
-  "@sortingFinishConfirmTitle": {
     "placeholders": {
       "count": {"type": "int"}
     }
@@ -440,5 +428,44 @@
     "placeholders": {
       "tag": {"type": "String"}
     }
-  }
+  },
+  "cleanStatusWithSwipes": "{remaining} left · Free swipes: {swipes}",
+  "@cleanStatusWithSwipes": {
+    "placeholders": {
+      "remaining": {"type": "int"},
+      "swipes": {"type": "int"}
+    }
+  },
+  "cleanTargetLabel": "Swipe-up category: {name}",
+  "@cleanTargetLabel": {
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "cleanTargetFooter": "Screenshots you swipe up move to this category.",
+  "cleanInfoTitle": "How Clean Works",
+  "cleanInfoIntro": "The deck shows screenshots that haven't been analyzed yet or landed in Other, and aren't on a board.",
+  "cleanInfoLeftTitle": "Swipe left to delete",
+  "cleanInfoLeftBody": "It's added to the delete list. Nothing is deleted until you confirm.",
+  "cleanInfoUpTitle": "Swipe up to categorize",
+  "cleanInfoUpBody": "It moves to the category shown above the card. Tap that category to change it.",
+  "cleanInfoRightTitle": "Swipe right to skip",
+  "cleanInfoRightBody": "It stays where it is and comes back next time.",
+  "cleanInfoUndoFooter": "Tap the arrow at the top left to undo your last swipe.",
+  "cleanInfoFreeFooter": "Tap the arrow at the top left to undo your last swipe. On the free plan you get {count} swipes a week; skipping doesn't use one.",
+  "@cleanInfoFreeFooter": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "cleanDoneTitle": "All Done",
+  "cleanSkippedBody": "You skipped {count}. Want another look?",
+  "@cleanSkippedBody": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "cleanShowSkipped": "Show Skipped",
+  "cleanBackToLibrary": "Back to Library",
+  "cleanAssignFailed": "Couldn't move the screenshot. It's back in the deck."
 }

@@ -206,12 +206,6 @@ abstract class AppLocalizations {
   /// **'Search'**
   String get searchTitle;
 
-  /// No description provided for @sortingTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Sort'**
-  String get sortingTitle;
-
   /// No description provided for @paywallTitle.
   ///
   /// In en, this message translates to:
@@ -815,7 +809,7 @@ abstract class AppLocalizations {
   /// No description provided for @sortingEmptyTitle.
   ///
   /// In en, this message translates to:
-  /// **'Nothing left to sort'**
+  /// **'Nothing left to clean'**
   String get sortingEmptyTitle;
 
   /// No description provided for @sortingEmptyBody.
@@ -827,32 +821,20 @@ abstract class AppLocalizations {
   /// No description provided for @sortingLimitTitle.
   ///
   /// In en, this message translates to:
-  /// **'Your free sorting quota is used up'**
+  /// **'You\'ve used this week\'s free swipes'**
   String get sortingLimitTitle;
 
   /// No description provided for @sortingLimitBody.
   ///
   /// In en, this message translates to:
-  /// **'Go Pro for unlimited sorting.'**
+  /// **'Go Pro for unlimited swipes.'**
   String get sortingLimitBody;
-
-  /// No description provided for @sortingAssignSheetTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Which board should this go to?'**
-  String get sortingAssignSheetTitle;
 
   /// No description provided for @sortingHintDelete.
   ///
   /// In en, this message translates to:
   /// **'Delete'**
   String get sortingHintDelete;
-
-  /// No description provided for @sortingHintAssign.
-  ///
-  /// In en, this message translates to:
-  /// **'Add to board'**
-  String get sortingHintAssign;
 
   /// No description provided for @sortingHintSkip.
   ///
@@ -871,12 +853,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count} left'**
   String sortingRemainingCount(int count);
-
-  /// No description provided for @sortingDeleteFailed.
-  ///
-  /// In en, this message translates to:
-  /// **'Couldn\'t delete the screenshot.'**
-  String get sortingDeleteFailed;
 
   /// No description provided for @bulkSelectAction.
   ///
@@ -1244,18 +1220,6 @@ abstract class AppLocalizations {
   /// **'Recent screenshots'**
   String get recentsScreenTitle;
 
-  /// No description provided for @sortingUndo.
-  ///
-  /// In en, this message translates to:
-  /// **'Undo'**
-  String get sortingUndo;
-
-  /// No description provided for @sortingDeleteDeferred.
-  ///
-  /// In en, this message translates to:
-  /// **'Deletion paused. Tap the delete button up top when you\'re ready.'**
-  String get sortingDeleteDeferred;
-
   /// No description provided for @sortingPendingDeleteCount.
   ///
   /// In en, this message translates to:
@@ -1267,12 +1231,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Delete {count}'**
   String sortingFinishAction(int count);
-
-  /// No description provided for @sortingFinishConfirmTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Delete {count} screenshots?'**
-  String sortingFinishConfirmTitle(int count);
 
   /// No description provided for @sortingFinishConfirmBody.
   ///
@@ -1597,6 +1555,114 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Search for {tag}'**
   String searchTagLabel(String tag);
+
+  /// No description provided for @cleanStatusWithSwipes.
+  ///
+  /// In en, this message translates to:
+  /// **'{remaining} left · Free swipes: {swipes}'**
+  String cleanStatusWithSwipes(int remaining, int swipes);
+
+  /// No description provided for @cleanTargetLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Swipe-up category: {name}'**
+  String cleanTargetLabel(String name);
+
+  /// No description provided for @cleanTargetFooter.
+  ///
+  /// In en, this message translates to:
+  /// **'Screenshots you swipe up move to this category.'**
+  String get cleanTargetFooter;
+
+  /// No description provided for @cleanInfoTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'How Clean Works'**
+  String get cleanInfoTitle;
+
+  /// No description provided for @cleanInfoIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'The deck shows screenshots that haven\'t been analyzed yet or landed in Other, and aren\'t on a board.'**
+  String get cleanInfoIntro;
+
+  /// No description provided for @cleanInfoLeftTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Swipe left to delete'**
+  String get cleanInfoLeftTitle;
+
+  /// No description provided for @cleanInfoLeftBody.
+  ///
+  /// In en, this message translates to:
+  /// **'It\'s added to the delete list. Nothing is deleted until you confirm.'**
+  String get cleanInfoLeftBody;
+
+  /// No description provided for @cleanInfoUpTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Swipe up to categorize'**
+  String get cleanInfoUpTitle;
+
+  /// No description provided for @cleanInfoUpBody.
+  ///
+  /// In en, this message translates to:
+  /// **'It moves to the category shown above the card. Tap that category to change it.'**
+  String get cleanInfoUpBody;
+
+  /// No description provided for @cleanInfoRightTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Swipe right to skip'**
+  String get cleanInfoRightTitle;
+
+  /// No description provided for @cleanInfoRightBody.
+  ///
+  /// In en, this message translates to:
+  /// **'It stays where it is and comes back next time.'**
+  String get cleanInfoRightBody;
+
+  /// No description provided for @cleanInfoUndoFooter.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap the arrow at the top left to undo your last swipe.'**
+  String get cleanInfoUndoFooter;
+
+  /// No description provided for @cleanInfoFreeFooter.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap the arrow at the top left to undo your last swipe. On the free plan you get {count} swipes a week; skipping doesn\'t use one.'**
+  String cleanInfoFreeFooter(int count);
+
+  /// No description provided for @cleanDoneTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'All Done'**
+  String get cleanDoneTitle;
+
+  /// No description provided for @cleanSkippedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You skipped {count}. Want another look?'**
+  String cleanSkippedBody(int count);
+
+  /// No description provided for @cleanShowSkipped.
+  ///
+  /// In en, this message translates to:
+  /// **'Show Skipped'**
+  String get cleanShowSkipped;
+
+  /// No description provided for @cleanBackToLibrary.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to Library'**
+  String get cleanBackToLibrary;
+
+  /// No description provided for @cleanAssignFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t move the screenshot. It\'s back in the deck.'**
+  String get cleanAssignFailed;
 }
 
 class _AppLocalizationsDelegate

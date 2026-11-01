@@ -128,8 +128,9 @@ Future<bool> _undoMove(
 }
 
 /// Fotoğraf kütüphanesinden siler; onayı iOS'un kendi diyaloğu ister (ek
-/// diyalog yok). Silinen sayısını döndürür; 0 = vazgeçildi ya da başarısız.
-Future<int> deleteScreenshots(
+/// diyalog yok). Silinenlerin kimliklerini döndürür; boş = vazgeçildi ya da
+/// başarısız (kısmi silmede yalnız silinenler).
+Future<List<String>> deleteScreenshots(
   BuildContext context,
   WidgetRef ref,
   List<String> assetIds,
@@ -147,11 +148,11 @@ Future<int> deleteScreenshots(
     for (final String assetId in deleted) {
       await repo.removeEntry(assetId);
     }
-    return deleted.length;
+    return deleted;
   } catch (error, stackTrace) {
     debugPrint('Silme hatası: $error\n$stackTrace');
     toaster.show(failure, tone: StatusToastTone.error);
-    return 0;
+    return const [];
   }
 }
 

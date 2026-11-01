@@ -18,7 +18,6 @@
   "settingsAutoSortTitle": "Yeni ekran görüntülerini otomatik sırala",
   "settingsAutoSortSubtitle": "Yeni ekran görüntüsü geldiğinde arka planda çalışır",
   "searchTitle": "Ara",
-  "sortingTitle": "Sırala",
   "paywallTitle": "Pro'ya Geç",
   "onboardingTitle1": "Ekran görüntülerin nihayet düzenli",
   "onboardingBody1": "Snaply galerindeki tüm ekran görüntülerini bulur ve otomatik olarak düzenli panolara yerleştirir.",
@@ -220,13 +219,11 @@
   "searchEmpty": "Sonuç bulunamadı",
   "searchLockedTitle": "Arama bir Pro özelliği",
   "searchLockedBody": "Etiket ve görsel metinlerinde arama yapmak için Pro'ya geç.",
-  "sortingEmptyTitle": "Sıralanacak bir şey kalmadı",
+  "sortingEmptyTitle": "Temizlenecek bir şey kalmadı",
   "sortingEmptyBody": "Tüm ekran görüntülerin düzenli görünüyor.",
-  "sortingLimitTitle": "Ücretsiz sıralama hakkın doldu",
-  "sortingLimitBody": "Sınırsız sıralama için Pro'ya geç.",
-  "sortingAssignSheetTitle": "Hangi panoya eklensin?",
+  "sortingLimitTitle": "Bu haftaki ücretsiz kaydırma hakkın doldu",
+  "sortingLimitBody": "Sınırsız kaydırma için Pro'ya geç.",
   "sortingHintDelete": "Sil",
-  "sortingHintAssign": "Panoya ekle",
   "sortingHintSkip": "Atla",
   "sortCategoryPickerTitle": "Kategoriye ata",
   "sortingRemainingCount": "{count} kaldı",
@@ -235,7 +232,6 @@
       "count": {"type": "int"}
     }
   },
-  "sortingDeleteFailed": "Ekran görüntüsü silinemedi.",
   "bulkSelectAction": "Seç",
   "bulkSelectionCount": "{count} seçildi",
   "@bulkSelectionCount": {
@@ -347,8 +343,6 @@
   "categoryReanalyzeConfirmBody": "Bu gruptaki ekran görüntüleri AI'a yeniden gönderilir. Bu, haftalık analiz hakkından harcar.",
   "categoryReanalyzeEmpty": "Burada yeniden analiz edilecek bir şey yok.",
   "recentsScreenTitle": "Son ekran görüntüleri",
-  "sortingUndo": "Geri al",
-  "sortingDeleteDeferred": "Silme ertelendi. Hazır olduğunda üstteki sil düğmesine dokun.",
   "sortingPendingDeleteCount": "{count} silinecek",
   "@sortingPendingDeleteCount": {
     "placeholders": {
@@ -357,12 +351,6 @@
   },
   "sortingFinishAction": "{count} sil",
   "@sortingFinishAction": {
-    "placeholders": {
-      "count": {"type": "int"}
-    }
-  },
-  "sortingFinishConfirmTitle": "{count} ekran görüntüsü silinsin mi?",
-  "@sortingFinishConfirmTitle": {
     "placeholders": {
       "count": {"type": "int"}
     }
@@ -435,5 +423,44 @@
   "textCopyFailed": "Metin kopyalanamadı. Lütfen tekrar dene.",
   "infoCategoryLabel": "Kategori",
   "infoBoardLabel": "Pano",
-  "searchTagLabel": "{tag} için ara"
+  "searchTagLabel": "{tag} için ara",
+  "cleanStatusWithSwipes": "{remaining} kaldı · Ücretsiz hak: {swipes}",
+  "@cleanStatusWithSwipes": {
+    "placeholders": {
+      "remaining": {"type": "int"},
+      "swipes": {"type": "int"}
+    }
+  },
+  "cleanTargetLabel": "Yukarı kaydırma kategorisi: {name}",
+  "@cleanTargetLabel": {
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "cleanTargetFooter": "Yukarı kaydırdığın ekran görüntüleri bu kategoriye taşınır.",
+  "cleanInfoTitle": "Temizle Nasıl Çalışır",
+  "cleanInfoIntro": "Deste, henüz analiz edilmemiş ya da Diğer'e düşmüş ve bir panoda olmayan ekran görüntülerini gösterir.",
+  "cleanInfoLeftTitle": "Silmek için sola kaydır",
+  "cleanInfoLeftBody": "Silinecekler listesine eklenir. Sen onaylayana kadar hiçbir şey silinmez.",
+  "cleanInfoUpTitle": "Kategoriye atamak için yukarı kaydır",
+  "cleanInfoUpBody": "Kartın üstünde gösterilen kategoriye taşınır. Değiştirmek için o kategoriye dokun.",
+  "cleanInfoRightTitle": "Atlamak için sağa kaydır",
+  "cleanInfoRightBody": "Olduğu yerde kalır, bir dahaki sefere yine gelir.",
+  "cleanInfoUndoFooter": "Son hareketi geri almak için sol üstteki oka dokun.",
+  "cleanInfoFreeFooter": "Son hareketi geri almak için sol üstteki oka dokun. Ücretsiz planda haftada {count} kaydırma hakkın var; atlamak hakkından düşmez.",
+  "@cleanInfoFreeFooter": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "cleanDoneTitle": "Hepsi Bu Kadar",
+  "cleanSkippedBody": "{count} ekran görüntüsünü atladın. Bir daha bakmak ister misin?",
+  "@cleanSkippedBody": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "cleanShowSkipped": "Atlananları Göster",
+  "cleanBackToLibrary": "Kütüphane'ye Dön",
+  "cleanAssignFailed": "Ekran görüntüsü taşınamadı, desteye geri döndü."
 }
