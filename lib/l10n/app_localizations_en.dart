@@ -696,6 +696,14 @@ class AppLocalizationsEn extends AppLocalizations {
       'The screenshots in this group will be sent to AI again. This uses your weekly analysis quota.';
 
   @override
+  String get categoryReanalyzeConfirmBodyPro =>
+      'The screenshots in this group will be sent to AI again and regrouped.';
+
+  @override
+  String get categoryReanalyzeConfirmBodyTrial =>
+      'The screenshots in this group will be sent to AI again. This uses your trial analysis allowance.';
+
+  @override
   String get categoryReanalyzeEmpty => 'There\'s nothing to re-analyze here.';
 
   @override

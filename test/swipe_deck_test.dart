@@ -5,6 +5,7 @@ import 'package:ai_gallery_organizer/core/models/screenshot_entry.dart';
 import 'package:ai_gallery_organizer/core/theme/app_theme.dart';
 import 'package:ai_gallery_organizer/features/sorting/providers/clean_session_provider.dart';
 import 'package:ai_gallery_organizer/features/sorting/swipe_decision.dart';
+import 'package:ai_gallery_organizer/features/sorting/widgets/swipe_card.dart';
 import 'package:ai_gallery_organizer/features/sorting/widgets/swipe_deck.dart';
 import 'package:ai_gallery_organizer/l10n/app_localizations.dart';
 import 'package:flutter/cupertino.dart';
@@ -108,6 +109,29 @@ void main() {
       expect(swipes, isEmpty);
       expect(tester.getCenter(find.byType(GestureDetector).last), rest);
     });
+
+    for (final (String grip, double fraction) in [
+      ('üstten', 0.1),
+      ('alttan', 0.9),
+    ]) {
+      testWidgets('$grip tutulup sağa çekilen kart sağa yatar', (tester) async {
+        await tester.pumpWidget(_deck(SwipeDeckController(), []));
+        final Finder card = find.byType(SwipeCard).last;
+        final Rect rest = tester.getRect(card);
+        final TestGesture gesture = await tester.startGesture(
+          Offset(rest.center.dx, rest.top + rest.height * fraction),
+        );
+        await gesture.moveBy(const Offset(60, 0));
+        await tester.pump();
+        // Sağa yatış: üst kenar alt kenarın sağında kalır.
+        expect(
+          tester.getTopLeft(card).dx,
+          greaterThan(tester.getBottomLeft(card).dx),
+        );
+        await gesture.up();
+        await tester.pumpAndSettle();
+      });
+    }
 
     testWidgets('aynı kart butonla iki kez gönderilemez', (tester) async {
       final SwipeDeckController controller = SwipeDeckController();

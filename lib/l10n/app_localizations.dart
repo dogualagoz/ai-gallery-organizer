@@ -1262,6 +1262,18 @@ abstract class AppLocalizations {
   /// **'The screenshots in this group will be sent to AI again. This uses your weekly analysis quota.'**
   String get categoryReanalyzeConfirmBody;
 
+  /// No description provided for @categoryReanalyzeConfirmBodyPro.
+  ///
+  /// In en, this message translates to:
+  /// **'The screenshots in this group will be sent to AI again and regrouped.'**
+  String get categoryReanalyzeConfirmBodyPro;
+
+  /// No description provided for @categoryReanalyzeConfirmBodyTrial.
+  ///
+  /// In en, this message translates to:
+  /// **'The screenshots in this group will be sent to AI again. This uses your trial analysis allowance.'**
+  String get categoryReanalyzeConfirmBodyTrial;
+
   /// No description provided for @categoryReanalyzeEmpty.
   ///
   /// In en, this message translates to:

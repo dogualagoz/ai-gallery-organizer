@@ -360,6 +360,8 @@
   "categoryReanalyzeAction": "Re-analyze",
   "categoryReanalyzeConfirmTitle": "Re-analyze this category?",
   "categoryReanalyzeConfirmBody": "The screenshots in this group will be sent to AI again. This uses your weekly analysis quota.",
+  "categoryReanalyzeConfirmBodyPro": "The screenshots in this group will be sent to AI again and regrouped.",
+  "categoryReanalyzeConfirmBodyTrial": "The screenshots in this group will be sent to AI again. This uses your trial analysis allowance.",
   "categoryReanalyzeEmpty": "There's nothing to re-analyze here.",
   "recentsScreenTitle": "Recent screenshots",
   "sortingPendingDeleteCount": "{count} to delete",

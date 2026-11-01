@@ -12,10 +12,7 @@ void main() {
         total: 5,
       );
       final AnalysisQueueState next = initial.afterSuccess(
-        const AnalyzedItem(
-          assetId: 'a1',
-          category: ScreenshotCategory.social,
-        ),
+        const AnalyzedItem(assetId: 'a1', category: ScreenshotCategory.social),
       );
 
       expect(next.done, 1);
@@ -50,6 +47,17 @@ void main() {
       // En eskiler düşer, en yeniler kalır.
       expect(state.recent.last.assetId, 'a${overshoot - 1}');
       expect(state.done, overshoot);
+    });
+
+    test('biten öğe işlenenlerden aynı durumda düşer, sıra korunur', () {
+      const AnalysisQueueState running = AnalysisQueueState(
+        active: ['a', 'b', 'c'],
+      );
+      final AnalysisQueueState next = running.afterSuccess(
+        const AnalyzedItem(assetId: 'b', category: ScreenshotCategory.social),
+      );
+      expect(next.active, ['a', 'c']);
+      expect(next.recent.single.assetId, 'b');
     });
   });
 }

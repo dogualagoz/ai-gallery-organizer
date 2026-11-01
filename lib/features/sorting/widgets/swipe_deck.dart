@@ -85,7 +85,6 @@ class _Departure {
     required this.direction,
     required this.from,
     required this.velocity,
-    required this.grip,
     required this.scale,
   }) : offset = from;
 
@@ -94,18 +93,16 @@ class _Departure {
   final SwipeDirection direction;
   final Offset from;
   final Offset velocity;
-  final double grip;
   final double scale;
   Offset offset;
 }
 
-/// Beklenen geri dönüş: başlangıç noktası ve kartın tutuş yeri.
+/// Beklenen geri dönüş: kartın döneceği başlangıç noktası.
 class _Return {
-  const _Return(this.id, this.from, this.grip);
+  const _Return(this.id, this.from);
 
   final String id;
   final Offset from;
-  final double grip;
 }
 
 class _SwipeDeckState extends State<SwipeDeck> with TickerProviderStateMixin {
@@ -145,8 +142,6 @@ class _SwipeDeckState extends State<SwipeDeck> with TickerProviderStateMixin {
   String? _departedId;
   double _promoteFrom = 1;
 
-  /// Tutulan dikey konum (0 üst, 1 alt): dönüşün mili.
-  double _grip = AppSwipe.buttonGrip;
   Offset _dragOrigin = Offset.zero;
   bool _dragging = false;
 
@@ -209,11 +204,7 @@ class _SwipeDeckState extends State<SwipeDeck> with TickerProviderStateMixin {
     _x.stop();
     _y.stop();
     _dragging = true;
-    // Dinlenen kartta tutulan nokta mil olur; yarıda yakalanan kart kendi
-    // milini korur (açı ve konum sıçramasın).
-    if (_offset == Offset.zero && _cardSize.height > 0) {
-      _grip = (details.localPosition.dy / _cardSize.height).clamp(0.0, 1.0);
-    }
+    // Yarıda yakalanan kart bulunduğu yerden devam eder (sıçrama yok).
     _dragOrigin = details.globalPosition - _offset;
   }
 
@@ -251,7 +242,6 @@ class _SwipeDeckState extends State<SwipeDeck> with TickerProviderStateMixin {
   void _swipeByButton(SwipeDirection direction) {
     final SwipeDeckItem? top = widget.top;
     if (top == null || _dragging || _isDeparting(top.id)) return;
-    if (_offset == Offset.zero) _grip = AppSwipe.buttonGrip;
     _commit(direction, Offset.zero);
   }
 
@@ -269,7 +259,6 @@ class _SwipeDeckState extends State<SwipeDeck> with TickerProviderStateMixin {
           direction: direction,
           from: _offset,
           velocity: throwVelocity(direction, velocity),
-          grip: _grip,
           scale: _scale.value,
         ),
       );
@@ -295,8 +284,9 @@ class _SwipeDeckState extends State<SwipeDeck> with TickerProviderStateMixin {
   }
 
   /// [axis]'i yayla sıfıra götürür. Yay toleransla durduğu için sonunda tam
-  /// sıfıra oturtulur: dinlenen kart yeni tutuşta milini yeniden seçebilsin.
-  /// Hareket yarıda kesilirse (kart yakalandı) oturtma yapılmaz.
+  /// sıfıra oturtulur (dinlenen kart tam yerinde, sonraki kart hesapları
+  /// sıfırdan başlar). Hareket yarıda kesilirse (kart yakalandı) oturtma
+  /// yapılmaz.
   void _springHome(
     AnimationController axis,
     SpringDescription spring,
@@ -321,22 +311,17 @@ class _SwipeDeckState extends State<SwipeDeck> with TickerProviderStateMixin {
         .where((departure) => departure.item.id == id)
         .firstOrNull;
     if (flying == null) {
-      _expected = _Return(
-        id,
-        returnOrigin(direction, _screen),
-        AppSwipe.buttonGrip,
-      );
+      _expected = _Return(id, returnOrigin(direction, _screen));
       return;
     }
     // Henüz ekrandan çıkmamış kart yarıda yakalanır: bulunduğu yerden döner.
-    _expected = _Return(id, flying.offset, flying.grip);
+    _expected = _Return(id, flying.offset);
     setState(() => _departures.remove(flying));
   }
 
   /// Geri alınan kart geldiği kenardan yerine yaylanır (simetrik yol).
   void _enter(_Return expected) {
     _resetTop();
-    _grip = expected.grip;
     if (context.reduceMotion) {
       _opacity
         ..value = 0
@@ -450,7 +435,6 @@ class _SwipeDeckState extends State<SwipeDeck> with TickerProviderStateMixin {
             opacity: _opacity.value,
             child: _CardTransform(
               offset: offset,
-              grip: _grip,
               scale: _scale.value,
               cardSize: _cardSize,
               // Jest kartın içinde: dönerken yakalanan kart da tutulabilir.
@@ -476,18 +460,16 @@ class _SwipeDeckState extends State<SwipeDeck> with TickerProviderStateMixin {
   }
 }
 
-/// Kartı ofset kadar taşır ve tutulan noktayı mil yaparak döndürür.
+/// Kartı ofset kadar taşır ve çekildiği yöne yatırır.
 class _CardTransform extends StatelessWidget {
   const _CardTransform({
     required this.offset,
-    required this.grip,
     required this.scale,
     required this.cardSize,
     required this.child,
   });
 
   final Offset offset;
-  final double grip;
   final double scale;
   final Size cardSize;
   final Widget child;
@@ -497,9 +479,10 @@ class _CardTransform extends StatelessWidget {
     return Transform.translate(
       offset: offset,
       child: Transform.rotate(
-        angle: swipeRotation(offset.dx, cardSize.width, grip),
-        // Mil, kartın ortasına göre tutulan yükseklikte.
-        origin: Offset(0, (grip - 0.5) * cardSize.height),
+        angle: swipeRotation(offset.dx, cardSize.width),
+        // Mil alt kenarda: kart avuçtaki iskambil gibi yelpazelenir ve en
+        // sık tutulan alt yarı başparmağın altından kaymaz.
+        origin: Offset(0, cardSize.height / 2),
         child: Transform.scale(scale: scale, child: child),
       ),
     );
@@ -611,7 +594,6 @@ class _DepartingCardState extends State<_DepartingCard>
               opacity: widget.reduceMotion ? 1 - _life.value : 1,
               child: _CardTransform(
                 offset: offset,
-                grip: _departure.grip,
                 scale: _departure.scale,
                 cardSize: widget.cardSize,
                 child: SwipeCard(

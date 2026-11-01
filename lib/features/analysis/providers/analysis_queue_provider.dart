@@ -60,6 +60,7 @@ class AnalysisQueueState {
     this.recent = const [],
     this.categoryCounts = const {},
     this.freeQuotaExhausted = false,
+    this.active = const [],
   });
 
   /// [recent] listesinde tutulan en fazla öğe sayısı — animasyon için
@@ -89,6 +90,16 @@ class AnalysisQueueState {
   /// başlama durumlarından farklı) — milestone sayfası yalnız bunda açılır.
   final bool freeQuotaExhausted;
 
+  /// Şu an analiz edilen öğeler (başlama sırasıyla). İlerleme kartının
+  /// küçük resmi ilkini gösterir: biten öğe oradan karosuna uçar.
+  final List<String> active;
+
+  /// [assetId] çıkarılmış [active] listesi.
+  List<String> withoutActive(String assetId) => [
+    for (final String id in active)
+      if (id != assetId) id,
+  ];
+
   bool get isRunning => status == AnalysisQueueStatus.running;
 
   /// Başarılı bir analiz sonrası yeni state: sayaç, sınırlı [recent] listesi
@@ -104,6 +115,8 @@ class AnalysisQueueState {
         ...categoryCounts,
         item.category: (categoryCounts[item.category] ?? 0) + 1,
       },
+      // Uçuş ile küçük resmin değişimi aynı durumda: resim takılı kalmaz.
+      active: withoutActive(item.assetId),
     );
   }
 
@@ -115,6 +128,7 @@ class AnalysisQueueState {
     List<AnalyzedItem>? recent,
     Map<ScreenshotCategory, int>? categoryCounts,
     bool? freeQuotaExhausted,
+    List<String>? active,
   }) {
     return AnalysisQueueState(
       status: status ?? this.status,
@@ -124,6 +138,7 @@ class AnalysisQueueState {
       recent: recent ?? this.recent,
       categoryCounts: categoryCounts ?? this.categoryCounts,
       freeQuotaExhausted: freeQuotaExhausted ?? this.freeQuotaExhausted,
+      active: active ?? this.active,
     );
   }
 }
@@ -240,6 +255,7 @@ class AnalysisQueueNotifier extends Notifier<AnalysisQueueState> {
         return;
       }
       final ScreenshotEntry entry = queue.removeFirst();
+      state = state.copyWith(active: [...state.active, entry.assetId]);
       await _waitForSlot(profile.minRequestGap);
       await _analyzeEntry(repo, entry, quota, runId);
     }
@@ -266,7 +282,7 @@ class AnalysisQueueNotifier extends Notifier<AnalysisQueueState> {
   ) async {
     final AssetEntity? asset = repo.assetFor(entry.assetId);
     if (asset == null) {
-      if (_runId == runId) state = state.copyWith(failed: state.failed + 1);
+      _settle(entry.assetId, runId, failed: true);
       return;
     }
     try {
@@ -300,10 +316,20 @@ class AnalysisQueueNotifier extends Notifier<AnalysisQueueState> {
     } on AnalysisRateLimitException catch (error) {
       debugPrint('Günlük kota hatası (${entry.assetId}): $error');
       _dailyCapHit = true;
+      _settle(entry.assetId, runId);
     } catch (error, stackTrace) {
       debugPrint('Analiz hatası (${entry.assetId}): $error\n$stackTrace');
-      if (_runId == runId) state = state.copyWith(failed: state.failed + 1);
+      _settle(entry.assetId, runId, failed: true);
     }
+  }
+
+  /// Başarısız/yarıda kalan öğe işlenenlerden düşer; [failed] ise sayılır.
+  void _settle(String assetId, int runId, {bool failed = false}) {
+    if (_runId != runId) return;
+    state = state.copyWith(
+      failed: failed ? state.failed + 1 : null,
+      active: state.withoutActive(assetId),
+    );
   }
 
   /// Tur sonunda banner'da gösterilecek durumu belirler.
@@ -409,7 +435,11 @@ class AnalysisQueueNotifier extends Notifier<AnalysisQueueState> {
   void cancel() {
     _cancelRequested = true;
     if (state.isRunning) {
-      state = state.copyWith(status: AnalysisQueueStatus.completed);
+      // Dönen sonuçlar artık kaydedilmez: işlenenler listesi de boşalır.
+      state = state.copyWith(
+        status: AnalysisQueueStatus.completed,
+        active: const [],
+      );
     }
   }
 

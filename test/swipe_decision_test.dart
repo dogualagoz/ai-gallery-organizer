@@ -78,17 +78,15 @@ void main() {
   });
 
   group('swipeRotation', () {
-    test(
-      'üstten tutulan kart gittiği yöne, alttan tutulan ters yöne döner',
-      () {
-        expect(swipeRotation(100, 300, 0), greaterThan(0));
-        expect(swipeRotation(100, 300, 1), lessThan(0));
-        expect(swipeRotation(-100, 300, 0), lessThan(0));
-      },
-    );
+    test('kart çekildiği yöne yatar, yerindeyken dönmez', () {
+      expect(swipeRotation(100, 300), greaterThan(0));
+      expect(swipeRotation(-100, 300), lessThan(0));
+      expect(swipeRotation(0, 300), 0);
+    });
 
-    test('ortadan tutulan kart dönmez', () {
-      expect(swipeRotation(100, 300, 0.5), 0);
+    test('yatış en fazla açıyla sınırlı', () {
+      expect(swipeRotation(5000, 300), AppSwipe.maxRotation);
+      expect(swipeRotation(-5000, 300), -AppSwipe.maxRotation);
     });
   });
 

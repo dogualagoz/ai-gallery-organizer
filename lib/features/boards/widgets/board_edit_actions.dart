@@ -214,8 +214,9 @@ Future<void> renameBoard(
 }
 
 /// Kategoriyi yeniden analiz eder: onaydan sonra kayıtları bekleyen yapıp
-/// kuyruğu yalnız onlarla başlatır; animasyon Kütüphane'deki modülde oynar ve
-/// haftalık kotadan harcanır. Analiz başladıysa true.
+/// kuyruğu yalnız onlarla başlatır; animasyon Kütüphane'deki modülde oynar.
+/// Ücretsizde haftalık kotadan, denemede deneme hakkından harcanır; onay metni
+/// buna göre seçilir. Analiz başladıysa true.
 Future<bool> reanalyzeCategory(
   BuildContext context,
   WidgetRef ref,
@@ -224,10 +225,15 @@ Future<bool> reanalyzeCategory(
   final l10n = context.l10n;
   final List<ScreenshotEntry> filtered = boardEntries(ref, category: category);
   if (filtered.isEmpty) return false;
+  final EntitlementState entitlement = ref.read(entitlementProvider);
   final bool confirmed = await showConfirmAlert(
     context,
     title: l10n.categoryReanalyzeConfirmTitle,
-    message: l10n.categoryReanalyzeConfirmBody,
+    message: entitlement.isInTrialWindow
+        ? l10n.categoryReanalyzeConfirmBodyTrial
+        : entitlement.isPro
+        ? l10n.categoryReanalyzeConfirmBodyPro
+        : l10n.categoryReanalyzeConfirmBody,
     confirmLabel: l10n.categoryReanalyzeAction,
   );
   if (!confirmed || !context.mounted) return false;

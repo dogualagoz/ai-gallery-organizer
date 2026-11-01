@@ -58,6 +58,9 @@ abstract final class AppFlight {
   /// Sıradaki kartın kalkış aralığı (tek tek besleme → akış hissi).
   static const Duration spawnCadence = Duration(milliseconds: 140);
 
+  /// Kalkan resmin yerine gelen yeni kaynak küçük resmin başlangıç ölçeği.
+  static const double sourceEnterScale = 0.6;
+
   /// Uçan kartın ölçüsü — screenshot oranına yakın dikey kart.
   static const Size cardSize = Size(40, 64);
 
@@ -189,16 +192,13 @@ abstract final class AppSwipe {
   /// pay (px): bölgeden çıkmak için eşiğin bu kadar gerisine dönmek gerekir.
   static const double armHysteresis = AppMotion.hysteresis;
 
-  /// Kartın bir kart genişliği kadar yatay yolda döndüğü açı (radyan).
-  static const double rotationPerWidth = 0.18;
+  /// Kartın bir kart genişliği kadar yatay yolda yattığı açı (radyan);
+  /// eşikte yaklaşık 4°.
+  static const double rotationPerWidth = 0.2;
 
-  /// Merkezden bu oran kadar uzaktan tutulan kart tam devrilir; ortadan
-  /// tutulan kart dönmez (tutulan nokta mil olur).
-  static const double leanSpan = 0.25;
-
-  /// Butonla fırlatılan kartın tutulmuş sayıldığı dikey konum (0 üst, 1 alt):
-  /// üst çeyrekten tutulmuş gibi gittiği yöne devrilir.
-  static const double buttonGrip = 0.25;
+  /// Kartın en fazla yatış açısı (radyan, ≈11.5°): ekrandan çıkarken de
+  /// bundan fazla dönmez.
+  static const double maxRotation = 0.2;
 
   /// Gidişteki asgari hız (px/s): butonla ya da yavaş bırakışla giden kart da
   /// kararlı biçimde ekrandan çıkar. Hızlı fırlatmanın hızı aynen korunur.

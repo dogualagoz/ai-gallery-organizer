@@ -66,14 +66,15 @@ SwipeDirection? armedDirection(Offset offset, SwipeDirection? previous) {
   return travelAlong(offset, direction) >= needed ? direction : null;
 }
 
-/// Kartın dönüş açısı (radyan): yatay yolla orantılı. [grip] tutulan dikey
-/// konumdur (0 üst, 1 alt): üstten tutulan kart gittiği yöne, alttan tutulan
-/// ters yöne devrilir; tam ortadan tutulan kart dönmez.
-double swipeRotation(double dx, double width, double grip) {
+/// Kartın yatış açısı (radyan): çekildiği yöne, yatay yolla orantılı ve
+/// [AppSwipe.maxRotation] ile sınırlı. Tutulan nokta fark etmez: aynı jest
+/// her seferinde aynı görünür ve yatış kartın gittiği yönü gösterir.
+double swipeRotation(double dx, double width) {
   if (width <= 0) return 0;
-  // 0.5 kartın dikey ortası: mil oradaysa dönüş yoktur.
-  final double lean = ((0.5 - grip) / AppSwipe.leanSpan).clamp(-1.0, 1.0);
-  return dx / width * AppSwipe.rotationPerWidth * lean;
+  return (dx / width * AppSwipe.rotationPerWidth).clamp(
+    -AppSwipe.maxRotation,
+    AppSwipe.maxRotation,
+  );
 }
 
 /// Gidişin başlangıç hızı (px/s): bırakış hızı korunur, gidiş ekseninde en

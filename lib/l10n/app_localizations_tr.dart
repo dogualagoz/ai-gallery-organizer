@@ -688,6 +688,14 @@ class AppLocalizationsTr extends AppLocalizations {
       'Bu gruptaki ekran görüntüleri AI\'a yeniden gönderilir. Bu, haftalık analiz hakkından harcar.';
 
   @override
+  String get categoryReanalyzeConfirmBodyPro =>
+      'Bu gruptaki ekran görüntüleri AI\'a yeniden gönderilir ve yeniden gruplanır.';
+
+  @override
+  String get categoryReanalyzeConfirmBodyTrial =>
+      'Bu gruptaki ekran görüntüleri AI\'a yeniden gönderilir. Bu, deneme süresindeki analiz hakkından harcar.';
+
+  @override
   String get categoryReanalyzeEmpty =>
       'Burada yeniden analiz edilecek bir şey yok.';
 

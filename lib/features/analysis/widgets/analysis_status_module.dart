@@ -58,14 +58,22 @@ class _AnalysisStatusModuleState extends ConsumerState<AnalysisStatusModule> {
     super.didChangeDependencies();
     final AnalysisFlights? flights = AnalysisFlightScope.of(context);
     if (identical(flights, _flights)) return;
-    _flights?.busy.removeListener(_onFlightsChanged);
-    _flights = flights?..busy.addListener(_onFlightsChanged);
+    _unlisten();
+    _flights = flights
+      ?..busy.addListener(_onFlightsChanged)
+      ..nextFlight.addListener(_onFlightsChanged);
   }
 
   @override
   void dispose() {
-    _flights?.busy.removeListener(_onFlightsChanged);
+    _unlisten();
     super.dispose();
+  }
+
+  void _unlisten() {
+    _flights
+      ?..busy.removeListener(_onFlightsChanged)
+      ..nextFlight.removeListener(_onFlightsChanged);
   }
 
   bool get _flying => _flights?.busy.value ?? false;
@@ -197,13 +205,14 @@ class _AnalysisStatusModuleState extends ConsumerState<AnalysisStatusModule> {
     return l10n.homeWeeklyLimitResetIn(days);
   }
 
-  AssetEntity? _nextSource() {
-    for (final ScreenshotEntry entry in widget.entries) {
-      if (entry.isPending) {
-        return ref.read(screenshotRepositoryProvider).assetFor(entry.assetId);
-      }
-    }
-    return null;
+  /// Kaynak küçük resim: sıradaki uçuşun görseli (kalkınca karosuna
+  /// süzülür), sıra boşsa şu an analiz edilen ilk ekran görüntüsü.
+  AssetEntity? _source(AnalysisQueueState queue) {
+    final FlightRequest? next = _flights?.nextFlight.value;
+    if (next != null) return next.asset;
+    final String? active = queue.active.firstOrNull;
+    if (active == null) return null;
+    return ref.read(screenshotRepositoryProvider).assetFor(active);
   }
 
   /// (anahtar, görünüm) — görünüm null ise modül gizlenir.
@@ -224,7 +233,7 @@ class _AnalysisStatusModuleState extends ConsumerState<AnalysisStatusModule> {
         AnalysisProgressCard(
           processed: queue.done + queue.failed,
           total: queue.total,
-          source: _nextSource(),
+          source: _source(queue),
           onPause: _confirmPause,
         ),
       );

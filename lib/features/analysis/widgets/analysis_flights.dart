@@ -39,6 +39,10 @@ abstract interface class AnalysisFlights {
 
   /// Havada ya da sırada kart varken true.
   ValueListenable<bool> get busy;
+
+  /// Sıradaki (henüz kalkmamış) uçuş; sıra boşsa null. Kaynak küçük resim
+  /// bunu gösterir, kalkınca bir sonrakine geçer.
+  ValueListenable<FlightRequest?> get nextFlight;
 }
 
 /// Kalkış noktasının kaynak kutunun sol kenarına uzaklığı.
@@ -71,6 +75,7 @@ class _AnalysisFlightScopeState extends State<AnalysisFlightScope>
   final List<FlightRequest> _waiting = [];
   final List<_Flight> _flights = [];
   final ValueNotifier<bool> _busy = ValueNotifier(false);
+  final ValueNotifier<FlightRequest?> _next = ValueNotifier(null);
 
   /// Her karede uçuş katmanını yeniden çizdiren sinyal (kapsamın geri kalanı
   /// yeniden kurulmaz).
@@ -87,6 +92,11 @@ class _AnalysisFlightScopeState extends State<AnalysisFlightScope>
   ValueListenable<bool> get busy => _busy;
 
   @override
+  ValueListenable<FlightRequest?> get nextFlight => _next;
+
+  void _syncNext() => _next.value = _waiting.firstOrNull;
+
+  @override
   GlobalKey targetKeyFor(ScreenshotCategory category) => _targets.putIfAbsent(
     category,
     () => GlobalKey(debugLabel: 'flightTarget.${category.name}'),
@@ -96,6 +106,7 @@ class _AnalysisFlightScopeState extends State<AnalysisFlightScope>
   void enqueue(Iterable<FlightRequest> items) {
     if (_reduceMotion) return;
     _waiting.addAll(items);
+    _syncNext();
     if (_waiting.isEmpty) return;
     _busy.value = true;
     if (!_ticker.isActive) {
@@ -107,6 +118,7 @@ class _AnalysisFlightScopeState extends State<AnalysisFlightScope>
   @override
   void clear() {
     _waiting.clear();
+    _syncNext();
     _flights.clear();
     _stop();
     _frame.value++;
@@ -116,6 +128,7 @@ class _AnalysisFlightScopeState extends State<AnalysisFlightScope>
   void dispose() {
     _ticker.dispose();
     _busy.dispose();
+    _next.dispose();
     _frame.dispose();
     super.dispose();
   }
@@ -142,9 +155,11 @@ class _AnalysisFlightScopeState extends State<AnalysisFlightScope>
       // Modül görünmüyor (kaydırılıp gitti): sıradakiler uçmadan iner,
       // tur özeti beklemede kalmaz.
       _waiting.clear();
+      _syncNext();
       return;
     }
     final FlightRequest request = _waiting.removeAt(0);
+    _syncNext();
     final double floor = _floorY();
     final Offset target =
         _centerOf(targetKeyFor(request.category)) ?? Offset(source.dx, floor);

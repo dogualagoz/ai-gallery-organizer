@@ -7,8 +7,10 @@ import 'package:photo_manager/photo_manager.dart';
 import 'package:photo_manager_image_provider/photo_manager_image_provider.dart';
 
 import '../../../core/constants/app_icons.dart';
+import '../../../core/constants/motion_constants.dart';
 import '../../../core/constants/ui_constants.dart';
 import '../../../core/l10n/l10n_extension.dart';
+import '../../../core/utils/motion_physics.dart';
 import '../../../core/widgets/app_nav_scaffold.dart';
 import '../../../core/widgets/surface_card.dart';
 
@@ -84,7 +86,8 @@ class AnalysisProgressCard extends StatelessWidget {
   final int processed;
   final int total;
 
-  /// Sıradaki ekran görüntüsü; uçuşlar bu küçük resmin üstünden kalkar.
+  /// Sıradaki uçacak (yoksa analiz edilen) ekran görüntüsü; uçuşlar bu
+  /// küçük resmin üstünden kalkar.
   final AssetEntity? source;
   final VoidCallback onPause;
 
@@ -304,9 +307,52 @@ class _FilledPill extends StatelessWidget {
   }
 }
 
+/// Yeni kaynak resmin gelişi: sekmesiz, hızlı yay.
+final Curve _sourceArrival = SpringCurve(
+  AppSprings.snappy,
+  AppDurations.medium,
+);
+
 /// İlerleme kartının başındaki küçük resim (uçuşların görsel kalkış yeri).
+/// Resim değişince yenisi büyüyerek gelir; eskisi beklemez, çünkü o anda
+/// uçuş kartı olarak karosuna kalkmıştır.
 class _SourceThumb extends StatelessWidget {
   const _SourceThumb({required this.asset});
+
+  final AssetEntity? asset;
+
+  @override
+  Widget build(BuildContext context) {
+    final bool reduceMotion = context.reduceMotion;
+    return SizedBox(
+      width: AppSizes.analysisSourceWidth,
+      height: AppSizes.analysisSourceHeight,
+      child: AnimatedSwitcher(
+        duration: reduceMotion
+            ? AppMotion.reducedCrossfade
+            : AppDurations.medium,
+        switchInCurve: reduceMotion ? Curves.linear : _sourceArrival,
+        layoutBuilder: (current, previous) =>
+            current ?? const SizedBox.shrink(),
+        transitionBuilder: (child, animation) {
+          final Widget faded = FadeTransition(opacity: animation, child: child);
+          if (reduceMotion) return faded;
+          return ScaleTransition(
+            scale: Tween<double>(
+              begin: AppFlight.sourceEnterScale,
+              end: 1,
+            ).animate(animation),
+            child: faded,
+          );
+        },
+        child: _SourceImage(key: ValueKey(asset?.id), asset: asset),
+      ),
+    );
+  }
+}
+
+class _SourceImage extends StatelessWidget {
+  const _SourceImage({super.key, required this.asset});
 
   final AssetEntity? asset;
 
@@ -320,9 +366,7 @@ class _SourceThumb extends StatelessWidget {
     );
     return ClipRRect(
       borderRadius: BorderRadius.circular(AppRadius.sm),
-      child: SizedBox(
-        width: AppSizes.analysisSourceWidth,
-        height: AppSizes.analysisSourceHeight,
+      child: SizedBox.expand(
         child: image == null
             ? placeholder
             : AssetEntityImage(
