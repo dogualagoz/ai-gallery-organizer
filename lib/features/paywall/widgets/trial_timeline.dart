@@ -34,7 +34,7 @@ class TrialTimeline extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
-        color: scheme.surfaceContainerHighest.withValues(alpha: 0.4),
+        color: scheme.surface,
         borderRadius: BorderRadius.circular(AppRadius.lg),
       ),
       child: Column(

@@ -1,5 +1,5 @@
 // Kategori enum'ının lokalize etiket ve ikon karşılıkları (UI katmanı için).
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 
 import '../models/screenshot_category.dart';
 import 'l10n_extension.dart';
@@ -58,51 +58,51 @@ extension ScreenshotCategoryX on ScreenshotCategory {
   String displayName(AppLocalizations l10n, Map<int, String> overrides) =>
       overrides[index] ?? label(l10n);
 
-  /// Kategoriye eşlik eden ikon.
+  /// Kategoriye eşlik eden ikon (SF Symbols karşılığı CupertinoIcons).
   IconData get icon {
     switch (this) {
       case ScreenshotCategory.lockScreen:
-        return Icons.lock_outline;
+        return CupertinoIcons.lock;
       case ScreenshotCategory.social:
-        return Icons.alternate_email;
+        return CupertinoIcons.at;
       case ScreenshotCategory.shopping:
-        return Icons.shopping_bag_outlined;
+        return CupertinoIcons.bag;
       case ScreenshotCategory.notesPasswords:
-        return Icons.sticky_note_2_outlined;
+        return CupertinoIcons.square_pencil;
       case ScreenshotCategory.messages:
-        return Icons.chat_bubble_outline;
+        return CupertinoIcons.chat_bubble;
       case ScreenshotCategory.receipts:
-        return Icons.receipt_long_outlined;
+        return CupertinoIcons.doc_plaintext;
       case ScreenshotCategory.other:
-        return Icons.photo_outlined;
+        return CupertinoIcons.photo;
       case ScreenshotCategory.qrCodes:
-        return Icons.qr_code_2;
+        return CupertinoIcons.qrcode;
       case ScreenshotCategory.recipes:
-        return Icons.restaurant_menu_outlined;
+        return CupertinoIcons.flame;
       case ScreenshotCategory.places:
-        return Icons.place_outlined;
+        return CupertinoIcons.location;
       case ScreenshotCategory.inspiration:
-        return Icons.lightbulb_outline;
+        return CupertinoIcons.lightbulb;
       case ScreenshotCategory.memes:
-        return Icons.sentiment_very_satisfied_outlined;
+        return CupertinoIcons.smiley;
       case ScreenshotCategory.outfits:
-        return Icons.checkroom_outlined;
+        return CupertinoIcons.tag;
       case ScreenshotCategory.health:
-        return Icons.favorite_outline;
+        return CupertinoIcons.heart;
       case ScreenshotCategory.tickets:
-        return Icons.confirmation_number_outlined;
+        return CupertinoIcons.ticket;
       case ScreenshotCategory.travel:
-        return Icons.flight_takeoff_outlined;
+        return CupertinoIcons.airplane;
       case ScreenshotCategory.food:
-        return Icons.lunch_dining_outlined;
+        return CupertinoIcons.cart;
       case ScreenshotCategory.finance:
-        return Icons.account_balance_outlined;
+        return CupertinoIcons.creditcard;
       case ScreenshotCategory.documents:
-        return Icons.description_outlined;
+        return CupertinoIcons.doc_text;
       case ScreenshotCategory.education:
-        return Icons.school_outlined;
+        return CupertinoIcons.book;
       case ScreenshotCategory.entertainment:
-        return Icons.movie_outlined;
+        return CupertinoIcons.film;
     }
   }
 }

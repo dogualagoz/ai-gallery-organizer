@@ -176,7 +176,7 @@ class _OnboardingPage extends StatelessWidget {
           _FadeSlideIn(
             child: Text(
               title,
-              style: textTheme.headlineMedium?.copyWith(
+              style: textTheme.headlineLarge?.copyWith(
                 fontWeight: FontWeight.w700,
               ),
               textAlign: TextAlign.center,

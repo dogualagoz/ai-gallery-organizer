@@ -36,6 +36,9 @@ abstract final class AppSizes {
   /// Navbar pilinin yanında yüzen ayrık dairesel Arama butonunun çapı.
   static const double navBarActionSize = 56;
 
+  /// Birincil (dolgulu) buton yüksekliği — iOS büyük buton ölçüsü.
+  static const double buttonHeight = 50;
+
   /// Board kartlarındaki kapak şeridi yüksekliği referansı.
   static const double boardCoverMin = 72;
 

@@ -119,7 +119,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
   @override
   Widget build(BuildContext context) {
     final ColorScheme scheme = Theme.of(context).colorScheme;
-    final TextStyle? nameStyle = Theme.of(context).textTheme.headlineMedium
+    final TextStyle? nameStyle = Theme.of(context).textTheme.headlineLarge
         ?.copyWith(fontWeight: FontWeight.w700, color: scheme.onSurface);
 
     return Scaffold(

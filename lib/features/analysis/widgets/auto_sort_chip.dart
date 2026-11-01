@@ -15,7 +15,7 @@ class AutoSortChip extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: AppSpacing.sm),
       child: Material(
-        color: scheme.surfaceContainerHighest.withValues(alpha: 0.5),
+        color: scheme.surface,
         borderRadius: BorderRadius.circular(AppRadius.md),
         clipBehavior: Clip.antiAlias,
         child: InkWell(

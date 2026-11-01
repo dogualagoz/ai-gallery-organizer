@@ -374,7 +374,7 @@ class _AnalyzeCardState extends ConsumerState<AnalyzeCard>
       decoration: BoxDecoration(
         color: Color.alphaBlend(
           scheme.primary.withValues(alpha: 0.05),
-          scheme.surfaceContainerHighest.withValues(alpha: 0.6),
+          scheme.surface,
         ),
         borderRadius: BorderRadius.circular(AppRadius.lg),
         border: Border.all(color: scheme.outlineVariant.withValues(alpha: 0.4)),

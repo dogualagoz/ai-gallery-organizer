@@ -148,7 +148,7 @@ class _QuotaRing extends StatelessWidget {
             children: [
               Text(
                 '$count',
-                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                style: Theme.of(context).textTheme.headlineLarge?.copyWith(
                   fontWeight: FontWeight.w700,
                 ),
               ),

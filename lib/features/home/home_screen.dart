@@ -110,8 +110,8 @@ class _HomeHeader extends ConsumerWidget {
     return PageHeader(
       title: context.l10n.galleryTitle,
       titleTrailing: isPro ? const ProBadge() : null,
-      // Başlık ile kota rozeti/eşitleme aynı satırda: üstteki boşluk kalkar.
-      inlineTitle: true,
+      // iOS büyük başlık deseni: aksiyon satırı üstte, 34pt başlık altında
+      // (aynı satırda 34pt başlık aksiyonlarla sıkışıp kesiliyordu).
       actions: [
         if (kDebugMode)
           IconButton(

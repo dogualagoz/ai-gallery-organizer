@@ -642,7 +642,7 @@ class _CategoryChip extends StatelessWidget {
                     label,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
                       color: scheme.onPrimaryContainer,
                       fontWeight: FontWeight.w600,
                     ),

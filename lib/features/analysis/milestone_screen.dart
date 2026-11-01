@@ -64,7 +64,7 @@ class _MilestoneScreenState extends ConsumerState<MilestoneScreen> {
               Text(
                 l10n.milestoneTitle,
                 textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.headlineMedium,
+                style: Theme.of(context).textTheme.headlineLarge,
               ),
               const SizedBox(height: AppSpacing.sm),
               Text(

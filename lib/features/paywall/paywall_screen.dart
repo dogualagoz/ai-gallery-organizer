@@ -328,7 +328,7 @@ class _PaywallHero extends StatelessWidget {
           Text(
             l10n.paywallWelcomeTitle,
             textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+            style: Theme.of(context).textTheme.headlineLarge?.copyWith(
               fontWeight: FontWeight.w700,
             ),
           ),

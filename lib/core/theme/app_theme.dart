@@ -1,29 +1,62 @@
-// Uygulama teması: açık (default) + koyu. Serin sis zemin + mürekkep +
-// iris (çivit) vurgu ve menekşe ikincil renk. Modern iOS diline yakın.
+// Uygulama teması: iOS sistem zeminleri + SF tipografi, iris yalnız aksan rengi.
+// Açık (default) + koyu; iOS semantik renkleri ColorScheme rollerine eşlenir.
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import '../constants/ui_constants.dart';
+import 'app_typography.dart';
 
-/// Marka renkleri — ColorScheme dışında doğrudan kullanılmaz.
-abstract final class _BrandColors {
-  // Açık tema: serin sis zemin + koyu mürekkep + iris vurgu.
-  static const Color mist = Color(0xFFF4F4F9);
-  static const Color surfaceLight = Color(0xFFFFFFFF);
-  static const Color ink = Color(0xFF1B1B24);
+/// Ham renk değerleri — ColorScheme dışında doğrudan kullanılmaz. iOS sistem
+/// renkleri HIG değerleridir; marka yalnız iris/menekşe aksanında yaşar.
+abstract final class _Palette {
+  // Marka aksanı.
   static const Color iris = Color(0xFF5457D6);
-  static const Color violet = Color(0xFF7E6BD9);
-  static const Color outlineLight = Color(0xFFDEDEE9);
-
-  // Koyu tema: gece zemini, aynı vurgular parlatılmış.
-  static const Color night = Color(0xFF121217);
-  static const Color surfaceDark = Color(0xFF1B1B22);
-  static const Color fog = Color(0xFFECECF4);
   static const Color irisBright = Color(0xFF8A8CFF);
+  static const Color violet = Color(0xFF7E6BD9);
   static const Color violetBright = Color(0xFFA995F0);
-  static const Color outlineDark = Color(0xFF34343F);
+
+  // iOS açık: systemGroupedBackground / secondarySystemGroupedBackground.
+  static const Color groupedLight = Color(0xFFF2F2F7);
+  static const Color cardLight = Color(0xFFFFFFFF);
+  static const Color labelLight = Color(0xFF000000);
+  // secondaryLabel'ın erişilebilir (≥4.5:1) opak karşılığı (systemGray, AX).
+  static const Color secondaryLabelLight = Color(0xFF6C6C70);
+  static const Color systemGray3Light = Color(0xFFC7C7CC);
+  static const Color systemGray5Light = Color(0xFFE5E5EA);
+  // Dolgular (tertiary/secondary systemFill'in beyaz üstü opak karşılığı).
+  static const Color fillLight = Color(0xFFEFEFF0);
+  static const Color fillStrongLight = Color(0xFFE9E9EB);
+  // systemRed: beyaz üstünde ~3.6:1 — HIG yıkıcı buton standardı; yalnız
+  // büyük/kalın metinde (17pt semibold, AA büyük metin 3:1) kullanılır.
+  static const Color redLight = Color(0xFFFF3B30);
+
+  // iOS koyu: saf siyah zemin, kartlar #1C1C1E, yükseltilmiş #2C2C2E.
+  static const Color groupedDark = Color(0xFF000000);
+  static const Color cardDark = Color(0xFF1C1C1E);
+  static const Color elevatedDark = Color(0xFF2C2C2E);
+  static const Color fillStrongDark = Color(0xFF3A3A3C);
+  static const Color labelDark = Color(0xFFFFFFFF);
+  static const Color secondaryLabelDark = Color(0xFF98989E);
+  static const Color systemGray3Dark = Color(0xFF48484A);
+  // opaqueSeparator: yükseltilmiş (#2C2C2E) dolgudan ayrışsın diye bir ton açık.
+  static const Color separatorDark = Color(0xFF38383A);
+  static const Color redDark = Color(0xFFFF453A);
+
+  static const Color white = Color(0xFFFFFFFF);
+  static const Color black = Color(0xFF000000);
+  static const Color transparent = Color(0x00000000);
 }
 
 /// Açık ve koyu [ThemeData] üreticisi.
+///
+/// iOS semantik rol → ColorScheme eşlemesi (ekranlar yalnız colorScheme'i
+/// kullanır):
+/// - systemGroupedBackground → `surfaceContainer` (scaffold zemini)
+/// - secondarySystemGroupedBackground (kart) → `surface`
+/// - tertiary grouped / dolgular → `surfaceContainerHigh(est)`
+/// - label / secondaryLabel → `onSurface` / `onSurfaceVariant`
+/// - separator → `outlineVariant`, güçlü kenarlık → `outline`
+/// - systemRed (yıkıcı) → `error`
 abstract final class AppTheme {
   static ThemeData get light => _build(_lightScheme);
 
@@ -31,63 +64,95 @@ abstract final class AppTheme {
 
   static const ColorScheme _lightScheme = ColorScheme(
     brightness: Brightness.light,
-    primary: _BrandColors.iris,
-    onPrimary: Colors.white,
-    primaryContainer: Color(0xFFE3E3FB),
+    primary: _Palette.iris,
+    onPrimary: _Palette.white,
+    primaryContainer: Color(0xFFE6E6FB),
     onPrimaryContainer: Color(0xFF24247A),
-    secondary: _BrandColors.violet,
-    onSecondary: Colors.white,
+    secondary: _Palette.violet,
+    onSecondary: _Palette.white,
     secondaryContainer: Color(0xFFECE7FB),
     onSecondaryContainer: Color(0xFF2E2075),
-    error: Color(0xFFB3261E),
-    onError: Colors.white,
-    surface: _BrandColors.surfaceLight,
-    onSurface: _BrandColors.ink,
-    surfaceContainerHighest: Color(0xFFEBEBF4),
-    surfaceContainer: _BrandColors.mist,
-    onSurfaceVariant: Color(0xFF6E6E80),
-    outline: _BrandColors.outlineLight,
-    outlineVariant: Color(0xFFEAEAF2),
-    inverseSurface: _BrandColors.ink,
-    onInverseSurface: _BrandColors.mist,
+    tertiary: _Palette.violet,
+    onTertiary: _Palette.white,
+    tertiaryContainer: Color(0xFFE9E3FB),
+    onTertiaryContainer: Color(0xFF2E2075),
+    error: _Palette.redLight,
+    onError: _Palette.white,
+    errorContainer: Color(0xFFFFE5E3),
+    onErrorContainer: Color(0xFF8A1C14),
+    surface: _Palette.cardLight,
+    onSurface: _Palette.labelLight,
+    onSurfaceVariant: _Palette.secondaryLabelLight,
+    surfaceContainerLowest: _Palette.cardLight,
+    surfaceContainerLow: _Palette.groupedLight,
+    surfaceContainer: _Palette.groupedLight,
+    surfaceContainerHigh: _Palette.fillLight,
+    surfaceContainerHighest: _Palette.fillStrongLight,
+    outline: _Palette.systemGray3Light,
+    outlineVariant: _Palette.systemGray5Light,
+    inverseSurface: _Palette.labelLight,
+    onInverseSurface: _Palette.groupedLight,
+    inversePrimary: _Palette.irisBright,
+    shadow: _Palette.black,
+    scrim: _Palette.black,
+    surfaceTint: _Palette.transparent,
   );
 
   static const ColorScheme _darkScheme = ColorScheme(
     brightness: Brightness.dark,
-    primary: _BrandColors.irisBright,
+    primary: _Palette.irisBright,
     onPrimary: Color(0xFF1A1B4B),
-    primaryContainer: Color(0xFF34367F),
+    primaryContainer: Color(0xFF2E3070),
     onPrimaryContainer: Color(0xFFE1E1FF),
-    secondary: _BrandColors.violetBright,
+    secondary: _Palette.violetBright,
     onSecondary: Color(0xFF251A55),
     secondaryContainer: Color(0xFF3C2F79),
     onSecondaryContainer: Color(0xFFEAE3FF),
-    error: Color(0xFFF2B8B5),
-    onError: Color(0xFF601410),
-    surface: _BrandColors.surfaceDark,
-    onSurface: _BrandColors.fog,
-    surfaceContainerHighest: Color(0xFF26262F),
-    surfaceContainer: _BrandColors.night,
-    onSurfaceVariant: Color(0xFF9A9AAB),
-    outline: _BrandColors.outlineDark,
-    outlineVariant: Color(0xFF28282F),
-    inverseSurface: _BrandColors.fog,
-    onInverseSurface: _BrandColors.night,
+    tertiary: _Palette.violetBright,
+    onTertiary: Color(0xFF251A55),
+    tertiaryContainer: Color(0xFF3C2F79),
+    onTertiaryContainer: Color(0xFFEAE3FF),
+    error: _Palette.redDark,
+    onError: _Palette.white,
+    errorContainer: Color(0xFF4A1512),
+    onErrorContainer: Color(0xFFFFDAD6),
+    surface: _Palette.cardDark,
+    onSurface: _Palette.labelDark,
+    onSurfaceVariant: _Palette.secondaryLabelDark,
+    surfaceContainerLowest: _Palette.groupedDark,
+    surfaceContainerLow: _Palette.groupedDark,
+    surfaceContainer: _Palette.groupedDark,
+    surfaceContainerHigh: _Palette.elevatedDark,
+    surfaceContainerHighest: _Palette.fillStrongDark,
+    outline: _Palette.systemGray3Dark,
+    outlineVariant: _Palette.separatorDark,
+    inverseSurface: _Palette.labelDark,
+    onInverseSurface: _Palette.cardDark,
+    inversePrimary: _Palette.iris,
+    shadow: _Palette.black,
+    scrim: _Palette.black,
+    surfaceTint: _Palette.transparent,
   );
 
   static ThemeData _build(ColorScheme scheme) {
+    final TextTheme textTheme = AppTypography.textTheme(scheme.onSurface);
     final ThemeData base = ThemeData(
       useMaterial3: true,
       colorScheme: scheme,
+      textTheme: textTheme,
       scaffoldBackgroundColor: scheme.surfaceContainer,
+      // iOS'ta dokunma geri bildirimi ripple değil; basış ölçeği/opaklığıdır.
+      splashFactory: NoSplash.splashFactory,
+      splashColor: _Palette.transparent,
+      highlightColor: _Palette.transparent,
     );
-    // iOS'ta San Francisco tipografisini kullan (Material default Roboto'yu ezer).
-    final TextTheme textTheme =
-        Typography.material2021(platform: TargetPlatform.iOS).englishLike
-            .apply(bodyColor: scheme.onSurface, displayColor: scheme.onSurface);
 
     return base.copyWith(
-      textTheme: textTheme,
+      // Cupertino widget'ları aynı aksan ve zemini kullansın.
+      cupertinoOverrideTheme: NoDefaultCupertinoThemeData(
+        primaryColor: scheme.primary,
+        scaffoldBackgroundColor: scheme.surfaceContainer,
+      ),
       // Not: push geçişleri iOS'ta framework default'u olan Cupertino
       // (sağdan kayma + interaktif geri swipe) ile gelir; ek ayar gerekmez.
       appBarTheme: AppBarTheme(
@@ -95,35 +160,47 @@ abstract final class AppTheme {
         foregroundColor: scheme.onSurface,
         elevation: 0,
         scrolledUnderElevation: 0,
-        centerTitle: false,
-        titleTextStyle: textTheme.titleLarge?.copyWith(
-          fontWeight: FontWeight.w700,
-          color: scheme.onSurface,
-        ),
-      ),
-      cardTheme: CardThemeData(
-        color: scheme.surface,
-        elevation: 0,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppRadius.lg),
-          side: BorderSide(color: scheme.outlineVariant),
-        ),
+        // iOS inline gezinme başlığı ortalı ve Headline (17 semibold) olur.
+        centerTitle: true,
+        titleTextStyle: textTheme.titleMedium,
       ),
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
-          minimumSize: const Size.fromHeight(52),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AppRadius.md),
-          ),
-          textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+          minimumSize: const Size.fromHeight(AppSizes.buttonHeight),
+          shape: const StadiumBorder(),
+          textStyle: textTheme.labelLarge,
+        ),
+      ),
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: OutlinedButton.styleFrom(
+          shape: const StadiumBorder(),
+          side: BorderSide(color: scheme.outline),
+          textStyle: textTheme.labelLarge,
+        ),
+      ),
+      textButtonTheme: TextButtonThemeData(
+        style: TextButton.styleFrom(textStyle: textTheme.bodyLarge),
+      ),
+      // Segment ve çip etiketleri 17pt buton stilinde taşar; Subheadline.
+      segmentedButtonTheme: SegmentedButtonThemeData(
+        style: ButtonStyle(
+          textStyle: WidgetStatePropertyAll(textTheme.titleSmall),
         ),
       ),
       chipTheme: base.chipTheme.copyWith(
+        labelStyle: AppTypography.subheadline,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppRadius.sm),
         ),
         side: BorderSide(color: scheme.outlineVariant),
       ),
+      // M3 varsayılanı surfaceContainerLow/High; koyuda zeminle aynı siyah
+      // olurdu. iOS'ta sheet ve uyarılar kart tonunda (secondary grouped).
+      bottomSheetTheme: BottomSheetThemeData(
+        backgroundColor: scheme.surface,
+        modalBackgroundColor: scheme.surface,
+      ),
+      dialogTheme: DialogThemeData(backgroundColor: scheme.surface),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: scheme.surfaceContainerHighest,
@@ -132,6 +209,7 @@ abstract final class AppTheme {
           borderSide: BorderSide.none,
         ),
       ),
+      dividerTheme: DividerThemeData(color: scheme.outlineVariant),
     );
   }
 }
