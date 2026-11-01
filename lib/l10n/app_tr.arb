@@ -214,9 +214,28 @@
   "boardsLimitTitle": "Özel panolar Pro'ya özel",
   "boardsEditDone": "Bitti",
   "boardDetailEmpty": "Burada henüz ekran görüntüsü yok",
-  "searchHint": "Etiket, metin veya kategori ara",
-  "searchPrompt": "Aramak için yazmaya başla",
-  "searchEmpty": "Sonuç bulunamadı",
+  "searchHint": "Etiket, metin, kategori ara",
+  "searchPrompt": "Etiketler, görsellerdeki metinler ve kategoriler aranabilir.",
+  "searchPromptTitle": "Ekran Görüntülerinde Ara",
+  "searchEmpty": "Sonuç Yok",
+  "searchEmptyBody": "“{query}” ile eşleşen bir şey yok. Başka bir kelime dene.",
+  "@searchEmptyBody": {
+    "placeholders": {
+      "query": {"type": "String"}
+    }
+  },
+  "searchAllCategories": "Tüm Kategorilerde Ara",
+  "searchNothingTitle": "Henüz Aranacak Bir Şey Yok",
+  "searchNothingBody": "Ekran görüntülerin analiz edilince etiket, metin ve kategoriye göre bulunabilir.",
+  "searchRecentTitle": "Son Aramalar",
+  "searchClearRecent": "Temizle",
+  "searchTagsTitle": "Sık Etiketler",
+  "searchResultCount": "{count} sonuç",
+  "@searchResultCount": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
   "searchLockedTitle": "Arama bir Pro özelliği",
   "searchLockedBody": "Etiket ve görsel metinlerinde arama yapmak için Pro'ya geç.",
   "sortingEmptyTitle": "Temizlenecek bir şey kalmadı",

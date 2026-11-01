@@ -11,10 +11,15 @@ class GroupedSection extends StatelessWidget {
     required this.children,
     this.header,
     this.footer,
+    this.margin,
   });
 
   final List<Widget> children;
   final String? header;
+
+  /// Kartın dış boşluğu; verilmezse iOS varsayılanı. Sayfa içi bölüm
+  /// başlığıyla hizalamak için verilir.
+  final EdgeInsetsGeometry? margin;
 
   /// Bölüm altındaki açıklama (uzun bilgi satıra değil buraya yazılır).
   final String? footer;
@@ -33,6 +38,7 @@ class GroupedSection extends StatelessWidget {
       ),
       header: headerText == null ? null : Text(headerText),
       footer: footerText == null ? null : Text(footerText),
+      margin: margin,
       children: children,
     );
   }

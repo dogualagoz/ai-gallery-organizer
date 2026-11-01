@@ -14,8 +14,8 @@ import '../../../core/models/screenshot_category.dart';
 import '../../../core/models/screenshot_entry.dart';
 import '../../../core/services/category_names_service.dart';
 import '../../../core/services/haptic_service.dart';
+import '../../../core/widgets/app_chip.dart';
 import '../../../core/widgets/grouped_section.dart';
-import '../../../core/widgets/pressable.dart';
 import '../../../core/widgets/status_toast.dart';
 import '../../../core/widgets/surface_card.dart';
 import '../../analysis/providers/analysis_queue_provider.dart';
@@ -250,36 +250,23 @@ class _TagsSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final ColorScheme scheme = Theme.of(context).colorScheme;
     return GroupedSection(
       header: l10n.detailTagsTitle,
       children: [
         Padding(
-          padding: const EdgeInsets.all(AppSpacing.md),
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.md,
+            vertical: AppSpacing.md - AppSizes.chipHitInset,
+          ),
+          // Çiplerin saydam dokunma payı satır aralığını da verir.
           child: Wrap(
             spacing: AppSpacing.sm,
-            runSpacing: AppSpacing.sm,
             children: [
               for (final String tag in tags)
-                Pressable(
+                AppChip(
+                  label: tag,
                   onPressed: () => onTag(tag),
                   semanticLabel: l10n.searchTagLabel(tag),
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(
-                      color: scheme.surfaceContainerHigh,
-                      borderRadius: BorderRadius.circular(AppRadius.pill),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: AppSizes.chipPaddingH,
-                        vertical: AppSizes.chipPaddingV,
-                      ),
-                      child: Text(
-                        tag,
-                        style: Theme.of(context).textTheme.bodyMedium,
-                      ),
-                    ),
-                  ),
                 ),
             ],
           ),

@@ -24,6 +24,8 @@ class AppNavScaffold extends StatelessWidget {
     this.onRefresh,
     this.controller,
     this.scrollable = true,
+    this.searchField,
+    this.onSearchActiveChanged,
   });
 
   /// Büyük başlık; küçülünce barın ortasında aynı metin görünür.
@@ -51,6 +53,14 @@ class AppNavScaffold extends StatelessWidget {
   /// Alt boşluğu içerik kendisi bırakır.
   final bool scrollable;
 
+  /// Verilirse büyük başlığın altında arama alanı durur (iOS searchable):
+  /// dokununca başlık küçülür, alan yukarı çıkar, yanında "İptal" belirir.
+  /// Etkin değilken alan dokunuşu yalnız etkinleştirir.
+  final Widget? searchField;
+
+  /// Arama etkinleşince true, "İptal" ile false.
+  final ValueChanged<bool>? onSearchActiveChanged;
+
   @override
   Widget build(BuildContext context) {
     final ColorScheme scheme = Theme.of(context).colorScheme;
@@ -69,23 +79,12 @@ class AppNavScaffold extends StatelessWidget {
                   parent: BouncingScrollPhysics(),
                 )
               : const NeverScrollableScrollPhysics(),
+          // Arama sonuçlarını kaydırmak klavyeyi kapatır (iOS davranışı).
+          keyboardDismissBehavior: searchField != null
+              ? ScrollViewKeyboardDismissBehavior.onDrag
+              : ScrollViewKeyboardDismissBehavior.manual,
           slivers: [
-            CupertinoSliverNavigationBar(
-              largeTitle: _largeTitle(),
-              middle: Text(title),
-              alwaysShowMiddle: false,
-              leading: leading,
-              trailing: trailing,
-              backgroundColor: scheme.surfaceContainer.withValues(
-                alpha: AppGlass.navBarFillAlpha,
-              ),
-              border: Border(
-                bottom: BorderSide(color: scheme.outlineVariant, width: 0),
-              ),
-              // Sekme dallarının her biri ayrı navigator; kök rota geçişinde
-              // aynı varsayılan hero tag'li birden çok bar çakışırdı.
-              transitionBetweenRoutes: false,
-            ),
+            _navigationBar(scheme),
             if (refresh != null && scrollable)
               CupertinoSliverRefreshControl(
                 onRefresh: () {
@@ -102,6 +101,42 @@ class AppNavScaffold extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _navigationBar(ColorScheme scheme) {
+    final Color background = scheme.surfaceContainer.withValues(
+      alpha: AppGlass.navBarFillAlpha,
+    );
+    final Border border = Border(
+      bottom: BorderSide(color: scheme.outlineVariant, width: 0),
+    );
+    final Widget? search = searchField;
+    // Sekme dallarının her biri ayrı navigator; kök rota geçişinde aynı
+    // varsayılan hero tag'li birden çok bar çakışırdı (transitionBetweenRoutes).
+    if (search != null) {
+      return CupertinoSliverNavigationBar.search(
+        searchField: search,
+        onSearchableBottomTap: onSearchActiveChanged,
+        largeTitle: _largeTitle(),
+        middle: Text(title),
+        alwaysShowMiddle: false,
+        leading: leading,
+        trailing: trailing,
+        backgroundColor: background,
+        border: border,
+        transitionBetweenRoutes: false,
+      );
+    }
+    return CupertinoSliverNavigationBar(
+      largeTitle: _largeTitle(),
+      middle: Text(title),
+      alwaysShowMiddle: false,
+      leading: leading,
+      trailing: trailing,
+      backgroundColor: background,
+      border: border,
+      transitionBetweenRoutes: false,
     );
   }
 

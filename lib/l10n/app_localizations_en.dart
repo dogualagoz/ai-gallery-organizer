@@ -402,13 +402,52 @@ class AppLocalizationsEn extends AppLocalizations {
   String get boardDetailEmpty => 'No screenshots here yet';
 
   @override
-  String get searchHint => 'Search tags, text, or category';
+  String get searchHint => 'Search tags, text, categories';
 
   @override
-  String get searchPrompt => 'Start typing to search';
+  String get searchPrompt =>
+      'Tags, the text inside your screenshots and categories are all searchable.';
 
   @override
-  String get searchEmpty => 'No results found';
+  String get searchPromptTitle => 'Search Your Screenshots';
+
+  @override
+  String get searchEmpty => 'No Results';
+
+  @override
+  String searchEmptyBody(String query) {
+    return 'Nothing matches “$query”. Try another word.';
+  }
+
+  @override
+  String get searchAllCategories => 'Search All Categories';
+
+  @override
+  String get searchNothingTitle => 'Nothing to Search Yet';
+
+  @override
+  String get searchNothingBody =>
+      'Once your screenshots are analyzed, you can find them by tag, text and category.';
+
+  @override
+  String get searchRecentTitle => 'Recent Searches';
+
+  @override
+  String get searchClearRecent => 'Clear';
+
+  @override
+  String get searchTagsTitle => 'Frequent Tags';
+
+  @override
+  String searchResultCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count results',
+      one: '1 result',
+    );
+    return '$_temp0';
+  }
 
   @override
   String get searchLockedTitle => 'Search is a Pro feature';

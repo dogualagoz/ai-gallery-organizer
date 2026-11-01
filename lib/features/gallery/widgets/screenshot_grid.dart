@@ -21,6 +21,7 @@ class ScreenshotGrid extends ConsumerWidget {
     this.inset = false,
     this.selectedIds,
     this.onToggle,
+    this.onOpen,
   });
 
   final List<ScreenshotEntry> entries;
@@ -34,6 +35,9 @@ class ScreenshotGrid extends ConsumerWidget {
 
   /// Seçim modunda dokunulan karonun kimliği.
   final ValueChanged<String>? onToggle;
+
+  /// Görüntüleyici açılmadan hemen önce (ör. arama sorgusunu geçmişe yazmak).
+  final VoidCallback? onOpen;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -70,11 +74,14 @@ class ScreenshotGrid extends ConsumerWidget {
             selected: selection?.contains(entry.assetId),
             onPressed: selection != null
                 ? () => onToggle?.call(entry.assetId)
-                : () => openViewer(
-                    context,
-                    entry.assetId,
-                    scope: [for (final item in entries) item.assetId],
-                  ),
+                : () {
+                    onOpen?.call();
+                    openViewer(
+                      context,
+                      entry.assetId,
+                      scope: [for (final item in entries) item.assetId],
+                    );
+                  },
           );
           if (selection != null) return tile;
           return ScreenshotContextMenu(key: key, entry: entry, child: tile);

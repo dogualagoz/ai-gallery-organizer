@@ -100,6 +100,12 @@ abstract final class AppSizes {
   /// Etiket kapsülünün iç boşlukları.
   static const double chipPaddingH = 12;
   static const double chipPaddingV = 6;
+
+  /// Çip kapsülünün üstünde/altında saydam dokunma payı (32pt kapsül → 44pt).
+  static const double chipHitInset = 6;
+
+  /// Çipteki ikon.
+  static const double chipIcon = 15;
 }
 
 /// Ekran görüntüsü ızgarası ve karosu.

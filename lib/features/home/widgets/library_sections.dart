@@ -16,6 +16,7 @@ import '../../../core/services/category_names_service.dart';
 import '../../../core/services/category_order_service.dart';
 import '../../../core/services/entitlement_service.dart';
 import '../../../core/services/photo_permission_service.dart';
+import '../../../core/widgets/section_header.dart';
 import '../../../core/widgets/status_toast.dart';
 import '../../../core/widgets/surface_card.dart';
 import '../../boards/providers/board_provider.dart';
@@ -24,50 +25,6 @@ import '../../boards/widgets/system_boards_grid.dart';
 import '../../gallery/data/screenshot_repository.dart';
 import '../../gallery/providers/gallery_provider.dart';
 import '../../gallery/widgets/screenshot_grid.dart';
-
-/// Bölüm başlığı: Title 3 metin + sağda opsiyonel metin eylemi.
-class LibrarySectionHeader extends StatelessWidget {
-  const LibrarySectionHeader({
-    super.key,
-    required this.title,
-    this.actionLabel,
-    this.onAction,
-  });
-
-  final String title;
-  final String? actionLabel;
-  final VoidCallback? onAction;
-
-  @override
-  Widget build(BuildContext context) {
-    final String? label = actionLabel;
-    return SizedBox(
-      height: kMinInteractiveDimensionCupertino,
-      child: Row(
-        children: [
-          Expanded(
-            child: Semantics(
-              header: true,
-              child: Text(
-                title,
-                style: Theme.of(context).textTheme.titleLarge,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-          ),
-          if (label != null)
-            CupertinoButton(
-              padding: const EdgeInsets.only(left: AppSpacing.sm),
-              minimumSize: const Size.square(kMinInteractiveDimensionCupertino),
-              onPressed: onAction,
-              child: Text(label),
-            ),
-        ],
-      ),
-    );
-  }
-}
 
 /// Kategoriler ve panolar başlıklarının paylaştığı Düzenle/Bitti eylemi.
 class _EditToggle {
@@ -112,7 +69,7 @@ class LibraryCategoriesSection extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        LibrarySectionHeader(
+        SectionHeader(
           title: l10n.boardsSystemSection,
           actionLabel: sorted.isEmpty ? null : edit.label(context),
           onAction: edit.toggle,
@@ -154,7 +111,7 @@ class LibraryBoardsSection extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        LibrarySectionHeader(
+        SectionHeader(
           title: context.l10n.boardsCustomSection,
           actionLabel: boards.isEmpty ? null : edit.label(context),
           onAction: edit.toggle,
@@ -179,7 +136,7 @@ class LibraryRecentsHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return LibrarySectionHeader(
+    return SectionHeader(
       title: context.l10n.homeRecentsSection,
       actionLabel: hasMore ? context.l10n.librarySeeAll : null,
       onAction: () => context.push(AppRoutes.recents),

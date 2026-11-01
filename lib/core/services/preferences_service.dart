@@ -29,6 +29,7 @@ abstract final class PrefKeys {
   static const String appLocale = 'app_locale';
   static const String lastReviewRequestMs = 'last_review_request_ms';
   static const String appOpenCount = 'app_open_count';
+  static const String recentSearches = 'recent_searches';
 }
 
 /// Onboarding tamamlandı bilgisi (router redirect bunu izler).

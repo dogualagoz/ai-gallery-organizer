@@ -779,20 +779,74 @@ abstract class AppLocalizations {
   /// No description provided for @searchHint.
   ///
   /// In en, this message translates to:
-  /// **'Search tags, text, or category'**
+  /// **'Search tags, text, categories'**
   String get searchHint;
 
   /// No description provided for @searchPrompt.
   ///
   /// In en, this message translates to:
-  /// **'Start typing to search'**
+  /// **'Tags, the text inside your screenshots and categories are all searchable.'**
   String get searchPrompt;
+
+  /// No description provided for @searchPromptTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Search Your Screenshots'**
+  String get searchPromptTitle;
 
   /// No description provided for @searchEmpty.
   ///
   /// In en, this message translates to:
-  /// **'No results found'**
+  /// **'No Results'**
   String get searchEmpty;
+
+  /// No description provided for @searchEmptyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing matches “{query}”. Try another word.'**
+  String searchEmptyBody(String query);
+
+  /// No description provided for @searchAllCategories.
+  ///
+  /// In en, this message translates to:
+  /// **'Search All Categories'**
+  String get searchAllCategories;
+
+  /// No description provided for @searchNothingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing to Search Yet'**
+  String get searchNothingTitle;
+
+  /// No description provided for @searchNothingBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Once your screenshots are analyzed, you can find them by tag, text and category.'**
+  String get searchNothingBody;
+
+  /// No description provided for @searchRecentTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent Searches'**
+  String get searchRecentTitle;
+
+  /// No description provided for @searchClearRecent.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear'**
+  String get searchClearRecent;
+
+  /// No description provided for @searchTagsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Frequent Tags'**
+  String get searchTagsTitle;
+
+  /// No description provided for @searchResultCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 result} other{{count} results}}'**
+  String searchResultCount(int count);
 
   /// No description provided for @searchLockedTitle.
   ///

@@ -214,9 +214,28 @@
   "boardsLimitTitle": "Custom boards are a Pro feature",
   "boardsEditDone": "Done",
   "boardDetailEmpty": "No screenshots here yet",
-  "searchHint": "Search tags, text, or category",
-  "searchPrompt": "Start typing to search",
-  "searchEmpty": "No results found",
+  "searchHint": "Search tags, text, categories",
+  "searchPrompt": "Tags, the text inside your screenshots and categories are all searchable.",
+  "searchPromptTitle": "Search Your Screenshots",
+  "searchEmpty": "No Results",
+  "searchEmptyBody": "Nothing matches “{query}”. Try another word.",
+  "@searchEmptyBody": {
+    "placeholders": {
+      "query": {"type": "String"}
+    }
+  },
+  "searchAllCategories": "Search All Categories",
+  "searchNothingTitle": "Nothing to Search Yet",
+  "searchNothingBody": "Once your screenshots are analyzed, you can find them by tag, text and category.",
+  "searchRecentTitle": "Recent Searches",
+  "searchClearRecent": "Clear",
+  "searchTagsTitle": "Frequent Tags",
+  "searchResultCount": "{count, plural, =1{1 result} other{{count} results}}",
+  "@searchResultCount": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
   "searchLockedTitle": "Search is a Pro feature",
   "searchLockedBody": "Go Pro to search across tags and screenshot text.",
   "sortingEmptyTitle": "Nothing left to clean",

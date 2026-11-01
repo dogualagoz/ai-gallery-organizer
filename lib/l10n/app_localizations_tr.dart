@@ -401,13 +401,46 @@ class AppLocalizationsTr extends AppLocalizations {
   String get boardDetailEmpty => 'Burada henüz ekran görüntüsü yok';
 
   @override
-  String get searchHint => 'Etiket, metin veya kategori ara';
+  String get searchHint => 'Etiket, metin, kategori ara';
 
   @override
-  String get searchPrompt => 'Aramak için yazmaya başla';
+  String get searchPrompt =>
+      'Etiketler, görsellerdeki metinler ve kategoriler aranabilir.';
 
   @override
-  String get searchEmpty => 'Sonuç bulunamadı';
+  String get searchPromptTitle => 'Ekran Görüntülerinde Ara';
+
+  @override
+  String get searchEmpty => 'Sonuç Yok';
+
+  @override
+  String searchEmptyBody(String query) {
+    return '“$query” ile eşleşen bir şey yok. Başka bir kelime dene.';
+  }
+
+  @override
+  String get searchAllCategories => 'Tüm Kategorilerde Ara';
+
+  @override
+  String get searchNothingTitle => 'Henüz Aranacak Bir Şey Yok';
+
+  @override
+  String get searchNothingBody =>
+      'Ekran görüntülerin analiz edilince etiket, metin ve kategoriye göre bulunabilir.';
+
+  @override
+  String get searchRecentTitle => 'Son Aramalar';
+
+  @override
+  String get searchClearRecent => 'Temizle';
+
+  @override
+  String get searchTagsTitle => 'Sık Etiketler';
+
+  @override
+  String searchResultCount(int count) {
+    return '$count sonuç';
+  }
 
   @override
   String get searchLockedTitle => 'Arama bir Pro özelliği';

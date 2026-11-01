@@ -18,6 +18,15 @@ abstract final class FreeLimits {
   static const int swipeSorts = 100;
 }
 
+/// Ara sekmesi sınırları.
+abstract final class SearchLimits {
+  /// Saklanan son arama sayısı (en yenisi başta).
+  static const int recent = 8;
+
+  /// Boş sorguda önerilen sık etiket sayısı.
+  static const int suggestedTags = 12;
+}
+
 /// Ücretsiz deneme (yıllık plan intro offer) dönemindeki sınırlar.
 /// Amaç: trial'da tüm galeriyi analiz ettirip iptal ederek sistemin
 /// boşluğundan yararlanmayı önlemek. Diğer Pro özellikler trial'da sınırsız.
