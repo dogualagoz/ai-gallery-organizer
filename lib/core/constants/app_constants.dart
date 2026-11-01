@@ -3,6 +3,9 @@
 /// Uygulamanın çalışma adı (placeholder — yayın öncesi tek noktadan değişir).
 const String kAppName = 'Snaply';
 
+/// Satır içi öğeleri ayıran orta nokta ("Şartlar · Gizlilik", "Fatura · 12").
+const String kInlineSeparator = '·';
+
 /// Free kullanıcı limitleri (PROJECT_DOCUMENTATION.md Bölüm 3).
 abstract final class FreeLimits {
   /// Haftalık ücretsiz otomatik AI analizi hakkı.

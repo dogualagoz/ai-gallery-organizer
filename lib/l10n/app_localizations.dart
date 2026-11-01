@@ -1130,6 +1130,12 @@ abstract class AppLocalizations {
   /// **'Purchase couldn\'t be completed. Please try again.'**
   String get paywallPurchaseFailed;
 
+  /// No description provided for @paywallProductsUnavailableTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Plans unavailable'**
+  String get paywallProductsUnavailableTitle;
+
   /// No description provided for @paywallProductsUnavailable.
   ///
   /// In en, this message translates to:

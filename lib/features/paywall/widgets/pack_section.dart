@@ -4,9 +4,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 
 import '../../../core/constants/app_constants.dart';
+import '../../../core/constants/app_icons.dart';
 import '../../../core/constants/ui_constants.dart';
 import '../../../core/l10n/l10n_extension.dart';
+import '../../../core/widgets/surface_card.dart';
 import '../providers/purchase_provider.dart';
+import 'tinted_icon_tile.dart';
 
 class PackSection extends ConsumerWidget {
   const PackSection({required this.packs, required this.busy, super.key});
@@ -47,50 +50,50 @@ class PackSection extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     if (packs.isEmpty) return const SizedBox.shrink();
     final l10n = context.l10n;
-    final ColorScheme scheme = Theme.of(context).colorScheme;
+    final TextTheme text = Theme.of(context).textTheme;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Divider(height: AppSpacing.xl),
-        Text(
-          l10n.paywallPacksTitle,
-          style: Theme.of(
-            context,
-          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
+        const SizedBox(height: AppSpacing.xl),
+        Semantics(
+          header: true,
+          child: Text(l10n.paywallPacksTitle, style: text.titleMedium),
         ),
         const SizedBox(height: AppSpacing.xs),
         Text(
           l10n.paywallPacksSubtitle,
-          style: Theme.of(
-            context,
-          ).textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant),
+          style: text.bodySmall?.copyWith(
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
         ),
         const SizedBox(height: AppSpacing.md),
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            for (int i = 0; i < packs.length; i++) ...[
-              if (i > 0) const SizedBox(width: AppSpacing.sm),
-              Expanded(
-                child: _PackCard(
-                  pack: packs[i],
-                  busy: busy,
-                  savings: _savingsVsSmallest(packs[i]),
-                  onBuy: () =>
-                      ref.read(purchaseFlowProvider.notifier).buy(packs[i]),
+        // Kartlar eş yükseklikte: fiyat butonları aynı hizada durur.
+        IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              for (int i = 0; i < packs.length; i++) ...[
+                if (i > 0) const SizedBox(width: AppSpacing.sm),
+                Expanded(
+                  child: _PackCard(
+                    pack: packs[i],
+                    busy: busy,
+                    savings: _savingsVsSmallest(packs[i]),
+                    onBuy: () =>
+                        ref.read(purchaseFlowProvider.notifier).buy(packs[i]),
+                  ),
                 ),
-              ),
+              ],
             ],
-          ],
+          ),
         ),
       ],
     );
   }
 }
 
-/// İkincil renkli, parlak (gradient + dış parıltı) paket kartı; metinler
-/// zemin üstünde okunacak kontrast renkte.
+/// Paket kartı: kredi sayısı, kısa açıklama ve tonlu fiyat butonu.
 class _PackCard extends StatelessWidget {
   const _PackCard({
     required this.pack,
@@ -109,74 +112,46 @@ class _PackCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final ColorScheme scheme = Theme.of(context).colorScheme;
+    final TextTheme text = Theme.of(context).textTheme;
     final int? credits = ProductIds.creditsFor(pack.id);
     final double? savingsValue = savings;
 
-    return Container(
+    return SurfaceCard(
       padding: const EdgeInsets.all(AppSpacing.md),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [scheme.secondary, scheme.tertiary],
-        ),
-        borderRadius: BorderRadius.circular(AppRadius.lg),
-        boxShadow: [
-          BoxShadow(
-            color: scheme.secondary.withValues(alpha: 0.35),
-            blurRadius: 20,
-            offset: const Offset(0, 6),
-          ),
-        ],
-      ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Container(
-                width: 36,
-                height: 36,
-                decoration: BoxDecoration(
-                  color: scheme.onSecondary.withValues(alpha: 0.18),
-                  borderRadius: BorderRadius.circular(AppRadius.md),
-                ),
-                child: Icon(Icons.bolt, size: 20, color: scheme.onSecondary),
-              ),
-              const Spacer(),
+              const TintedIconTile(icon: AppIcons.bolt),
+              // Dar kartta büyük yazıyla rozet taşmasın: gerekirse alt satıra.
               if (savingsValue != null)
-                _SavingsPill(percent: (savingsValue * 100).round()),
+                Flexible(
+                  child: _SavingsPill(percent: (savingsValue * 100).round()),
+                ),
             ],
           ),
           const SizedBox(height: AppSpacing.sm),
           Text(
             credits == null ? pack.title : l10n.paywallPackCredits(credits),
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w700,
-              color: scheme.onSecondary,
-            ),
+            style: text.titleMedium,
           ),
-          if (credits != null) ...[
-            const SizedBox(height: AppSpacing.xs),
+          if (credits != null)
             Text(
               l10n.paywallPackDescription(credits),
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: scheme.onSecondary.withValues(alpha: 0.85),
+              style: text.bodySmall?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
             ),
-          ],
-          const SizedBox(height: AppSpacing.sm),
-          SizedBox(
-            width: double.infinity,
-            child: FilledButton(
-              style: FilledButton.styleFrom(
-                backgroundColor: scheme.onSecondary,
-                foregroundColor: scheme.secondary,
-              ),
-              onPressed: busy ? null : onBuy,
-              child: Text(pack.price),
+          const Spacer(),
+          const SizedBox(height: AppSpacing.md),
+          FilledButton.tonal(
+            style: FilledButton.styleFrom(
+              minimumSize: const Size.fromHeight(AppSizes.buttonHeightCompact),
             ),
+            onPressed: busy ? null : onBuy,
+            child: Text(pack.price),
           ),
         ],
       ),
@@ -196,16 +171,16 @@ class _SavingsPill extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.sm,
-        vertical: AppSpacing.xs / 2,
+        vertical: AppPaywall.badgePaddingV,
       ),
       decoration: BoxDecoration(
-        color: scheme.onSecondary.withValues(alpha: 0.22),
+        color: scheme.primaryContainer,
         borderRadius: BorderRadius.circular(AppRadius.pill),
       ),
       child: Text(
         context.l10n.paywallPackSavings(percent),
         style: Theme.of(context).textTheme.labelSmall?.copyWith(
-          color: scheme.onSecondary,
+          color: scheme.onPrimaryContainer,
           fontWeight: FontWeight.w700,
         ),
       ),

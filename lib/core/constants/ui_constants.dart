@@ -1,5 +1,6 @@
 // UI sabitleri: boşluk, köşe yarıçapı ve animasyon süreleri.
 // Magic number kullanmamak için tüm widget'lar bu değerleri kullanır.
+import 'dart:ui' show Size;
 
 /// Kütüphane'deki "Son eklenenler" bölümünde gösterilen karo sayısı (3 sütun ×
 /// 2 satır); tamamı başlıktaki "Tümü" ile tam ekran Recents'te açılır.
@@ -68,6 +69,13 @@ abstract final class AppSizes {
   /// Birincil (dolgulu) buton yüksekliği — iOS büyük buton ölçüsü.
   static const double buttonHeight = 50;
 
+  /// Kart içindeki ikincil buton yüksekliği (44pt dokunma alanı).
+  static const double buttonHeightCompact = 44;
+
+  /// Sheet'in sağ üstündeki kapatma dairesi ve içindeki xmark.
+  static const double sheetClose = 30;
+  static const double sheetCloseGlyph = 14;
+
   /// Board kartlarındaki kapak şeridi yüksekliği referansı.
   static const double boardCoverMin = 72;
 
@@ -114,6 +122,53 @@ abstract final class AppSizes {
   /// Onboarding sayfa göstergesi: pasif nokta ve etkin kapsül genişliği.
   static const double pageDot = 8;
   static const double pageDotActive = 24;
+}
+
+/// Paywall sheet'inin ölçüleri.
+abstract final class AppPaywall {
+  /// Hero'daki dolgulu Pro karosu ve glifi (uygulama ikonu gibi).
+  static const double heroTile = 72;
+  static const double heroGlyph = 40;
+
+  /// Özellik, paket ve zaman çizelgesi satırlarındaki tonlu ikon karosu.
+  static const double iconTile = 36;
+  static const double iconGlyph = 20;
+
+  /// Plan kartının seçim dairesi ve çerçeve kalınlığı. Seçili değilken
+  /// çerçeve saydamdır; kalınlık değişmediği için içerik kaymaz.
+  static const double planRadio = 24;
+  static const double planBorder = 2;
+
+  /// Tasarruf rozetinin kartın üst kenarına binme payı ve dikey iç boşluğu.
+  static const double badgeOverlap = 10;
+  static const double badgePaddingV = 3;
+
+  /// Deneme zaman çizelgesindeki adımları bağlayan çizgi ve opaklığı.
+  static const double timelineLine = 2;
+  static const double timelineLineAlpha = 0.25;
+}
+
+/// Haftalık kota kutlama sahnesinin ölçüleri.
+abstract final class AppCelebration {
+  /// Sahne yüksekliği ve rozet çevresindeki mini kartların yörüngesi.
+  static const double sceneHeight = 220;
+  static const int cardCount = 6;
+  static const double orbitRadius = 88;
+
+  /// Süzülen kartların yörünge salınımı (px) ve en fazla yatışı (radyan).
+  static const double wobble = 8;
+  static const double wobbleTilt = 0.12;
+  static const Size cardSize = Size(30, 52);
+
+  /// Merkez onay rozeti, glifi ve çevresindeki yumuşak ışıma.
+  static const double badgeSize = 96;
+  static const double badgeGlyph = 48;
+  static const double glowAlpha = 0.25;
+  static const double glowBlur = 32;
+  static const double glowSpread = 4;
+
+  /// Özetteki en çok dolan kategori sayısı.
+  static const int topCategories = 3;
 }
 
 /// Ekran görüntüsü ızgarası ve karosu.
@@ -272,6 +327,9 @@ abstract final class AppOpacities {
 
   /// Onboarding sayfa göstergesindeki pasif noktaların opaklığı.
   static const double pageDotIdle = 0.3;
+
+  /// Aksan rengiyle tonlanmış ikon karosu zemini.
+  static const double iconTileTint = 0.12;
 }
 
 /// Standart animasyon süreleri.

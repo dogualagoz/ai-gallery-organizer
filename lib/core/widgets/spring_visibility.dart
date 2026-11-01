@@ -16,10 +16,15 @@ class SpringVisibility extends StatefulWidget {
     super.key,
     required this.visible,
     required this.child,
+    this.collapse = false,
   });
 
   final bool visible;
   final Widget child;
+
+  /// true ise gizlenirken yüksekliği de sıfıra iner: Column'daki alt çubuk
+  /// giderken yerinde boşluk kalmaz, üstteki içerik aşağı uzar.
+  final bool collapse;
 
   @override
   State<SpringVisibility> createState() => _SpringVisibilityState();
@@ -71,13 +76,21 @@ class _SpringVisibilityState extends State<SpringVisibility>
           child: widget.child,
           builder: (context, child) {
             final double t = _shown.value.clamp(0.0, 1.0);
-            return Opacity(
+            final Widget faded = Opacity(
               opacity: t,
               child: Transform.scale(
                 scale: reduceMotion
                     ? 1
                     : lerpDouble(AppMotion.chromeHiddenScale, 1, t),
                 child: child,
+              ),
+            );
+            if (!widget.collapse) return faded;
+            return ClipRect(
+              child: Align(
+                alignment: Alignment.topCenter,
+                heightFactor: t,
+                child: faded,
               ),
             );
           },

@@ -169,7 +169,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: AppRoutes.analysisMilestone,
         pageBuilder: (context, state) => CupertinoSheetPage<void>(
           key: state.pageKey,
-          builder: (context, _) => const MilestoneScreen(),
+          builder: (context, controller) =>
+              MilestoneScreen(scrollController: controller),
         ),
       ),
       GoRoute(

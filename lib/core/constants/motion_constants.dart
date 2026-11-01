@@ -42,6 +42,14 @@ abstract final class AppSprings {
         bounce: 0.2,
       );
 
+  /// Tek seferlik kutlama rozeti (haftalık kota doldu). Hafif taşma burada
+  /// bilinçli: jest yok ama an, kullanıcının emeğinin karşılığı (Delight).
+  static final SpringDescription celebrate =
+      SpringDescription.withDurationAndBounce(
+        duration: const Duration(milliseconds: 500),
+        bounce: 0.3,
+      );
+
   /// Analiz edilen küçük resmin kategori karosuna süzülmesi. Damping 1.0;
   /// kavisi yaydan değil, ilk yukarı atış hızından gelir.
   static final SpringDescription flight =

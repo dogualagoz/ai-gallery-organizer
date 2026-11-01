@@ -10,7 +10,7 @@ class AppChip extends StatelessWidget {
   const AppChip({
     super.key,
     required this.label,
-    required this.onPressed,
+    this.onPressed,
     this.icon,
     this.selected = false,
     this.background,
@@ -18,7 +18,9 @@ class AppChip extends StatelessWidget {
   });
 
   final String label;
-  final VoidCallback onPressed;
+
+  /// null ise pasif bilgi kapsülü: basış geri bildirimi olmaz.
+  final VoidCallback? onPressed;
   final IconData? icon;
 
   /// Filtre çipinde seçili durum (aksan dolgu, VoiceOver'da "seçili").

@@ -620,6 +620,9 @@ class AppLocalizationsEn extends AppLocalizations {
       'Purchase couldn\'t be completed. Please try again.';
 
   @override
+  String get paywallProductsUnavailableTitle => 'Plans unavailable';
+
+  @override
   String get paywallProductsUnavailable =>
       'Plans couldn\'t be loaded right now. Please try again later.';
 

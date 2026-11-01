@@ -611,6 +611,9 @@ class AppLocalizationsTr extends AppLocalizations {
       'Satın alma tamamlanamadı. Lütfen tekrar dene.';
 
   @override
+  String get paywallProductsUnavailableTitle => 'Planlar yüklenemedi';
+
+  @override
   String get paywallProductsUnavailable =>
       'Planlar şu anda yüklenemedi. Lütfen daha sonra tekrar dene.';
 

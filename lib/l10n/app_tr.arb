@@ -328,6 +328,7 @@
   "paywallContinueAction": "Devam Et",
   "paywallRestoreAction": "Satın alımları geri yükle",
   "paywallPurchaseFailed": "Satın alma tamamlanamadı. Lütfen tekrar dene.",
+  "paywallProductsUnavailableTitle": "Planlar yüklenemedi",
   "paywallProductsUnavailable": "Planlar şu anda yüklenemedi. Lütfen daha sonra tekrar dene.",
   "paywallTermsLink": "Kullanım Şartları",
   "paywallPrivacyLink": "Gizlilik Politikası",
