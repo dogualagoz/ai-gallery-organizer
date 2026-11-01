@@ -13,7 +13,6 @@ abstract final class AppIcons {
   static const IconData cleanFill = CupertinoIcons.hand_draw_fill;
   static const IconData search = CupertinoIcons.search;
   static const IconData settings = CupertinoIcons.gear_alt;
-  static const IconData settingsFill = CupertinoIcons.gear_alt_fill;
 
   // Eylemler.
   static const IconData analyze = CupertinoIcons.sparkles;
@@ -22,7 +21,6 @@ abstract final class AppIcons {
   static const IconData edit = CupertinoIcons.pencil;
   static const IconData more = CupertinoIcons.ellipsis_circle;
   static const IconData move = CupertinoIcons.folder;
-  static const IconData addToBoard = CupertinoIcons.folder_badge_plus;
   static const IconData add = CupertinoIcons.plus;
   static const IconData close = CupertinoIcons.xmark;
   static const IconData undo = CupertinoIcons.arrow_uturn_left;
@@ -31,7 +29,6 @@ abstract final class AppIcons {
   static const IconData sync = CupertinoIcons.arrow_2_circlepath;
   static const IconData skip = CupertinoIcons.arrow_right;
   static const IconData swipeUp = CupertinoIcons.arrow_up;
-  static const IconData stop = CupertinoIcons.stop_circle;
   static const IconData pause = CupertinoIcons.pause_circle;
   static const IconData select = CupertinoIcons.checkmark_circle;
   static const IconData redeem = CupertinoIcons.gift;
@@ -40,7 +37,6 @@ abstract final class AppIcons {
 
   // Durum ve gezinme.
   static const IconData back = CupertinoIcons.chevron_left;
-  static const IconData chevronRight = CupertinoIcons.chevron_right;
   static const IconData chevronDown = CupertinoIcons.chevron_down;
   static const IconData check = CupertinoIcons.checkmark;
   static const IconData checkCircleFill = CupertinoIcons.checkmark_circle_fill;
@@ -48,7 +44,6 @@ abstract final class AppIcons {
   static const IconData info = CupertinoIcons.info_circle;
   static const IconData infoFill = CupertinoIcons.info_circle_fill;
   static const IconData error = CupertinoIcons.exclamationmark_circle;
-  static const IconData warning = CupertinoIcons.exclamationmark_triangle;
   static const IconData lock = CupertinoIcons.lock_fill;
   static const IconData lockOpen = CupertinoIcons.lock_open;
   static const IconData pro = CupertinoIcons.rosette;
@@ -60,12 +55,8 @@ abstract final class AppIcons {
   // İçerik ve ayarlar.
   static const IconData photo = CupertinoIcons.photo;
   static const IconData board = CupertinoIcons.rectangle_stack;
-  static const IconData grid = CupertinoIcons.square_grid_2x2;
   static const IconData privacy = CupertinoIcons.hand_raised;
   static const IconData shield = CupertinoIcons.shield;
-  static const IconData themeLight = CupertinoIcons.sun_max;
-  static const IconData themeDark = CupertinoIcons.moon;
-  static const IconData themeSystem = CupertinoIcons.circle_lefthalf_fill;
   static const IconData notifications = CupertinoIcons.bell;
   static const IconData rate = CupertinoIcons.star;
   static const IconData feedback = CupertinoIcons.envelope;

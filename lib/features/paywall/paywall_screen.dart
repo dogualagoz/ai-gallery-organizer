@@ -175,11 +175,19 @@ class _PaywallContentState extends ConsumerState<_PaywallContent>
   }
 
   /// Listeyi sona kaydırarak paket bölümünü görünür yapar (paketler ve footer
-  /// birlikte viewport'a sığar). İlk animasyon sırasında lazily build edilen
-  /// satırlar maxScrollExtent'i büyütebildiği için sonda küçük bir düzeltme
-  /// kaydırması yapılır.
+  /// birlikte viewport'a sığar); Reduce Motion'da kaydırmadan atlar. İlk
+  /// animasyon sırasında lazily build edilen satırlar maxScrollExtent'i
+  /// büyütebildiği için sonda küçük bir düzeltme kaydırması yapılır.
   Future<void> _revealPacks() async {
     if (!_scrollController.hasClients) return;
+    if (context.reduceMotion) {
+      // İlk atlama son satırları kurdurur; kesin uç bir kare sonra bilinir.
+      _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
+      await WidgetsBinding.instance.endOfFrame;
+      if (!mounted || !_scrollController.hasClients) return;
+      _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
+      return;
+    }
     await _scrollController.animateTo(
       _scrollController.position.maxScrollExtent,
       duration: AppDurations.slow,

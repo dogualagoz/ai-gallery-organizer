@@ -7,6 +7,21 @@ import 'package:flutter/material.dart';
 import '../../../core/constants/ui_constants.dart';
 import 'illustration_loop.dart';
 
+/// Kartların harekete başlama kademesi (döngü oranı, kart başına).
+const double _cardStagger = 0.05;
+
+/// Mini kartın içi: gölge, görsel bloğu (kart yüksekliğine oran) ve metin
+/// çizgileri (genişlik kart genişliğine oran: taban + rastgele ek).
+const double _cardShadowAlpha = 0.08;
+const double _cardShadowBlur = 12;
+const Offset _cardShadowOffset = Offset(0, 4);
+const double _cardImageRatio = 0.35;
+const double _cardImageAlpha = 0.25;
+const double _cardLineHeight = 4;
+const double _cardLineAlpha = 0.3;
+const double _cardLineMinRatio = 0.4;
+const double _cardLineExtraRatio = 0.4;
+
 /// Tek bir mini kartın dağınık ve düzenli konum/rotasyon çifti.
 class _CardPose {
   const _CardPose({
@@ -137,7 +152,7 @@ class _SortIllustrationState extends State<SortIllustration>
     // Eğri doğrudan uygulanır: her karede CurvedAnimation kurmak dinleyici
     // sızdırır.
     final double t = Interval(
-      index * 0.05,
+      index * _cardStagger,
       1,
       curve: Curves.easeInOutCubic,
     ).transform(_controller.value);
@@ -189,9 +204,9 @@ class _MiniScreenshotCard extends StatelessWidget {
         border: Border.all(color: scheme.outline),
         boxShadow: [
           BoxShadow(
-            color: scheme.onSurface.withValues(alpha: 0.08),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
+            color: scheme.onSurface.withValues(alpha: _cardShadowAlpha),
+            blurRadius: _cardShadowBlur,
+            offset: _cardShadowOffset,
           ),
         ],
       ),
@@ -201,23 +216,28 @@ class _MiniScreenshotCard extends StatelessWidget {
           // Görsel bloğu: bazı kartlarda büyük, bazılarında yok.
           if (seed.isEven)
             Container(
-              height: height * 0.35,
+              height: height * _cardImageRatio,
               margin: const EdgeInsets.only(bottom: AppSpacing.xs),
               decoration: BoxDecoration(
                 color: (seed % 4 == 0 ? scheme.primary : scheme.secondary)
-                    .withValues(alpha: 0.25),
+                    .withValues(alpha: _cardImageAlpha),
                 borderRadius: BorderRadius.circular(AppRadius.sm),
               ),
             ),
           // Metin satırlarını andıran çizgiler.
           for (int line = 0; line < 3; line++)
             Container(
-              height: 4,
-              width: width * (0.4 + random.nextDouble() * 0.4),
+              height: _cardLineHeight,
+              width:
+                  width *
+                  (_cardLineMinRatio +
+                      random.nextDouble() * _cardLineExtraRatio),
               margin: const EdgeInsets.only(bottom: AppSpacing.xs),
               decoration: BoxDecoration(
-                color: scheme.onSurfaceVariant.withValues(alpha: 0.3),
-                borderRadius: BorderRadius.circular(2),
+                color: scheme.onSurfaceVariant.withValues(
+                  alpha: _cardLineAlpha,
+                ),
+                borderRadius: BorderRadius.circular(_cardLineHeight / 2),
               ),
             ),
         ],

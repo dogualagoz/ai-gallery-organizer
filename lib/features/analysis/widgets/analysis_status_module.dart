@@ -19,6 +19,7 @@ import '../../../core/router/app_router.dart';
 import '../../../core/services/entitlement_service.dart';
 import '../../../core/services/haptic_service.dart';
 import '../../../core/services/review_service.dart';
+import '../../../core/utils/motion_physics.dart';
 import '../../../core/widgets/app_dialogs.dart';
 import '../../gallery/data/screenshot_repository.dart';
 import '../../paywall/open_paywall.dart';
@@ -314,10 +315,11 @@ class _AnalysisStatusModuleState extends ConsumerState<AnalysisStatusModule> {
 
     // Kaynak anahtarı geçişin dışında: çıkan ve giren görünüm aynı anda
     // ağaçta dururken GlobalKey çakışmaz; uçuşlar kutunun sol-ortasından
-    // (ilerleme kartındaki küçük resim) kalkar.
+    // (ilerleme kartındaki küçük resim) kalkar. Reduce Motion'da yükseklik
+    // anında değişir; altındaki içerik kaymaz, yalnız çapraz geçiş kalır.
     return AnimatedSize(
       key: _flights?.sourceKey,
-      duration: AppDurations.medium,
+      duration: context.reduceMotion ? Duration.zero : AppDurations.medium,
       curve: Curves.easeOutCubic,
       alignment: Alignment.topCenter,
       child: AnimatedSwitcher(

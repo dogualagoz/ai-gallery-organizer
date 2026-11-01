@@ -3,6 +3,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
+import '../constants/ui_constants.dart';
+import '../utils/text_scale.dart';
+
 /// Yuvarlatılmış kart içinde gruplanmış satırlar; üstte başlık, altta
 /// açıklayıcı dipnot. Satırların ikonu varsa ayırıcılar metinden başlar.
 class GroupedSection extends StatelessWidget {
@@ -78,8 +81,12 @@ class GroupedRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ColorScheme scheme = Theme.of(context).colorScheme;
-    final String? subtitleText = subtitle;
-    final String? valueText = value;
+    final bool large = context.accessibilityText;
+    // Erişilebilirlik boyutlarında değer başlığın altına kendi satırında iner
+    // (iOS Ayarlar); yan yana kalsa başlık birkaç harfe kırpılır ya da satır
+    // taşar.
+    final String? valueText = large ? null : value;
+    final List<String> lines = [?subtitle, if (large) ?value];
     final bool chevron =
         showChevron ?? (onTap != null && trailing == null && !destructive);
 
@@ -87,15 +94,24 @@ class GroupedRow extends StatelessWidget {
       leading: icon == null
           ? null
           : Icon(icon, color: destructive ? scheme.error : scheme.primary),
-      title: Text(
+      title: _wrapping(
         title,
+        large: large,
         style: TextStyle(color: destructive ? scheme.error : scheme.onSurface),
       ),
-      subtitle: subtitleText == null
+      subtitle: lines.isEmpty
           ? null
-          : Text(
-              subtitleText,
-              style: TextStyle(color: scheme.onSurfaceVariant),
+          : Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                for (final String line in lines)
+                  _wrapping(
+                    line,
+                    large: large,
+                    style: TextStyle(color: scheme.onSurfaceVariant),
+                  ),
+              ],
             ),
       additionalInfo: valueText == null
           ? null
@@ -103,6 +119,22 @@ class GroupedRow extends StatelessWidget {
       trailing: trailing ?? (chevron ? const CupertinoListTileChevron() : null),
       onTap: onTap,
       backgroundColorActivated: scheme.surfaceContainerHigh,
+    );
+  }
+
+  /// CupertinoListTile metni tek satıra kırpar; erişilebilirlik boyutlarında
+  /// her metin kendi satır sınırıyla sarar (biri uzasa diğeri kesilmez).
+  static Widget _wrapping(
+    String text, {
+    required bool large,
+    required TextStyle style,
+  }) {
+    if (!large) return Text(text, style: style);
+    return Text(
+      text,
+      maxLines: AppSizes.accessibilityMaxLines,
+      overflow: TextOverflow.ellipsis,
+      style: style,
     );
   }
 }

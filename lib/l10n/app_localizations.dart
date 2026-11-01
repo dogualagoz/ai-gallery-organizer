@@ -344,18 +344,6 @@ abstract class AppLocalizations {
   /// **'{done} of {total} analyzed'**
   String analysisProgress(int done, int total);
 
-  /// No description provided for @analysisCompleted.
-  ///
-  /// In en, this message translates to:
-  /// **'{count} screenshots analyzed'**
-  String analysisCompleted(int count);
-
-  /// No description provided for @analysisCompletedWithFailures.
-  ///
-  /// In en, this message translates to:
-  /// **'{done} analyzed, {failed} failed'**
-  String analysisCompletedWithFailures(int done, int failed);
-
   /// No description provided for @analysisFailedBanner.
   ///
   /// In en, this message translates to:
@@ -379,12 +367,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'You\'ve reached the trial analysis limit. Grab an analysis pack, or unlimited unlocks when your trial converts.'**
   String get analysisTrialLimitBanner;
-
-  /// No description provided for @analysisLimitCompleted.
-  ///
-  /// In en, this message translates to:
-  /// **'{count} screenshots organized. Go Pro or grab an analysis pack to keep going.'**
-  String analysisLimitCompleted(int count);
 
   /// No description provided for @analysisDailyCapBanner.
   ///
@@ -1190,12 +1172,6 @@ abstract class AppLocalizations {
   /// **'Purchases'**
   String get settingsPurchasesSection;
 
-  /// No description provided for @settingsRemainingAnalyses.
-  ///
-  /// In en, this message translates to:
-  /// **'Remaining analyses'**
-  String get settingsRemainingAnalyses;
-
   /// No description provided for @settingsRestoreSuccess.
   ///
   /// In en, this message translates to:
@@ -1357,12 +1333,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'The screenshots in this group will be sent to AI again. This uses your trial analysis allowance.'**
   String get categoryReanalyzeConfirmBodyTrial;
-
-  /// No description provided for @categoryReanalyzeEmpty.
-  ///
-  /// In en, this message translates to:
-  /// **'There\'s nothing to re-analyze here.'**
-  String get categoryReanalyzeEmpty;
 
   /// No description provided for @recentsScreenTitle.
   ///

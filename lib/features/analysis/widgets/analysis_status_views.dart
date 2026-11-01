@@ -11,6 +11,7 @@ import '../../../core/constants/motion_constants.dart';
 import '../../../core/constants/ui_constants.dart';
 import '../../../core/l10n/l10n_extension.dart';
 import '../../../core/utils/motion_physics.dart';
+import '../../../core/utils/text_scale.dart';
 import '../../../core/widgets/app_nav_scaffold.dart';
 import '../../../core/widgets/surface_card.dart';
 
@@ -185,8 +186,10 @@ class AnalysisMessageRow extends StatelessWidget {
       icon: icon,
       muted: true,
       title: text,
-      trailing: Row(
-        mainAxisSize: MainAxisSize.min,
+      // Wrap: büyük yazıda eylem ile kapat sığmazsa alt alta geçer.
+      trailing: Wrap(
+        alignment: WrapAlignment.end,
+        crossAxisAlignment: WrapCrossAlignment.center,
         children: [
           if (label != null && action != null)
             CupertinoButton(
@@ -253,34 +256,54 @@ class _StatusRow extends StatelessWidget {
     final ColorScheme scheme = Theme.of(context).colorScheme;
     final TextTheme text = Theme.of(context).textTheme;
     final String? detail = subtitle;
+    final Widget label = Row(
+      children: [
+        Icon(
+          icon,
+          size: AppSizes.statusIcon,
+          color: muted ? scheme.onSurfaceVariant : scheme.primary,
+        ),
+        const SizedBox(width: AppSpacing.sm + AppSpacing.xs),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: detail == null ? text.bodyMedium : text.titleMedium,
+              ),
+              if (detail != null)
+                Text(
+                  detail,
+                  style: text.bodySmall?.copyWith(
+                    color: scheme.onSurfaceVariant,
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ],
+    );
+    // Erişilebilirlik boyutlarında eylem metnin altına iner: yan yana
+    // kalırsa metin birkaç harflik sütuna sıkışır ya da satır taşar.
+    if (context.accessibilityText) {
+      return _ModuleCard(
+        tinted: tinted,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            label,
+            const SizedBox(height: AppSpacing.sm),
+            Align(alignment: AlignmentDirectional.centerEnd, child: trailing),
+          ],
+        ),
+      );
+    }
     return _ModuleCard(
       tinted: tinted,
       child: Row(
         children: [
-          Icon(
-            icon,
-            size: AppSizes.statusIcon,
-            color: muted ? scheme.onSurfaceVariant : scheme.primary,
-          ),
-          const SizedBox(width: AppSpacing.sm + AppSpacing.xs),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: detail == null ? text.bodyMedium : text.titleMedium,
-                ),
-                if (detail != null)
-                  Text(
-                    detail,
-                    style: text.bodySmall?.copyWith(
-                      color: scheme.onSurfaceVariant,
-                    ),
-                  ),
-              ],
-            ),
-          ),
+          Expanded(child: label),
           const SizedBox(width: AppSpacing.sm),
           trailing,
         ],

@@ -18,6 +18,44 @@ const double _ringInset = _ringStroke / 2 + 1;
 const Size _miniCardSize = Size(44, 76);
 const double _weekIcon = 22;
 
+/// Döngü koreografisi (0-1 döngü oranı): halka dolumu ve hafta dönüşü.
+const double _fillBegin = 0.05;
+const double _fillEnd = 0.50;
+const double _resetBegin = 0.62;
+const double _resetEnd = 0.82;
+
+/// Hareket azaltıldığında gösterilen kare: halka dolu, kartlar emilmiş
+/// (tazelenme fazından hemen önce).
+const double _stillFrame = 0.61;
+
+/// Kart uçuşları: ilk kartın aralığı ve kartlar arası kademe.
+const double _cardBegin = 0.06;
+const double _cardEnd = 0.36;
+const double _cardStagger = 0.07;
+
+/// Kart uçuşunun son çeyreğinde halkaya emilir gibi söner, yarıya küçülür;
+/// başlangıçtaki eğiklik (radyan) varışta düzelir.
+const double _cardFadeFrom = 0.75;
+const double _cardShrink = 0.5;
+const double _cardTiltEven = 0.25;
+const double _cardTiltOdd = -0.2;
+
+/// Hafta çipinin dikey konumu (Alignment y; halkanın altında).
+const double _weekChipY = 0.92;
+
+/// Mini kartın içi: gölge, görsel bloğu ve metin çizgileri.
+const double _miniShadowAlpha = 0.08;
+const double _miniShadowBlur = 8;
+const Offset _miniShadowOffset = Offset(0, 3);
+const double _miniImageHeight = 22;
+const double _miniImageAlpha = 0.25;
+const double _miniLineHeight = 3;
+const double _miniLineAlpha = 0.3;
+
+/// Çizgi genişliği: taban + karta/satıra göre sözde rastgele ek.
+const double _miniLineBase = 20;
+const int _miniLineVariance = 14;
+
 class QuotaIllustration extends StatefulWidget {
   const QuotaIllustration({super.key});
 
@@ -47,10 +85,8 @@ class _QuotaIllustrationState extends State<QuotaIllustration>
   @override
   AnimationController get controller => _controller;
 
-  /// Hareket azaltıldığında halka dolu, kartlar emilmiş halde durur
-  /// (tazelenme fazından hemen önceki kare).
   @override
-  double get stillValue => 0.61;
+  double get stillValue => _stillFrame;
 
   @override
   void play() => _controller.repeat();
@@ -79,8 +115,8 @@ class _QuotaIllustrationState extends State<QuotaIllustration>
         return AnimatedBuilder(
           animation: _controller,
           builder: (context, _) {
-            final double fill = _phase(0.05, 0.50);
-            final double reset = _phase(0.62, 0.82);
+            final double fill = _phase(_fillBegin, _fillEnd);
+            final double reset = _phase(_resetBegin, _resetEnd);
             return Stack(
               alignment: Alignment.center,
               children: [
@@ -97,7 +133,8 @@ class _QuotaIllustrationState extends State<QuotaIllustration>
 
   /// Kenarlardan halkanın merkezine süzülüp kaybolan tek mini kart.
   Widget _buildCard(int index, Size area) {
-    final double t = _phase(0.06 + index * 0.07, 0.36 + index * 0.07);
+    final double delay = index * _cardStagger;
+    final double t = _phase(_cardBegin + delay, _cardEnd + delay);
     final Offset start = Offset(
       _cardStarts[index].dx * area.width,
       _cardStarts[index].dy * area.height,
@@ -110,11 +147,13 @@ class _QuotaIllustrationState extends State<QuotaIllustration>
       top: pos.dy,
       child: Opacity(
         // Halkaya varırken emilir gibi söner.
-        opacity: t < 0.75 ? 1 : 1 - (t - 0.75) / 0.25,
+        opacity: t < _cardFadeFrom
+            ? 1
+            : 1 - (t - _cardFadeFrom) / (1 - _cardFadeFrom),
         child: Transform.scale(
-          scale: 1 - 0.5 * t,
+          scale: 1 - _cardShrink * t,
           child: Transform.rotate(
-            angle: (index.isEven ? 0.25 : -0.2) * (1 - t),
+            angle: (index.isEven ? _cardTiltEven : _cardTiltOdd) * (1 - t),
             child: _MiniCard(seed: index),
           ),
         ),
@@ -126,7 +165,7 @@ class _QuotaIllustrationState extends State<QuotaIllustration>
   Widget _buildWeekChip(BuildContext context, double reset) {
     final ColorScheme scheme = Theme.of(context).colorScheme;
     return Align(
-      alignment: const Alignment(0, 0.92),
+      alignment: const Alignment(0, _weekChipY),
       child: Transform.rotate(
         angle: reset * 2 * math.pi,
         child: Container(
@@ -250,9 +289,9 @@ class _MiniCard extends StatelessWidget {
         border: Border.all(color: scheme.outline),
         boxShadow: [
           BoxShadow(
-            color: scheme.onSurface.withValues(alpha: 0.08),
-            blurRadius: 8,
-            offset: const Offset(0, 3),
+            color: scheme.onSurface.withValues(alpha: _miniShadowAlpha),
+            blurRadius: _miniShadowBlur,
+            offset: _miniShadowOffset,
           ),
         ],
       ),
@@ -261,21 +300,23 @@ class _MiniCard extends StatelessWidget {
         children: [
           if (seed.isEven)
             Container(
-              height: 22,
+              height: _miniImageHeight,
               margin: const EdgeInsets.only(bottom: AppSpacing.xs),
               decoration: BoxDecoration(
-                color: scheme.primary.withValues(alpha: 0.25),
+                color: scheme.primary.withValues(alpha: _miniImageAlpha),
                 borderRadius: BorderRadius.circular(AppRadius.sm / 2),
               ),
             ),
           for (int line = 0; line < 2; line++)
             Container(
-              height: 3,
-              width: 20 + (seed * 7 + line * 5) % 14,
+              height: _miniLineHeight,
+              width: _miniLineBase + (seed * 7 + line * 5) % _miniLineVariance,
               margin: const EdgeInsets.only(bottom: AppSpacing.xs),
               decoration: BoxDecoration(
-                color: scheme.onSurfaceVariant.withValues(alpha: 0.3),
-                borderRadius: BorderRadius.circular(1.5),
+                color: scheme.onSurfaceVariant.withValues(
+                  alpha: _miniLineAlpha,
+                ),
+                borderRadius: BorderRadius.circular(_miniLineHeight / 2),
               ),
             ),
         ],

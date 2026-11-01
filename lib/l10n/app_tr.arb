@@ -57,29 +57,10 @@
       "total": {"type": "int"}
     }
   },
-  "analysisCompleted": "{count} ekran görüntüsü analiz edildi",
-  "@analysisCompleted": {
-    "placeholders": {
-      "count": {"type": "int"}
-    }
-  },
-  "analysisCompletedWithFailures": "{done} analiz edildi, {failed} başarısız",
-  "@analysisCompletedWithFailures": {
-    "placeholders": {
-      "done": {"type": "int"},
-      "failed": {"type": "int"}
-    }
-  },
   "analysisFailedBanner": "Analiz başarısız oldu. Bağlantını kontrol edip tekrar dene.",
   "analysisRetryAction": "Tekrar dene",
   "analysisLimitBanner": "Bu haftanın ücretsiz analiz hakkı doldu. Pro'ya geç ya da analiz paketi al.",
   "analysisTrialLimitBanner": "Deneme dönemi analiz sınırına ulaştın. Analiz paketi alabilirsin; deneme tamamlanınca sınırsıza geçer.",
-  "analysisLimitCompleted": "{count} ekran görüntüsü gruplandırıldı. Devam etmek için Pro'ya geç ya da analiz paketi al.",
-  "@analysisLimitCompleted": {
-    "placeholders": {
-      "count": {"type": "int"}
-    }
-  },
   "analysisDailyCapBanner": "Günlük analiz limiti doldu. Yarın kaldığı yerden devam eder.",
   "paywallPackSavings": "%{percent} daha avantajlı",
   "@paywallPackSavings": {
@@ -338,7 +319,6 @@
   "settingsGoPro": "Snaply Pro'ya geç",
   "settingsGoProBody": "Sınırsız analiz, pano ve arama seni bekliyor.",
   "settingsPurchasesSection": "Satın alımlar",
-  "settingsRemainingAnalyses": "Kalan analiz hakkı",
   "settingsRestoreSuccess": "Satın alımlar geri yüklendi.",
   "redeemSettingsLabel": "Kodu kullan",
   "settingsAboutSection": "Hakkında",
@@ -377,7 +357,6 @@
   "categoryReanalyzeConfirmBody": "Bu gruptaki ekran görüntüleri AI'a yeniden gönderilir. Bu, haftalık analiz hakkından harcar.",
   "categoryReanalyzeConfirmBodyPro": "Bu gruptaki ekran görüntüleri AI'a yeniden gönderilir ve yeniden gruplanır.",
   "categoryReanalyzeConfirmBodyTrial": "Bu gruptaki ekran görüntüleri AI'a yeniden gönderilir. Bu, deneme süresindeki analiz hakkından harcar.",
-  "categoryReanalyzeEmpty": "Burada yeniden analiz edilecek bir şey yok.",
   "recentsScreenTitle": "Son ekran görüntüleri",
   "sortingPendingDeleteCount": "{count} silinecek",
   "@sortingPendingDeleteCount": {

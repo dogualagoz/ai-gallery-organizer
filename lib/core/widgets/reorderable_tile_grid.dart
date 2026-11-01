@@ -13,6 +13,7 @@ import '../constants/motion_constants.dart';
 import '../constants/ui_constants.dart';
 import '../services/haptic_service.dart';
 import '../utils/motion_physics.dart';
+import '../utils/text_scale.dart';
 import 'jiggle.dart';
 
 class ReorderableTileGrid extends StatefulWidget {
@@ -89,6 +90,10 @@ class _ReorderableTileGridState extends State<ReorderableTileGrid>
 
   Size _cell = Size.zero;
 
+  /// Geçerli sütun sayısı; [_cell] ile aynı yerleşimde (build) hesaplanır ki
+  /// jest sırasında yazı ölçeği değişse de slot hesapları tutarlı kalsın.
+  int _columns = 1;
+
   List<Key> get _keys => [
     for (int i = 0; i < widget.itemCount; i++) widget.keyBuilder(i),
   ];
@@ -128,8 +133,8 @@ class _ReorderableTileGridState extends State<ReorderableTileGrid>
   }
 
   Offset _slotOrigin(int position) {
-    final int column = position % widget.crossAxisCount;
-    final int row = position ~/ widget.crossAxisCount;
+    final int column = position % _columns;
+    final int row = position ~/ _columns;
     return Offset(
       column * (_cell.width + widget.spacing),
       row * (_cell.height + widget.spacing),
@@ -140,15 +145,12 @@ class _ReorderableTileGridState extends State<ReorderableTileGrid>
   int _slotAt(Offset point) {
     final int column = (point.dx / (_cell.width + widget.spacing))
         .floor()
-        .clamp(0, widget.crossAxisCount - 1);
+        .clamp(0, _columns - 1);
     final int row = (point.dy / (_cell.height + widget.spacing)).floor().clamp(
       0,
-      (widget.itemCount - 1) ~/ widget.crossAxisCount,
+      (widget.itemCount - 1) ~/ _columns,
     );
-    return (row * widget.crossAxisCount + column).clamp(
-      0,
-      widget.itemCount - 1,
-    );
+    return (row * _columns + column).clamp(0, widget.itemCount - 1);
   }
 
   Offset _toLocal(Offset global) =>
@@ -311,9 +313,12 @@ class _ReorderableTileGridState extends State<ReorderableTileGrid>
 
   @override
   Widget build(BuildContext context) {
+    final bool large = context.accessibilityText;
     return LayoutBuilder(
       builder: (context, constraints) {
-        final int columns = widget.crossAxisCount;
+        // Erişilebilirlik boyutlarında tek sütun: iki sütunlu karoda büyük
+        // başlık kapağı ezer (Fotoğraflar albümleri de böyle akar).
+        final int columns = _columns = large ? 1 : widget.crossAxisCount;
         final double width = constraints.maxWidth;
         final double cellWidth =
             (width - widget.spacing * (columns - 1)) / columns;

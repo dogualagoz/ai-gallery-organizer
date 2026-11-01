@@ -1,10 +1,13 @@
 // Tek onboarding sayfası: üstte illüstrasyon, altta yayla beliren başlık,
 // açıklama ve isteğe bağlı dipnot.
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
 import '../../../core/constants/motion_constants.dart';
 import '../../../core/constants/ui_constants.dart';
 import '../../../core/utils/motion_physics.dart';
+import '../../../core/utils/text_scale.dart';
 
 /// Onboarding sayfası. Metin değişince (ör. izin reddi) çapraz geçişle
 /// yenilenir; illüstrasyon kendi katmanında çizilir ki döngüsü metni
@@ -31,6 +34,7 @@ class OnboardingPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (context.accessibilityText) return _scrollingTexts(context);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
       child: Column(
@@ -53,6 +57,35 @@ class OnboardingPage extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.xl),
         ],
+      ),
+    );
+  }
+
+  /// Erişilebilirlik boyutları: metin sayfaya sığmayabilir, kaydırılır.
+  /// Dekoratif illüstrasyon metne yer açmak için gösterilmez; kısa metin
+  /// dikeyde ortalanır.
+  Widget _scrollingTexts(BuildContext context) {
+    const EdgeInsets padding = EdgeInsets.symmetric(
+      horizontal: AppSpacing.lg,
+      vertical: AppSpacing.xl,
+    );
+    return LayoutBuilder(
+      builder: (context, constraints) => SingleChildScrollView(
+        padding: padding,
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            minHeight: math.max(0, constraints.maxHeight - padding.vertical),
+          ),
+          child: Center(
+            child: AnimatedSwitcher(
+              duration: AppMotion.reducedCrossfade,
+              child: KeyedSubtree(
+                key: ValueKey('$title\n$body'),
+                child: _texts(context),
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }

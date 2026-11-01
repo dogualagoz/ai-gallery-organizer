@@ -57,29 +57,10 @@
       "total": {"type": "int"}
     }
   },
-  "analysisCompleted": "{count} screenshots analyzed",
-  "@analysisCompleted": {
-    "placeholders": {
-      "count": {"type": "int"}
-    }
-  },
-  "analysisCompletedWithFailures": "{done} analyzed, {failed} failed",
-  "@analysisCompletedWithFailures": {
-    "placeholders": {
-      "done": {"type": "int"},
-      "failed": {"type": "int"}
-    }
-  },
   "analysisFailedBanner": "Analysis failed. Check your connection and try again.",
   "analysisRetryAction": "Retry",
   "analysisLimitBanner": "Your free weekly analysis quota is used up. Go Pro or grab an analysis pack.",
   "analysisTrialLimitBanner": "You've reached the trial analysis limit. Grab an analysis pack, or unlimited unlocks when your trial converts.",
-  "analysisLimitCompleted": "{count} screenshots organized. Go Pro or grab an analysis pack to keep going.",
-  "@analysisLimitCompleted": {
-    "placeholders": {
-      "count": {"type": "int"}
-    }
-  },
   "analysisDailyCapBanner": "Daily analysis limit reached. It will continue tomorrow.",
   "paywallPackSavings": "{percent}% better value",
   "@paywallPackSavings": {
@@ -338,7 +319,6 @@
   "settingsGoPro": "Upgrade to Snaply Pro",
   "settingsGoProBody": "Unlimited analysis, boards and search await.",
   "settingsPurchasesSection": "Purchases",
-  "settingsRemainingAnalyses": "Remaining analyses",
   "settingsRestoreSuccess": "Purchases restored.",
   "redeemSettingsLabel": "Redeem a code",
   "settingsAboutSection": "About",
@@ -377,7 +357,6 @@
   "categoryReanalyzeConfirmBody": "The screenshots in this group will be sent to AI again. This uses your weekly analysis quota.",
   "categoryReanalyzeConfirmBodyPro": "The screenshots in this group will be sent to AI again and regrouped.",
   "categoryReanalyzeConfirmBodyTrial": "The screenshots in this group will be sent to AI again. This uses your trial analysis allowance.",
-  "categoryReanalyzeEmpty": "There's nothing to re-analyze here.",
   "recentsScreenTitle": "Recent screenshots",
   "sortingPendingDeleteCount": "{count} to delete",
   "@sortingPendingDeleteCount": {

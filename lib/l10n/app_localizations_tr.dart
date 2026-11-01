@@ -145,16 +145,6 @@ class AppLocalizationsTr extends AppLocalizations {
   }
 
   @override
-  String analysisCompleted(int count) {
-    return '$count ekran görüntüsü analiz edildi';
-  }
-
-  @override
-  String analysisCompletedWithFailures(int done, int failed) {
-    return '$done analiz edildi, $failed başarısız';
-  }
-
-  @override
   String get analysisFailedBanner =>
       'Analiz başarısız oldu. Bağlantını kontrol edip tekrar dene.';
 
@@ -168,11 +158,6 @@ class AppLocalizationsTr extends AppLocalizations {
   @override
   String get analysisTrialLimitBanner =>
       'Deneme dönemi analiz sınırına ulaştın. Analiz paketi alabilirsin; deneme tamamlanınca sınırsıza geçer.';
-
-  @override
-  String analysisLimitCompleted(int count) {
-    return '$count ekran görüntüsü gruplandırıldı. Devam etmek için Pro\'ya geç ya da analiz paketi al.';
-  }
 
   @override
   String get analysisDailyCapBanner =>
@@ -644,9 +629,6 @@ class AppLocalizationsTr extends AppLocalizations {
   String get settingsPurchasesSection => 'Satın alımlar';
 
   @override
-  String get settingsRemainingAnalyses => 'Kalan analiz hakkı';
-
-  @override
   String get settingsRestoreSuccess => 'Satın alımlar geri yüklendi.';
 
   @override
@@ -738,10 +720,6 @@ class AppLocalizationsTr extends AppLocalizations {
   @override
   String get categoryReanalyzeConfirmBodyTrial =>
       'Bu gruptaki ekran görüntüleri AI\'a yeniden gönderilir. Bu, deneme süresindeki analiz hakkından harcar.';
-
-  @override
-  String get categoryReanalyzeEmpty =>
-      'Burada yeniden analiz edilecek bir şey yok.';
 
   @override
   String get recentsScreenTitle => 'Son ekran görüntüleri';

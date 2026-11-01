@@ -1,5 +1,6 @@
 // Paywall: kapatma yüklemede de görünür; plan seçimi CTA etiketini değiştirir;
-// paket odaklı açılışta abonelik CTA'sı katlanır; ürün yoksa yeniden dene.
+// paket odaklı açılışta abonelik CTA'sı katlanır (Reduce Motion'da
+// kaydırmadan atlar); ürün yoksa yeniden dene.
 import 'dart:async';
 
 import 'package:ai_gallery_organizer/core/constants/app_constants.dart';
@@ -49,6 +50,7 @@ Future<void> _pump(
   WidgetTester tester, {
   required Future<List<ProductDetails>> Function() products,
   bool scrollToPacks = false,
+  bool reduceMotion = false,
 }) async {
   // iPhone 17 ölçüsü: planlar ve paketler aynı anda sığmaz.
   tester.view.physicalSize = const Size(1206, 2622);
@@ -69,6 +71,11 @@ Future<void> _pump(
         locale: const Locale('en'),
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
+        builder: (context, child) => MediaQuery(
+          data: MediaQuery.of(context)
+              .copyWith(disableAnimations: reduceMotion),
+          child: child!,
+        ),
         home: PaywallScreen(scrollToPacks: scrollToPacks),
       ),
     ),
@@ -133,6 +140,27 @@ void main() {
     await tester.drag(find.byType(ListView), const Offset(0, 3000));
     await tester.pumpAndSettle();
     expect(_ctaVisible(tester), isTrue);
+  });
+
+  testWidgets('Reduce Motion: paket odaklı açılış kaydırmadan atlar', (
+    tester,
+  ) async {
+    await _pump(
+      tester,
+      products: () async => _catalog,
+      scrollToPacks: true,
+      reduceMotion: true,
+    );
+    // Ürünler → ilk kare → atlama → bir kare sonraki düzeltme; süre geçmez.
+    for (int i = 0; i < 4; i++) {
+      await tester.pump();
+    }
+
+    final ScrollPosition position = tester
+        .state<ScrollableState>(find.byType(Scrollable).first)
+        .position;
+    expect(position.pixels, greaterThan(0));
+    expect(position.pixels, position.maxScrollExtent);
   });
 
   testWidgets('ürün gelmezse açıklama ve yeniden dene', (tester) async {

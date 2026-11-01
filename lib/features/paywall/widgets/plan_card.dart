@@ -8,6 +8,7 @@ import '../../../core/constants/app_constants.dart';
 import '../../../core/constants/app_icons.dart';
 import '../../../core/constants/ui_constants.dart';
 import '../../../core/l10n/l10n_extension.dart';
+import '../../../core/utils/text_scale.dart';
 import '../../../core/widgets/pressable.dart';
 
 class PlanCard extends StatelessWidget {
@@ -130,16 +131,35 @@ class _PlanCardBody extends StatelessWidget {
             color: selected ? scheme.primary : scheme.outline,
           ),
           const SizedBox(width: AppSpacing.md),
-          Expanded(
-            child: _PlanLabels(
-              product: product,
-              monthlyEquivalent: monthlyEquivalent,
-            ),
-          ),
-          const SizedBox(width: AppSpacing.sm),
-          _PlanPrice(product: product),
+          Expanded(child: _content(context)),
         ],
       ),
+    );
+  }
+
+  /// Etiketler solda, fiyat sağda; erişilebilirlik boyutlarında fiyat
+  /// etiketlerin altına iner (yan yana sığmaz).
+  Widget _content(BuildContext context) {
+    final Widget labels = _PlanLabels(
+      product: product,
+      monthlyEquivalent: monthlyEquivalent,
+    );
+    if (context.accessibilityText) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          labels,
+          const SizedBox(height: AppSpacing.xs),
+          _PlanPrice(product: product, alignment: CrossAxisAlignment.start),
+        ],
+      );
+    }
+    return Row(
+      children: [
+        Expanded(child: labels),
+        const SizedBox(width: AppSpacing.sm),
+        _PlanPrice(product: product),
+      ],
     );
   }
 }
@@ -186,9 +206,13 @@ class _PlanLabels extends StatelessWidget {
 }
 
 class _PlanPrice extends StatelessWidget {
-  const _PlanPrice({required this.product});
+  const _PlanPrice({
+    required this.product,
+    this.alignment = CrossAxisAlignment.end,
+  });
 
   final ProductDetails product;
+  final CrossAxisAlignment alignment;
 
   @override
   Widget build(BuildContext context) {
@@ -201,7 +225,7 @@ class _PlanPrice extends StatelessWidget {
     };
 
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.end,
+      crossAxisAlignment: alignment,
       children: [
         Text(
           product.price,

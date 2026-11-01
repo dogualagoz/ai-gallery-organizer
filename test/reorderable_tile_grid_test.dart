@@ -1,6 +1,8 @@
 // Düzenleme modu ızgarası: basılı tutup sürükleyerek sıralama, bırakınca
-// doğru index çifti ve düzenleme kapalıyken sürüklemenin çalışmaması.
+// doğru index çifti ve düzenleme kapalıyken sürüklemenin çalışmaması;
+// erişilebilirlik yazı boyutlarında tek sütun.
 import 'package:ai_gallery_organizer/core/constants/motion_constants.dart';
+import 'package:ai_gallery_organizer/core/constants/ui_constants.dart';
 import 'package:ai_gallery_organizer/core/theme/app_theme.dart';
 import 'package:ai_gallery_organizer/core/widgets/reorderable_tile_grid.dart';
 import 'package:flutter/material.dart';
@@ -11,9 +13,15 @@ const double _gridWidth = 300;
 Widget _grid({
   required bool editing,
   required void Function(int from, int to) onReorder,
+  double textScale = 1,
 }) {
   return MaterialApp(
     theme: AppTheme.light,
+    builder: (context, child) => MediaQuery(
+      data: MediaQuery.of(context)
+          .copyWith(textScaler: TextScaler.linear(textScale)),
+      child: child!,
+    ),
     home: Scaffold(
       body: Align(
         alignment: Alignment.topLeft,
@@ -74,5 +82,33 @@ void main() {
     await _liftAndDrop(tester, 'tile0', 'tile3');
 
     expect(moves, isEmpty);
+  });
+
+  testWidgets('erişilebilirlik yazı boyutunda karolar tek sütuna dizilir', (
+    tester,
+  ) async {
+    final List<(int, int)> moves = [];
+    await tester.pumpWidget(
+      _grid(
+        editing: true,
+        textScale: AppSizes.accessibilityTextScale,
+        onReorder: (from, to) => moves.add((from, to)),
+      ),
+    );
+
+    // Konum karonun içinden okunur: yuva kutusu dönüşümü çocuğa uygular.
+    Rect tile(String label) => tester.getRect(
+      find
+          .ancestor(of: find.text(label), matching: find.byType(ColoredBox))
+          .first,
+    );
+    final Rect first = tile('tile0');
+    final Rect second = tile('tile1');
+    expect(first.width, moreOrLessEquals(_gridWidth));
+    expect(second.top, greaterThan(first.bottom));
+
+    // Tek sütunda sıralama da konuma göre çalışır.
+    await _liftAndDrop(tester, 'tile0', 'tile2');
+    expect(moves, [(0, 2)]);
   });
 }

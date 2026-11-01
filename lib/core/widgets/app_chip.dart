@@ -66,10 +66,14 @@ class AppChip extends StatelessWidget {
                     Icon(glyph, size: AppSizes.chipIcon, color: foreground),
                     const SizedBox(width: AppSpacing.xs),
                   ],
-                  Text(
-                    label,
-                    style: Theme.of(context).textTheme.bodyMedium
-                        ?.copyWith(color: foreground),
+                  // Büyük yazıda dar alanda (Wrap) sarar; yatay kaydırılan
+                  // listede genişlik sınırsız olduğundan tek satır kalır.
+                  Flexible(
+                    child: Text(
+                      label,
+                      style: Theme.of(context).textTheme.bodyMedium
+                          ?.copyWith(color: foreground),
+                    ),
                   ),
                 ],
               ),

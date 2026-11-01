@@ -147,16 +147,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String analysisCompleted(int count) {
-    return '$count screenshots analyzed';
-  }
-
-  @override
-  String analysisCompletedWithFailures(int done, int failed) {
-    return '$done analyzed, $failed failed';
-  }
-
-  @override
   String get analysisFailedBanner =>
       'Analysis failed. Check your connection and try again.';
 
@@ -170,11 +160,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get analysisTrialLimitBanner =>
       'You\'ve reached the trial analysis limit. Grab an analysis pack, or unlimited unlocks when your trial converts.';
-
-  @override
-  String analysisLimitCompleted(int count) {
-    return '$count screenshots organized. Go Pro or grab an analysis pack to keep going.';
-  }
 
   @override
   String get analysisDailyCapBanner =>
@@ -653,9 +638,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsPurchasesSection => 'Purchases';
 
   @override
-  String get settingsRemainingAnalyses => 'Remaining analyses';
-
-  @override
   String get settingsRestoreSuccess => 'Purchases restored.';
 
   @override
@@ -747,9 +729,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get categoryReanalyzeConfirmBodyTrial =>
       'The screenshots in this group will be sent to AI again. This uses your trial analysis allowance.';
-
-  @override
-  String get categoryReanalyzeEmpty => 'There\'s nothing to re-analyze here.';
 
   @override
   String get recentsScreenTitle => 'Recent screenshots';

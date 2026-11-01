@@ -45,6 +45,14 @@ abstract final class AppSizes {
   /// Dynamic Type ile büyümez; sabit yükseklikli pil taşmasın diye sınırlanır.
   static const double navBarMaxTextScale = 1.2;
 
+  /// iOS erişilebilirlik metin boyutlarının başladığı ölçek (AX1: gövde
+  /// 17pt → 28pt). Bu eşikten sonra yan yana etiket/değer çiftleri alt alta
+  /// dizilir.
+  static const double accessibilityTextScale = 28 / 17;
+
+  /// Erişilebilirlik boyutlarında satır başlığının sarabileceği satır sayısı.
+  static const int accessibilityMaxLines = 4;
+
   /// Sekme ikonundaki sayı rozetinin asgari çapı ve yatay iç boşluğu (iOS
   /// tab badge); ikonun sağ üst köşesine bu kadar taşar.
   static const double tabBadgeMinSize = 18;
@@ -75,9 +83,6 @@ abstract final class AppSizes {
   /// Sheet'in sağ üstündeki kapatma dairesi ve içindeki xmark.
   static const double sheetClose = 30;
   static const double sheetCloseGlyph = 14;
-
-  /// Board kartlarındaki kapak şeridi yüksekliği referansı.
-  static const double boardCoverMin = 72;
 
   /// Pano/kategori karosunun en-boy oranı (kapak + iki satır metin).
   static const double boardTileAspect = 1.05;
@@ -118,6 +123,9 @@ abstract final class AppSizes {
   /// Ayarlar'daki Pro satırının dolgulu ikon karosu ve içindeki glif.
   static const double settingsProTile = 40;
   static const double settingsProGlyph = 24;
+
+  /// Kütüphane başlığının yanındaki PRO kapsülündeki rozet glifi.
+  static const double proBadgeGlyph = 12;
 
   /// Onboarding sayfa göstergesi: pasif nokta ve etkin kapsül genişliği.
   static const double pageDot = 8;
@@ -319,9 +327,6 @@ abstract final class AppEmptyState {
 
 /// Standart opaklık değerleri.
 abstract final class AppOpacities {
-  /// Pro kullanıcının app bar'ındaki incelikli gradient tonunun opaklığı.
-  static const double proAppBarTint = 0.12;
-
   /// Aksan rengiyle hafifçe tonlanmış kart zemini (öneri/eylem kartları).
   static const double accentTint = 0.08;
 

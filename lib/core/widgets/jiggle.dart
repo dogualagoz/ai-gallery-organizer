@@ -94,7 +94,8 @@ class _JiggleState extends State<Jiggle> with TickerProviderStateMixin {
     final double offset = (widget.seed * AppMotion.jigglePhaseSpread) % 1;
     return AnimatedBuilder(
       animation: _animation,
-      child: widget.child,
+      // Karo bir kez boyanır; titreşim boyunca yalnız dönüş katmanı değişir.
+      child: RepaintBoundary(child: widget.child),
       builder: (context, child) => Transform.rotate(
         angle:
             AppMotion.jiggleAngle *

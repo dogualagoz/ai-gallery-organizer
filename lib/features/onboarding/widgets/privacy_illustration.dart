@@ -19,6 +19,9 @@ const double _ringWidth = 2;
 /// İkinci halkanın faz kayması (yarım tur).
 const double _ringPhase = 0.5;
 
+/// Hareket azaltıldığında gösterilen kare: halkalar yarı açılmış.
+const double _stillFrame = 0.3;
+
 class PrivacyIllustration extends StatefulWidget {
   const PrivacyIllustration({super.key});
 
@@ -33,9 +36,8 @@ class _PrivacyIllustrationState extends State<PrivacyIllustration>
   @override
   AnimationController get controller => _controller;
 
-  /// Hareket azaltıldığında halkalar yarı açılmış halde durur.
   @override
-  double get stillValue => 0.3;
+  double get stillValue => _stillFrame;
 
   @override
   void play() => _controller.repeat();

@@ -6,6 +6,70 @@ Biçim [Keep a Changelog](https://keepachangelog.com/tr/1.1.0/) temel alınır;
 sürümleme [Semantic Versioning](https://semver.org/lang/tr/) izler.
 Her başlıktaki `+N` iOS build (CFBundleVersion) numarasıdır.
 
+## [1.3.0+11] - 2026-11-02
+
+Arayüzü baştan iOS diline taşıyan tasarım sürümü (Apple *Designing Fluid
+Interfaces* ilkeleri). Free/Pro kuralları değişmedi.
+
+### Eklenenler
+- **Yeni gezinme:** `( Kütüphane | Temizle )` sekme pili + ayrık **Ara**
+  sekmesi. Ayarlar Kütüphane'nin sağ üstünden sheet olarak açılır; kategori ve
+  pano detayı sekme içinde açılır, kenardan geri kaydırma çalışır.
+- **Fotoğraflar tarzı görüntüleyici:** koleksiyon içinde kaydırma, çift
+  dokunuşla yaylı zoom, aşağı çekip kapatma; bilgi panelinde kategori
+  değiştirme, etikete dokunup arama, OCR metnini kopyalama.
+- **Seçim modu:** pano detayında Tümünü seç, Taşı / Paylaş / Sil araç çubuğu,
+  taşımada Geri Al.
+- **Ara sekmesi:** başlığa gömülü arama alanı, son aramalar, kategori filtre
+  çipleri ve kelime bazlı arama dizini.
+- **Ayarlar:** iOS gruplu liste; Aboneliği yönet, Geri bildirim ve Uygulamayı
+  değerlendir satırları; tema seçimi segment kontrolle.
+- **Temizle:** kesilebilir swipe destesi (kart animasyon sırasında da
+  yakalanır), karar fırlatma hızına göre, Geri Al kartı çıktığı kenardan
+  getirir. Bekleyen silmeler sekme rozeti ve alt çubukta durur; sekme
+  değişimindeki sürpriz sistem diyaloğu kalktı.
+- **Erişilebilirlik:** Hareketi Azalt tüm ekranlarda (yay ve kayma yerine
+  çapraz geçiş, döngüler durur). En büyük yazı boyutlarında satırlar alt alta
+  dizilir, pano ızgarası tek sütuna geçer, onboarding kaydırılır. İkon
+  butonlarında VoiceOver etiketi ve 44pt dokunma alanı.
+- Kütüphane'de **tek analiz modülü** (bekleyen / ilerleme / kota / sonuç);
+  kota yalnız burada görünür.
+- Fotoğraf izni iptal edilince boş galeri yerine "Ayarları Aç" durumu.
+
+### Değiştirilenler
+- **Görsel dil:** iOS sistem renkleri (gruplu zeminler), SF tipografi ölçeği
+  (boyuta özgü tracking, 34pt büyük başlık), Cupertino bileşen ve ikonları;
+  iris (#5457D6) yalnız aksan. Material ripple, SnackBar ve AlertDialog'lar
+  yerine basış geri bildirimi, üstten durum bildirimi ve action sheet.
+- **Hareket:** animasyonlar yayla ve o anki değerden başlar, gesture hızını
+  devralır; sekme yalnız fırlatmadan sonra. Haptik görsel olayla aynı karede.
+- Büyük başlıklar kaydırınca küçülür.
+- Analiz efekti sadeleşti: duman, parçacık ve ışıma kalktı; kategorilere uçan
+  küçük resimler yayla.
+- Paywall ve Milestone sheet olarak açılır. Paywall'da kapatma yüklenirken de
+  görünür, paket odaklı açılışta abonelik butonu katlanır; Milestone rozeti
+  sheet yerleşince açılır.
+- Onboarding: canlı sayfa göstergesi; izin reddi aynı sayfada ("Ayarları Aç" /
+  "Şimdilik geç").
+- Animasyonlu açılış ekranı ve sesi kaldırıldı (HIG: launch screen ilk ekrana
+  benzemeli); yerine kısa çapraz geçiş.
+
+### Düzeltmeler
+- Swipe kartında ilk kaydırmadan sonra alt butonların çalışmaması (controller
+  bağlantısı yeni kart kurulunca siliniyordu) ve çift atama yarışı.
+- `CurvedAnimation` sızıntıları, analiz kartında boşta çalışan zamanlayıcı ve
+  cam sekme çubuğu altındaki sürekli ticker.
+- Pano detayında native geri kaydırmayla çakışan özel kenar kaydırması.
+- Büyük yazıda plan kartı, Ayarlar satırları, analiz satırları ve çiplerdeki
+  taşmalar.
+
+### Bakım
+- `audioplayers` ve `animations` bağımlılıkları, kullanılmayan l10n anahtarları
+  ve ikon sabitleri kaldırıldı.
+- Yeni testler: hareket fiziği, swipe kararı ve destesi, son aramalar, arama
+  dizini, görüntüleyici, paywall, milestone ve Dynamic Type (AX5) taşma
+  testleri.
+
 ## [1.2.0+10] - 2026-08-27
 
 ### Eklenenler
