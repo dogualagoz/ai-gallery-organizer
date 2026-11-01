@@ -1,9 +1,9 @@
 {
   "@@locale": "en",
   "appTitle": "Snaply",
-  "tabHome": "Home",
-  "tabSort": "Sort",
-  "tabSettings": "Settings",
+  "tabLibrary": "Library",
+  "tabClean": "Clean",
+  "doneAction": "Done",
   "galleryTitle": "Screenshots",
   "boardsTitle": "Boards",
   "settingsTitle": "Settings",

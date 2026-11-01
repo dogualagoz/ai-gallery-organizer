@@ -68,16 +68,19 @@ class GlassPanel extends StatelessWidget {
               ),
               child: child,
             )
-          : _glass(scheme, isDark),
+          : _glass(context, scheme, isDark),
     );
   }
 
-  Widget _glass(ColorScheme scheme, bool isDark) {
+  Widget _glass(BuildContext context, ColorScheme scheme, bool isDark) {
     // "Işık" iki temada da beyazdır: açıkta surface, koyuda onSurface.
     final Color light = isDark ? scheme.onSurface : scheme.surface;
     return ClipRRect(
       borderRadius: borderRadius,
       child: BackdropFilter(
+        // Ata bir BackdropGroup varsa (ör. sekme çubuğu) yan yana camlar tek
+        // arka plan örneğini paylaşır; motor bulanıklığı bir kez hesaplar.
+        backdropGroupKey: BackdropGroup.of(context)?.backdropKey,
         filter: ImageFilter.compose(
           outer: _saturate,
           inner: ImageFilter.blur(

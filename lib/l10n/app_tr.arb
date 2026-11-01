@@ -1,9 +1,9 @@
 {
   "@@locale": "tr",
   "appTitle": "Snaply",
-  "tabHome": "Ana Sayfa",
-  "tabSort": "Sırala",
-  "tabSettings": "Ayarlar",
+  "tabLibrary": "Kütüphane",
+  "tabClean": "Temizle",
+  "doneAction": "Bitti",
   "galleryTitle": "Ekran Görüntüleri",
   "boardsTitle": "Panolar",
   "settingsTitle": "Ayarlar",

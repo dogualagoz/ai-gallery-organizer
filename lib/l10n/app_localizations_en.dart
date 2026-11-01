@@ -13,13 +13,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get appTitle => 'Snaply';
 
   @override
-  String get tabHome => 'Home';
+  String get tabLibrary => 'Library';
 
   @override
-  String get tabSort => 'Sort';
+  String get tabClean => 'Clean';
 
   @override
-  String get tabSettings => 'Settings';
+  String get doneAction => 'Done';
 
   @override
   String get galleryTitle => 'Screenshots';

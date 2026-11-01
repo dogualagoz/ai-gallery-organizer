@@ -18,7 +18,6 @@ import '../../../core/widgets/app_dialogs.dart';
 import '../../../core/widgets/status_toast.dart';
 import '../../gallery/data/screenshot_repository.dart';
 import '../../gallery/providers/gallery_provider.dart';
-import '../board_detail_screen.dart';
 import '../providers/board_provider.dart';
 
 /// Düzenleme modu aksiyon sayfasından seçilen işlem.
@@ -150,18 +149,10 @@ void _openSelection(
     context.push(AppRoutes.paywall);
     return;
   }
-  Navigator.of(context).push(
-    MaterialPageRoute<void>(
-      builder: (_) => category != null
-          ? BoardDetailScreen.category(
-              category: category,
-              startInSelection: true,
-            )
-          : BoardDetailScreen.custom(
-              boardId: board!.id,
-              startInSelection: true,
-            ),
-    ),
+  context.push(
+    category != null
+        ? AppRoutes.category(category, select: true)
+        : AppRoutes.board(board!.id, select: true),
   );
 }
 

@@ -16,7 +16,6 @@ import '../../core/router/app_router.dart';
 import '../../core/services/category_names_service.dart';
 import '../../core/services/entitlement_service.dart';
 import '../../core/widgets/app_dialogs.dart';
-import '../../core/widgets/edge_swipe_back.dart';
 import '../../core/widgets/page_header.dart';
 import '../../core/widgets/screenshot_results_grid.dart';
 import '../../core/widgets/status_toast.dart';
@@ -94,10 +93,12 @@ class _BoardDetailScreenState extends ConsumerState<BoardDetailScreen> {
 
     final bool canBulkDelete = ref.watch(entitlementProvider).canBulkDelete;
 
-    return EdgeSwipeBack(
-      // Seçim modunda kenar-swipe kapalı: yanlışlıkla ekrandan çıkmayı önler.
-      enabled: !_selectionMode,
-      onBack: () => Navigator.maybePop(context),
+    return PopScope(
+      // Seçim modunda geri jesti/tuşu önce seçimi kapatır, ekrandan çıkmaz.
+      canPop: !_selectionMode,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) _exitSelection();
+      },
       child: Scaffold(
         body: Column(
           children: [

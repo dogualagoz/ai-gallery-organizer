@@ -17,10 +17,18 @@ import 'widgets/plan_card.dart';
 import 'widgets/trial_timeline.dart';
 
 class PaywallScreen extends ConsumerWidget {
-  const PaywallScreen({super.key, this.scrollToPacks = false});
+  const PaywallScreen({
+    super.key,
+    this.scrollToPacks = false,
+    this.scrollController,
+  });
 
   /// Açılışta paket bölümüne kaydır (analiz limiti akışından gelindiğinde).
   final bool scrollToPacks;
+
+  /// Sheet rotasının kaydırıcısı: içerik en üstteyken aşağı çekmek sheet'i
+  /// kapatsın diye listeye bağlanır. Null ise ekran kendi controller'ını açar.
+  final ScrollController? scrollController;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -63,7 +71,11 @@ class PaywallScreen extends ConsumerWidget {
             _ProductsUnavailable(text: l10n.paywallProductsUnavailable),
         data: (items) => items.isEmpty
             ? _ProductsUnavailable(text: l10n.paywallProductsUnavailable)
-            : _PaywallContent(products: items, scrollToPacks: scrollToPacks),
+            : _PaywallContent(
+                products: items,
+                scrollToPacks: scrollToPacks,
+                scrollController: scrollController,
+              ),
       ),
     );
   }
@@ -117,10 +129,15 @@ class _CloseButton extends StatelessWidget {
 }
 
 class _PaywallContent extends ConsumerStatefulWidget {
-  const _PaywallContent({required this.products, this.scrollToPacks = false});
+  const _PaywallContent({
+    required this.products,
+    this.scrollToPacks = false,
+    this.scrollController,
+  });
 
   final List<ProductDetails> products;
   final bool scrollToPacks;
+  final ScrollController? scrollController;
 
   @override
   ConsumerState<_PaywallContent> createState() => _PaywallContentState();
@@ -132,11 +149,17 @@ class _PaywallContentState extends ConsumerState<_PaywallContent> {
   // orElse closure'ı kovaryans nedeniyle tip hatası fırlatıyor.
   late String _selectedProductId = _defaultProductId();
 
-  final ScrollController _scrollController = ScrollController();
+  late final ScrollController _scrollController;
+
+  /// Dışarıdan (sheet) gelen controller'ın sahibi rotadır; yalnız kendi
+  /// açtığımızı kapatırız.
+  late final bool _ownsController;
 
   @override
   void initState() {
     super.initState();
+    _ownsController = widget.scrollController == null;
+    _scrollController = widget.scrollController ?? ScrollController();
     if (widget.scrollToPacks) {
       WidgetsBinding.instance.addPostFrameCallback((_) => _revealPacks());
     }
@@ -144,7 +167,7 @@ class _PaywallContentState extends ConsumerState<_PaywallContent> {
 
   @override
   void dispose() {
-    _scrollController.dispose();
+    if (_ownsController) _scrollController.dispose();
     super.dispose();
   }
 

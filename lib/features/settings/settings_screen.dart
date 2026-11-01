@@ -13,6 +13,7 @@ import '../../core/services/entitlement_service.dart';
 import '../../core/services/haptic_service.dart';
 import '../../core/services/preferences_service.dart';
 import '../../core/utils/link_opener.dart';
+import '../../core/widgets/app_nav_scaffold.dart';
 import '../../core/widgets/page_header.dart';
 import '../../core/widgets/status_toast.dart';
 import '../paywall/providers/purchase_provider.dart';
@@ -23,7 +24,11 @@ final packageInfoProvider = FutureProvider<PackageInfo>(
 );
 
 class SettingsScreen extends ConsumerStatefulWidget {
-  const SettingsScreen({super.key});
+  const SettingsScreen({super.key, this.scrollController});
+
+  /// Sheet rotasının kaydırıcısı: liste en üstteyken aşağı çekmek sheet'i
+  /// kapatır.
+  final ScrollController? scrollController;
 
   @override
   ConsumerState<SettingsScreen> createState() => _SettingsScreenState();
@@ -46,14 +51,23 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     return Scaffold(
       body: Column(
         children: [
-          PageHeader(title: l10n.settingsTitle),
+          PageHeader(
+            title: l10n.settingsTitle,
+            actions: [
+              NavBarButton.text(
+                label: l10n.doneAction,
+                onPressed: () => context.pop(),
+              ),
+            ],
+          ),
           Expanded(
             child: ListView(
+              controller: widget.scrollController,
               padding: EdgeInsets.fromLTRB(
                 AppSpacing.md,
                 AppSpacing.xs,
                 AppSpacing.md,
-                // Yüzen navbar içeriği örtmesin diye alt boşluk eklenir.
+                // Home indicator içeriği örtmesin diye alt boşluk eklenir.
                 MediaQuery.paddingOf(context).bottom + AppSpacing.md,
               ),
               children: [

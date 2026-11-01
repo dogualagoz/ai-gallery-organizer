@@ -33,6 +33,13 @@ abstract final class AppSizes {
   static const double navBarHeight = 56;
   static const double navBarIcon = 24;
 
+  /// Sekme ikonu ile etiketi arasındaki boşluk.
+  static const double navBarLabelGap = 2;
+
+  /// Sekme etiketlerinin büyüyebileceği en fazla metin ölçeği. iOS tab bar'ı
+  /// Dynamic Type ile büyümez; sabit yükseklikli pil taşmasın diye sınırlanır.
+  static const double navBarMaxTextScale = 1.2;
+
   /// Navbar pilinin yanında yüzen ayrık dairesel Arama butonunun çapı.
   static const double navBarActionSize = 56;
 
@@ -41,12 +48,6 @@ abstract final class AppSizes {
 
   /// Board kartlarındaki kapak şeridi yüksekliği referansı.
   static const double boardCoverMin = 72;
-
-  /// iOS geri-kaydırma jestinin başlayabileceği sol kenar bölgesi (px).
-  static const double edgeSwipeZone = 24;
-
-  /// Geri-kaydırmayı tamamlamak için gereken minimum yatay mesafe (px).
-  static const double edgeSwipeTriggerDistance = 80;
 }
 
 /// Yüzen buzlu-cam (glassmorphism) yüzey ayarları — navbar pili + ayrık Arama

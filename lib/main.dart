@@ -11,6 +11,7 @@ import 'core/router/app_router.dart';
 import 'core/services/hive_service.dart';
 import 'core/services/preferences_service.dart';
 import 'core/theme/app_theme.dart';
+import 'core/widgets/launch_reveal.dart';
 import 'features/paywall/providers/purchase_provider.dart';
 import 'firebase_options.dart';
 
@@ -63,6 +64,8 @@ class SnaplyApp extends ConsumerWidget {
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       routerConfig: ref.watch(appRouterProvider),
+      builder: (context, child) =>
+          LaunchReveal(child: child ?? const SizedBox.shrink()),
     );
   }
 }

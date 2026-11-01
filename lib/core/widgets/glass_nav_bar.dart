@@ -1,19 +1,15 @@
-// Yüzen buzlu-cam (glassmorphism) alt gezinme pili: parlak yarı-opak kapsül,
-// seçili sekmeyi camın üstünde duran düz tonlu bir kapsül gösterir, sekmeler
-// arası akıcı kayar ve parmakla yatay sürüklemeyi birebir takip eder.
+// Yüzen buzlu-cam sekme pili: seçili sekmeyi camın üstündeki tonlu kapsül
+// gösterir. Gösterge yayla sürülür, sürüklemeyi 1:1 izler, bırakınca parmağın
+// hızını devralır ve uçlarda lastik gibi direnir.
 import 'package:flutter/material.dart';
+import 'package:flutter/physics.dart';
 
+import '../constants/motion_constants.dart';
 import '../constants/ui_constants.dart';
 import '../services/haptic_service.dart';
+import '../utils/motion_physics.dart';
 import 'glass_panel.dart';
-
-/// Sekmeye basılıyken uygulanan çok hafif küçülme (dokunma geri bildirimi).
-/// iOS'ta dokunmada bileşen neredeyse yer değiştirmez — düşük tutulur.
-const double _navItemPressScale = 0.95;
-
-/// Kayan seçim göstergesinin yerleşme eğrisi: hafif "settle" yapar, easeOutBack
-/// gibi çizgi film taşması vermez (iOS tab bar göstergesi hissi).
-const Cubic _indicatorSettleCurve = Cubic(0.33, 1.12, 0.66, 1);
+import 'pressable.dart';
 
 /// [GlassNavBar] içindeki tek sekme tanımı.
 class GlassNavDestination {
@@ -28,10 +24,13 @@ class GlassNavDestination {
   final String label;
 }
 
-/// Yüzen buzlu-cam gezinme pili. Scaffold'a `extendBody: true` ile verilmelidir;
-/// içerik çubuğun arkasından akar ve [GlassPanel]'in BackdropFilter'ı onu
-/// bulanıklaştırarak frosted etkiyi görünür kılar. Dokunmanın yanı sıra parmakla
-/// yatay kaydırarak sekme değiştirmeyi de destekler.
+/// Yüzen buzlu-cam sekme pili. Scaffold'a `extendBody: true` ile verilmelidir;
+/// içerik çubuğun arkasından akar ve [GlassPanel] onu bulanıklaştırır.
+///
+/// [selectedIndex] pil dışında bir değerse (ör. ayrık Ara sekmesi seçili)
+/// gösterge gizlenir ve son pil sekmesinde bekler. Sekme dokunarak ya da pil
+/// üzerinde yatay sürükleyerek değişir; gösterge her yeni sekmenin üstüne
+/// geçtiğinde seçim haptiği verilir.
 class GlassNavBar extends StatefulWidget {
   const GlassNavBar({
     super.key,
@@ -48,112 +47,190 @@ class GlassNavBar extends StatefulWidget {
   State<GlassNavBar> createState() => _GlassNavBarState();
 }
 
-class _GlassNavBarState extends State<GlassNavBar> {
-  /// Sürükleme sırasında göstergenin sürekli (kesirli) konumu; parmağı birebir
-  /// takip eder. Sürükleme yoksa null → gösterge seçili sekmeye yaslanır.
-  double? _dragPos;
+class _GlassNavBarState extends State<GlassNavBar>
+    with SingleTickerProviderStateMixin {
+  /// Göstergenin yaslandığı (son seçilen) pil sekmesi.
+  late int _restIndex = _inPill(widget.selectedIndex)
+      ? widget.selectedIndex
+      : 0;
 
-  /// Parmağın x konumunu 0..(count-1) aralığında kesirli sekme konumuna çevirir.
-  double _posForDx(double dx, double width) {
-    final int count = widget.destinations.length;
-    final double itemWidth = width / count;
-    return (dx / itemWidth - 0.5).clamp(0.0, (count - 1).toDouble());
+  /// Göstergenin sekme birimindeki konumu (0 = ilk sekme). Sınırsızdır: lastik
+  /// bant ve momentum yayı uçlarda kısa süre aralık dışına taşıyabilir.
+  late final AnimationController _position = AnimationController.unbounded(
+    vsync: this,
+    value: _restIndex.toDouble(),
+  );
+
+  bool _dragging = false;
+
+  /// Sürüklemede parmağın dirençsiz konumu (sekme birimi).
+  double _dragRaw = 0;
+
+  /// Sürüklerken göstergenin üstünde durduğu sekme (haptik eşiği).
+  int _hoverIndex = 0;
+
+  /// Tek sekmenin genişliği (px); sürükleme başında ölçülür.
+  double _itemWidth = 1;
+
+  int get _count => widget.destinations.length;
+
+  double get _maxPos => (_count - 1).toDouble();
+
+  bool _inPill(int index) => index >= 0 && index < widget.destinations.length;
+
+  @override
+  void didUpdateWidget(GlassNavBar oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final int index = widget.selectedIndex;
+    if (!_inPill(index) || index == _restIndex) return;
+    _restIndex = index;
+    if (_dragging) return;
+    // Gösterge gizliyken (Ara seçiliydi) kaymadan yerinde belirir.
+    if (!_inPill(oldWidget.selectedIndex)) {
+      _position.value = index.toDouble();
+    } else {
+      _settle(AppSprings.standard, _position.velocity);
+    }
   }
 
-  void _handleDragUpdate(DragUpdateDetails details, double width) {
-    final double pos = _posForDx(details.localPosition.dx, width);
-    final int prevNearest = (_dragPos ?? widget.selectedIndex.toDouble())
-        .round();
-    // Yeni bir sekmenin üzerine gelince hafif haptik; sekme değişimi bırakınca.
-    if (pos.round() != prevNearest) Haptics.tap();
-    setState(() => _dragPos = pos);
+  @override
+  void dispose() {
+    _position.dispose();
+    super.dispose();
   }
 
-  void _handleDragEnd() {
-    final int target = (_dragPos ?? widget.selectedIndex.toDouble()).round();
-    setState(() => _dragPos = null);
+  /// Göstergeyi [_restIndex]'e yayla oturtur. O anki konum ve hızdan başlar,
+  /// böylece süren bir geçiş yakalanıp yönü değiştirilebilir.
+  void _settle(SpringDescription spring, double velocity) {
+    final double target = _restIndex.toDouble();
+    if (context.reduceMotion) {
+      _position.value = target;
+      return;
+    }
+    _position.animateWith(
+      SpringSimulation(spring, _position.value, target, velocity),
+    );
+  }
+
+  int _clampIndex(double position) => position.round().clamp(0, _count - 1);
+
+  void _onDragStart(DragStartDetails details) {
+    _itemWidth = context.size!.width / _count;
+    _position.stop();
+    // Gizli gösterge parmağın altındaki sekmede belirir; görünürken parmak
+    // onu tuttuğu yerden sürükler (atlama yok).
+    if (!_inPill(widget.selectedIndex)) {
+      _position.value = (details.localPosition.dx / _itemWidth)
+          .floorToDouble()
+          .clamp(0, _maxPos);
+    }
+    _dragRaw = _position.value;
+    _hoverIndex = _clampIndex(_position.value);
+    setState(() => _dragging = true);
+  }
+
+  void _onDragUpdate(DragUpdateDetails details) {
+    _dragRaw += details.delta.dx / _itemWidth;
+    _position.value = _resist(_dragRaw);
+    final int hover = _clampIndex(_position.value);
+    if (hover == _hoverIndex) return;
+    _hoverIndex = hover;
+    Haptics.tap();
+  }
+
+  /// Aralık dışına taşan sürüklemeye artan direnç uygular (sekme birimi).
+  double _resist(double raw) {
+    final double bound = raw.clamp(0, _maxPos);
+    final double overshoot = (raw - bound) * _itemWidth;
+    return bound + rubberband(overshoot, _itemWidth) / _itemWidth;
+  }
+
+  void _onDragEnd(DragEndDetails details) {
+    final double velocity = details.velocity.pixelsPerSecond.dx;
+    // Hedef bırakış noktasından değil, hızın götüreceği noktadan seçilir:
+    // kısa bir fiske de sekmeyi değiştirebilir.
+    final double projected =
+        _position.value +
+        project(velocity, decelerationRate: AppMotion.decelerationFast) /
+            _itemWidth;
+    final int target = _clampIndex(projected);
+    if (target != _hoverIndex) Haptics.tap();
+    _restIndex = target;
+    _settle(AppSprings.momentum, velocity / _itemWidth);
+    setState(() => _dragging = false);
+    // Aynı sekmede bırakmak "köke dön" anlamına gelen yeniden seçim değildir.
     if (target != widget.selectedIndex) widget.onSelected(target);
+  }
+
+  void _onDragCancel() {
+    if (!_dragging) return;
+    _settle(AppSprings.standard, 0);
+    setState(() => _dragging = false);
   }
 
   @override
   Widget build(BuildContext context) {
-    // Dış boşluk paylaşılan tek bir inset olarak _MainShell'de uygulanıyor
-    // (pil + ayrık aksiyon butonu aynı hizada yüzsün diye).
-    return LayoutBuilder(
-      builder: (context, constraints) => GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onHorizontalDragStart: (_) =>
-            setState(() => _dragPos = widget.selectedIndex.toDouble()),
-        onHorizontalDragUpdate: (details) =>
-            _handleDragUpdate(details, constraints.maxWidth),
-        onHorizontalDragEnd: (_) => _handleDragEnd(),
-        onHorizontalDragCancel: () => setState(() => _dragPos = null),
-        child: _buildPill(context),
-      ),
-    );
-  }
-
-  Widget _buildPill(BuildContext context) {
-    final ColorScheme scheme = Theme.of(context).colorScheme;
-    final double radius = AppSizes.navBarHeight / 2;
-    final int count = widget.destinations.length;
-    final double pos = _dragPos ?? widget.selectedIndex.toDouble();
-    final double x = count == 1 ? 0 : -1 + (2 * pos / (count - 1));
-
-    return GlassPanel(
-      borderRadius: BorderRadius.circular(radius),
-      child: SizedBox(
-        height: AppSizes.navBarHeight,
-        child: Stack(
-          children: [
-            // Kayan seçim göstergesi — düz tonlu kapsül, camın üstünde.
-            _dragPos == null
-                ? AnimatedAlign(
-                    duration: AppDurations.medium,
-                    curve: _indicatorSettleCurve,
-                    alignment: Alignment(x, 0),
-                    child: _indicator(scheme, count),
-                  )
-                : Align(
-                    // Sürüklerken parmağı anında izler (animasyonsuz).
-                    alignment: Alignment(x, 0),
-                    child: _indicator(scheme, count),
-                  ),
-            Row(
-              children: [
-                for (int i = 0; i < count; i++)
-                  Expanded(
-                    child: _NavItem(
-                      destination: widget.destinations[i],
-                      selected: i == widget.selectedIndex,
-                      onTap: () {
-                        Haptics.tap();
-                        widget.onSelected(i);
-                      },
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onHorizontalDragStart: _onDragStart,
+      onHorizontalDragUpdate: _onDragUpdate,
+      onHorizontalDragEnd: _onDragEnd,
+      onHorizontalDragCancel: _onDragCancel,
+      child: GlassPanel(
+        borderRadius: BorderRadius.circular(AppSizes.navBarHeight / 2),
+        child: SizedBox(
+          height: AppSizes.navBarHeight,
+          child: Stack(
+            children: [
+              _buildIndicator(context),
+              Row(
+                children: [
+                  for (int i = 0; i < _count; i++)
+                    Expanded(
+                      child: _NavItem(
+                        destination: widget.destinations[i],
+                        selected: i == widget.selectedIndex,
+                        onTap: () => widget.onSelected(i),
+                      ),
                     ),
-                  ),
-              ],
-            ),
-          ],
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  /// Seçili sekmeyi saran düz, hafif primary tonlu kapsül (seçim göstergesi).
-  Widget _indicator(ColorScheme scheme, int count) {
-    return FractionallySizedBox(
-      widthFactor: 1 / count,
-      heightFactor: 1,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.xs,
-          vertical: AppSpacing.sm,
+  /// Her zaman ağaçta duran seçim göstergesi; konumu [_position]'dan okunur.
+  Widget _buildIndicator(BuildContext context) {
+    final ColorScheme scheme = Theme.of(context).colorScheme;
+    return AnimatedOpacity(
+      opacity: _dragging || _inPill(widget.selectedIndex) ? 1 : 0,
+      duration: AppDurations.fast,
+      child: AnimatedBuilder(
+        animation: _position,
+        builder: (context, child) => Align(
+          alignment: Alignment(
+            _count == 1 ? 0 : -1 + 2 * _position.value / _maxPos,
+            0,
+          ),
+          child: child,
         ),
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            color: scheme.primary.withValues(alpha: AppGlass.indicatorTint),
-            borderRadius: BorderRadius.circular(AppRadius.lg),
+        child: FractionallySizedBox(
+          widthFactor: 1 / _count,
+          heightFactor: 1,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.xs,
+              vertical: AppSpacing.sm,
+            ),
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                color: scheme.primary.withValues(alpha: AppGlass.indicatorTint),
+                borderRadius: BorderRadius.circular(AppRadius.lg),
+              ),
+            ),
           ),
         ),
       ),
@@ -161,9 +238,9 @@ class _GlassNavBarState extends State<GlassNavBar> {
   }
 }
 
-/// İkon + etiketten oluşan tek sekme düğmesi. Basılıyken hafifçe küçülür;
-/// seçilince renk primary olur ve ikon dolgulu türüne geçer.
-class _NavItem extends StatefulWidget {
+/// İkon + etiketten oluşan tek sekme. Seçiliyken primary renk ve dolgulu ikon;
+/// seçili olmayan sekmeye dokunmak seçim haptiği verir.
+class _NavItem extends StatelessWidget {
   const _NavItem({
     required this.destination,
     required this.selected,
@@ -175,68 +252,38 @@ class _NavItem extends StatefulWidget {
   final VoidCallback onTap;
 
   @override
-  State<_NavItem> createState() => _NavItemState();
-}
-
-class _NavItemState extends State<_NavItem> {
-  bool _pressed = false;
-
-  void _setPressed(bool value) {
-    if (_pressed != value) setState(() => _pressed = value);
-  }
-
-  @override
   Widget build(BuildContext context) {
     final ColorScheme scheme = Theme.of(context).colorScheme;
-    // Referans tab bar yüksek kontrastlı: seçili değilken de neredeyse tam koyu.
-    final Color color = widget.selected
-        ? scheme.primary
-        : scheme.onSurface.withValues(alpha: 0.85);
+    final Color color = selected ? scheme.primary : scheme.onSurface;
 
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTapDown: (_) => _setPressed(true),
-      onTapUp: (_) => _setPressed(false),
-      onTapCancel: () => _setPressed(false),
-      onTap: widget.onTap,
-      child: AnimatedScale(
-        scale: _pressed ? _navItemPressScale : 1.0,
-        duration: AppDurations.fast,
-        curve: Curves.easeOut,
-        child: Semantics(
-          selected: widget.selected,
-          button: true,
-          label: widget.destination.label,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              AnimatedSwitcher(
-                duration: AppDurations.fast,
-                switchInCurve: Curves.easeOut,
-                switchOutCurve: Curves.easeIn,
-                child: Icon(
-                  widget.selected
-                      ? widget.destination.selectedIcon
-                      : widget.destination.icon,
-                  key: ValueKey(widget.selected),
-                  color: color,
-                  size: AppSizes.navBarIcon,
-                ),
+    return Pressable(
+      onPressed: onTap,
+      haptic: !selected,
+      child: Semantics(
+        selected: selected,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            AnimatedSwitcher(
+              duration: AppDurations.fast,
+              child: Icon(
+                selected ? destination.selectedIcon : destination.icon,
+                key: ValueKey(selected),
+                color: color,
+                size: AppSizes.navBarIcon,
               ),
-              const SizedBox(height: 2),
-              Text(
-                widget.destination.label,
-                style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: color,
-                  fontWeight: widget.selected
-                      ? FontWeight.w600
-                      : FontWeight.w500,
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
+            ),
+            const SizedBox(height: AppSizes.navBarLabelGap),
+            Text(
+              destination.label,
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                color: color,
+                fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
               ),
-            ],
-          ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
         ),
       ),
     );

@@ -14,7 +14,6 @@ import '../../../core/widgets/app_dialogs.dart';
 import '../../../core/widgets/fade_in_up.dart';
 import '../../../core/widgets/reorderable_tile_grid.dart';
 import '../../gallery/data/screenshot_repository.dart';
-import '../board_detail_screen.dart';
 import '../providers/board_provider.dart';
 import 'board_covers.dart';
 import 'board_edit_actions.dart';
@@ -83,8 +82,7 @@ class CustomBoardsGrid extends ConsumerWidget {
               label: board.name,
               count: boardEntries.length,
               covers: covers,
-              openBuilder: (context) =>
-                  BoardDetailScreen.custom(boardId: board.id),
+              onOpen: () => context.push(AppRoutes.board(board.id)),
             ),
           ),
         );

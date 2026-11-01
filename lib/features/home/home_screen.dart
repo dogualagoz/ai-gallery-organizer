@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/constants/app_icons.dart';
 import '../../core/constants/ui_constants.dart';
 import '../../core/l10n/l10n_extension.dart';
 import '../../core/models/board.dart';
@@ -14,6 +15,7 @@ import '../../core/services/category_names_service.dart';
 import '../../core/services/category_order_service.dart';
 import '../../core/services/entitlement_service.dart';
 import '../../core/services/review_service.dart';
+import '../../core/widgets/app_nav_scaffold.dart';
 import '../../core/widgets/page_header.dart';
 import '../../core/widgets/pro_badge.dart';
 import '../../core/widgets/status_toast.dart';
@@ -123,6 +125,12 @@ class _HomeHeader extends ConsumerWidget {
         const WeeklyLimitBadge(),
         const SizedBox(width: AppSpacing.xs),
         _SyncAction(onSync: onSync),
+        // Ayarlar artık sekme değil: Kütüphane'nin sağ üstünden sheet açılır.
+        NavBarButton.icon(
+          icon: AppIcons.settings,
+          label: context.l10n.settingsTitle,
+          onPressed: () => context.push(AppRoutes.settings),
+        ),
       ],
     );
   }

@@ -1,5 +1,5 @@
 // Board görünümündeki tek kart: kapak thumbnail şeridi + ikon, ad ve sayaç.
-// Dokununca standart iOS push (sağdan kayma) ile hedef ekrana geçer.
+// Dokununca [BoardTile.onOpen] hedef rotayı açar (go_router push).
 import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:photo_manager_image_provider/photo_manager_image_provider.dart';
@@ -28,7 +28,7 @@ class BoardTile extends StatelessWidget {
     required this.label,
     required this.count,
     required this.covers,
-    required this.openBuilder,
+    required this.onOpen,
     this.newCount = 0,
   });
 
@@ -39,8 +39,8 @@ class BoardTile extends StatelessWidget {
   /// Board içeriğinden örnek thumbnail'lar (en fazla [kBoardCoverCount]).
   final List<AssetEntity> covers;
 
-  /// Kartın büyüyerek açılacağı hedef ekranı üretir.
-  final WidgetBuilder openBuilder;
+  /// Karoya dokununca hedef pano rotasını açar.
+  final VoidCallback onOpen;
 
   /// Son analizde bu karoya dağıtılan, henüz görülmemiş yeni screenshot sayısı;
   /// >0 ise karo mor tonda vurgulanır, yıldız tozu ve "+N" rozeti gösterilir.
@@ -63,7 +63,6 @@ class BoardTile extends StatelessWidget {
         ? body
         : Stack(fit: StackFit.expand, children: [const _TileGloss(), body]);
 
-    // Standart iOS geçişi: dokununca hedef ekran sağdan kayarak açılır.
     final Widget tile = Material(
       color: _tileSurface(scheme, newCount),
       clipBehavior: Clip.antiAlias,
@@ -72,9 +71,7 @@ class BoardTile extends StatelessWidget {
         side: _tileBorder(scheme, newCount),
       ),
       child: InkWell(
-        onTap: () => Navigator.of(context).push(
-          MaterialPageRoute<void>(builder: openBuilder),
-        ),
+        onTap: onOpen,
         child: content,
       ),
     );

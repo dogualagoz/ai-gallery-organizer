@@ -70,4 +70,7 @@ abstract final class AppMotion {
 
   /// Reduce Motion açıkken kayma/yay yerine kullanılan çapraz geçiş süresi.
   static const Duration reducedCrossfade = Duration(milliseconds: 200);
+
+  /// Native launch screen'den ilk ekrana geçişteki kısa çapraz geçiş.
+  static const Duration launchReveal = Duration(milliseconds: 250);
 }

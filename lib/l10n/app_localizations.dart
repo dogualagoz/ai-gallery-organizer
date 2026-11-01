@@ -104,23 +104,23 @@ abstract class AppLocalizations {
   /// **'Snaply'**
   String get appTitle;
 
-  /// No description provided for @tabHome.
+  /// No description provided for @tabLibrary.
   ///
   /// In en, this message translates to:
-  /// **'Home'**
-  String get tabHome;
+  /// **'Library'**
+  String get tabLibrary;
 
-  /// No description provided for @tabSort.
+  /// No description provided for @tabClean.
   ///
   /// In en, this message translates to:
-  /// **'Sort'**
-  String get tabSort;
+  /// **'Clean'**
+  String get tabClean;
 
-  /// No description provided for @tabSettings.
+  /// No description provided for @doneAction.
   ///
   /// In en, this message translates to:
-  /// **'Settings'**
-  String get tabSettings;
+  /// **'Done'**
+  String get doneAction;
 
   /// No description provided for @galleryTitle.
   ///

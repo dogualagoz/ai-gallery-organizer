@@ -1,9 +1,11 @@
-// go_router tanımı: onboarding kapısı + 3 sekmeli ana kabuk + tam ekran rotalar.
+// go_router tanımı: onboarding kapısı + Kütüphane/Temizle/Ara sekmeli kabuk +
+// kök navigator'daki tam ekran görüntüleyici ve sheet rotaları.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../features/analysis/milestone_screen.dart';
+import '../../features/boards/board_detail_screen.dart';
 import '../../features/detail/detail_screen.dart';
 import '../../features/home/home_screen.dart';
 import '../../features/home/recents_screen.dart';
@@ -12,24 +14,39 @@ import '../../features/paywall/paywall_screen.dart';
 import '../../features/search/search_screen.dart';
 import '../../features/settings/settings_screen.dart';
 import '../../features/sorting/sorting_screen.dart';
-import '../../features/splash/splash_screen.dart';
+import '../constants/app_icons.dart';
 import '../constants/ui_constants.dart';
 import '../l10n/l10n_extension.dart';
+import '../models/screenshot_category.dart';
 import '../services/preferences_service.dart';
+import '../widgets/app_sheet.dart';
 import '../widgets/glass_action_button.dart';
 import '../widgets/glass_nav_bar.dart';
 
+/// Ana kabuğun sekmeleri. Sıra, [StatefulShellRoute] dal sırasıyla aynıdır.
+enum AppTab { library, clean, search }
+
 /// Rota yolları — string tekrarını önlemek için tek yerde.
 abstract final class AppRoutes {
-  static const String splash = '/splash';
   static const String onboarding = '/onboarding';
-  static const String gallery = '/gallery';
-  static const String settings = '/settings';
+  static const String library = '/library';
+  static const String clean = '/clean';
   static const String search = '/search';
-  static const String sorting = '/sorting';
-  static const String recents = '/recents';
+  static const String settings = '/settings';
   static const String paywall = '/paywall';
   static const String analysisMilestone = '/analysis-milestone';
+  static const String detailBase = '/detail';
+
+  /// Kütüphane dalının alt rota parçaları; bu ekranlarda sekme çubuğu kalır.
+  static const String recentsSegment = 'recents';
+  static const String categorySegment = 'category';
+  static const String boardSegment = 'board';
+
+  static const String recents = '$library/$recentsSegment';
+
+  /// Pano/kategori detayını doğrudan seçim modunda açan query parametresi.
+  static const String selectQuery = 'select';
+  static const String selectQueryOn = '1';
 
   /// Paywall query parametresi: açılışta paket bölümüne kaydır.
   static const String paywallFocusQuery = 'focus';
@@ -39,53 +56,69 @@ abstract final class AppRoutes {
   static const String paywallPacks =
       '$paywall?$paywallFocusQuery=$paywallFocusPacks';
 
+  /// Sistem kategorisi panosu (enum index'i ile adreslenir).
+  static String category(ScreenshotCategory category, {bool select = false}) =>
+      _selectable('$library/$categorySegment/${category.index}', select);
+
+  /// Kullanıcı panosu. Kimlik, slash içerse de tek segment kalsın diye encode
+  /// edilir.
+  static String board(String boardId, {bool select = false}) => _selectable(
+    '$library/$boardSegment/${Uri.encodeComponent(boardId)}',
+    select,
+  );
+
   /// Detay rotası assetId parametresi alır. iOS asset ID'leri slash içerir
   /// (`UUID/L0/001`) — encode edilmezse rota fazladan segmentlere bölünüp
   /// eşleşmez; go_router parametreyi okurken kendisi decode eder.
   static String detail(String assetId) =>
-      '/detail/${Uri.encodeComponent(assetId)}';
+      '$detailBase/${Uri.encodeComponent(assetId)}';
+
+  static String _selectable(String path, bool select) =>
+      select ? '$path?$selectQuery=$selectQueryOn' : path;
 }
+
+const String _assetIdParam = 'assetId';
+const String _categoryParam = 'index';
+const String _boardIdParam = 'boardId';
+
+/// Rota adresindeki kategori index'ini çözer; geçersizse null.
+ScreenshotCategory? _categoryOf(GoRouterState state) {
+  final int? index = int.tryParse(state.pathParameters[_categoryParam] ?? '');
+  return index == null
+      ? null
+      : ScreenshotCategory.values.elementAtOrNull(index);
+}
+
+bool _startsInSelection(GoRouterState state) =>
+    state.uri.queryParameters[AppRoutes.selectQuery] == AppRoutes.selectQueryOn;
 
 final appRouterProvider = Provider<GoRouter>((ref) {
   // Onboarding bayrağını izle: tamamlanınca redirect otomatik güncellenir.
   final bool onboardingComplete = ref.watch(onboardingCompleteProvider);
 
   return GoRouter(
-    initialLocation: AppRoutes.splash,
+    initialLocation: AppRoutes.library,
     redirect: (context, state) {
-      // Splash kendi yönlendirmesini animasyon bitince yapar — muaf tut.
-      if (state.matchedLocation == AppRoutes.splash) return null;
       final bool onOnboarding = state.matchedLocation == AppRoutes.onboarding;
       if (!onboardingComplete && !onOnboarding) return AppRoutes.onboarding;
-      if (onboardingComplete && onOnboarding) return AppRoutes.gallery;
+      if (onboardingComplete && onOnboarding) return AppRoutes.library;
       return null;
     },
     routes: [
       GoRoute(
-        path: AppRoutes.splash,
-        builder: (context, state) => const SplashScreen(),
-      ),
-      GoRoute(
         path: AppRoutes.onboarding,
         builder: (context, state) => const OnboardingScreen(),
       ),
-      // Ana kabuk: alt sekme çubuğu, her sekme kendi navigation stack'inde.
+      // Ana kabuk: yüzen sekme çubuğu, her sekme kendi navigation stack'inde.
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) =>
             _MainShell(navigationShell: navigationShell),
         branches: [
+          StatefulShellBranch(routes: [_libraryRoute()]),
           StatefulShellBranch(
             routes: [
               GoRoute(
-                path: AppRoutes.gallery,
-                builder: (context, state) => const HomeScreen(),
-              ),
-            ],
-          ),
-          StatefulShellBranch(
-            routes: [
-              GoRoute(
-                path: AppRoutes.sorting,
+                path: AppRoutes.clean,
                 builder: (context, state) => const SortingScreen(),
               ),
             ],
@@ -93,40 +126,40 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           StatefulShellBranch(
             routes: [
               GoRoute(
-                path: AppRoutes.settings,
-                builder: (context, state) => const SettingsScreen(),
+                path: AppRoutes.search,
+                builder: (context, state) => const SearchScreen(),
               ),
             ],
           ),
         ],
       ),
+      // Görüntüleyici kök navigator'da: sekme çubuğunu örter (Fotoğraflar gibi).
       GoRoute(
-        path: '/detail/:assetId',
+        path: '${AppRoutes.detailBase}/:$_assetIdParam',
         builder: (context, state) =>
-            DetailScreen(assetId: state.pathParameters['assetId']!),
+            DetailScreen(assetId: state.pathParameters[_assetIdParam]!),
       ),
       GoRoute(
-        path: AppRoutes.search,
-        builder: (context, state) => const SearchScreen(),
-      ),
-      GoRoute(
-        path: AppRoutes.recents,
-        builder: (context, state) => const RecentsScreen(),
+        path: AppRoutes.settings,
+        pageBuilder: (context, state) => CupertinoSheetPage<void>(
+          key: state.pageKey,
+          builder: (context, controller) =>
+              SettingsScreen(scrollController: controller),
+        ),
       ),
       GoRoute(
         path: AppRoutes.analysisMilestone,
-        // Kutlama sayfası da paywall gibi alttan tam sayfa modal.
-        pageBuilder: (context, state) => const MaterialPage(
-          fullscreenDialog: true,
-          child: MilestoneScreen(),
+        pageBuilder: (context, state) => CupertinoSheetPage<void>(
+          key: state.pageKey,
+          builder: (context, _) => const MilestoneScreen(),
         ),
       ),
       GoRoute(
         path: AppRoutes.paywall,
-        // Paywall alttan tam sayfa modal olarak açılır (iOS alışkanlığı).
-        pageBuilder: (context, state) => MaterialPage(
-          fullscreenDialog: true,
-          child: PaywallScreen(
+        pageBuilder: (context, state) => CupertinoSheetPage<void>(
+          key: state.pageKey,
+          builder: (context, controller) => PaywallScreen(
+            scrollController: controller,
             scrollToPacks:
                 state.uri.queryParameters[AppRoutes.paywallFocusQuery] ==
                 AppRoutes.paywallFocusPacks,
@@ -137,66 +170,104 @@ final appRouterProvider = Provider<GoRouter>((ref) {
   );
 });
 
-/// Alt sekme çubuğunu barındıran ana kabuk: 3 sekmeli yüzen buzlu-cam pil +
-/// sağında ayrık dairesel Arama butonu (Apple News+ tab bar deseni).
+/// Kütüphane sekmesi ve sekme çubuğu görünürken açılan alt ekranları.
+GoRoute _libraryRoute() {
+  return GoRoute(
+    path: AppRoutes.library,
+    builder: (context, state) => const HomeScreen(),
+    routes: [
+      GoRoute(
+        path: AppRoutes.recentsSegment,
+        builder: (context, state) => const RecentsScreen(),
+      ),
+      GoRoute(
+        path: '${AppRoutes.categorySegment}/:$_categoryParam',
+        redirect: (context, state) =>
+            _categoryOf(state) == null ? AppRoutes.library : null,
+        builder: (context, state) => BoardDetailScreen.category(
+          category: _categoryOf(state)!,
+          startInSelection: _startsInSelection(state),
+        ),
+      ),
+      GoRoute(
+        path: '${AppRoutes.boardSegment}/:$_boardIdParam',
+        builder: (context, state) => BoardDetailScreen.custom(
+          boardId: state.pathParameters[_boardIdParam]!,
+          startInSelection: _startsInSelection(state),
+        ),
+      ),
+    ],
+  );
+}
+
+/// Sekme çubuğunu barındıran ana kabuk: 2 sekmeli yüzen cam pil + sağında
+/// ayrık dairesel Ara sekmesi (iOS 26 tab bar + arama sekmesi deseni).
 class _MainShell extends StatelessWidget {
   const _MainShell({required this.navigationShell});
 
   final StatefulNavigationShell navigationShell;
 
+  /// Pil ve Ara dairesinin cam bulanıklığını paylaştığı sabit anahtar.
+  static final BackdropKey _backdropKey = BackdropKey();
+
+  void _goTab(int index) => navigationShell.goBranch(
+    index,
+    // Aynı sekmeye tekrar basınca kök ekrana döner (iOS davranışı).
+    initialLocation: index == navigationShell.currentIndex,
+  );
+
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final double bottomInset = MediaQuery.paddingOf(context).bottom;
+    final int current = navigationShell.currentIndex;
 
     return Scaffold(
       // İçerik camın arkasından aksın diye gövde navbar'ın altına uzatılır.
       extendBody: true,
       body: navigationShell,
-      bottomNavigationBar: Padding(
-        // Home indicator varsa onun üstünde, yoksa kenardan sabit boşlukla yüzer.
-        padding: EdgeInsets.fromLTRB(
-          AppSpacing.lg,
-          AppSpacing.sm,
-          AppSpacing.lg,
-          bottomInset > 0 ? bottomInset : AppSpacing.md,
-        ),
-        // 3 sekmeli pil solda esner, ayrık dairesel Arama butonu sağda sabit.
-        child: Row(
-          children: [
-            Expanded(
-              child: GlassNavBar(
-                selectedIndex: navigationShell.currentIndex,
-                onSelected: (index) => navigationShell.goBranch(
-                  index,
-                  // Aynı sekmeye tekrar basınca kök ekrana döner (iOS davranışı).
-                  initialLocation: index == navigationShell.currentIndex,
+      bottomNavigationBar: MediaQuery.withClampedTextScaling(
+        maxScaleFactor: AppSizes.navBarMaxTextScale,
+        child: BackdropGroup(
+          backdropKey: _backdropKey,
+          child: Padding(
+            // Home indicator varsa onun üstünde, yoksa kenardan sabit boşlukla.
+            padding: EdgeInsets.fromLTRB(
+              AppSpacing.lg,
+              AppSpacing.sm,
+              AppSpacing.lg,
+              bottomInset > 0 ? bottomInset : AppSpacing.md,
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: GlassNavBar(
+                    selectedIndex: current,
+                    onSelected: _goTab,
+                    destinations: [
+                      GlassNavDestination(
+                        icon: AppIcons.library,
+                        selectedIcon: AppIcons.libraryFill,
+                        label: l10n.tabLibrary,
+                      ),
+                      GlassNavDestination(
+                        icon: AppIcons.clean,
+                        selectedIcon: AppIcons.cleanFill,
+                        label: l10n.tabClean,
+                      ),
+                    ],
+                  ),
                 ),
-                destinations: [
-                  GlassNavDestination(
-                    icon: Icons.home_outlined,
-                    selectedIcon: Icons.home_rounded,
-                    label: context.l10n.tabHome,
-                  ),
-                  GlassNavDestination(
-                    icon: Icons.swipe_outlined,
-                    selectedIcon: Icons.swipe,
-                    label: context.l10n.tabSort,
-                  ),
-                  GlassNavDestination(
-                    icon: Icons.settings_outlined,
-                    selectedIcon: Icons.settings_rounded,
-                    label: context.l10n.tabSettings,
-                  ),
-                ],
-              ),
+                const SizedBox(width: AppSpacing.sm),
+                GlassActionButton(
+                  icon: AppIcons.search,
+                  label: l10n.searchTitle,
+                  selected: current == AppTab.search.index,
+                  onPressed: () => _goTab(AppTab.search.index),
+                ),
+              ],
             ),
-            const SizedBox(width: AppSpacing.sm),
-            GlassActionButton(
-              icon: Icons.search,
-              tooltip: context.l10n.searchTitle,
-              onPressed: () => context.push(AppRoutes.search),
-            ),
-          ],
+          ),
         ),
       ),
     );

@@ -2,18 +2,19 @@
 // Düzenleme modunda kategoriler sürüklenerek yeniden sıralanabilir (silme/ad yok).
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../core/l10n/category_labels.dart';
 import '../../../core/l10n/l10n_extension.dart';
 import '../../../core/models/screenshot_category.dart';
 import '../../../core/models/screenshot_entry.dart';
+import '../../../core/router/app_router.dart';
 import '../../../core/services/category_order_service.dart';
 import '../../../core/widgets/fade_in_up.dart';
 import '../../../core/widgets/reorderable_tile_grid.dart';
 import '../../analysis/providers/recent_distribution_provider.dart';
 import '../../analysis/widgets/category_target_scope.dart';
 import '../../gallery/data/screenshot_repository.dart';
-import '../board_detail_screen.dart';
 import '../providers/board_provider.dart';
 import 'board_covers.dart';
 import 'board_edit_actions.dart';
@@ -101,8 +102,8 @@ class SystemBoardsGrid extends ConsumerWidget {
                   count: categoryEntries.length,
                   covers: covers,
                   newCount: newCount,
-                  openBuilder: (context) =>
-                      BoardDetailScreen.category(category: category),
+                  onOpen: () =>
+                      context.push(AppRoutes.category(category)),
                 ),
               ),
             ),

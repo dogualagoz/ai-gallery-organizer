@@ -1,24 +1,28 @@
-// Navbar pilinin yanında yüzen, aynı buzlu-cam yüzeyi paylaşan dairesel buton.
+// Sekme pilinin yanında yüzen, aynı buzlu-cam yüzeyi paylaşan dairesel sekme.
 import 'package:flutter/material.dart';
 
 import '../constants/ui_constants.dart';
-import '../services/haptic_service.dart';
 import 'glass_panel.dart';
+import 'pressable.dart';
 
-/// [GlassNavBar] ile aynı hizada, ayrık dairesel bir aksiyon butonu (ör. Arama).
-/// `Scaffold(extendBody: true)` altında kullanılmalı — [GlassPanel]'in
-/// BackdropFilter'ı arkadan akan içeriği bulanıklaştırır.
+/// [GlassNavBar] ile aynı hizada, ayrık dairesel sekme (ör. Ara). Seçiliyken
+/// pildeki göstergeyle aynı tonda dolar. `Scaffold(extendBody: true)` altında
+/// kullanılmalı — [GlassPanel] arkadan akan içeriği bulanıklaştırır.
 class GlassActionButton extends StatelessWidget {
   const GlassActionButton({
     super.key,
     required this.icon,
-    required this.tooltip,
+    required this.label,
     required this.onPressed,
+    this.selected = false,
   });
 
   final IconData icon;
-  final String tooltip;
+
+  /// VoiceOver etiketi (görünür metin yok).
+  final String label;
   final VoidCallback onPressed;
+  final bool selected;
 
   @override
   Widget build(BuildContext context) {
@@ -26,26 +30,40 @@ class GlassActionButton extends StatelessWidget {
 
     return GlassPanel(
       borderRadius: BorderRadius.circular(AppSizes.navBarActionSize / 2),
-      // GestureDetector (InkWell değil): Scaffold'un bottomNavigationBar
-      // slotunda Material ata yok; _NavItem ile de tutarlı.
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: () {
-          Haptics.tap();
-          onPressed();
-        },
-        child: SizedBox(
-          width: AppSizes.navBarActionSize,
-          height: AppSizes.navBarHeight,
-          child: Semantics(
-            button: true,
-            label: tooltip,
-            child: Center(
-              child: Icon(
-                icon,
-                color: scheme.primary,
-                size: AppSizes.navBarIcon,
-              ),
+      child: Pressable(
+        onPressed: onPressed,
+        haptic: !selected,
+        semanticLabel: label,
+        child: Semantics(
+          selected: selected,
+          child: SizedBox(
+            width: AppSizes.navBarActionSize,
+            height: AppSizes.navBarHeight,
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                AnimatedOpacity(
+                  opacity: selected ? 1 : 0,
+                  duration: AppDurations.fast,
+                  child: Padding(
+                    padding: const EdgeInsets.all(AppSpacing.sm),
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        color: scheme.primary.withValues(
+                          alpha: AppGlass.indicatorTint,
+                        ),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const SizedBox.expand(),
+                    ),
+                  ),
+                ),
+                Icon(
+                  icon,
+                  color: selected ? scheme.primary : scheme.onSurface,
+                  size: AppSizes.navBarIcon,
+                ),
+              ],
             ),
           ),
         ),

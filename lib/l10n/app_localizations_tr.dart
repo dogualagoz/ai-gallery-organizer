@@ -13,13 +13,13 @@ class AppLocalizationsTr extends AppLocalizations {
   String get appTitle => 'Snaply';
 
   @override
-  String get tabHome => 'Ana Sayfa';
+  String get tabLibrary => 'Kütüphane';
 
   @override
-  String get tabSort => 'Sırala';
+  String get tabClean => 'Temizle';
 
   @override
-  String get tabSettings => 'Ayarlar';
+  String get doneAction => 'Bitti';
 
   @override
   String get galleryTitle => 'Ekran Görüntüleri';
