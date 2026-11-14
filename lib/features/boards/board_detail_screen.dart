@@ -25,7 +25,7 @@ import '../analysis/providers/recent_distribution_provider.dart';
 import '../gallery/providers/gallery_provider.dart';
 import '../gallery/screenshot_actions.dart';
 import '../gallery/widgets/screenshot_grid.dart';
-import '../paywall/open_paywall.dart';
+import '../../core/router/open_paywall.dart';
 import 'providers/board_provider.dart';
 import 'widgets/board_edit_actions.dart';
 

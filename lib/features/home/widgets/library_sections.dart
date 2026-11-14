@@ -11,7 +11,7 @@ import '../../../core/l10n/l10n_extension.dart';
 import '../../../core/models/board.dart';
 import '../../../core/models/screenshot_category.dart';
 import '../../../core/models/screenshot_entry.dart';
-import '../../../core/router/app_router.dart';
+import '../../../core/router/app_routes.dart';
 import '../../../core/services/category_names_service.dart';
 import '../../../core/services/category_order_service.dart';
 import '../../../core/services/entitlement_service.dart';

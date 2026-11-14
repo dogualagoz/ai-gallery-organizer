@@ -3,7 +3,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../core/router/app_router.dart';
+import 'app_routes.dart';
 
 /// Paywall sheet'ini açar. [packs] true ise açılışta analiz paketleri
 /// bölümüne kaydırır (kota bitti akışları).

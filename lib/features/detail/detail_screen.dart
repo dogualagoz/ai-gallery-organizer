@@ -19,7 +19,7 @@ import '../../core/constants/motion_constants.dart';
 import '../../core/constants/ui_constants.dart';
 import '../../core/l10n/l10n_extension.dart';
 import '../../core/models/screenshot_entry.dart';
-import '../../core/router/app_router.dart';
+import '../../core/router/app_routes.dart';
 import '../../core/services/haptic_service.dart';
 import '../../core/utils/motion_physics.dart';
 import '../../core/widgets/empty_state_view.dart';

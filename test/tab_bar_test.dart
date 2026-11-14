@@ -1,6 +1,6 @@
 // Sekme pili (dokunma, sürükleme, momentum projeksiyonu) ve rota yolu testleri.
 import 'package:ai_gallery_organizer/core/models/screenshot_category.dart';
-import 'package:ai_gallery_organizer/core/router/app_router.dart';
+import 'package:ai_gallery_organizer/core/router/app_routes.dart';
 import 'package:ai_gallery_organizer/core/theme/app_theme.dart';
 import 'package:ai_gallery_organizer/core/widgets/glass_nav_bar.dart';
 import 'package:flutter/cupertino.dart';

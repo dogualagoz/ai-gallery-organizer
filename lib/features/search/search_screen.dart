@@ -22,7 +22,7 @@ import '../../core/widgets/app_nav_scaffold.dart';
 import '../../core/widgets/empty_state_view.dart';
 import '../gallery/providers/gallery_provider.dart';
 import '../gallery/widgets/screenshot_grid.dart';
-import '../paywall/open_paywall.dart';
+import '../../core/router/open_paywall.dart';
 import 'search_index.dart';
 import 'search_request_provider.dart';
 import 'widgets/search_category_bar.dart';

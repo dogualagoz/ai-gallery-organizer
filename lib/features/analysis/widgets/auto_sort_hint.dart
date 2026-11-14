@@ -11,7 +11,7 @@ import '../../../core/services/entitlement_service.dart';
 import '../../../core/services/preferences_service.dart';
 import '../../../core/widgets/app_nav_scaffold.dart';
 import '../../../core/widgets/surface_card.dart';
-import '../../paywall/open_paywall.dart';
+import '../../../core/router/open_paywall.dart';
 
 class AutoSortHint extends ConsumerWidget {
   const AutoSortHint({super.key});

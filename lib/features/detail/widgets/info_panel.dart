@@ -20,7 +20,7 @@ import '../../../core/widgets/status_toast.dart';
 import '../../../core/widgets/surface_card.dart';
 import '../../analysis/providers/analysis_queue_provider.dart';
 import '../../boards/providers/board_provider.dart';
-import '../../paywall/open_paywall.dart';
+import '../../../core/router/open_paywall.dart';
 import 'viewer_top_bar.dart';
 
 /// [entry]'nin bilgileri. Üstteki başlık alanı sürükleme tutamağıdır

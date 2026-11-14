@@ -3,15 +3,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../core/router/app_router.dart';
-
-/// Görüntüleyicide kaydırılabilen sıralı koleksiyon. Rota ekiyle (extra)
-/// taşınır; deep link'te bulunmaz, görüntüleyici tek görselle açılır.
-class ViewerScope {
-  const ViewerScope(this.assetIds);
-
-  final List<String> assetIds;
-}
+import 'app_routes.dart';
 
 /// [assetId]'yi görüntüleyicide açar. [scope] verilirse görüntüleyici bu
 /// sıradaki komşulara kaydırılabilir.

@@ -14,7 +14,7 @@ import '../../../core/services/haptic_service.dart';
 import '../../../core/services/preferences_service.dart';
 import '../../../core/utils/link_opener.dart';
 import '../../../core/widgets/grouped_section.dart';
-import '../../paywall/open_paywall.dart';
+import '../../../core/router/open_paywall.dart';
 import '../../paywall/providers/purchase_provider.dart';
 import '../providers/package_info_provider.dart';
 import 'settings_rows.dart';

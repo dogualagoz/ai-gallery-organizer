@@ -8,7 +8,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/constants/ui_constants.dart';
 import '../../../core/l10n/l10n_extension.dart';
 import '../../../core/models/screenshot_entry.dart';
-import '../../detail/open_viewer.dart';
+import '../../../core/router/open_viewer.dart';
 import '../data/screenshot_repository.dart';
 import 'screenshot_context_menu.dart';
 import 'screenshot_grid_tile.dart';

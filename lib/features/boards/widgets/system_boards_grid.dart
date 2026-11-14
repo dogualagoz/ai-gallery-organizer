@@ -10,7 +10,7 @@ import '../../../core/l10n/category_labels.dart';
 import '../../../core/l10n/l10n_extension.dart';
 import '../../../core/models/screenshot_category.dart';
 import '../../../core/models/screenshot_entry.dart';
-import '../../../core/router/app_router.dart';
+import '../../../core/router/app_routes.dart';
 import '../../../core/services/category_order_service.dart';
 import '../../../core/widgets/reorderable_tile_grid.dart';
 import '../../analysis/providers/recent_distribution_provider.dart';

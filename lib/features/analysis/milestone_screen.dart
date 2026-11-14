@@ -13,7 +13,7 @@ import '../../core/services/category_names_service.dart';
 import '../../core/services/entitlement_service.dart';
 import '../../core/widgets/app_chip.dart';
 import '../../core/widgets/sheet_close_button.dart';
-import '../paywall/open_paywall.dart';
+import '../../core/router/open_paywall.dart';
 import 'providers/analysis_queue_provider.dart';
 import 'widgets/milestone_celebration.dart';
 

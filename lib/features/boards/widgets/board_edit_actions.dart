@@ -12,7 +12,7 @@ import '../../../core/l10n/l10n_extension.dart';
 import '../../../core/models/board.dart';
 import '../../../core/models/screenshot_category.dart';
 import '../../../core/models/screenshot_entry.dart';
-import '../../../core/router/app_router.dart';
+import '../../../core/router/app_routes.dart';
 import '../../../core/services/category_names_service.dart';
 import '../../../core/services/entitlement_service.dart';
 import '../../../core/widgets/app_dialogs.dart';
@@ -21,7 +21,7 @@ import '../../../core/widgets/status_toast.dart';
 import '../../analysis/providers/analysis_queue_provider.dart';
 import '../../gallery/data/screenshot_repository.dart';
 import '../../gallery/providers/gallery_provider.dart';
-import '../../paywall/open_paywall.dart';
+import '../../../core/router/open_paywall.dart';
 import '../providers/board_provider.dart';
 
 /// Düzenleme modu aksiyon sayfasından seçilen işlem.
