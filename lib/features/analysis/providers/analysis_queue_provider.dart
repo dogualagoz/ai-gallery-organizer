@@ -468,6 +468,10 @@ class AnalysisQueueNotifier extends Notifier<AnalysisQueueState> {
     state = const AnalysisQueueState();
   }
 
+  /// Son tur kullanıcı tarafından durduruldu/sıfırlandı mı (auto-sort bunu
+  /// görürse turu kendiliğinden yeniden başlatmaz). Yeni `start()` temizler.
+  bool get stoppedByUser => _cancelRequested;
+
   /// Tur sonucu banner'ını kapatır.
   void dismiss() {
     if (!state.isRunning) state = const AnalysisQueueState();
