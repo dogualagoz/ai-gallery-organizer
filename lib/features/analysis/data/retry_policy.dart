@@ -35,8 +35,6 @@ class RetryPolicy {
   Duration delayFor(int attempt, {Random? random}) {
     final Random rng = random ?? Random();
     final double factor = (1 << (attempt - 1)) * (0.75 + rng.nextDouble() / 2);
-    return Duration(
-      milliseconds: (baseDelay.inMilliseconds * factor).round(),
-    );
+    return Duration(milliseconds: (baseDelay.inMilliseconds * factor).round());
   }
 }

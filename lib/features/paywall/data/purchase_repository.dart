@@ -45,8 +45,8 @@ class PurchaseRepository {
   /// geçerli kod bir abonelik transaction'ı üretir; sonuç [purchaseStream]'e
   /// düşer ve mevcut satın alma akışıyla aynı şekilde Pro'yu açar.
   Future<void> presentCodeRedemption() {
-    final InAppPurchaseStoreKitPlatformAddition addition =
-        _iap.getPlatformAddition<InAppPurchaseStoreKitPlatformAddition>();
+    final InAppPurchaseStoreKitPlatformAddition addition = _iap
+        .getPlatformAddition<InAppPurchaseStoreKitPlatformAddition>();
     return addition.presentCodeRedemptionSheet();
   }
 

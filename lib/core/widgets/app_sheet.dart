@@ -1,7 +1,6 @@
 // iOS sheet yardımcıları: sayfa gibi modaller için CupertinoSheetRoute (go_router
 // Page'i dahil), küçük seçiciler için kök navigator'da kısa bottom sheet.
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
 
 /// go_router `pageBuilder`'ında kullanılan iOS sheet sayfası: kart gibi alttan
 /// açılır, arkadaki sayfa geri çekilip küçülür, aşağı sürükleyince kapanır.
@@ -40,20 +39,4 @@ Future<T?> showAppSheet<T>(
   required ScrollableWidgetBuilder builder,
 }) {
   return showCupertinoSheet<T>(context: context, scrollableBuilder: builder);
-}
-
-/// Küçük seçici/sheet (kategori seçimi gibi). Kök navigator'da açılır ki
-/// yüzen sekme çubuğu sheet'in üstünde kalmasın; tutamak ve safe area hazır.
-Future<T?> showPickerSheet<T>(
-  BuildContext context, {
-  required WidgetBuilder builder,
-}) {
-  return showModalBottomSheet<T>(
-    context: context,
-    useRootNavigator: true,
-    useSafeArea: true,
-    showDragHandle: true,
-    isScrollControlled: true,
-    builder: builder,
-  );
 }

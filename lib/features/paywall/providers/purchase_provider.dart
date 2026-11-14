@@ -30,7 +30,7 @@ class PurchaseFlowState {
   /// Başarılı satın almanın ürün kimliği — UI paket/abonelik ayrımı yapar
   /// (ör. paket alımı paywall'u kapatmaz, snackbar gösterir).
   final String? productId;
-} 
+}
 
 /// Çifte teslimatı önlemek için hatırlanan işlem sayısı üst sınırı.
 const int _maxRememberedTransactions = 50;
@@ -72,9 +72,8 @@ class PurchaseFlowNotifier extends Notifier<PurchaseFlowState> {
     final PurchaseRepository repo = ref.read(purchaseRepositoryProvider);
     _subscription = repo.purchaseStream.listen(
       _handleUpdates,
-      onError: (_) => state = const PurchaseFlowState(
-        status: PurchaseFlowStatus.error,
-      ),
+      onError: (_) =>
+          state = const PurchaseFlowState(status: PurchaseFlowStatus.error),
     );
     ref.onDispose(() => _subscription?.cancel());
     return PurchaseFlowState.initial;
@@ -138,10 +137,12 @@ class PurchaseFlowNotifier extends Notifier<PurchaseFlowState> {
     if (credits == null) {
       // İşlem zamanı trial penceresi hesabında kullanılır; restore orijinal
       // tarihi getirdiği için pencere reinstall sonrası da doğru kalır.
-      await ref.read(entitlementProvider.notifier).setProFromPurchase(
-        productId: purchase.productID,
-        purchaseMs: int.tryParse(purchase.transactionDate ?? ''),
-      );
+      await ref
+          .read(entitlementProvider.notifier)
+          .setProFromPurchase(
+            productId: purchase.productID,
+            purchaseMs: int.tryParse(purchase.transactionDate ?? ''),
+          );
       return;
     }
     if (purchase.status != PurchaseStatus.purchased) return;

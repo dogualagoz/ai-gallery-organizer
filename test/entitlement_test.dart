@@ -83,8 +83,7 @@ void main() {
   });
 
   group('haftalık kota penceresi', () {
-    test('migration: pencere anahtarı yoksa sayaç sıfırlanıp pencere açılır',
-        () async {
+    test('migration: pencere anahtarı yoksa sayaç sıfırlanıp pencere açılır', () async {
       // Ömürlük-kota sürümünden gelen kullanıcı: kullanım var ama pencere yok.
       final container = await _container(
         initialValues: {PrefKeys.aiAnalysisUsed: 80},
@@ -125,38 +124,42 @@ void main() {
       expect(state.weekStartMs, greaterThan(oldStart));
     });
 
-    test('ensureWeeklyWindow süre dolunca free sayacı sıfırlar, kredi kalır',
-        () async {
-      final container = await _container();
-      final notifier = container.read(entitlementProvider.notifier);
-      await notifier.addCredits(50);
-      await notifier.registerAnalysis(FreeLimits.aiAnalysis);
-      expect(container.read(entitlementProvider).canAnalyze, isTrue);
+    test(
+      'ensureWeeklyWindow süre dolunca free sayacı sıfırlar, kredi kalır',
+      () async {
+        final container = await _container();
+        final notifier = container.read(entitlementProvider.notifier);
+        await notifier.addCredits(50);
+        await notifier.registerAnalysis(FreeLimits.aiAnalysis);
+        expect(container.read(entitlementProvider).canAnalyze, isTrue);
 
-      final DateTime later = DateTime.now().add(
-        FreeLimits.aiAnalysisWindow + const Duration(minutes: 1),
-      );
-      notifier.ensureWeeklyWindow(now: later);
+        final DateTime later = DateTime.now().add(
+          FreeLimits.aiAnalysisWindow + const Duration(minutes: 1),
+        );
+        notifier.ensureWeeklyWindow(now: later);
 
-      final state = container.read(entitlementProvider);
-      expect(state.aiAnalysisUsed, 0);
-      expect(state.remainingFreeAnalysis, FreeLimits.aiAnalysis);
-      expect(state.analysisCredits, 50);
-    });
+        final state = container.read(entitlementProvider);
+        expect(state.aiAnalysisUsed, 0);
+        expect(state.remainingFreeAnalysis, FreeLimits.aiAnalysis);
+        expect(state.analysisCredits, 50);
+      },
+    );
 
-    test('ensureWeeklyWindow pencere dolmadıysa hiçbir şeyi değiştirmez',
-        () async {
-      final container = await _container();
-      final notifier = container.read(entitlementProvider.notifier);
-      await notifier.registerAnalysis(30);
-      final int weekStart = container.read(entitlementProvider).weekStartMs;
+    test(
+      'ensureWeeklyWindow pencere dolmadıysa hiçbir şeyi değiştirmez',
+      () async {
+        final container = await _container();
+        final notifier = container.read(entitlementProvider.notifier);
+        await notifier.registerAnalysis(30);
+        final int weekStart = container.read(entitlementProvider).weekStartMs;
 
-      notifier.ensureWeeklyWindow();
+        notifier.ensureWeeklyWindow();
 
-      final state = container.read(entitlementProvider);
-      expect(state.aiAnalysisUsed, 30);
-      expect(state.weekStartMs, weekStart);
-    });
+        final state = container.read(entitlementProvider);
+        expect(state.aiAnalysisUsed, 30);
+        expect(state.weekStartMs, weekStart);
+      },
+    );
 
     test('pencere dolunca swipe sayacı da sıfırlanır', () async {
       final container = await _container();
@@ -186,32 +189,33 @@ void main() {
       final state = container.read(entitlementProvider);
       expect(
         state.nextWeeklyReset,
-        DateTime.fromMillisecondsSinceEpoch(
-          state.weekStartMs,
-        ).add(FreeLimits.aiAnalysisWindow),
+        DateTime.fromMillisecondsSinceEpoch(state.weekStartMs)
+            .add(FreeLimits.aiAnalysisWindow),
       );
     });
   });
 
   group('trial analiz sınırı', () {
-    test('yıllık satın alma trial penceresini açar ve sınır uygulanır',
-        () async {
-      final container = await _container();
-      final notifier = container.read(entitlementProvider.notifier);
-      await notifier.setProFromPurchase(productId: ProductIds.yearly);
+    test(
+      'yıllık satın alma trial penceresini açar ve sınır uygulanır',
+      () async {
+        final container = await _container();
+        final notifier = container.read(entitlementProvider.notifier);
+        await notifier.setProFromPurchase(productId: ProductIds.yearly);
 
-      var state = container.read(entitlementProvider);
-      expect(state.isInTrialWindow, isTrue);
-      expect(state.remainingTrialAnalysis, TrialLimits.aiAnalysis);
-      expect(state.canAnalyze, isTrue);
+        var state = container.read(entitlementProvider);
+        expect(state.isInTrialWindow, isTrue);
+        expect(state.remainingTrialAnalysis, TrialLimits.aiAnalysis);
+        expect(state.canAnalyze, isTrue);
 
-      await notifier.registerAnalysis(TrialLimits.aiAnalysis);
-      state = container.read(entitlementProvider);
-      expect(state.remainingTrialAnalysis, 0);
-      expect(state.canAnalyze, isFalse);
-      // Haftalık free sayaç trial tüketiminden etkilenmez.
-      expect(state.aiAnalysisUsed, 0);
-    });
+        await notifier.registerAnalysis(TrialLimits.aiAnalysis);
+        state = container.read(entitlementProvider);
+        expect(state.remainingTrialAnalysis, 0);
+        expect(state.canAnalyze, isFalse);
+        // Haftalık free sayaç trial tüketiminden etkilenmez.
+        expect(state.aiAnalysisUsed, 0);
+      },
+    );
 
     test('pencere geçmişte kaldıysa Pro sınırsızdır', () async {
       final container = await _container();
@@ -261,8 +265,7 @@ void main() {
       expect(state.analysisCredits, 50);
     });
 
-    test('setPro(false) trial izlerini temizler, free hafta korunur',
-        () async {
+    test('setPro(false) trial izlerini temizler, free hafta korunur', () async {
       final container = await _container();
       final notifier = container.read(entitlementProvider.notifier);
       // Önce free kullanıcı olarak biraz kota harca.

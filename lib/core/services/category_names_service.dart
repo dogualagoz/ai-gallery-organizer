@@ -23,9 +23,6 @@ class CategoryNamesNotifier extends Notifier<Map<int, String>> {
       if (key is int) key: _box.get(key)!,
   };
 
-  /// [category] için özel ad; yoksa null.
-  String? nameFor(ScreenshotCategory category) => state[category.index];
-
   /// Özel ad ayarlar; boş/yalnızca boşluk ise override'ı temizler.
   Future<void> setName(ScreenshotCategory category, String name) async {
     final String trimmed = name.trim();

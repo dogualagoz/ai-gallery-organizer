@@ -13,7 +13,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 /// Gerçek IAP kanalına dokunmadan purchaseStream'i elle tetikleyen sahte repo.
 class _FakePurchaseRepository extends PurchaseRepository {
-
   final StreamController<List<PurchaseDetails>> _controller =
       StreamController.broadcast();
   final List<String> completedProductIds = [];
@@ -116,20 +115,23 @@ void main() {
     expect(container.read(entitlementProvider).analysisCredits, 1000);
   });
 
-  test('restored paket olayı kredi vermez (consumable restore edilmez)', () async {
-    final fake = _FakePurchaseRepository();
-    final container = await _container(fake);
-    container.read(purchaseFlowProvider);
+  test(
+    'restored paket olayı kredi vermez (consumable restore edilmez)',
+    () async {
+      final fake = _FakePurchaseRepository();
+      final container = await _container(fake);
+      container.read(purchaseFlowProvider);
 
-    fake.emit(
-      _purchase(
-        productId: ProductIds.pack500,
-        status: PurchaseStatus.restored,
-        purchaseId: 'tx-4',
-      ),
-    );
-    await Future<void>.delayed(Duration.zero);
+      fake.emit(
+        _purchase(
+          productId: ProductIds.pack500,
+          status: PurchaseStatus.restored,
+          purchaseId: 'tx-4',
+        ),
+      );
+      await Future<void>.delayed(Duration.zero);
 
-    expect(container.read(entitlementProvider).analysisCredits, 0);
-  });
+      expect(container.read(entitlementProvider).analysisCredits, 0);
+    },
+  );
 }

@@ -29,8 +29,6 @@ class BoardRepository {
 
   Stream<BoxEvent> watchChanges() => _box.watch();
 
-  Board? boardFor(String id) => _box.get(id);
-
   Future<Board> create(String name) async {
     // Yeni board her zaman listenin sonuna eklenir.
     final int maxOrder = _box.values.fold<int>(

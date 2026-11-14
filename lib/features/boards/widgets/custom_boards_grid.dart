@@ -91,9 +91,8 @@ class _NewBoardTile extends ConsumerWidget {
     final ColorScheme scheme = Theme.of(context).colorScheme;
 
     return Pressable(
-      onPressed: () => canCreate
-          ? _showCreateDialog(context, ref)
-          : openPaywall(context),
+      onPressed: () =>
+          canCreate ? _showCreateDialog(context, ref) : openPaywall(context),
       child: SurfaceCard(
         padding: const EdgeInsets.all(AppSpacing.md),
         child: Column(

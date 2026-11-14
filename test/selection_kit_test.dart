@@ -17,6 +17,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 /// Testlerin ortak kabuğu: tema + l10n (İngilizce) + tek gövde.
+const Key _hitTarget = ValueKey<String>('hit-target');
+
 Widget _app(Widget child) {
   return MaterialApp(
     theme: AppTheme.light,
@@ -76,18 +78,18 @@ void main() {
           child: GestureDetector(
             behavior: HitTestBehavior.opaque,
             onTap: () => taps++,
-            child: const SizedBox(width: 100, height: 60),
+            child: const SizedBox(key: _hitTarget, width: 100, height: 60),
           ),
         ),
       );
 
       await tester.pumpWidget(build(false));
-      await tester.tap(find.byType(SizedBox).last, warnIfMissed: false);
+      await tester.tap(find.byKey(_hitTarget), warnIfMissed: false);
       expect(taps, 0);
 
       await tester.pumpWidget(build(true));
       await tester.pumpAndSettle();
-      await tester.tap(find.byType(SizedBox).last);
+      await tester.tap(find.byKey(_hitTarget));
       expect(taps, 1);
     });
   });

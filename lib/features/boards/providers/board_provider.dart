@@ -13,8 +13,9 @@ final boardsProvider = AsyncNotifierProvider<BoardsNotifier, List<Board>>(
 
 /// Anasayfadaki pano/kategori ızgaralarının "düzenleme modu" (iOS jiggle).
 /// Uzun basınca açılır, "Bitti" ile kapanır; her iki ızgara da paylaşır.
-final boardsEditModeProvider =
-    NotifierProvider<BoardsEditModeNotifier, bool>(BoardsEditModeNotifier.new);
+final boardsEditModeProvider = NotifierProvider<BoardsEditModeNotifier, bool>(
+  BoardsEditModeNotifier.new,
+);
 
 class BoardsEditModeNotifier extends Notifier<bool> {
   @override
@@ -63,7 +64,8 @@ class BoardsNotifier extends AsyncNotifier<List<Board>> {
     final ScreenshotRepository screenshotRepo = ref.read(
       screenshotRepositoryProvider,
     );
-    final Iterable<String> assignedAssetIds = screenshotRepo.sortedEntries()
+    final Iterable<String> assignedAssetIds = screenshotRepo
+        .sortedEntries()
         .where((entry) => entry.boardId == id)
         .map((entry) => entry.assetId);
     for (final String assetId in assignedAssetIds) {

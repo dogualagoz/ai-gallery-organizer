@@ -13,10 +13,7 @@ import 'analysis_queue_provider.dart';
 /// `AnalysisQueueNotifier.start()` zaten çalışan bir turu no-op yaptığı için
 /// tekrar tetiklenmesi (ör. her başarılı kayıtta) güvenlidir.
 final autoSortControllerProvider = Provider<void>((ref) {
-  ref.listen<AsyncValue<List<ScreenshotEntry>>>(galleryProvider, (
-    _,
-    next,
-  ) {
+  ref.listen<AsyncValue<List<ScreenshotEntry>>>(galleryProvider, (_, next) {
     final List<ScreenshotEntry>? entries = next.value;
     if (entries == null) return;
     if (!ref.read(entitlementProvider).isPro) return;

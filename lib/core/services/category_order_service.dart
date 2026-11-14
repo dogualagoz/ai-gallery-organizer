@@ -43,17 +43,16 @@ class CategoryOrderNotifier extends Notifier<List<int>> {
   /// [visible] kategorileri kayıtlı tam sıraya göre diziler.
   List<ScreenshotCategory> sortVisible(List<ScreenshotCategory> visible) {
     final List<int> order = state;
-    final List<ScreenshotCategory> sorted = [...visible]
-      ..sort((a, b) => order.indexOf(a.index).compareTo(order.indexOf(b.index)));
+    final List<ScreenshotCategory> sorted = [
+      ...visible,
+    ]..sort((a, b) => order.indexOf(a.index).compareTo(order.indexOf(b.index)));
     return sorted;
   }
 
   /// Görünür kategorilerin yeni sırasını ([newVisibleOrder]) kalıcılaştırır.
   /// Görünmeyen kategorilerin tam sıradaki konumları değişmez: yalnız görünür
   /// olanların işgal ettiği "slotlara" yeni sıra yerleştirilir.
-  Future<void> reorderVisible(
-    List<ScreenshotCategory> newVisibleOrder,
-  ) async {
+  Future<void> reorderVisible(List<ScreenshotCategory> newVisibleOrder) async {
     final List<int> full = [...state];
     final Set<int> visibleIndexes = {
       for (final ScreenshotCategory c in newVisibleOrder) c.index,

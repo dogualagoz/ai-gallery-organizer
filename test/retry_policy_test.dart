@@ -36,7 +36,10 @@ void main() {
       for (int attempt = 1; attempt <= 3; attempt++) {
         final int base = 2000 * (1 << (attempt - 1));
         final Duration delay = policy.delayFor(attempt, random: rng);
-        expect(delay.inMilliseconds, greaterThanOrEqualTo((base * 0.75).round()));
+        expect(
+          delay.inMilliseconds,
+          greaterThanOrEqualTo((base * 0.75).round()),
+        );
         expect(delay.inMilliseconds, lessThan((base * 1.25).round()));
       }
     });

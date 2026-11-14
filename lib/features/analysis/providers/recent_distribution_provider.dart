@@ -35,10 +35,4 @@ class RecentDistributionNotifier
     final Map<ScreenshotCategory, int> next = {...state}..remove(category);
     state = next;
   }
-
-  /// Tüm rozetleri temizler.
-  void clearAll() {
-    if (state.isEmpty) return;
-    state = const {};
-  }
 }
