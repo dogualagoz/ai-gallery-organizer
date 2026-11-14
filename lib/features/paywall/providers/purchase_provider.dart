@@ -66,28 +66,55 @@ final purchaseFlowProvider =
 /// paywall ekranı kapalıyken tamamlanan/restore edilen satın almalar da yakalanır.
 class PurchaseFlowNotifier extends Notifier<PurchaseFlowState> {
   StreamSubscription<List<PurchaseDetails>>? _subscription;
+  Timer? _restoreTimer;
+
+  /// Kredi teslimi sürerken aynı işlemin ikinci kez işlenmesini önler
+  /// (kontrol ile `_markDelivered` arasında `await` boşluğu var).
+  final Set<String> _deliveringTxIds = {};
 
   @override
   PurchaseFlowState build() {
     final PurchaseRepository repo = ref.read(purchaseRepositoryProvider);
     _subscription = repo.purchaseStream.listen(
       _handleUpdates,
-      onError: (_) =>
-          state = const PurchaseFlowState(status: PurchaseFlowStatus.error),
+      onError: (Object error, StackTrace stackTrace) {
+        debugPrint('IAP: purchase stream hatası: $error\n$stackTrace');
+        state = const PurchaseFlowState(status: PurchaseFlowStatus.error);
+      },
     );
-    ref.onDispose(() => _subscription?.cancel());
+    ref.onDispose(() {
+      _subscription?.cancel();
+      _restoreTimer?.cancel();
+    });
     return PurchaseFlowState.initial;
   }
 
+  /// Satın alma başlatır; platform hatasında akış `error`'a düşer (UI'ı
+  /// `pending`'de kilitlemez).
   Future<void> buy(ProductDetails product) async {
     state = const PurchaseFlowState(status: PurchaseFlowStatus.pending);
-    await ref.read(purchaseRepositoryProvider).buy(product);
+    try {
+      await ref.read(purchaseRepositoryProvider).buy(product);
+    } catch (error, stackTrace) {
+      debugPrint('IAP: buy hatası (${product.id}): $error\n$stackTrace');
+      state = const PurchaseFlowState(status: PurchaseFlowStatus.error);
+    }
   }
 
+  /// Geri yükleme başlatır; hiçbir işlem dönmezse [_restoreTimeout] sonra
+  /// `pending` durumu temizlenir.
   Future<void> restore() async {
     state = const PurchaseFlowState(status: PurchaseFlowStatus.pending);
-    await ref.read(purchaseRepositoryProvider).restore();
-    Future.delayed(_restoreTimeout, () {
+    try {
+      await ref.read(purchaseRepositoryProvider).restore();
+    } catch (error, stackTrace) {
+      debugPrint('IAP: restore hatası: $error\n$stackTrace');
+      state = const PurchaseFlowState(status: PurchaseFlowStatus.error);
+      return;
+    }
+    // Önceki zamanlayıcı ikinci restore'un pending'ini erken sıfırlamasın.
+    _restoreTimer?.cancel();
+    _restoreTimer = Timer(_restoreTimeout, () {
       if (state.status == PurchaseFlowStatus.pending) {
         state = PurchaseFlowState.initial;
       }
@@ -146,9 +173,16 @@ class PurchaseFlowNotifier extends Notifier<PurchaseFlowState> {
       return;
     }
     if (purchase.status != PurchaseStatus.purchased) return;
-    if (await _alreadyDelivered(purchase.purchaseID)) return;
-    await ref.read(entitlementProvider.notifier).addCredits(credits);
-    await _markDelivered(purchase.purchaseID);
+    final String? txId = purchase.purchaseID;
+    // `add` senkron: ikinci aynı işlem ilk `await`'ten önce elenir.
+    if (txId != null && !_deliveringTxIds.add(txId)) return;
+    try {
+      if (await _alreadyDelivered(txId)) return;
+      await ref.read(entitlementProvider.notifier).addCredits(credits);
+      await _markDelivered(txId);
+    } finally {
+      if (txId != null) _deliveringTxIds.remove(txId);
+    }
   }
 
   Future<bool> _alreadyDelivered(String? purchaseId) async {
