@@ -181,7 +181,7 @@ Future<void> renameBoard(
   final l10n = context.l10n;
   if (category != null) {
     final Map<int, String> names = ref.read(categoryNamesProvider);
-    final String current = names[category.index] ?? category.label(l10n);
+    final String current = category.displayName(l10n, names);
     final String? name = await showTextPrompt(
       context,
       title: l10n.categoryRenameDialogTitle,

@@ -88,4 +88,29 @@ void main() {
     await repo.restorePlacement(before);
     expect(box.get('a'), isNull);
   });
+
+  test(
+    'kişiselleştirme sinyali hata verse de kategori yazımı başarılı sayılır',
+    () async {
+      final ScreenshotRepository failingRepo = ScreenshotRepository(
+        box,
+        onCorrection: (from, to, tags) async =>
+            throw StateError('priors yazılamadı'),
+      );
+      await box.put(
+        'a',
+        ScreenshotEntry(
+          assetId: 'a',
+          createdAt: DateTime(2026),
+          category: ScreenshotCategory.social,
+          aiCategory: ScreenshotCategory.social,
+          analyzedAt: DateTime(2026, 2),
+        ),
+      );
+
+      await failingRepo.setCategory('a', ScreenshotCategory.receipts);
+
+      expect(box.get('a')!.category, ScreenshotCategory.receipts);
+    },
+  );
 }

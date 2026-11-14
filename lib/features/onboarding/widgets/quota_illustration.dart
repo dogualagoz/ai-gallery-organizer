@@ -267,7 +267,10 @@ class _RingPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_RingPainter oldDelegate) =>
-      oldDelegate.fill != fill || oldDelegate.sweepShift != sweepShift;
+      oldDelegate.fill != fill ||
+      oldDelegate.sweepShift != sweepShift ||
+      oldDelegate.trackColor != trackColor ||
+      oldDelegate.fillColor != fillColor;
 }
 
 /// Screenshot'ı andıran, çizgi dolgulu küçük kart.

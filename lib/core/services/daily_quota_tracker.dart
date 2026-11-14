@@ -33,9 +33,14 @@ class DailyQuotaTracker {
   bool canRequest(int? dailyCap) => dailyCap == null || usedToday < dailyCap;
 
   /// Bir isteği sayaca işler; gün değiştiyse sayaç sıfırdan başlar.
+  ///
+  /// İki yazım da `await`'ten ÖNCE başlar: prefs önbelleği senkron güncellenir,
+  /// bu yüzden eşzamanlı worker'ların okuduğu sayaç kayıp güncelleme yapmaz.
   Future<void> register() async {
     final int next = usedToday + 1;
-    await _prefs.setString(PrefKeys.aiDailyDate, _today);
-    await _prefs.setInt(PrefKeys.aiDailyCount, next);
+    await Future.wait([
+      _prefs.setString(PrefKeys.aiDailyDate, _today),
+      _prefs.setInt(PrefKeys.aiDailyCount, next),
+    ]);
   }
 }

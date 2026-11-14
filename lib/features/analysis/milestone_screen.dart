@@ -9,6 +9,7 @@ import '../../core/constants/ui_constants.dart';
 import '../../core/l10n/category_labels.dart';
 import '../../core/l10n/l10n_extension.dart';
 import '../../core/models/screenshot_category.dart';
+import '../../core/services/category_names_service.dart';
 import '../../core/services/entitlement_service.dart';
 import '../../core/widgets/app_chip.dart';
 import '../../core/widgets/sheet_close_button.dart';
@@ -117,14 +118,16 @@ class _RunSummary extends ConsumerWidget {
 }
 
 /// Bu turda en çok dolan kategoriler: ikonlu bilgi kapsülleri.
-class _TopCategories extends StatelessWidget {
+class _TopCategories extends ConsumerWidget {
   const _TopCategories({required this.counts});
 
   final Map<ScreenshotCategory, int> counts;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     if (counts.isEmpty) return const SizedBox.shrink();
+    // Kullanıcının verdiği özel kategori adları kutlamada da görünsün.
+    final Map<int, String> names = ref.watch(categoryNamesProvider);
     final List<MapEntry<ScreenshotCategory, int>> top = counts.entries.toList()
       ..sort((a, b) => b.value.compareTo(a.value));
 
@@ -136,7 +139,7 @@ class _TopCategories extends StatelessWidget {
           AppChip(
             icon: entry.key.icon,
             label:
-                '${entry.key.label(context.l10n)} '
+                '${entry.key.displayName(context.l10n, names)} '
                 '$kInlineSeparator ${entry.value}',
             background: Theme.of(context).colorScheme.surface,
           ),

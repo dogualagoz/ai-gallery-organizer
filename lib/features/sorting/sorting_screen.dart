@@ -58,7 +58,10 @@ class _SortingScreenState extends ConsumerState<SortingScreen> {
   void initState() {
     super.initState();
     // 7 gün boşta kalan kullanıcı ekrana taze haftalık swipe kotasıyla girsin.
-    ref.read(entitlementProvider.notifier).ensureWeeklyWindow();
+    // Pencere dolmuşsa provider state'i değişir; widget kurulurken yazılmasın.
+    Future.microtask(() {
+      if (mounted) ref.read(entitlementProvider.notifier).ensureWeeklyWindow();
+    });
   }
 
   @override

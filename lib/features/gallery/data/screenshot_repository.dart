@@ -186,8 +186,13 @@ class ScreenshotRepository {
     entry.analyzedAt ??= DateTime.now();
     await _box.put(assetId, entry);
     // Kullanıcı gerçekten AI'ın kararını değiştirdiyse öğrenme sinyali kaydet.
+    // En iyi çaba: yazım zaten başarılı, sinyal hatası taşımayı bozmamalı.
     if (aiOriginal != null && aiOriginal != category) {
-      await onCorrection?.call(aiOriginal, category, entry.tags);
+      try {
+        await onCorrection?.call(aiOriginal, category, entry.tags);
+      } catch (error, stackTrace) {
+        debugPrint('Düzeltme sinyali kaydedilemedi: $error\n$stackTrace');
+      }
     }
   }
 

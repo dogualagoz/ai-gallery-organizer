@@ -5,6 +5,7 @@
 // ederse AI'ın kararı bu öğrenilen kategoriyle güncellenir.
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_ce/hive.dart';
 
@@ -106,7 +107,10 @@ class CategoryPriorsNotifier extends Notifier<PriorsMap> {
         if (parsed.isNotEmpty) result[tag] = parsed;
       });
       return result;
-    } catch (_) {
+    } catch (error, stackTrace) {
+      // Bozuk JSON sessizce yutulmasın: bir sonraki yazım öğrenilmiş tercihleri
+      // boş haritayla ezer, bu yüzden iz bırakılır.
+      debugPrint('Priors okunamadı, boş başlanıyor: $error\n$stackTrace');
       return {};
     }
   }

@@ -5,6 +5,7 @@ import 'package:ai_gallery_organizer/core/constants/app_constants.dart';
 import 'package:ai_gallery_organizer/core/constants/app_icons.dart';
 import 'package:ai_gallery_organizer/core/models/screenshot_category.dart';
 import 'package:ai_gallery_organizer/core/models/screenshot_entry.dart';
+import 'package:ai_gallery_organizer/core/services/category_names_service.dart';
 import 'package:ai_gallery_organizer/core/services/preferences_service.dart';
 import 'package:ai_gallery_organizer/core/theme/app_theme.dart';
 import 'package:ai_gallery_organizer/features/analysis/milestone_screen.dart';
@@ -28,6 +29,12 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 /// iOS'un en büyük erişilebilirlik metin boyutu (gövde 17pt → 53pt).
 const double _ax5 = 53 / 17;
+
+/// Hive açılmadan özel kategori adı okuyan widget'lar için boş ad kümesi.
+class _NoCategoryNames extends CategoryNamesNotifier {
+  @override
+  Map<int, String> build() => {};
+}
 
 class _FakePurchaseRepository extends PurchaseRepository {
   @override
@@ -194,7 +201,10 @@ void main() {
         tester,
         locale: locale,
         home: const MilestoneScreen(),
-        overrides: [analysisQueueProvider.overrideWith(_FinishedQueue.new)],
+        overrides: [
+          analysisQueueProvider.overrideWith(_FinishedQueue.new),
+          categoryNamesProvider.overrideWith(_NoCategoryNames.new),
+        ],
       );
       await _scrollThrough(tester, find.byType(CustomScrollView));
       expect(tester.takeException(), isNull);
