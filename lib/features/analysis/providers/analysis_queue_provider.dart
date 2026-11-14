@@ -159,6 +159,10 @@ class AnalysisQueueNotifier extends Notifier<AnalysisQueueState> {
   /// "Sıfırla" anında ve kalıcı temizlenir).
   int _runId = 0;
 
+  /// Detay ekranından tek tek analiz edilen id'ler; kuyruk bunları atlar
+  /// (aynı screenshot için çift Gemini çağrısı ve çift kredi düşümü olmasın).
+  final Set<String> _inFlightSingles = {};
+
   /// Ücretsiz katmanın günlük istek tavanına bu turda ulaşıldı mı.
   bool _dailyCapHit = false;
 
@@ -182,6 +186,7 @@ class AnalysisQueueNotifier extends Notifier<AnalysisQueueState> {
     final List<ScreenshotEntry> pending = repo
         .sortedEntries()
         .where((entry) => entry.isPending)
+        .where((entry) => !_inFlightSingles.contains(entry.assetId))
         .where((entry) => scope == null || scope.contains(entry.assetId))
         .toList();
     if (pending.isEmpty) return;
@@ -287,29 +292,16 @@ class AnalysisQueueNotifier extends Notifier<AnalysisQueueState> {
     }
     try {
       await quota.register();
-      final AnalysisResult result = await ref
-          .read(screenshotAnalyzerProvider)
-          .analyze(asset);
-      // "Yarıda kes" (cancel) ya da "Sıfırla" (reset) istendiyse: kullanıcı
-      // durdurduktan sonra dönen bu in-flight sonucu artık kaydetme ve kredi
-      // harcama — durdurma anında analiz edilmemiş hiçbir screenshot işlenmiş
-      // sayılmamalı.
-      if (_cancelRequested || _runId != runId) return;
-      // Cihaz içi kişiselleşme: kullanıcı düzeltmelerinden öğrenilen net bir
-      // sinyal varsa AI kararını güncelle, yoksa AI'ınkini koru.
-      final ScreenshotCategory refined =
-          ref.read(categoryPriorsProvider.notifier).suggest(result.tags) ??
-          result.category;
-      await repo.saveAnalysis(
-        assetId: entry.assetId,
-        category: refined,
-        aiCategory: result.category,
-        tags: result.tags,
-        ocrText: result.ocrText,
+      // "Yarıda kes" (cancel) ya da "Sıfırla" (reset) turu geçersiz kılar:
+      // durdurma anında dönen in-flight sonuç kaydedilmez, kredi harcanmaz.
+      final ScreenshotCategory? refined = await _analyzeAndPersist(
+        repo,
+        asset,
+        entry.assetId,
+        isStale: () => _runId != runId,
       );
-      await ref.read(entitlementProvider.notifier).registerAnalysis(1);
-      // Sıfırlandıysa analizi kaydettik ama state'i güncelleme.
-      if (_runId != runId) return;
+      // Kayıt sürerken sıfırlandıysa analiz kaydedildi ama state'e dokunma.
+      if (refined == null || _runId != runId) return;
       state = state.afterSuccess(
         AnalyzedItem(assetId: entry.assetId, category: refined),
       );
@@ -343,7 +335,8 @@ class AnalysisQueueNotifier extends Notifier<AnalysisQueueState> {
     return AnalysisQueueStatus.completed;
   }
 
-  /// Detay ekranından tek screenshot analizi. Kuyruk çalışıyorsa reddedilir.
+  /// Detay ekranından tek screenshot analizi. Kuyruk çalışıyorsa ya da aynı
+  /// screenshot zaten analiz ediliyorsa reddedilir.
   Future<SingleAnalysisOutcome> analyzeSingle(String assetId) async {
     if (state.isRunning) return SingleAnalysisOutcome.failed;
     ref.read(entitlementProvider.notifier).ensureWeeklyWindow();
@@ -354,27 +347,50 @@ class AnalysisQueueNotifier extends Notifier<AnalysisQueueState> {
     final ScreenshotRepository repo = ref.read(screenshotRepositoryProvider);
     final AssetEntity? asset = repo.assetFor(assetId);
     if (asset == null) return SingleAnalysisOutcome.failed;
+    if (!_inFlightSingles.add(assetId)) return SingleAnalysisOutcome.failed;
 
     try {
-      final AnalysisResult result = await ref
-          .read(screenshotAnalyzerProvider)
-          .analyze(asset);
-      final ScreenshotCategory refined =
-          ref.read(categoryPriorsProvider.notifier).suggest(result.tags) ??
-          result.category;
-      await repo.saveAnalysis(
-        assetId: assetId,
-        category: refined,
-        aiCategory: result.category,
-        tags: result.tags,
-        ocrText: result.ocrText,
-      );
-      await ref.read(entitlementProvider.notifier).registerAnalysis(1);
+      await ref.read(dailyQuotaTrackerProvider).register();
+      await _analyzeAndPersist(repo, asset, assetId);
       return SingleAnalysisOutcome.success;
+    } on AnalysisRateLimitException catch (error) {
+      debugPrint('Günlük kota hatası ($assetId): $error');
+      return SingleAnalysisOutcome.failed;
     } catch (error, stackTrace) {
       debugPrint('Tekil analiz hatası ($assetId): $error\n$stackTrace');
       return SingleAnalysisOutcome.failed;
+    } finally {
+      _inFlightSingles.remove(assetId);
     }
+  }
+
+  /// Analiz → cihaz içi kişiselleştirme → kayıt → kredi düşümü zinciri.
+  /// Kaydedilen kategoriyi döner; [isStale] analiz bittiğinde true ise (tur
+  /// iptal/sıfırlandı) hiçbir şey kaydedilmez ve null döner.
+  Future<ScreenshotCategory?> _analyzeAndPersist(
+    ScreenshotRepository repo,
+    AssetEntity asset,
+    String assetId, {
+    bool Function()? isStale,
+  }) async {
+    final AnalysisResult result = await ref
+        .read(screenshotAnalyzerProvider)
+        .analyze(asset);
+    if (isStale?.call() ?? false) return null;
+    // Cihaz içi kişiselleşme: kullanıcı düzeltmelerinden öğrenilen net bir
+    // sinyal varsa AI kararını güncelle, yoksa AI'ınkini koru.
+    final ScreenshotCategory refined =
+        ref.read(categoryPriorsProvider.notifier).suggest(result.tags) ??
+        result.category;
+    await repo.saveAnalysis(
+      assetId: assetId,
+      category: refined,
+      aiCategory: result.category,
+      tags: result.tags,
+      ocrText: result.ocrText,
+    );
+    await ref.read(entitlementProvider.notifier).registerAnalysis(1);
+    return refined;
   }
 
   /// DEBUG: API/quota harcamadan analiz animasyonunu denemek için sahte bir
@@ -429,11 +445,12 @@ class AnalysisQueueNotifier extends Notifier<AnalysisQueueState> {
   }
 
   /// Koşan kuyruğu nazikçe durdurur (aktif istek biter, yenisi başlamaz);
-  /// şimdiye inen fotoğraflarla özet gösterilir. Kart anında özet moduna
-  /// geçebilsin diye turu hemen tamamlanmış say — arka planda süren `start()`
-  /// daha sonra aynı (completed) statüyü yazar, bu yüzden çakışma olmaz.
+  /// şimdiye inen fotoğraflarla özet gösterilir. Turu hemen tamamlanmış sayar
+  /// ve `_runId`'yi artırır: arka planda süren `start()` ile in-flight
+  /// istekler sonradan state'i EZEMEZ (özet kapatılsa bile kart geri gelmez).
   void cancel() {
     _cancelRequested = true;
+    _runId++;
     if (state.isRunning) {
       // Dönen sonuçlar artık kaydedilmez: işlenenler listesi de boşalır.
       state = state.copyWith(
