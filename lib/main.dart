@@ -10,6 +10,7 @@ import 'core/l10n/l10n_extension.dart';
 import 'core/router/app_router.dart';
 import 'core/services/hive_service.dart';
 import 'core/services/preferences_service.dart';
+import 'core/startup/startup_error_app.dart';
 import 'core/theme/app_theme.dart';
 import 'core/widgets/launch_reveal.dart';
 import 'features/paywall/providers/purchase_provider.dart';
@@ -20,8 +21,41 @@ Future<void> main() async {
 
   // Router redirect'i senkron okuma yaptığı için prefs açılışta yüklenir.
   final SharedPreferences prefs = await SharedPreferences.getInstance();
-  await HiveService.init();
-  // AI analizi (firebase_ai) için gerekli; options ile plist'e bağımlılık kalmaz.
+  await _openStorageAndRun(prefs);
+}
+
+/// Yerel depolamayı açıp uygulamayı başlatır; açılamazsa kullanıcıya yeniden
+/// dene / onaylı sıfırla seçenekleri sunan kurtarma ekranını gösterir
+/// ([reset] true ise önce yerel box'lar silinir).
+Future<void> _openStorageAndRun(
+  SharedPreferences prefs, {
+  bool reset = false,
+}) async {
+  try {
+    if (reset) await HiveService.resetAll();
+    await HiveService.init();
+  } catch (error, stackTrace) {
+    debugPrint('Yerel depolama açılamadı: $error\n$stackTrace');
+    runApp(
+      StartupErrorApp(
+        onRetry: () => _openStorageAndRun(prefs),
+        onReset: () => _openStorageAndRun(prefs, reset: true),
+      ),
+    );
+    return;
+  }
+  await _initFirebase();
+  runApp(
+    ProviderScope(
+      overrides: [sharedPreferencesProvider.overrideWithValue(prefs)],
+      child: const SnaplyApp(),
+    ),
+  );
+}
+
+/// Firebase + App Check başlatma (AI analizi için gerekli).
+Future<void> _initFirebase() async {
+  // options ile plist'e bağımlılık kalmaz.
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   // App Check: API anahtarının uygulama dışından kötüye kullanımını engeller.
   // Debug'da debug provider (token konsola yazılır, Firebase Console'a eklenir);
@@ -36,13 +70,6 @@ Future<void> main() async {
     // Aktivasyon hatası açılışı engellememeli; enforcement kapalıyken istekler yine geçer.
     debugPrint('App Check aktivasyon hatası: $error\n$stackTrace');
   }
-
-  runApp(
-    ProviderScope(
-      overrides: [sharedPreferencesProvider.overrideWithValue(prefs)],
-      child: const SnaplyApp(),
-    ),
-  );
 }
 
 class SnaplyApp extends ConsumerWidget {

@@ -482,5 +482,10 @@
   },
   "cleanShowSkipped": "Show Skipped",
   "cleanBackToLibrary": "Back to Library",
-  "cleanAssignFailed": "Couldn't move the screenshot. It's back in the deck."
+  "cleanAssignFailed": "Couldn't move the screenshot. It's back in the deck.",
+  "startupErrorTitle": "Your library couldn't be opened",
+  "startupErrorBody": "Snaply couldn't open its local data. Try again. If it keeps failing, you can reset local data: your photos are not touched and the library is rebuilt from your Screenshots album.",
+  "startupErrorReset": "Reset Local Data",
+  "startupErrorResetConfirmTitle": "Reset local data?",
+  "startupErrorResetConfirmBody": "Analysis results, custom boards and category settings stored on this device will be deleted. Your photos are not affected."
 }

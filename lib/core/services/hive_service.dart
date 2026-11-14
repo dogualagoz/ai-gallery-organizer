@@ -23,27 +23,68 @@ abstract final class HiveService {
   /// karışık olabildiği için tipsiz (dynamic) tutulur.
   static late Box<dynamic> settings;
 
+  static bool _prepared = false;
+
+  /// Adapter kaydı + şifreli box'ları açar. Açılamazsa (release'de) hatayı
+  /// fırlatır; veri silinmez — çağıran kurtarma ekranı gösterir.
   static Future<void> init() async {
-    await Hive.initFlutter();
-    Hive.registerAdapters();
-    final HiveAesCipher cipher = HiveAesCipher(await _loadOrCreateKey());
-    screenshots = await _openEncrypted<ScreenshotEntry>(
+    await _prepare();
+    final HiveAesCipher cipher = HiveAesCipher(await loadOrCreateKey());
+    screenshots = await openEncrypted<ScreenshotEntry>(
       HiveBoxes.screenshots,
       cipher,
     );
-    boards = await _openEncrypted<Board>(HiveBoxes.boards, cipher);
-    categoryNames = await _openEncrypted<String>(
+    boards = await openEncrypted<Board>(HiveBoxes.boards, cipher);
+    categoryNames = await openEncrypted<String>(
       HiveBoxes.categoryNames,
       cipher,
     );
-    settings = await _openEncrypted<dynamic>(HiveBoxes.settings, cipher);
+    settings = await openEncrypted<dynamic>(HiveBoxes.settings, cipher);
+  }
+
+  /// Tüm yerel box'ları diskten siler (kullanıcı onaylı kurtarma yolu); ardından
+  /// [init] yeniden çağrılmalıdır. Galeri verisi senkronla yeniden kurulur.
+  static Future<void> resetAll() async {
+    await _prepare();
+    for (final String name in _boxNames) {
+      await Hive.deleteBoxFromDisk(name);
+    }
+  }
+
+  static const List<String> _boxNames = [
+    HiveBoxes.screenshots,
+    HiveBoxes.boards,
+    HiveBoxes.categoryNames,
+    HiveBoxes.settings,
+  ];
+
+  /// Hive dizini + adapter kaydı; yeniden denemelerde tekrar edilmez.
+  static Future<void> _prepare() async {
+    if (_prepared) return;
+    await Hive.initFlutter();
+    Hive.registerAdapters();
+    _prepared = true;
   }
 
   /// Şifreleme anahtarını Keychain'den okur; ilk açılışta üretip kaydeder.
-  static Future<Uint8List> _loadOrCreateKey() async {
+  ///
+  /// Anahtar YOKKEN şifreli box dosyaları diskte duruyorsa yeni anahtar
+  /// üretilmez ([StateError] fırlar): Hive yanlış anahtarla "corrupted box
+  /// recovery" yapıp dosyayı sessizce boşaltır. Keychain'in geçici okunamaması
+  /// (ör. kilitli cihaz) kullanıcı verisini silmemeli; kurtarma ekranı
+  /// yeniden dene / onaylı sıfırla sunar.
+  @visibleForTesting
+  static Future<Uint8List> loadOrCreateKey() async {
     const FlutterSecureStorage storage = FlutterSecureStorage();
     final String? stored = await storage.read(key: HiveBoxes.encryptionKeyName);
     if (stored != null) return base64Decode(stored);
+    for (final String name in _boxNames) {
+      if (await Hive.boxExists(name)) {
+        throw StateError(
+          'Şifreleme anahtarı bulunamadı ama "$name" box\'ı diskte duruyor.',
+        );
+      }
+    }
     final List<int> key = Hive.generateSecureKey();
     await storage.write(
       key: HiveBoxes.encryptionKeyName,
@@ -52,18 +93,21 @@ abstract final class HiveService {
     return Uint8List.fromList(key);
   }
 
-  /// Box'ı şifreli açar; açılamazsa (örn. şifresiz eski format) siler ve
-  /// yeniden oluşturur. Uygulama yayınlanmadan şifrelemeye geçildiği için
-  /// migration gerekmez — bu yol yalnız geliştirme cihazlarını etkiler ve
-  /// veriler galeriden yeniden senkronla geri gelir.
-  static Future<Box<T>> _openEncrypted<T>(
+  /// Box'ı şifreli açar. Açılamazsa yalnız [resetOnFailure] true iken (debug
+  /// varsayılanı: şifresiz eski format geliştirme cihazlarında) siler ve
+  /// yeniden oluşturur; release'de kullanıcı verisi ASLA sessizce silinmez —
+  /// hata loglanıp fırlatılır ve açılışta kurtarma ekranı gösterilir.
+  @visibleForTesting
+  static Future<Box<T>> openEncrypted<T>(
     String name,
-    HiveAesCipher cipher,
-  ) async {
+    HiveAesCipher cipher, {
+    bool resetOnFailure = kDebugMode,
+  }) async {
     try {
       return await Hive.openBox<T>(name, encryptionCipher: cipher);
-    } catch (error) {
-      debugPrint('Hive box "$name" açılamadı, sıfırlanıyor: $error');
+    } catch (error, stackTrace) {
+      debugPrint('Hive box "$name" açılamadı: $error\n$stackTrace');
+      if (!resetOnFailure) rethrow;
       await Hive.deleteBoxFromDisk(name);
       return Hive.openBox<T>(name, encryptionCipher: cipher);
     }

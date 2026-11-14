@@ -991,4 +991,21 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get cleanAssignFailed =>
       'Couldn\'t move the screenshot. It\'s back in the deck.';
+
+  @override
+  String get startupErrorTitle => 'Your library couldn\'t be opened';
+
+  @override
+  String get startupErrorBody =>
+      'Snaply couldn\'t open its local data. Try again. If it keeps failing, you can reset local data: your photos are not touched and the library is rebuilt from your Screenshots album.';
+
+  @override
+  String get startupErrorReset => 'Reset Local Data';
+
+  @override
+  String get startupErrorResetConfirmTitle => 'Reset local data?';
+
+  @override
+  String get startupErrorResetConfirmBody =>
+      'Analysis results, custom boards and category settings stored on this device will be deleted. Your photos are not affected.';
 }

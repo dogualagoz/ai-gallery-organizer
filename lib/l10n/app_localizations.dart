@@ -1783,6 +1783,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Couldn\'t move the screenshot. It\'s back in the deck.'**
   String get cleanAssignFailed;
+
+  /// No description provided for @startupErrorTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your library couldn\'t be opened'**
+  String get startupErrorTitle;
+
+  /// No description provided for @startupErrorBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Snaply couldn\'t open its local data. Try again. If it keeps failing, you can reset local data: your photos are not touched and the library is rebuilt from your Screenshots album.'**
+  String get startupErrorBody;
+
+  /// No description provided for @startupErrorReset.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset Local Data'**
+  String get startupErrorReset;
+
+  /// No description provided for @startupErrorResetConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset local data?'**
+  String get startupErrorResetConfirmTitle;
+
+  /// No description provided for @startupErrorResetConfirmBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Analysis results, custom boards and category settings stored on this device will be deleted. Your photos are not affected.'**
+  String get startupErrorResetConfirmBody;
 }
 
 class _AppLocalizationsDelegate

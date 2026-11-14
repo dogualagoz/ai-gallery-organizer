@@ -981,4 +981,21 @@ class AppLocalizationsTr extends AppLocalizations {
   @override
   String get cleanAssignFailed =>
       'Ekran görüntüsü taşınamadı, desteye geri döndü.';
+
+  @override
+  String get startupErrorTitle => 'Kütüphane açılamadı';
+
+  @override
+  String get startupErrorBody =>
+      'Snaply yerel verilerini açamadı. Tekrar dene. Sorun sürerse yerel verileri sıfırlayabilirsin: fotoğraflarına dokunulmaz, kütüphane Ekran Resimleri albümünden yeniden oluşturulur.';
+
+  @override
+  String get startupErrorReset => 'Yerel Verileri Sıfırla';
+
+  @override
+  String get startupErrorResetConfirmTitle => 'Yerel veriler sıfırlansın mı?';
+
+  @override
+  String get startupErrorResetConfirmBody =>
+      'Bu cihazda saklanan analiz sonuçları, özel panolar ve kategori ayarları silinecek. Fotoğraflarını etkilemez.';
 }
