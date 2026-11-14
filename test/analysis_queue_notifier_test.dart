@@ -285,4 +285,22 @@ void main() {
     );
     expect(analyzer.calls, isEmpty);
   });
+
+  test('stoppedByUser: cancel işaretler, yeni tur temizler', () async {
+    await setUpQueue(pending: 1);
+    expect(notifier().stoppedByUser, isFalse);
+    final Future<void> first = notifier().start();
+    await pump();
+
+    notifier().cancel();
+    expect(notifier().stoppedByUser, isTrue);
+    analyzer.complete('a0');
+    await first;
+
+    final Future<void> second = notifier().start();
+    await pump();
+    expect(notifier().stoppedByUser, isFalse);
+    analyzer.complete('a0');
+    await second;
+  });
 }

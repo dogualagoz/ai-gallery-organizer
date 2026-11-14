@@ -49,6 +49,9 @@ abstract final class HiveService {
     for (final String name in _boxNames) {
       await Hive.deleteBoxFromDisk(name);
     }
+    // Bozuk/okunamayan anahtar yüzünden sıfırlama döngüye girmesin: taze
+    // anahtar bir sonraki init'te üretilir (artık box dosyası kalmadı).
+    await const FlutterSecureStorage().delete(key: HiveBoxes.encryptionKeyName);
   }
 
   static const List<String> _boxNames = [

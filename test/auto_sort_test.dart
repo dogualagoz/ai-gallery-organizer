@@ -138,4 +138,24 @@ void main() {
     await _pump();
     expect(queue.starts, 1);
   });
+
+  test('tur sürerken auto-sort açılırsa tur doğal bitince başlar', () async {
+    await setUpAuto(pro: true, initial: const []);
+    await container.read(autoSortEnabledProvider.notifier).setEnabled(false);
+    gallery.push([_entry('a')]);
+    queue.setQueueState(
+      const AnalysisQueueState(status: AnalysisQueueStatus.running),
+    );
+    await _pump();
+
+    await container.read(autoSortEnabledProvider.notifier).setEnabled(true);
+    await _pump();
+    expect(queue.starts, 0);
+
+    queue.setQueueState(
+      const AnalysisQueueState(status: AnalysisQueueStatus.completed),
+    );
+    await _pump();
+    expect(queue.starts, 1);
+  });
 }

@@ -138,7 +138,10 @@ class PurchaseFlowNotifier extends Notifier<PurchaseFlowState> {
         case PurchaseStatus.restored:
           // Önce yetki/kredi + başarı durumu: completePurchase (aşağıda)
           // restore yolunda hata fırlatabiliyor; UI bu yüzden askıda kalmamalı.
-          await _grantEntitlement(purchase);
+          final bool? granted = await _grantSafely(purchase);
+          // null: aynı işlem zaten teslim ediliyor, ilk akış sonuçlandıracak.
+          if (granted == null) continue;
+          if (!granted) return;
           state = PurchaseFlowState(
             status: PurchaseFlowStatus.success,
             productId: purchase.productID,
@@ -156,10 +159,26 @@ class PurchaseFlowNotifier extends Notifier<PurchaseFlowState> {
     }
   }
 
+  /// Yetkiyi verir; hata olursa akış `error`'a düşer ve işlem TAMAMLANMAZ
+  /// (store yeniden iletir, kredi/Pro kaybolmaz). Başarıda true, hatada false,
+  /// eşzamanlı yinelenen işlemde null döner.
+  Future<bool?> _grantSafely(PurchaseDetails purchase) async {
+    try {
+      return await _grantEntitlement(purchase) ? true : null;
+    } catch (error, stackTrace) {
+      debugPrint(
+        'IAP: yetki verilemedi (${purchase.productID}): $error\n$stackTrace',
+      );
+      state = const PurchaseFlowState(status: PurchaseFlowStatus.error);
+      return false;
+    }
+  }
+
   /// Ürün kimliğine göre yetki verir: abonelik/lifetime → Pro, analiz paketi
   /// → kredi. Paketler `restored` olayıyla asla gelmemeli (consumable) ama
   /// güvenlik payı olarak yalnız `purchased`'de kredi verilir.
-  Future<void> _grantEntitlement(PurchaseDetails purchase) async {
+  /// Aynı paket işlemi zaten teslim ediliyorsa false (ilk akış sonuçlandırır).
+  Future<bool> _grantEntitlement(PurchaseDetails purchase) async {
     final int? credits = ProductIds.creditsFor(purchase.productID);
     if (credits == null) {
       // İşlem zamanı trial penceresi hesabında kullanılır; restore orijinal
@@ -170,16 +189,17 @@ class PurchaseFlowNotifier extends Notifier<PurchaseFlowState> {
             productId: purchase.productID,
             purchaseMs: int.tryParse(purchase.transactionDate ?? ''),
           );
-      return;
+      return true;
     }
-    if (purchase.status != PurchaseStatus.purchased) return;
+    if (purchase.status != PurchaseStatus.purchased) return true;
     final String? txId = purchase.purchaseID;
     // `add` senkron: ikinci aynı işlem ilk `await`'ten önce elenir.
-    if (txId != null && !_deliveringTxIds.add(txId)) return;
+    if (txId != null && !_deliveringTxIds.add(txId)) return false;
     try {
-      if (await _alreadyDelivered(txId)) return;
+      if (await _alreadyDelivered(txId)) return true;
       await ref.read(entitlementProvider.notifier).addCredits(credits);
       await _markDelivered(txId);
+      return true;
     } finally {
       if (txId != null) _deliveringTxIds.remove(txId);
     }

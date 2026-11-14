@@ -33,7 +33,13 @@ final autoSortControllerProvider = Provider<void>((ref) {
   }
 
   void tryStart() {
-    if (pendingNow() == 0 || !canAutoStart()) return;
+    if (pendingNow() == 0) return;
+    // Tur sürerken Pro'ya geçiş/auto-sort açılışı tur bitince karşılanır.
+    if (ref.read(analysisQueueProvider).isRunning) {
+      deferred = true;
+      return;
+    }
+    if (!canAutoStart()) return;
     ref.read(analysisQueueProvider.notifier).start();
   }
 

@@ -154,6 +154,10 @@ final analysisQueueProvider =
 class AnalysisQueueNotifier extends Notifier<AnalysisQueueState> {
   bool _cancelRequested = false;
 
+  /// Son tur kullanıcı tarafından durduruldu/sıfırlandı mı; yeni tur
+  /// başlayınca temizlenir (bkz. [stoppedByUser]).
+  bool _stoppedByUser = false;
+
   /// Aktif turun kimliği: `reset()` bunu artırır, böylece arka planda süren
   /// eski `start()`/`simulate()` sıfırlamadan sonra state'i EZEMEZ (çarpı →
   /// "Sıfırla" anında ve kalıcı temizlenir).
@@ -180,6 +184,7 @@ class AnalysisQueueNotifier extends Notifier<AnalysisQueueState> {
   /// (kategori içinde "yeniden analiz et"); verilmezse tüm bekleyen galeri.
   Future<void> start({Iterable<String>? onlyAssetIds}) async {
     if (state.isRunning) return;
+    _stoppedByUser = false;
 
     final ScreenshotRepository repo = ref.read(screenshotRepositoryProvider);
     final Set<String>? scope = onlyAssetIds?.toSet();
@@ -262,6 +267,8 @@ class AnalysisQueueNotifier extends Notifier<AnalysisQueueState> {
       final ScreenshotEntry entry = queue.removeFirst();
       state = state.copyWith(active: [...state.active, entry.assetId]);
       await _waitForSlot(profile.minRequestGap);
+      // Tempo beklerken tur iptal/sıfırlandıysa istek atılmaz (kota/maliyet).
+      if (_runId != runId || _cancelRequested) return;
       await _analyzeEntry(repo, entry, quota, runId);
     }
   }
@@ -450,6 +457,7 @@ class AnalysisQueueNotifier extends Notifier<AnalysisQueueState> {
   /// istekler sonradan state'i EZEMEZ (özet kapatılsa bile kart geri gelmez).
   void cancel() {
     _cancelRequested = true;
+    _stoppedByUser = true;
     _runId++;
     if (state.isRunning) {
       // Dönen sonuçlar artık kaydedilmez: işlenenler listesi de boşalır.
@@ -464,13 +472,14 @@ class AnalysisQueueNotifier extends Notifier<AnalysisQueueState> {
   /// anında boşta duruma döner. Çarpı → "Sıfırla" bunu çağırır.
   void reset() {
     _cancelRequested = true;
+    _stoppedByUser = true;
     _runId++;
     state = const AnalysisQueueState();
   }
 
   /// Son tur kullanıcı tarafından durduruldu/sıfırlandı mı (auto-sort bunu
   /// görürse turu kendiliğinden yeniden başlatmaz). Yeni `start()` temizler.
-  bool get stoppedByUser => _cancelRequested;
+  bool get stoppedByUser => _stoppedByUser;
 
   /// Tur sonucu banner'ını kapatır.
   void dismiss() {
