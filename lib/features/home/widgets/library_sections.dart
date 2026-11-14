@@ -25,6 +25,7 @@ import '../../boards/widgets/system_boards_grid.dart';
 import '../../gallery/data/screenshot_repository.dart';
 import '../../gallery/providers/gallery_provider.dart';
 import '../../gallery/widgets/screenshot_grid.dart';
+import '../../../core/utils/app_logger.dart';
 
 /// Kategoriler ve panolar başlıklarının paylaştığı Düzenle/Bitti eylemi.
 class _EditToggle {
@@ -219,7 +220,7 @@ class LimitedAccessBanner extends ConsumerWidget {
       if (!context.mounted) return;
       await ref.read(galleryProvider.notifier).sync();
     } catch (error, stackTrace) {
-      debugPrint('Sınırlı erişim seçimi eşitlenemedi: $error\n$stackTrace');
+      logError('Sınırlı erişim seçimi eşitlenemedi', error, stackTrace);
       if (!context.mounted) return;
       showStatusToast(context, failure, tone: StatusToastTone.error);
     }

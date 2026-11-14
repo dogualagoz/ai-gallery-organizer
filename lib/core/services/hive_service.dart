@@ -9,6 +9,7 @@ import '../constants/app_constants.dart';
 import '../models/board.dart';
 import '../models/hive/hive_registrar.g.dart';
 import '../models/screenshot_entry.dart';
+import '../utils/app_logger.dart';
 
 /// Uygulama açılışında bir kez çağrılır: adapter kaydı + şifreli box açma.
 ///
@@ -109,7 +110,7 @@ abstract final class HiveService {
     try {
       return await Hive.openBox<T>(name, encryptionCipher: cipher);
     } catch (error, stackTrace) {
-      debugPrint('Hive box "$name" açılamadı: $error\n$stackTrace');
+      logError('Hive box "$name" açılamadı', error, stackTrace);
       if (!resetOnFailure) rethrow;
       await Hive.deleteBoxFromDisk(name);
       return Hive.openBox<T>(name, encryptionCipher: cipher);

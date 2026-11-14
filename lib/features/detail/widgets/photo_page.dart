@@ -14,6 +14,7 @@ import '../../../core/constants/motion_constants.dart';
 import '../../../core/constants/ui_constants.dart';
 import '../../../core/utils/motion_physics.dart';
 import '../../gallery/widgets/screenshot_grid_tile.dart';
+import '../../../core/utils/app_logger.dart';
 
 /// Hero uçuşunun eğrisi: geçiş süresine yayılmış sekmesiz yay. Kapanışta
 /// Hero bunu tersine çevirip uygular; görsel iki yönde de yay gibi yavaşlar.
@@ -281,7 +282,7 @@ class ViewerImage extends StatelessWidget {
               : const SizedBox.shrink(),
           errorBuilder: (context, error, stackTrace) {
             // Küçük resim altta kaldığı için kullanıcıya ayrı hata gösterilmez.
-            debugPrint('Tam çözünürlük yüklenemedi (${image.id}): $error');
+            logError('Tam çözünürlük yüklenemedi (${image.id})', error);
             return const SizedBox.shrink();
           },
         ),

@@ -25,6 +25,7 @@ import '../analysis/widgets/auto_sort_hint.dart';
 import '../boards/providers/board_provider.dart';
 import '../gallery/providers/gallery_provider.dart';
 import 'widgets/library_sections.dart';
+import '../../core/utils/app_logger.dart';
 
 /// Uygulama açılış sayacının bu oturumda bir kez işlendiğini işaretler.
 bool _appOpenCounted = false;
@@ -83,7 +84,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     try {
       await ref.read(galleryProvider.notifier).sync();
     } catch (error, stackTrace) {
-      debugPrint('Galeri manuel eşitleme hatası: $error\n$stackTrace');
+      logError('Galeri manuel eşitleme hatası', error, stackTrace);
       if (!mounted) return;
       showStatusToast(context, failure, tone: StatusToastTone.error);
     }

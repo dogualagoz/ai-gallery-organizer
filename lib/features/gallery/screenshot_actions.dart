@@ -15,6 +15,7 @@ import '../../core/services/haptic_service.dart';
 import '../../core/widgets/status_toast.dart';
 import 'data/screenshot_repository.dart';
 import 'widgets/move_target_sheet.dart';
+import '../../core/utils/app_logger.dart';
 
 /// Orijinal dosyaları iOS paylaşım sayfasıyla paylaşır. Paylaşım sayfası
 /// (iPad'de) [context]'in kutusundan açılır. Hiçbir dosya alınamazsa hata
@@ -35,7 +36,7 @@ Future<void> shareScreenshots(
       final File? file = await repo.assetFor(assetId)?.file;
       if (file != null) files.add(XFile(file.path));
     } catch (error, stackTrace) {
-      debugPrint('Paylaşım dosyası alınamadı ($assetId): $error\n$stackTrace');
+      logError('Paylaşım dosyası alınamadı ($assetId)', error, stackTrace);
     }
   }
   if (files.isEmpty) {
@@ -47,7 +48,7 @@ Future<void> shareScreenshots(
       ShareParams(files: files, sharePositionOrigin: origin),
     );
   } catch (error, stackTrace) {
-    debugPrint('Paylaşım açılamadı: $error\n$stackTrace');
+    logError('Paylaşım açılamadı', error, stackTrace);
     toaster.show(failure, tone: StatusToastTone.error);
   }
 }
@@ -88,7 +89,7 @@ Future<bool> moveScreenshots(
       }
     }
   } catch (error, stackTrace) {
-    debugPrint('Taşıma hatası: $error\n$stackTrace');
+    logError('Taşıma hatası', error, stackTrace);
     // Yarıda kalan taşıma geri sarılır: "taşınamadı" deyip bir kısmını
     // taşınmış bırakmayalım.
     await _undoMove(repo, before);
@@ -122,7 +123,7 @@ Future<bool> _undoMove(
     }
     return true;
   } catch (error, stackTrace) {
-    debugPrint('Taşıma geri alınamadı: $error\n$stackTrace');
+    logError('Taşıma geri alınamadı', error, stackTrace);
     return false;
   }
 }
@@ -150,7 +151,7 @@ Future<List<String>> deleteScreenshots(
     }
     return deleted;
   } catch (error, stackTrace) {
-    debugPrint('Silme hatası: $error\n$stackTrace');
+    logError('Silme hatası', error, stackTrace);
     toaster.show(failure, tone: StatusToastTone.error);
     return const [];
   }

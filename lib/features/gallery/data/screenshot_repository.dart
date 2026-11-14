@@ -12,6 +12,7 @@ import '../../../core/models/screenshot_entry.dart';
 import '../../../core/services/category_priors_service.dart';
 import '../../../core/services/hive_service.dart';
 import '../../../core/services/photo_permission_service.dart';
+import '../../../core/utils/app_logger.dart';
 
 final screenshotRepositoryProvider = Provider<ScreenshotRepository>((ref) {
   return ScreenshotRepository(
@@ -121,14 +122,14 @@ class ScreenshotRepository {
     // olarak sınıflanmadığından Screenshots albümü boş kalır; debug'da tüm
     // görsellere düşülür ki AI akışı test edilebilsin.
     if (kDebugMode && paths.isNotEmpty) {
-      debugPrint('ScreenshotRepository: debug fallback — tüm görseller');
+      logInfo('ScreenshotRepository: debug fallback — tüm görseller');
       final AssetPathEntity fallback = paths.first;
       final int count = await fallback.assetCountAsync;
       if (count == 0) return const [];
       return fallback.getAssetListRange(start: 0, end: count);
     }
 
-    debugPrint('ScreenshotRepository: Screenshots albümü bulunamadı/boş');
+    logInfo('ScreenshotRepository: Screenshots albümü bulunamadı/boş');
     return const [];
   }
 
@@ -191,7 +192,7 @@ class ScreenshotRepository {
       try {
         await onCorrection?.call(aiOriginal, category, entry.tags);
       } catch (error, stackTrace) {
-        debugPrint('Düzeltme sinyali kaydedilemedi: $error\n$stackTrace');
+        logError('Düzeltme sinyali kaydedilemedi', error, stackTrace);
       }
     }
   }

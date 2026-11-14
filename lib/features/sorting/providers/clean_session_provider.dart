@@ -10,6 +10,7 @@ import '../../../core/services/entitlement_service.dart';
 import '../../gallery/data/screenshot_repository.dart';
 import '../../gallery/providers/gallery_provider.dart';
 import '../swipe_decision.dart';
+import '../../../core/utils/app_logger.dart';
 
 /// Oturumdaki tek kaydırma; "Geri al" için saklanır.
 @immutable
@@ -155,7 +156,7 @@ class CleanSessionNotifier extends Notifier<CleanSession> {
         try {
           await ref.read(screenshotRepositoryProvider).setCategory(id, target);
         } catch (error, stackTrace) {
-          debugPrint('Swipe kategori ataması yazılamadı: $error\n$stackTrace');
+          logError('Swipe kategori ataması yazılamadı', error, stackTrace);
           state = state._copyWith(
             assigned: {...state.assigned}..remove(id),
             history: [
@@ -187,7 +188,7 @@ class CleanSessionNotifier extends Notifier<CleanSession> {
             .read(screenshotRepositoryProvider)
             .restorePlacement(placement);
       } catch (error, stackTrace) {
-        debugPrint('Swipe ataması geri alınamadı: $error\n$stackTrace');
+        logError('Swipe ataması geri alınamadı', error, stackTrace);
         return false;
       } finally {
         _undoing = false;

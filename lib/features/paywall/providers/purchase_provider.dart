@@ -1,7 +1,6 @@
 // Satın alma akışı durumu + IAP purchase stream dinleyicisi; entitlement'ı günceller.
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 
@@ -9,6 +8,7 @@ import '../../../core/constants/app_constants.dart';
 import '../../../core/services/entitlement_service.dart';
 import '../../../core/services/preferences_service.dart';
 import '../data/purchase_repository.dart';
+import '../../../core/utils/app_logger.dart';
 
 /// Satın alma/restore akışının anlık UI durumu.
 enum PurchaseFlowStatus { idle, pending, success, error }
@@ -41,15 +41,15 @@ final purchaseProductsProvider = FutureProvider<List<ProductDetails>>((
 ) async {
   final PurchaseRepository repo = ref.watch(purchaseRepositoryProvider);
   if (!await repo.isAvailable()) {
-    debugPrint('IAP: mağaza kullanılamıyor (isAvailable=false)');
+    logInfo('IAP: mağaza kullanılamıyor (isAvailable=false)');
     return const [];
   }
   final ProductDetailsResponse response = await repo.queryProducts();
   if (response.error != null) {
-    debugPrint('IAP: ürün sorgu hatası — ${response.error}');
+    logInfo('IAP: ürün sorgu hatası — ${response.error}');
   }
   if (response.notFoundIDs.isNotEmpty) {
-    debugPrint('IAP: bulunamayan ürün ID\'leri — ${response.notFoundIDs}');
+    logInfo('IAP: bulunamayan ürün ID\'leri — ${response.notFoundIDs}');
   }
   return response.productDetails;
 });
@@ -78,7 +78,7 @@ class PurchaseFlowNotifier extends Notifier<PurchaseFlowState> {
     _subscription = repo.purchaseStream.listen(
       _handleUpdates,
       onError: (Object error, StackTrace stackTrace) {
-        debugPrint('IAP: purchase stream hatası: $error\n$stackTrace');
+        logError('IAP: purchase stream hatası', error, stackTrace);
         state = const PurchaseFlowState(status: PurchaseFlowStatus.error);
       },
     );
@@ -96,7 +96,7 @@ class PurchaseFlowNotifier extends Notifier<PurchaseFlowState> {
     try {
       await ref.read(purchaseRepositoryProvider).buy(product);
     } catch (error, stackTrace) {
-      debugPrint('IAP: buy hatası (${product.id}): $error\n$stackTrace');
+      logError('IAP: buy hatası (${product.id})', error, stackTrace);
       state = const PurchaseFlowState(status: PurchaseFlowStatus.error);
     }
   }
@@ -108,7 +108,7 @@ class PurchaseFlowNotifier extends Notifier<PurchaseFlowState> {
     try {
       await ref.read(purchaseRepositoryProvider).restore();
     } catch (error, stackTrace) {
-      debugPrint('IAP: restore hatası: $error\n$stackTrace');
+      logError('IAP: restore hatası', error, stackTrace);
       state = const PurchaseFlowState(status: PurchaseFlowStatus.error);
       return;
     }
@@ -166,8 +166,10 @@ class PurchaseFlowNotifier extends Notifier<PurchaseFlowState> {
     try {
       return await _grantEntitlement(purchase) ? true : null;
     } catch (error, stackTrace) {
-      debugPrint(
-        'IAP: yetki verilemedi (${purchase.productID}): $error\n$stackTrace',
+      logError(
+        'IAP: yetki verilemedi (${purchase.productID})',
+        error,
+        stackTrace,
       );
       state = const PurchaseFlowState(status: PurchaseFlowStatus.error);
       return false;
@@ -236,9 +238,10 @@ class PurchaseFlowNotifier extends Notifier<PurchaseFlowState> {
     try {
       await repo.completePurchase(purchase);
     } catch (error, stackTrace) {
-      debugPrint(
-        'IAP: completePurchase hatası (${purchase.productID}): '
-        '$error\n$stackTrace',
+      logError(
+        'IAP: completePurchase hatası (${purchase.productID})',
+        error,
+        stackTrace,
       );
     }
   }

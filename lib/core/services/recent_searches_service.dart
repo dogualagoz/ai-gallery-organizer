@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../constants/app_constants.dart';
 import '../utils/text_normalize.dart';
 import 'preferences_service.dart';
+import '../utils/app_logger.dart';
 
 /// [query]'yi [recent] listesinin başına koyar. Boş sorgu yok sayılır;
 /// aynı sorgunun eski kaydı (büyük/küçük harf ve Türkçe karakter farkı
@@ -53,9 +54,9 @@ class RecentSearchesNotifier extends Notifier<List<String>> {
       final bool saved = await ref
           .read(sharedPreferencesProvider)
           .setStringList(PrefKeys.recentSearches, next);
-      if (!saved) debugPrint('Son aramalar kaydedilemedi');
+      if (!saved) logInfo('Son aramalar kaydedilemedi');
     } catch (error, stackTrace) {
-      debugPrint('Son aramalar kaydedilemedi: $error\n$stackTrace');
+      logError('Son aramalar kaydedilemedi', error, stackTrace);
     }
   }
 }

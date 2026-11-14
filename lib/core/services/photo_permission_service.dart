@@ -1,8 +1,9 @@
 // Fotoğraf kütüphanesi izin akışının tek noktadan yönetimi.
 // Onboarding, galeri ve Kütüphane aynı davranışı paylaşır.
-import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:photo_manager/photo_manager.dart';
+
+import '../utils/app_logger.dart';
 
 /// İzin isteminin sadeleştirilmiş sonucu.
 enum PhotoPermissionResult {
@@ -81,7 +82,7 @@ class PhotoAccessNotifier extends AsyncNotifier<PhotoAccess> {
     } catch (error, stackTrace) {
       // Okunamazsa son bilinen düzeyle devam edilir; bir sonraki dönüşte
       // yeniden denenir.
-      debugPrint('Fotoğraf izni yeniden okunamadı: $error\n$stackTrace');
+      logError('Fotoğraf izni yeniden okunamadı', error, stackTrace);
     }
   }
 }

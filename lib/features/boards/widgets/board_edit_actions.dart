@@ -23,6 +23,7 @@ import '../../gallery/data/screenshot_repository.dart';
 import '../../gallery/providers/gallery_provider.dart';
 import '../../../core/router/open_paywall.dart';
 import '../providers/board_provider.dart';
+import '../../../core/utils/app_logger.dart';
 
 /// Düzenleme modu aksiyon sayfasından seçilen işlem.
 enum _BoardEditAction { rename, select, deleteAll, deleteBoard }
@@ -291,7 +292,7 @@ Future<void> deleteAllInBoard(
       await repo.removeEntry(assetId);
     }
   } catch (error, stackTrace) {
-    debugPrint('Pano toplu silme hatası: $error\n$stackTrace');
+    logError('Pano toplu silme hatası', error, stackTrace);
     if (context.mounted) {
       showStatusToast(
         context,

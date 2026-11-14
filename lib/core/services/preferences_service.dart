@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../utils/app_logger.dart';
+
 /// main() içinde gerçek instance ile override edilir — böylece router
 /// redirect'i gibi senkron yerlerden okunabilir.
 final sharedPreferencesProvider = Provider<SharedPreferences>((ref) {
@@ -138,7 +140,7 @@ class AutoSortHintDismissedNotifier extends Notifier<bool> {
           .setBool(PrefKeys.autoSortHintDismissed, true);
     } catch (error, stackTrace) {
       // Bu oturumda gizli kalır; kalıcı yazılamadıysa sonraki açılışta döner.
-      debugPrint('İpucu kapatma kaydedilemedi: $error\n$stackTrace');
+      logError('İpucu kapatma kaydedilemedi', error, stackTrace);
     }
   }
 }

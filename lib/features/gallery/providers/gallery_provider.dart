@@ -1,12 +1,12 @@
 // Galeri state'i: Hive'daki kayıt listesi + cihaz kütüphanesi eşitleme aksiyonu.
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/models/screenshot_entry.dart';
 import '../../../core/services/photo_permission_service.dart';
 import '../data/screenshot_repository.dart';
+import '../../../core/utils/app_logger.dart';
 
 /// Galeri listesi. İlk açılışta cihazla otomatik eşitler; sonrasında
 /// box değişikliklerini dinleyerek güncel kalır (AI analizi yazınca vs.).
@@ -49,7 +49,7 @@ class GalleryNotifier extends AsyncNotifier<List<ScreenshotEntry>> {
     } on PhotoAccessDeniedException {
       rethrow;
     } catch (error, stackTrace) {
-      debugPrint('Galeri eşitleme hatası: $error\n$stackTrace');
+      logError('Galeri eşitleme hatası', error, stackTrace);
     }
     return repo.sortedEntries();
   }

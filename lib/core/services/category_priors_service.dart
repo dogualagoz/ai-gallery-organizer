@@ -5,13 +5,13 @@
 // ederse AI'ın kararı bu öğrenilen kategoriyle güncellenir.
 import 'dart:convert';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_ce/hive.dart';
 
 import '../constants/ai_constants.dart';
 import '../models/screenshot_category.dart';
 import 'hive_service.dart';
+import '../utils/app_logger.dart';
 
 /// Etiket → (kategori index → oy sayısı) eşlemesi.
 typedef PriorsMap = Map<String, Map<int, int>>;
@@ -110,7 +110,7 @@ class CategoryPriorsNotifier extends Notifier<PriorsMap> {
     } catch (error, stackTrace) {
       // Bozuk JSON sessizce yutulmasın: bir sonraki yazım öğrenilmiş tercihleri
       // boş haritayla ezer, bu yüzden iz bırakılır.
-      debugPrint('Priors okunamadı, boş başlanıyor: $error\n$stackTrace');
+      logError('Priors okunamadı, boş başlanıyor', error, stackTrace);
       return {};
     }
   }

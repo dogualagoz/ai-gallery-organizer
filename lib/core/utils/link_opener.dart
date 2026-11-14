@@ -4,6 +4,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../l10n/l10n_extension.dart';
 import '../widgets/status_toast.dart';
+import 'app_logger.dart';
 
 /// [url]'i sistemde açar; açılamazsa varsa [fallbackUrl]'i dener (ör. Mail
 /// uygulaması kurulu değilse destek sayfası), o da olmazsa lokalize hata
@@ -28,7 +29,7 @@ Future<bool> _launch(String url) async {
   try {
     return await launchUrl(Uri.parse(url));
   } catch (error, stackTrace) {
-    debugPrint('Link açma hatası ($url): $error\n$stackTrace');
+    logError('Link açma hatası ($url)', error, stackTrace);
     return false;
   }
 }

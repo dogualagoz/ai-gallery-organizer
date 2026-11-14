@@ -15,6 +15,7 @@ import 'core/theme/app_theme.dart';
 import 'core/widgets/launch_reveal.dart';
 import 'features/paywall/providers/purchase_provider.dart';
 import 'firebase_options.dart';
+import 'core/utils/app_logger.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -35,7 +36,7 @@ Future<void> _openStorageAndRun(
     if (reset) await HiveService.resetAll();
     await HiveService.init();
   } catch (error, stackTrace) {
-    debugPrint('Yerel depolama açılamadı: $error\n$stackTrace');
+    logError('Yerel depolama açılamadı', error, stackTrace);
     runApp(
       StartupErrorApp(
         onRetry: () => _openStorageAndRun(prefs),
@@ -68,7 +69,7 @@ Future<void> _initFirebase() async {
     );
   } catch (error, stackTrace) {
     // Aktivasyon hatası açılışı engellememeli; enforcement kapalıyken istekler yine geçer.
-    debugPrint('App Check aktivasyon hatası: $error\n$stackTrace');
+    logError('App Check aktivasyon hatası', error, stackTrace);
   }
 }
 

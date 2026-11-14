@@ -22,6 +22,7 @@ import '../../analysis/providers/analysis_queue_provider.dart';
 import '../../boards/providers/board_provider.dart';
 import '../../../core/router/open_paywall.dart';
 import 'viewer_top_bar.dart';
+import '../../../core/utils/app_logger.dart';
 
 /// [entry]'nin bilgileri. Üstteki başlık alanı sürükleme tutamağıdır
 /// (sürüklemeyi görüntüleyici yönetir); içerik ayrıca kaydırılır.
@@ -317,7 +318,7 @@ class _TextSection extends StatelessWidget {
         icon: AppIcons.copy,
       );
     } catch (error, stackTrace) {
-      debugPrint('Metin kopyalanamadı: $error\n$stackTrace');
+      logError('Metin kopyalanamadı', error, stackTrace);
       toaster.show(l10n.textCopyFailed, tone: StatusToastTone.error);
     }
   }
