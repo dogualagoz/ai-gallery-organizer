@@ -232,27 +232,7 @@ class _DetailScreenState extends ConsumerState<DetailScreen>
     );
 
     return [
-      forCurrent(
-        (entry) => Consumer(
-          builder: (context, ref, _) {
-            // Yalnız panel, görünen kaydın analiz/taşıma alanlarını izler.
-            ref.watch(
-              galleryProvider.select(
-                (_) => viewerEntryFields(repo.entryFor(entry.assetId)),
-              ),
-            );
-            return ViewerInfoLayer(
-              motion: _motion,
-              height: height,
-              entry: entry,
-              bottomInset:
-                  AppSizes.navBarHeight + toolbarBottom + AppSpacing.md,
-              onMove: () => _move(entry.assetId),
-              onTag: _searchTag,
-            );
-          },
-        ),
-      ),
+      forCurrent((entry) => _infoLayer(repo, entry, height, toolbarBottom)),
       Positioned(
         top: 0,
         left: 0,
@@ -270,6 +250,33 @@ class _DetailScreenState extends ConsumerState<DetailScreen>
         child: fade(forCurrent(_toolbar)),
       ),
     ];
+  }
+
+  /// Görünen kaydın bilgi paneli; yalnız bu katman kaydın analiz/taşıma
+  /// alanlarını izler (galerinin geri kalanı paneli yenilemez).
+  Widget _infoLayer(
+    ScreenshotRepository repo,
+    ScreenshotEntry entry,
+    double height,
+    double toolbarBottom,
+  ) {
+    return Consumer(
+      builder: (context, ref, _) {
+        ref.watch(
+          galleryProvider.select(
+            (_) => viewerEntryFields(repo.entryFor(entry.assetId)),
+          ),
+        );
+        return ViewerInfoLayer(
+          motion: _motion,
+          height: height,
+          entry: entry,
+          bottomInset: AppSizes.navBarHeight + toolbarBottom + AppSpacing.md,
+          onMove: () => _move(entry.assetId),
+          onTag: _searchTag,
+        );
+      },
+    );
   }
 
   /// Liste değişince (silme) bulunulan öğe yeniden konumlanır: silinenin
