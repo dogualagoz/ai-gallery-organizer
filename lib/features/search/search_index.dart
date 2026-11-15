@@ -5,7 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/models/screenshot_category.dart';
 import '../../core/models/screenshot_entry.dart';
 import '../../core/utils/text_normalize.dart';
-import '../gallery/providers/gallery_provider.dart';
+import '../gallery/providers/gallery_derived_providers.dart';
 
 final RegExp _whitespace = RegExp(r'\s+');
 
@@ -100,5 +100,5 @@ class SearchIndex {
 
 /// Galeriden kurulan arama dizini (galeri değişince yenilenir).
 final searchIndexProvider = Provider<SearchIndex>(
-  (ref) => SearchIndex(ref.watch(galleryProvider).value ?? const []),
+  (ref) => SearchIndex(ref.watch(galleryEntriesProvider)),
 );

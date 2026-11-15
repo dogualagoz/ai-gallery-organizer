@@ -28,6 +28,10 @@ abstract final class SearchLimits {
 
   /// Boş sorguda önerilen sık etiket sayısı.
   static const int suggestedTags = 12;
+
+  /// Yazarken sonuçların yenilenmesi için beklenen duraklama; her harfte
+  /// tüm dizin taranmaz.
+  static const Duration queryDebounce = Duration(milliseconds: 200);
 }
 
 /// Ücretsiz deneme (yıllık plan intro offer) dönemindeki sınırlar.

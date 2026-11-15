@@ -38,7 +38,16 @@ class SearchScreen extends ConsumerStatefulWidget {
 
 class _SearchScreenState extends ConsumerState<SearchScreen> {
   final TextEditingController _controller = TextEditingController();
+
+  /// Sonuçları belirleyen sorgu; yazarken [SearchLimits.queryDebounce]
+  /// duraklamasından sonra alandaki metne yetişir.
   String _query = '';
+  Timer? _debounce;
+
+  /// Son arama ve girdileri: ilgisiz yeniden kurulumlar dizini yeniden
+  /// taramasın.
+  Object? _resultsKey;
+  List<ScreenshotEntry> _cachedResults = const [];
 
   /// Seçili kategori filtresi (null = tümü).
   ScreenshotCategory? _category;
@@ -66,6 +75,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
 
   @override
   void dispose() {
+    _debounce?.cancel();
     _controller.dispose();
     super.dispose();
   }
@@ -89,6 +99,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
 
   /// Sorguyu alana ve sonuçlara uygular (öneriye dokunma, etiket isteği).
   void _setQuery(String query, {bool remember = false}) {
+    _debounce?.cancel();
     _controller.value = TextEditingValue(
       text: query,
       selection: TextSelection.collapsed(offset: query.length),
@@ -97,15 +108,31 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     if (remember) _remember();
   }
 
+  /// Yazarken sonuçlar duraklamadan sonra yenilenir; alan boşalınca öneriler
+  /// beklemeden döner.
+  void _onChanged(String value) {
+    _debounce?.cancel();
+    if (value.trim().isEmpty) {
+      setState(() => _query = value);
+      return;
+    }
+    _debounce = Timer(SearchLimits.queryDebounce, () {
+      if (mounted) setState(() => _query = value);
+    });
+  }
+
   /// Anlamlı arama anı (gönderme, sonuç açma, öneri ya da görüntüleyicide
-  /// etiket seçme) geçmişe yazılır; yazarken her harf kaydedilmez.
-  void _remember() => ref.read(recentSearchesProvider.notifier).add(_query);
+  /// etiket seçme) geçmişe yazılır; yazarken her harf kaydedilmez. Alandaki
+  /// güncel metin yazılır (bekleyen duraklamadan bağımsız).
+  void _remember() =>
+      ref.read(recentSearchesProvider.notifier).add(_controller.text);
 
   void _onActiveChanged(bool active) {
     setState(() {
       _active = active;
       if (active) return;
       // "İptal" aramayı baştan alır (iOS davranışı).
+      _debounce?.cancel();
       _controller.clear();
       _query = '';
       _category = null;
@@ -145,7 +172,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
         controller: _controller,
         autofocus: _active,
         placeholder: l10n.searchHint,
-        onChanged: (value) => setState(() => _query = value),
+        onChanged: _onChanged,
         onSubmitted: (_) => _remember(),
       ),
       onSearchActiveChanged: _onActiveChanged,
@@ -246,11 +273,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   List<Widget> _results(SearchIndex index) {
     final l10n = context.l10n;
     final Map<int, String> names = ref.watch(categoryNamesProvider);
-    final List<ScreenshotEntry> results = index.search(
-      _query,
-      category: _category,
-      nameOf: (category) => category.displayName(l10n, names),
-    );
+    final List<ScreenshotEntry> results = _resultsFor(index, names);
     if (results.isEmpty) {
       final String query = _query.trim();
       return [
@@ -284,6 +307,22 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       ),
       ScreenshotGrid(entries: results, onOpen: _remember),
     ];
+  }
+
+  /// [index] üzerinde güncel sorgu ve filtrenin sonuçları; girdiler değişmedikçe
+  /// önceki sonuç döner.
+  List<ScreenshotEntry> _resultsFor(SearchIndex index, Map<int, String> names) {
+    final l10n = context.l10n;
+    final Object key = (index, _query, _category, names, l10n);
+    if (key != _resultsKey) {
+      _resultsKey = key;
+      _cachedResults = index.search(
+        _query,
+        category: _category,
+        nameOf: (category) => category.displayName(l10n, names),
+      );
+    }
+    return _cachedResults;
   }
 
   /// Kalan alanı dolduran ortalanmış içerik (boş/yükleniyor durumları).

@@ -2,6 +2,7 @@
 // (geçmişe yazılır), etkin aramada yazma ve "İptal" ile sıfırlama.
 import 'dart:io';
 
+import 'package:ai_gallery_organizer/core/constants/app_constants.dart';
 import 'package:ai_gallery_organizer/core/models/hive/hive_registrar.g.dart';
 import 'package:ai_gallery_organizer/core/models/screenshot_category.dart';
 import 'package:ai_gallery_organizer/core/models/screenshot_entry.dart';
@@ -152,6 +153,10 @@ void main() {
     );
     await tester.pumpAndSettle();
     await tester.enterText(find.byType(CupertinoSearchTextField), 'zzz');
+    await tester.pump();
+    // Sonuçlar yazma duraklamasından sonra yenilenir.
+    expect(find.text('No Results'), findsNothing);
+    await tester.pump(SearchLimits.queryDebounce);
     await tester.pumpAndSettle();
     expect(find.text('No Results'), findsOneWidget);
 
