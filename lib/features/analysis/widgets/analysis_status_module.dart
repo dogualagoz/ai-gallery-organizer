@@ -10,7 +10,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:photo_manager/photo_manager.dart';
 
-import '../../../core/constants/app_constants.dart';
 import '../../../core/constants/app_curves.dart';
 import '../../../core/constants/app_icons.dart';
 import '../../../core/constants/ui_constants.dart';
@@ -27,6 +26,7 @@ import '../../gallery/providers/gallery_derived_providers.dart';
 import '../providers/analysis_queue_provider.dart';
 import '../providers/analysis_summary_provider.dart';
 import 'analysis_flights.dart';
+import 'analysis_quota_text.dart';
 import 'analysis_status_views.dart';
 
 class AnalysisStatusModule extends ConsumerStatefulWidget {
@@ -163,36 +163,6 @@ class _AnalysisStatusModuleState extends ConsumerState<AnalysisStatusModule> {
 
   void _dismissResult() => ref.read(analysisQueueProvider.notifier).dismiss();
 
-  /// Kalan hak metni. Sıra önemli: deneme penceresi (Pro sayılsa da sınırlı)
-  /// önce, sonra sınırsız Pro, aksi halde haftalık ücretsiz (+ kredi).
-  String _quotaHint(EntitlementState e) {
-    final l10n = context.l10n;
-    if (e.isInTrialWindow) {
-      return l10n.analyzeHeroTrialHint(
-        e.remainingTrialAnalysis + e.analysisCredits,
-      );
-    }
-    if (e.isPro) return l10n.analyzeHeroUnlimited;
-    if (e.analysisCredits > 0) {
-      return l10n.analyzeHeroQuotaWithCredits(
-        e.remainingFreeAnalysis,
-        FreeLimits.aiAnalysis,
-        e.analysisCredits,
-      );
-    }
-    return l10n.analyzeHeroQuotaHint(
-      e.remainingFreeAnalysis,
-      FreeLimits.aiAnalysis,
-    );
-  }
-
-  /// Hak bittiğinde: denemede neden bittiği, ücretsizde ne zaman yenileneceği.
-  String _quotaExhaustedDetail(EntitlementState e) {
-    final l10n = context.l10n;
-    if (e.isInTrialWindow) return l10n.analysisTrialQuotaUsed;
-    return l10n.homeWeeklyLimitResetIn(e.daysUntilWeeklyReset);
-  }
-
   /// Kaynak küçük resim: sıradaki uçuşun görseli (kalkınca karosuna
   /// süzülür), sıra boşsa şu an analiz edilen ilk ekran görüntüsü.
   AssetEntity? _source(AnalysisQueueState queue) {
@@ -287,7 +257,7 @@ class _AnalysisStatusModuleState extends ConsumerState<AnalysisStatusModule> {
         'quota',
         AnalysisQuotaRow(
           pending: pending,
-          detail: _quotaExhaustedDetail(e),
+          detail: analysisQuotaExhaustedDetail(context.l10n, e),
           onGetMore: _openPacks,
         ),
       );
@@ -296,7 +266,7 @@ class _AnalysisStatusModuleState extends ConsumerState<AnalysisStatusModule> {
       'pending',
       AnalysisPendingCard(
         pending: pending,
-        quotaHint: _quotaHint(e),
+        quotaHint: analysisQuotaHint(context.l10n, e),
         onAnalyze: _start,
       ),
     );
