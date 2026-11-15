@@ -11,8 +11,8 @@ import 'swipe_deck_controller.dart';
 /// Uçmakta olan kartın verisi; [offset] uçuş boyunca güncellenir (geri al
 /// kartı yarıda yakalarsa oradan döndürür). Dinleyicisi yok, düz alan: kart
 /// ağaçtan çıktıktan sonra son yay karesi yazsa da sorun olmaz.
-class Departure {
-  Departure({
+class DeckDeparture {
+  DeckDeparture({
     required this.item,
     required this.direction,
     required this.from,
@@ -73,7 +73,7 @@ class DepartingCard extends StatefulWidget {
     required this.onGone,
   });
 
-  final Departure departure;
+  final DeckDeparture departure;
   final Size cardSize;
   final Size screen;
 
@@ -91,7 +91,7 @@ class DepartingCard extends StatefulWidget {
 
 class _DepartingCardState extends State<DepartingCard>
     with TickerProviderStateMixin {
-  late final Departure _departure = widget.departure;
+  late final DeckDeparture _departure = widget.departure;
   late final AnimationController _x = AnimationController.unbounded(
     vsync: this,
     value: _departure.from.dx,

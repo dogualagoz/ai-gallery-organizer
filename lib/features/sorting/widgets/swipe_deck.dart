@@ -84,7 +84,7 @@ class _SwipeDeckState extends State<SwipeDeck>
     _opacity,
   ]);
 
-  final List<Departure> _departures = [];
+  final List<DeckDeparture> _departures = [];
   _Return? _expected;
 
   /// Son gönderilen kartın kimliği ve o an arkadaki kartın ölçeği: üste
@@ -205,7 +205,7 @@ class _SwipeDeckState extends State<SwipeDeck>
     _promoteFrom = _nextScale;
     setState(() {
       _departures.add(
-        Departure(
+        DeckDeparture(
           item: top,
           direction: direction,
           from: _offset,
@@ -259,7 +259,7 @@ class _SwipeDeckState extends State<SwipeDeck>
 
   @override
   void expectReturn(String id, SwipeDirection direction) {
-    final Departure? flying = _departures
+    final DeckDeparture? flying = _departures
         .where((departure) => departure.item.id == id)
         .firstOrNull;
     if (flying == null) {
@@ -302,7 +302,7 @@ class _SwipeDeckState extends State<SwipeDeck>
     _opacity.value = 1;
   }
 
-  void _removeDeparture(Departure departure) {
+  void _removeDeparture(DeckDeparture departure) {
     if (!_departures.contains(departure)) return;
     setState(() => _departures.remove(departure));
   }
@@ -337,7 +337,7 @@ class _SwipeDeckState extends State<SwipeDeck>
               children: [
                 if (next != null) _nextCard(next),
                 if (top != null && !_isDeparting(top.id)) _topCard(top),
-                for (final Departure departure in _departures)
+                for (final DeckDeparture departure in _departures)
                   DepartingCard(
                     key: departure.key,
                     departure: departure,

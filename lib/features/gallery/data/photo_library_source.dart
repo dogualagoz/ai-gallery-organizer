@@ -43,14 +43,14 @@ class PhotoLibrarySource {
     // olarak sınıflanmadığından Screenshots albümü boş kalır; debug'da tüm
     // görsellere düşülür ki AI akışı test edilebilsin.
     if (kDebugMode && paths.isNotEmpty) {
-      logInfo('ScreenshotRepository: debug fallback — tüm görseller');
+      logInfo('PhotoLibrarySource: debug fallback — tüm görseller');
       final AssetPathEntity fallback = paths.first;
       final int count = await fallback.assetCountAsync;
       if (count == 0) return const [];
       return fallback.getAssetListRange(start: 0, end: count);
     }
 
-    logInfo('ScreenshotRepository: Screenshots albümü bulunamadı/boş');
+    logInfo('PhotoLibrarySource: Screenshots albümü bulunamadı/boş');
     return const [];
   }
 }
