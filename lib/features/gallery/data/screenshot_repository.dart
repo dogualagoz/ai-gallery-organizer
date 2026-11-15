@@ -2,7 +2,6 @@
 // ile Hive (local metadata) arasındaki köprü.
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_ce/hive.dart';
 import 'package:photo_manager/photo_manager.dart';
@@ -11,8 +10,8 @@ import '../../../core/models/screenshot_category.dart';
 import '../../../core/models/screenshot_entry.dart';
 import '../../../core/services/category_priors_service.dart';
 import '../../../core/services/hive_service.dart';
-import '../../../core/services/photo_permission_service.dart';
 import '../../../core/utils/app_logger.dart';
+import 'photo_library_source.dart';
 
 final screenshotRepositoryProvider = Provider<ScreenshotRepository>((ref) {
   return ScreenshotRepository(
@@ -32,10 +31,19 @@ typedef CategoryCorrectionRecorder = Future<void> Function(
   List<String> tags,
 );
 
+/// Ekran görüntüsü metadata'sının (Hive) tek erişim noktası; cihaz
+/// kütüphanesiyle eşitler ve asset'leri oturum boyunca önbellekte tutar.
 class ScreenshotRepository {
-  ScreenshotRepository(this._box, {this.onCorrection});
+  ScreenshotRepository(
+    this._box, {
+    this.onCorrection,
+    this._source = const PhotoLibrarySource(),
+  });
 
   final Box<ScreenshotEntry> _box;
+
+  /// Cihaz kütüphanesi okuması (testlerde sahtesi verilir).
+  final PhotoLibrarySource _source;
 
   /// Kullanıcı düzeltmelerini öğrenme sinyaline aktaran opsiyonel callback.
   final CategoryCorrectionRecorder? onCorrection;
@@ -76,7 +84,7 @@ class ScreenshotRepository {
   /// Erişim yoksa [PhotoAccessDeniedException] fırlatır.
   /// Dönen değer: yeni eklenen kayıt sayısı.
   Future<int> syncLibrary() async {
-    final List<AssetEntity> assets = await _fetchScreenshotAssets();
+    final List<AssetEntity> assets = await _source.fetchScreenshots();
 
     _assetCache
       ..clear()
@@ -102,49 +110,6 @@ class ScreenshotRepository {
     if (newEntries.isNotEmpty) await _box.putAll(newEntries);
 
     return newEntries.length;
-  }
-
-  /// iOS "Screenshots" akıllı albümünden tüm asset'leri çeker.
-  Future<List<AssetEntity>> _fetchScreenshotAssets() async {
-    final PermissionState permission =
-        await PhotoManager.requestPermissionExtend();
-    // Boş liste dönülmez: erişimsizlik "hiç ekran görüntüsü yok" sanılmasın.
-    if (!permission.hasAccess) throw const PhotoAccessDeniedException();
-
-    final List<AssetPathEntity> paths = await PhotoManager.getAssetPathList(
-      type: RequestType.image,
-    );
-
-    // iOS, screenshot'ları sistem tarafında akıllı albümde toplar —
-    // subtype filtresi yazmaya gerek yok, albümün kendisi filtredir.
-    AssetPathEntity? screenshotAlbum;
-    for (final AssetPathEntity path in paths) {
-      if (path.albumTypeEx?.darwin?.subtype ==
-          PMDarwinAssetCollectionSubtype.smartAlbumScreenshots) {
-        screenshotAlbum = path;
-        break;
-      }
-    }
-    if (screenshotAlbum != null) {
-      final int count = await screenshotAlbum.assetCountAsync;
-      if (count > 0) {
-        return screenshotAlbum.getAssetListRange(start: 0, end: count);
-      }
-    }
-
-    // Simülatörde `simctl addmedia` ile eklenen görseller gerçek screenshot
-    // olarak sınıflanmadığından Screenshots albümü boş kalır; debug'da tüm
-    // görsellere düşülür ki AI akışı test edilebilsin.
-    if (kDebugMode && paths.isNotEmpty) {
-      logInfo('ScreenshotRepository: debug fallback — tüm görseller');
-      final AssetPathEntity fallback = paths.first;
-      final int count = await fallback.assetCountAsync;
-      if (count == 0) return const [];
-      return fallback.getAssetListRange(start: 0, end: count);
-    }
-
-    logInfo('ScreenshotRepository: Screenshots albümü bulunamadı/boş');
-    return const [];
   }
 
   /// AI analiz sonucunu kaydeder. [aiCategory] modelin ham kararıdır; [category]
