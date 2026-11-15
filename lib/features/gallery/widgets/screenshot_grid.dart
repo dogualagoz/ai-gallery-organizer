@@ -82,22 +82,54 @@ class ScreenshotGrid extends ConsumerWidget {
               ),
             );
           }
-          return ScreenshotContextMenu(
+          return _BrowseTile(
             key: key,
             entry: entry,
-            child: ScreenshotGridTile(
-              entry: entry,
-              asset: repo.assetFor(entry.assetId),
-              radius: inset ? AppRadius.sm : 0,
-              onPressed: () {
-                onOpen?.call();
-                openViewer(
-                  context,
-                  entry.assetId,
-                  scope: [for (final item in entries) item.assetId],
-                );
-              },
-            ),
+            entries: entries,
+            repo: repo,
+            radius: inset ? AppRadius.sm : 0,
+            onOpen: onOpen,
+          );
+        },
+      ),
+    );
+  }
+}
+
+/// Normal moddaki karo: dokunuş görüntüleyiciyi ızgaranın sırasıyla açar,
+/// uzun basış bağlam menüsü getirir.
+class _BrowseTile extends StatelessWidget {
+  const _BrowseTile({
+    super.key,
+    required this.entry,
+    required this.entries,
+    required this.repo,
+    required this.radius,
+    required this.onOpen,
+  });
+
+  final ScreenshotEntry entry;
+
+  /// Görüntüleyicinin kaydırma kapsamı (ızgaranın tamamı).
+  final List<ScreenshotEntry> entries;
+  final ScreenshotRepository repo;
+  final double radius;
+  final VoidCallback? onOpen;
+
+  @override
+  Widget build(BuildContext context) {
+    return ScreenshotContextMenu(
+      entry: entry,
+      child: ScreenshotGridTile(
+        entry: entry,
+        asset: repo.assetFor(entry.assetId),
+        radius: radius,
+        onPressed: () {
+          onOpen?.call();
+          openViewer(
+            context,
+            entry.assetId,
+            scope: [for (final item in entries) item.assetId],
           );
         },
       ),

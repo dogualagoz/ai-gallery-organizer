@@ -59,7 +59,6 @@ class _MoveTargetSheet extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
-    final Map<int, String> names = ref.watch(categoryNamesProvider);
     final List<ScreenshotCategory> categories = [
       for (final ScreenshotCategory category in ref.watch(
         orderedCategoriesProvider,
@@ -83,38 +82,63 @@ class _MoveTargetSheet extends ConsumerWidget {
       slivers: [
         if (boards.isNotEmpty)
           SliverToBoxAdapter(
-            child: GroupedSection(
-              header: l10n.moveSectionBoards,
-              children: [
-                for (final Board board in boards)
-                  GroupedRow(
-                    icon: AppIcons.board,
-                    title: board.name,
-                    showChevron: false,
-                    onTap: () => choose(MoveTarget.board(board.id, board.name)),
-                  ),
-              ],
-            ),
+            child: _BoardTargets(boards: boards, onChoose: choose),
           ),
         SliverToBoxAdapter(
-          child: GroupedSection(
-            header: l10n.moveSectionCategories,
-            children: [
-              for (final ScreenshotCategory category in categories)
-                GroupedRow(
-                  icon: category.icon,
-                  title: category.displayName(l10n, names),
-                  showChevron: false,
-                  onTap: () => choose(
-                    MoveTarget.category(
-                      category,
-                      category.displayName(l10n, names),
-                    ),
-                  ),
-                ),
-            ],
-          ),
+          child: _CategoryTargets(categories: categories, onChoose: choose),
         ),
+      ],
+    );
+  }
+}
+
+/// Kullanıcı panoları bölümü.
+class _BoardTargets extends StatelessWidget {
+  const _BoardTargets({required this.boards, required this.onChoose});
+
+  final List<Board> boards;
+  final ValueChanged<MoveTarget> onChoose;
+
+  @override
+  Widget build(BuildContext context) {
+    return GroupedSection(
+      header: context.l10n.moveSectionBoards,
+      children: [
+        for (final Board board in boards)
+          GroupedRow(
+            icon: AppIcons.board,
+            title: board.name,
+            showChevron: false,
+            onTap: () => onChoose(MoveTarget.board(board.id, board.name)),
+          ),
+      ],
+    );
+  }
+}
+
+/// Sistem kategorileri bölümü (kullanıcının verdiği adlarla).
+class _CategoryTargets extends ConsumerWidget {
+  const _CategoryTargets({required this.categories, required this.onChoose});
+
+  final List<ScreenshotCategory> categories;
+  final ValueChanged<MoveTarget> onChoose;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
+    final Map<int, String> names = ref.watch(categoryNamesProvider);
+    return GroupedSection(
+      header: l10n.moveSectionCategories,
+      children: [
+        for (final ScreenshotCategory category in categories)
+          GroupedRow(
+            icon: category.icon,
+            title: category.displayName(l10n, names),
+            showChevron: false,
+            onTap: () => onChoose(
+              MoveTarget.category(category, category.displayName(l10n, names)),
+            ),
+          ),
       ],
     );
   }
