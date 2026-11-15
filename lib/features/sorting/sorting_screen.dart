@@ -1,6 +1,7 @@
 // Temizle sekmesi: analiz bekleyen ya da "Diğer"e düşmüş ekran görüntüleri
 // için kart destesi — sola sil (onaylanana kadar bekler), sağa atla, yukarı
 // seçili kategoriye ata. Bekleyen silmeler sekme değişse de korunur.
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/cupertino.dart';
@@ -329,7 +330,7 @@ class _SortingScreenState extends ConsumerState<SortingScreen> {
     if (deleted.isEmpty) return;
     Haptics.confirm();
     // Temizlik sonrası olumlu an: değerlendirme iste (cooldown'lı).
-    ref.read(reviewServiceProvider).requestIfAppropriate();
+    unawaited(ref.read(reviewServiceProvider).requestIfAppropriate());
   }
 
   Future<void> _pickTarget() async {

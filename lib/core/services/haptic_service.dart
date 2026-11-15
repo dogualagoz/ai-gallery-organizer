@@ -1,4 +1,6 @@
 // Semantik haptic sözlüğü: tüm titreşim geri bildirimi tek yerden yönetilir.
+import 'dart:async';
+
 import 'package:flutter/services.dart';
 
 /// Uygulama genelindeki haptic kelime dağarcığı. Doğrudan
@@ -25,9 +27,9 @@ abstract final class Haptics {
 
   /// Kutlamalık başarı ("ta-dah"): analiz turu bitti, restore başarılı.
   static Future<void> success() async {
-    HapticFeedback.mediumImpact();
+    unawaited(HapticFeedback.mediumImpact());
     await Future<void>.delayed(_successGap);
-    HapticFeedback.lightImpact();
+    unawaited(HapticFeedback.lightImpact());
   }
 
   /// Satın alma başarısı — [success] ile aynı desen, semantik ayrım için.

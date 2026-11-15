@@ -1,6 +1,8 @@
 // Pano/kategori yönetim eylemleri: düzenleme modu action sheet'i, karo bağlam
 // menüsü ve detaydaki "…" menüsünün paylaştığı yeniden adlandır, yeniden analiz
 // et, seç (toplu sil/taşı), tümünü sil ve panoyu sil işlemleri.
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -245,7 +247,8 @@ Future<bool> reanalyzeCategory(
   for (final String assetId in ids) {
     await repo.markPending(assetId);
   }
-  queue.start(onlyAssetIds: ids);
+  // Tur arka planda sürer; ilerleme durum modülünde izlenir.
+  unawaited(queue.start(onlyAssetIds: ids));
   return true;
 }
 

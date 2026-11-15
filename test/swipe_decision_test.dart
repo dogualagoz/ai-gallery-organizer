@@ -68,12 +68,12 @@ void main() {
     final SwipeDirection? armed = armedDirection(const Offset(-_t, 0), null);
     expect(armed, SwipeDirection.left);
     // Eşiğin hemen gerisi: hâlâ eşikte sayılır.
-    final Offset justBelow = Offset(-_t + AppSwipe.armHysteresis / 2, 0);
+    const Offset justBelow = Offset(-_t + AppSwipe.armHysteresis / 2, 0);
     expect(armedDirection(justBelow, armed), SwipeDirection.left);
     // Daha önce eşikte değilse aynı nokta eşik sayılmaz.
     expect(armedDirection(justBelow, null), isNull);
     // Payın gerisine dönünce çıkar.
-    final Offset clear = Offset(-_t + AppSwipe.armHysteresis * 2, 0);
+    const Offset clear = Offset(-_t + AppSwipe.armHysteresis * 2, 0);
     expect(armedDirection(clear, armed), isNull);
   });
 

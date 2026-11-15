@@ -12,10 +12,6 @@ class AnalysisResult {
     this.ocrText,
   });
 
-  final ScreenshotCategory category;
-  final List<String> tags;
-  final String? ocrText;
-
   /// Gemini'nin JSON yanıtını çözer.
   /// Şema dışı değerlerde güvenli düşüş yapar (bilinmeyen kategori → other,
   /// bozuk tags → boş liste); geçersiz JSON'da [FormatException] fırlatır.
@@ -47,4 +43,8 @@ class AnalysisResult {
       ocrText: ocrText,
     );
   }
+
+  final ScreenshotCategory category;
+  final List<String> tags;
+  final String? ocrText;
 }

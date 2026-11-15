@@ -13,10 +13,6 @@ import '../../../core/utils/text_scale.dart';
 /// yenilenir; illüstrasyon kendi katmanında çizilir ki döngüsü metni
 /// yeniden boyatmasın.
 class OnboardingPage extends StatelessWidget {
-  /// Gövde ve dipnotun başlığa göre kademeli başlama oranları.
-  static const double _bodyDelay = 0.25;
-  static const double _noteDelay = 0.4;
-
   const OnboardingPage({
     super.key,
     required this.illustration,
@@ -24,6 +20,10 @@ class OnboardingPage extends StatelessWidget {
     required this.body,
     this.note,
   });
+
+  /// Gövde ve dipnotun başlığa göre kademeli başlama oranları.
+  static const double _bodyDelay = 0.25;
+  static const double _noteDelay = 0.4;
 
   final Widget illustration;
   final String title;

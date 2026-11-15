@@ -75,7 +75,7 @@ class ScreenshotAnalyzer {
 
     final Content content = Content.multi([
       InlineDataPart('image/jpeg', bytes),
-      TextPart(AiConfig.prompt),
+      const TextPart(AiConfig.prompt),
     ]);
 
     int attempt = 0;
