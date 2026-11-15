@@ -328,7 +328,6 @@
   "settingsWeeklyQuota": "Bu haftaki ücretsiz hak",
   "settingsCredits": "Paket kredisi",
   "settingsTrialQuota": "Deneme hakkı",
-  "settingsTrialFooter": "Deneme haftası bitince analiz sınırsız olur.",
   "settingsAnalysisRow": "AI analizi",
   "settingsUnlimited": "Sınırsız",
   "settingsManageSubscription": "Aboneliği yönet",
@@ -485,7 +484,8 @@
   "startupErrorResetConfirmBody": "Bu cihazda saklanan analiz sonuçları, özel panolar ve kategori ayarları silinecek. Fotoğraflarını etkilemez.",
   "quotaFraction": "{remaining} / {total}",
   "quotaOfTotal": "/ {total}",
-  "sentencePair": "{first} {second}",
+  "settingsAutoSortFooterFree": "Yeni ekran görüntüleri arka planda analiz edilip panolarına yerleştirilir. Haftalık kota {days} gün sonra yenilenir.",
+  "settingsAutoSortFooterTrial": "Yeni ekran görüntüleri arka planda analiz edilip panolarına yerleştirilir. Deneme haftası bitince analiz sınırsız olur.",
   "appVersionBuild": "{version} ({build})",
   "categoryCountChip": "{name} · {count}",
   "tabBadgeOverflow": "{max}+"

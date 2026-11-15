@@ -1226,12 +1226,6 @@ abstract class AppLocalizations {
   /// **'Trial analyses'**
   String get settingsTrialQuota;
 
-  /// No description provided for @settingsTrialFooter.
-  ///
-  /// In en, this message translates to:
-  /// **'After the trial week, analysis is unlimited.'**
-  String get settingsTrialFooter;
-
   /// No description provided for @settingsAnalysisRow.
   ///
   /// In en, this message translates to:
@@ -1826,11 +1820,17 @@ abstract class AppLocalizations {
   /// **'/ {total}'**
   String quotaOfTotal(int total);
 
-  /// İki bağımsız cümleyi tek paragrafta birleştirir.
+  /// Free kullanıcı: otomatik sıralama açıklaması + kota yenilenme süresi.
   ///
   /// In en, this message translates to:
-  /// **'{first} {second}'**
-  String sentencePair(String first, String second);
+  /// **'New screenshots are analyzed in the background and placed in their boards. Weekly quota renews in {days} days.'**
+  String settingsAutoSortFooterFree(int days);
+
+  /// No description provided for @settingsAutoSortFooterTrial.
+  ///
+  /// In en, this message translates to:
+  /// **'New screenshots are analyzed in the background and placed in their boards. After the trial week, analysis is unlimited.'**
+  String get settingsAutoSortFooterTrial;
 
   /// Sürüm ve derleme numarası.
   ///

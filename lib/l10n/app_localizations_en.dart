@@ -667,10 +667,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsTrialQuota => 'Trial analyses';
 
   @override
-  String get settingsTrialFooter =>
-      'After the trial week, analysis is unlimited.';
-
-  @override
   String get settingsAnalysisRow => 'AI analysis';
 
   @override
@@ -1020,9 +1016,13 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String sentencePair(String first, String second) {
-    return '$first $second';
+  String settingsAutoSortFooterFree(int days) {
+    return 'New screenshots are analyzed in the background and placed in their boards. Weekly quota renews in $days days.';
   }
+
+  @override
+  String get settingsAutoSortFooterTrial =>
+      'New screenshots are analyzed in the background and placed in their boards. After the trial week, analysis is unlimited.';
 
   @override
   String appVersionBuild(String version, String build) {

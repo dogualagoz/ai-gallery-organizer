@@ -3,7 +3,8 @@
 /// Uygulamanın çalışma adı (placeholder — yayın öncesi tek noktadan değişir).
 const String kAppName = 'Snaply';
 
-/// Satır içi öğeleri ayıran orta nokta ("Şartlar · Gizlilik", "Fatura · 12").
+/// Paywall altındaki bağlantıları ayıran orta nokta ("Şartlar · Gizlilik").
+/// Metin içindeki ayraçlar (ör. kategori çipi) ARB değerlerinde durur.
 const String kInlineSeparator = '·';
 
 /// Free kullanıcı limitleri (PROJECT_DOCUMENTATION.md Bölüm 3).

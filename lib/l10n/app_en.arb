@@ -328,7 +328,6 @@
   "settingsWeeklyQuota": "Free this week",
   "settingsCredits": "Pack credits",
   "settingsTrialQuota": "Trial analyses",
-  "settingsTrialFooter": "After the trial week, analysis is unlimited.",
   "settingsAnalysisRow": "AI analysis",
   "settingsUnlimited": "Unlimited",
   "settingsManageSubscription": "Manage subscription",
@@ -498,11 +497,12 @@
     "description": "Kota halkasında sayacın altındaki toplam.",
     "placeholders": {"total": {"type": "int"}}
   },
-  "sentencePair": "{first} {second}",
-  "@sentencePair": {
-    "description": "İki bağımsız cümleyi tek paragrafta birleştirir.",
-    "placeholders": {"first": {"type": "String"}, "second": {"type": "String"}}
+  "settingsAutoSortFooterFree": "New screenshots are analyzed in the background and placed in their boards. Weekly quota renews in {days} days.",
+  "@settingsAutoSortFooterFree": {
+    "description": "Free kullanıcı: otomatik sıralama açıklaması + kota yenilenme süresi.",
+    "placeholders": {"days": {"type": "int"}}
   },
+  "settingsAutoSortFooterTrial": "New screenshots are analyzed in the background and placed in their boards. After the trial week, analysis is unlimited.",
   "appVersionBuild": "{version} ({build})",
   "@appVersionBuild": {
     "description": "Sürüm ve derleme numarası.",

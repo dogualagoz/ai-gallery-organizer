@@ -184,17 +184,11 @@ class AnalysisSection extends StatelessWidget {
   }
 
   String _footer(AppLocalizations l10n) {
-    final String autoSort = l10n.settingsAutoSortFooter;
     if (!entitlement.isPro) {
-      return l10n.sentencePair(
-        autoSort,
-        l10n.homeWeeklyLimitResetIn(entitlement.daysUntilWeeklyReset),
-      );
+      return l10n.settingsAutoSortFooterFree(entitlement.daysUntilWeeklyReset);
     }
-    if (entitlement.isInTrialWindow) {
-      return l10n.sentencePair(autoSort, l10n.settingsTrialFooter);
-    }
-    return autoSort;
+    if (entitlement.isInTrialWindow) return l10n.settingsAutoSortFooterTrial;
+    return l10n.settingsAutoSortFooter;
   }
 }
 

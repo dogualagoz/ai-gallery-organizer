@@ -657,10 +657,6 @@ class AppLocalizationsTr extends AppLocalizations {
   String get settingsTrialQuota => 'Deneme hakkı';
 
   @override
-  String get settingsTrialFooter =>
-      'Deneme haftası bitince analiz sınırsız olur.';
-
-  @override
   String get settingsAnalysisRow => 'AI analizi';
 
   @override
@@ -1010,9 +1006,13 @@ class AppLocalizationsTr extends AppLocalizations {
   }
 
   @override
-  String sentencePair(String first, String second) {
-    return '$first $second';
+  String settingsAutoSortFooterFree(int days) {
+    return 'Yeni ekran görüntüleri arka planda analiz edilip panolarına yerleştirilir. Haftalık kota $days gün sonra yenilenir.';
   }
+
+  @override
+  String get settingsAutoSortFooterTrial =>
+      'Yeni ekran görüntüleri arka planda analiz edilip panolarına yerleştirilir. Deneme haftası bitince analiz sınırsız olur.';
 
   @override
   String appVersionBuild(String version, String build) {

@@ -53,25 +53,39 @@ class StatusCard extends StatelessWidget {
     this.padding = StatusCardSurface.defaultPadding,
   }) : assert(title != null || subtitle != null);
 
+  /// Satırın başındaki durum ikonu.
   final IconData icon;
+
+  /// Başlık; alt yazı varsa başlık stilinde, yoksa gövde metni olarak çizilir.
   final String? title;
+
+  /// İkincil renkte küçük açıklama.
   final String? subtitle;
+
+  /// Sağdaki (büyük yazıda alttaki) eylem.
   final Widget trailing;
+
+  /// Metnin altına gelen ek öğe (ör. satır içi bağlantı).
   final Widget? footer;
+
+  /// true ise aksan tonlu dolgu.
   final bool tinted;
 
   /// true ise ikon aksan yerine ikincil renkte (bilgi/uyarı satırları).
   final bool muted;
+
+  /// Kartın iç boşluğu.
   final EdgeInsetsGeometry padding;
 
   @override
   Widget build(BuildContext context) {
     final ColorScheme scheme = Theme.of(context).colorScheme;
-    final bool top = footer != null;
+    // Altında ek öğe varsa ikon ve eylem metnin ilk satırına hizalanır.
+    final CrossAxisAlignment align = footer != null
+        ? CrossAxisAlignment.start
+        : CrossAxisAlignment.center;
     final Widget label = Row(
-      crossAxisAlignment: top
-          ? CrossAxisAlignment.start
-          : CrossAxisAlignment.center,
+      crossAxisAlignment: align,
       children: [
         Icon(
           icon,
@@ -102,9 +116,7 @@ class StatusCard extends StatelessWidget {
       tinted: tinted,
       padding: padding,
       child: Row(
-        crossAxisAlignment: top
-            ? CrossAxisAlignment.start
-            : CrossAxisAlignment.center,
+        crossAxisAlignment: align,
         children: [
           Expanded(child: label),
           const SizedBox(width: AppSpacing.sm),
@@ -147,6 +159,7 @@ class FilledPillButton extends StatelessWidget {
     required this.onPressed,
   });
 
+  /// Buton metni.
   final String label;
   final VoidCallback onPressed;
 

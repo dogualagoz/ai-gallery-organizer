@@ -6,8 +6,13 @@ import 'package:flutter/physics.dart';
 
 /// Standart animasyon süreleri.
 abstract final class AppDurations {
+  /// Küçük durum değişimleri ve kısa kaydırmalar.
   static const Duration fast = Duration(milliseconds: 150);
+
+  /// Boyut/içerik geçişleri ve hızlı yay eğrileri.
   static const Duration medium = Duration(milliseconds: 300);
+
+  /// Sayfa geçişi, bölüme kaydırma ve sahne girişleri.
   static const Duration slow = Duration(milliseconds: 600);
 
   /// Onboarding gibi sahne animasyonları için uzun süre.
