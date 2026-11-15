@@ -23,7 +23,7 @@ import '../../core/widgets/empty_state_view.dart';
 import '../../core/widgets/selection_toolbar.dart';
 import '../../core/widgets/spring_visibility.dart';
 import '../analysis/providers/recent_distribution_provider.dart';
-import '../gallery/providers/gallery_provider.dart';
+import '../gallery/providers/gallery_derived_providers.dart';
 import '../gallery/screenshot_actions.dart';
 import '../gallery/widgets/screenshot_grid.dart';
 import 'providers/board_provider.dart';
@@ -139,19 +139,15 @@ class _BoardDetailScreenState extends ConsumerState<BoardDetailScreen> {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final ScreenshotCategory? category = widget.category;
-    final List<ScreenshotEntry> entries = [
-      for (final ScreenshotEntry entry
-          in ref.watch(galleryProvider).value ?? const <ScreenshotEntry>[])
-        if (category != null
-            ? entry.category == category
-            : entry.boardId == widget.boardId)
-          entry,
-    ];
-    final Board? board = widget.boardId == null
+    final String? boardId = widget.boardId;
+    final List<ScreenshotEntry> entries =
+        (category != null
+            ? ref.watch(entriesByCategoryProvider)[category]
+            : ref.watch(entriesByBoardProvider)[boardId]) ??
+        const [];
+    final Board? board = boardId == null
         ? null
-        : (ref.watch(boardsProvider).value ?? const <Board>[])
-              .where((candidate) => candidate.id == widget.boardId)
-              .firstOrNull;
+        : ref.watch(boardByIdProvider(boardId));
     final String title = category != null
         ? category.displayName(l10n, ref.watch(categoryNamesProvider))
         : (board?.name ?? l10n.boardsTitle);

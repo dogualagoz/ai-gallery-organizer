@@ -176,12 +176,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         ),
         sliver: SliverList.list(
           children: [
-            AnalysisStatusModule(entries: entries),
+            const AnalysisStatusModule(),
             const AutoSortHint(),
             const LimitedAccessBanner(),
-            LibraryCategoriesSection(entries: entries),
+            const LibraryCategoriesSection(),
             const SizedBox(height: AppSpacing.lg),
-            LibraryBoardsSection(entries: entries),
+            const LibraryBoardsSection(),
             const SizedBox(height: AppSpacing.lg),
             LibraryRecentsHeader(
               hasMore: entries.length > kLibraryRecentsLimit,

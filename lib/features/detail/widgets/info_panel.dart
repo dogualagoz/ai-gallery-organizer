@@ -215,9 +215,7 @@ class _PlacementSection extends ConsumerWidget {
     final String? boardId = entry.boardId;
     final Board? board = boardId == null
         ? null
-        : (ref.watch(boardsProvider).value ?? const <Board>[])
-              .where((candidate) => candidate.id == boardId)
-              .firstOrNull;
+        : ref.watch(boardByIdProvider(boardId));
     if (category == null && board == null) return const SizedBox.shrink();
 
     return GroupedSection(

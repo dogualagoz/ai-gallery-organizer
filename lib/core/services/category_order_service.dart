@@ -13,6 +13,18 @@ final categoryOrderProvider =
       CategoryOrderNotifier.new,
     );
 
+/// Tüm sistem kategorileri, kullanıcının kayıtlı sırasıyla. Ekranlar
+/// görünür alt kümeyi bu listeyi süzerek alır (sıralama tek yerde).
+final orderedCategoriesProvider = Provider<List<ScreenshotCategory>>((ref) {
+  const List<ScreenshotCategory> all = ScreenshotCategory.values;
+  final Set<int> seen = {};
+  return [
+    for (final int index in ref.watch(categoryOrderProvider))
+      // Enum'dan kalkmış ya da yinelenen kayıtlı index'ler atlanır.
+      if (index >= 0 && index < all.length && seen.add(index)) all[index],
+  ];
+});
+
 class CategoryOrderNotifier extends Notifier<List<int>> {
   static const String _key = 'category_order';
 
@@ -38,15 +50,6 @@ class CategoryOrderNotifier extends Notifier<List<int>> {
         if (!saved.contains(i)) i,
     ];
     return [...saved, ...missing];
-  }
-
-  /// [visible] kategorileri kayıtlı tam sıraya göre diziler.
-  List<ScreenshotCategory> sortVisible(List<ScreenshotCategory> visible) {
-    final List<int> order = state;
-    final List<ScreenshotCategory> sorted = [
-      ...visible,
-    ]..sort((a, b) => order.indexOf(a.index).compareTo(order.indexOf(b.index)));
-    return sorted;
   }
 
   /// Görünür kategorilerin yeni sırasını ([newVisibleOrder]) kalıcılaştırır.

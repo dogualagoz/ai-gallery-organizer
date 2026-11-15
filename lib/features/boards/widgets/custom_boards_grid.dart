@@ -17,6 +17,7 @@ import '../../../core/widgets/pressable.dart';
 import '../../../core/widgets/reorderable_tile_grid.dart';
 import '../../../core/widgets/surface_card.dart';
 import '../../gallery/data/screenshot_repository.dart';
+import '../../gallery/providers/gallery_derived_providers.dart';
 import '../providers/board_provider.dart';
 import 'board_context_menu.dart';
 import 'board_covers.dart';
@@ -28,19 +29,20 @@ class CustomBoardsGrid extends ConsumerWidget {
   const CustomBoardsGrid({
     super.key,
     required this.boards,
-    required this.entries,
     required this.repo,
     required this.canCreate,
   });
 
   final List<Board> boards;
-  final List<ScreenshotEntry> entries;
   final ScreenshotRepository repo;
   final bool canCreate;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final bool editing = ref.watch(boardsEditModeProvider);
+    final Map<String, List<ScreenshotEntry>> byBoard = ref.watch(
+      entriesByBoardProvider,
+    );
 
     return ReorderableTileGrid(
       itemCount: boards.length,
@@ -56,9 +58,8 @@ class CustomBoardsGrid extends ConsumerWidget {
       },
       itemBuilder: (context, index) {
         final Board board = boards[index];
-        final List<ScreenshotEntry> boardEntries = entries
-            .where((entry) => entry.boardId == board.id)
-            .toList();
+        final List<ScreenshotEntry> boardEntries =
+            byBoard[board.id] ?? const [];
         final Widget tile = BoardTile(
           icon: AppIcons.board,
           label: board.name,

@@ -11,6 +11,12 @@ final boardsProvider = AsyncNotifierProvider<BoardsNotifier, List<Board>>(
   BoardsNotifier.new,
 );
 
+/// Id'si verilen pano; listede yoksa (yüklenmedi ya da silindi) null.
+final boardByIdProvider = Provider.family<Board?, String>((ref, id) {
+  final List<Board> boards = ref.watch(boardsProvider).value ?? const [];
+  return boards.where((board) => board.id == id).firstOrNull;
+});
+
 /// Anasayfadaki pano/kategori ızgaralarının "düzenleme modu" (iOS jiggle).
 /// Uzun basınca açılır, "Bitti" ile kapanır; her iki ızgara da paylaşır.
 final boardsEditModeProvider = NotifierProvider<BoardsEditModeNotifier, bool>(

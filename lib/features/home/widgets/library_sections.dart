@@ -13,7 +13,6 @@ import '../../../core/models/screenshot_category.dart';
 import '../../../core/models/screenshot_entry.dart';
 import '../../../core/router/app_routes.dart';
 import '../../../core/services/category_names_service.dart';
-import '../../../core/services/category_order_service.dart';
 import '../../../core/services/entitlement_service.dart';
 import '../../../core/services/photo_permission_service.dart';
 import '../../../core/utils/app_logger.dart';
@@ -24,6 +23,7 @@ import '../../boards/providers/board_provider.dart';
 import '../../boards/widgets/custom_boards_grid.dart';
 import '../../boards/widgets/system_boards_grid.dart';
 import '../../gallery/data/screenshot_repository.dart';
+import '../../gallery/providers/gallery_derived_providers.dart';
 import '../../gallery/providers/gallery_provider.dart';
 import '../../gallery/widgets/screenshot_grid.dart';
 
@@ -47,9 +47,7 @@ class _EditToggle {
 
 /// İçeriği olan sistem kategorileri, kayıtlı kullanıcı sırasıyla.
 class LibraryCategoriesSection extends ConsumerWidget {
-  const LibraryCategoriesSection({super.key, required this.entries});
-
-  final List<ScreenshotEntry> entries;
+  const LibraryCategoriesSection({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -58,14 +56,9 @@ class LibraryCategoriesSection extends ConsumerWidget {
       ref,
       ref.watch(boardsEditModeProvider),
     );
-    final List<ScreenshotCategory> nonEmpty = [
-      for (final ScreenshotCategory category in ScreenshotCategory.values)
-        if (entries.any((entry) => entry.category == category)) category,
-    ];
-    ref.watch(categoryOrderProvider);
-    final List<ScreenshotCategory> sorted = ref
-        .read(categoryOrderProvider.notifier)
-        .sortVisible(nonEmpty);
+    final List<ScreenshotCategory> sorted = ref.watch(
+      visibleCategoriesProvider,
+    );
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -86,7 +79,6 @@ class LibraryCategoriesSection extends ConsumerWidget {
         else
           SystemBoardsGrid(
             categories: sorted,
-            entries: entries,
             repo: ref.watch(screenshotRepositoryProvider),
             categoryNames: ref.watch(categoryNamesProvider),
           ),
@@ -97,9 +89,7 @@ class LibraryCategoriesSection extends ConsumerWidget {
 
 /// Kullanıcı panoları + "Yeni pano".
 class LibraryBoardsSection extends ConsumerWidget {
-  const LibraryBoardsSection({super.key, required this.entries});
-
-  final List<ScreenshotEntry> entries;
+  const LibraryBoardsSection({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -120,7 +110,6 @@ class LibraryBoardsSection extends ConsumerWidget {
         const SizedBox(height: AppSpacing.xs),
         CustomBoardsGrid(
           boards: boards,
-          entries: entries,
           repo: ref.watch(screenshotRepositoryProvider),
           canCreate: ref.watch(entitlementProvider).canCreateBoards,
         ),

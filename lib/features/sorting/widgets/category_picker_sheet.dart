@@ -39,13 +39,12 @@ class _CategoryPickerSheet extends ConsumerWidget {
     final l10n = context.l10n;
     final ColorScheme scheme = Theme.of(context).colorScheme;
     final Map<int, String> names = ref.watch(categoryNamesProvider);
-    ref.watch(categoryOrderProvider);
-    final List<ScreenshotCategory> categories = ref
-        .read(categoryOrderProvider.notifier)
-        .sortVisible([
-          for (final ScreenshotCategory category in ScreenshotCategory.values)
-            if (category != ScreenshotCategory.other) category,
-        ]);
+    final List<ScreenshotCategory> categories = [
+      for (final ScreenshotCategory category in ref.watch(
+        orderedCategoriesProvider,
+      ))
+        if (category != ScreenshotCategory.other) category,
+    ];
 
     return AppNavScaffold(
       title: l10n.sortCategoryPickerTitle,

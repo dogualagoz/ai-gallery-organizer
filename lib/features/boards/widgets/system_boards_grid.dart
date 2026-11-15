@@ -16,6 +16,7 @@ import '../../../core/widgets/reorderable_tile_grid.dart';
 import '../../analysis/providers/recent_distribution_provider.dart';
 import '../../analysis/widgets/analysis_flights.dart';
 import '../../gallery/data/screenshot_repository.dart';
+import '../../gallery/providers/gallery_derived_providers.dart';
 import '../providers/board_provider.dart';
 import 'board_context_menu.dart';
 import 'board_covers.dart';
@@ -28,13 +29,11 @@ class SystemBoardsGrid extends ConsumerWidget {
   const SystemBoardsGrid({
     super.key,
     required this.categories,
-    required this.entries,
     required this.repo,
     this.categoryNames = const {},
   });
 
   final List<ScreenshotCategory> categories;
-  final List<ScreenshotEntry> entries;
   final ScreenshotRepository repo;
 
   /// Kategori index → kullanıcı özel adı (yoksa çeviri etiketi kullanılır).
@@ -49,6 +48,9 @@ class SystemBoardsGrid extends ConsumerWidget {
       recentDistributionProvider,
     );
     final AnalysisFlights? flights = AnalysisFlightScope.of(context);
+    final Map<ScreenshotCategory, List<ScreenshotEntry>> byCategory = ref.watch(
+      entriesByCategoryProvider,
+    );
 
     return ReorderableTileGrid(
       itemCount: categories.length,
@@ -62,9 +64,8 @@ class SystemBoardsGrid extends ConsumerWidget {
       },
       itemBuilder: (context, index) {
         final ScreenshotCategory category = categories[index];
-        final List<ScreenshotEntry> categoryEntries = entries
-            .where((entry) => entry.category == category)
-            .toList();
+        final List<ScreenshotEntry> categoryEntries =
+            byCategory[category] ?? const [];
         final Widget tile = BoardTile(
           icon: category.icon,
           label: category.displayName(l10n, categoryNames),

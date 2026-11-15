@@ -28,10 +28,12 @@ class SearchCategoryBar extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
     final Map<int, String> names = ref.watch(categoryNamesProvider);
-    ref.watch(categoryOrderProvider);
-    final List<ScreenshotCategory> ordered = ref
-        .read(categoryOrderProvider.notifier)
-        .sortVisible(categories.toList());
+    final List<ScreenshotCategory> ordered = [
+      for (final ScreenshotCategory category in ref.watch(
+        orderedCategoriesProvider,
+      ))
+        if (categories.contains(category)) category,
+    ];
     final Color background = Theme.of(context).colorScheme.surface;
 
     return SingleChildScrollView(

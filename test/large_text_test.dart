@@ -12,6 +12,7 @@ import 'package:ai_gallery_organizer/features/analysis/milestone_screen.dart';
 import 'package:ai_gallery_organizer/features/analysis/providers/analysis_queue_provider.dart';
 import 'package:ai_gallery_organizer/features/analysis/widgets/analysis_status_module.dart';
 import 'package:ai_gallery_organizer/features/analysis/widgets/analysis_status_views.dart';
+import 'package:ai_gallery_organizer/features/gallery/providers/gallery_derived_providers.dart';
 import 'package:ai_gallery_organizer/features/onboarding/onboarding_screen.dart';
 import 'package:ai_gallery_organizer/features/onboarding/widgets/sort_illustration.dart';
 import 'package:ai_gallery_organizer/features/paywall/data/purchase_repository.dart';
@@ -220,8 +221,9 @@ void main() {
           PrefKeys.aiAnalysisUsed: 90,
           PrefKeys.analysisCredits: 25,
         },
+        overrides: [galleryEntriesProvider.overrideWithValue(_pending(7))],
         home: _column([
-          AnalysisStatusModule(entries: _pending(7)),
+          const AnalysisStatusModule(),
           AnalysisProgressCard(
             processed: 120,
             total: 400,
@@ -255,7 +257,8 @@ void main() {
         tester,
         locale: locale,
         prefsValues: {PrefKeys.aiAnalysisUsed: FreeLimits.aiAnalysis},
-        home: _column([AnalysisStatusModule(entries: _pending(5))]),
+        overrides: [galleryEntriesProvider.overrideWithValue(_pending(5))],
+        home: _column([const AnalysisStatusModule()]),
       );
       expect(find.byType(AnalysisQuotaRow), findsOneWidget);
       expect(tester.takeException(), isNull);

@@ -60,13 +60,12 @@ class _MoveTargetSheet extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
     final Map<int, String> names = ref.watch(categoryNamesProvider);
-    ref.watch(categoryOrderProvider);
-    final List<ScreenshotCategory> categories = ref
-        .read(categoryOrderProvider.notifier)
-        .sortVisible([
-          for (final ScreenshotCategory category in ScreenshotCategory.values)
-            if (category != currentCategory) category,
-        ]);
+    final List<ScreenshotCategory> categories = [
+      for (final ScreenshotCategory category in ref.watch(
+        orderedCategoriesProvider,
+      ))
+        if (category != currentCategory) category,
+    ];
     final List<Board> boards = [
       for (final Board board in ref.watch(boardsProvider).value ?? const [])
         if (board.id != currentBoardId) board,

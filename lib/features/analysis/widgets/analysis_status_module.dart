@@ -14,7 +14,6 @@ import '../../../core/constants/app_constants.dart';
 import '../../../core/constants/app_icons.dart';
 import '../../../core/constants/ui_constants.dart';
 import '../../../core/l10n/l10n_extension.dart';
-import '../../../core/models/screenshot_entry.dart';
 import '../../../core/router/app_routes.dart';
 import '../../../core/router/open_paywall.dart';
 import '../../../core/services/entitlement_service.dart';
@@ -23,16 +22,14 @@ import '../../../core/services/review_service.dart';
 import '../../../core/utils/motion_physics.dart';
 import '../../../core/widgets/app_dialogs.dart';
 import '../../gallery/data/screenshot_repository.dart';
+import '../../gallery/providers/gallery_derived_providers.dart';
 import '../providers/analysis_queue_provider.dart';
 import '../providers/analysis_summary_provider.dart';
 import 'analysis_flights.dart';
 import 'analysis_status_views.dart';
 
 class AnalysisStatusModule extends ConsumerStatefulWidget {
-  const AnalysisStatusModule({super.key, required this.entries});
-
-  /// Galerideki kayıtlar (bekleyen sayısı ve kaynak küçük resim için).
-  final List<ScreenshotEntry> entries;
+  const AnalysisStatusModule({super.key});
 
   @override
   ConsumerState<AnalysisStatusModule> createState() =>
@@ -78,8 +75,6 @@ class _AnalysisStatusModuleState extends ConsumerState<AnalysisStatusModule> {
   }
 
   bool get _flying => _flights?.busy.value ?? false;
-
-  int get _pending => widget.entries.where((entry) => entry.isPending).length;
 
   /// Özet, tur bitmiş ve son kart inmişken görünür.
   bool get _summaryVisible => ref.read(analysisSummaryProvider) && !_flying;
@@ -282,7 +277,7 @@ class _AnalysisStatusModuleState extends ConsumerState<AnalysisStatusModule> {
 
   /// Boşta: bekleyen varsa hak durumuna göre kart ya da kota satırı.
   (String, Widget?) _pendingView(EntitlementState e) {
-    final int pending = _pending;
+    final int pending = ref.watch(pendingCountProvider);
     if (pending == 0) return ('hidden', null);
     if (!e.canAnalyze) {
       return (

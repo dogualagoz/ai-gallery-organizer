@@ -11,6 +11,7 @@ import 'package:ai_gallery_organizer/features/analysis/providers/analysis_summar
 import 'package:ai_gallery_organizer/features/analysis/providers/recent_distribution_provider.dart';
 import 'package:ai_gallery_organizer/features/analysis/widgets/analysis_status_module.dart';
 import 'package:ai_gallery_organizer/features/analysis/widgets/analysis_status_views.dart';
+import 'package:ai_gallery_organizer/features/gallery/providers/gallery_derived_providers.dart';
 import 'package:ai_gallery_organizer/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -52,13 +53,16 @@ Future<void> _pumpModule(
 
   await tester.pumpWidget(
     ProviderScope(
-      overrides: [sharedPreferencesProvider.overrideWithValue(prefs)],
+      overrides: [
+        sharedPreferencesProvider.overrideWithValue(prefs),
+        galleryEntriesProvider.overrideWithValue(entries),
+      ],
       child: MaterialApp(
         theme: AppTheme.light,
         locale: const Locale('en'),
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
-        home: Scaffold(body: AnalysisStatusModule(entries: entries)),
+        home: const Scaffold(body: AnalysisStatusModule()),
       ),
     ),
   );

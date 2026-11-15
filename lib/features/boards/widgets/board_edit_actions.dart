@@ -24,7 +24,7 @@ import '../../../core/widgets/app_menus.dart';
 import '../../../core/widgets/status_toast.dart';
 import '../../analysis/providers/analysis_queue_provider.dart';
 import '../../gallery/data/screenshot_repository.dart';
-import '../../gallery/providers/gallery_provider.dart';
+import '../../gallery/providers/gallery_derived_providers.dart';
 import '../providers/board_provider.dart';
 
 /// Düzenleme modu aksiyon sayfasından seçilen işlem.
@@ -167,11 +167,11 @@ List<ScreenshotEntry> boardEntries(
   Board? board,
   ScreenshotCategory? category,
 }) {
-  final List<ScreenshotEntry> entries =
-      ref.read(galleryProvider).value ?? const [];
-  return category != null
-      ? entries.where((entry) => entry.category == category).toList()
-      : entries.where((entry) => entry.boardId == board!.id).toList();
+  final List<ScreenshotEntry>? entries = category != null
+      ? ref.read(entriesByCategoryProvider)[category]
+      : ref.read(entriesByBoardProvider)[board!.id];
+  // Çağıran listeyi değiştirebilir; paylaşılan gruplama korunur.
+  return [...?entries];
 }
 
 /// Yeniden adlandırma: sistem kategorisinde ad override'ı, özel board'da isim.
