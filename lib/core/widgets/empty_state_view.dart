@@ -38,8 +38,6 @@ class EmptyStateView extends StatelessWidget {
     final ColorScheme scheme = Theme.of(context).colorScheme;
     final TextTheme text = Theme.of(context).textTheme;
     final String? body = message;
-    final String? primary = actionLabel;
-    final String? secondary = secondaryActionLabel;
 
     return Center(
       child: Padding(
@@ -72,21 +70,51 @@ class EmptyStateView extends StatelessWidget {
                   ),
                 ),
               ],
-              if (primary != null && onAction != null) ...[
-                const SizedBox(height: AppSpacing.lg),
-                FilledButton(onPressed: onAction, child: Text(primary)),
-              ],
-              if (secondary != null && onSecondaryAction != null) ...[
-                const SizedBox(height: AppSpacing.xs),
-                TextButton(
-                  onPressed: onSecondaryAction,
-                  child: Text(secondary),
-                ),
-              ],
+              _EmptyStateActions(
+                primaryLabel: actionLabel,
+                onPrimary: onAction,
+                secondaryLabel: secondaryActionLabel,
+                onSecondary: onSecondaryAction,
+              ),
             ],
           ),
         ),
       ),
+    );
+  }
+}
+
+/// Boş durumun eylemleri: dolgulu birincil ve altında metin ikincil; etiketi
+/// ya da geri çağrısı olmayan buton çizilmez.
+class _EmptyStateActions extends StatelessWidget {
+  const _EmptyStateActions({
+    required this.primaryLabel,
+    required this.onPrimary,
+    required this.secondaryLabel,
+    required this.onSecondary,
+  });
+
+  final String? primaryLabel;
+  final VoidCallback? onPrimary;
+  final String? secondaryLabel;
+  final VoidCallback? onSecondary;
+
+  @override
+  Widget build(BuildContext context) {
+    final String? primary = primaryLabel;
+    final String? secondary = secondaryLabel;
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (primary != null && onPrimary != null) ...[
+          const SizedBox(height: AppSpacing.lg),
+          FilledButton(onPressed: onPrimary, child: Text(primary)),
+        ],
+        if (secondary != null && onSecondary != null) ...[
+          const SizedBox(height: AppSpacing.xs),
+          TextButton(onPressed: onSecondary, child: Text(secondary)),
+        ],
+      ],
     );
   }
 }
