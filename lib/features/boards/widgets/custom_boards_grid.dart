@@ -18,10 +18,10 @@ import '../../../core/widgets/reorderable_tile_grid.dart';
 import '../../../core/widgets/surface_card.dart';
 import '../../gallery/data/screenshot_repository.dart';
 import '../../gallery/providers/gallery_derived_providers.dart';
+import '../board_actions.dart';
 import '../providers/board_provider.dart';
 import 'board_context_menu.dart';
 import 'board_covers.dart';
-import 'board_edit_actions.dart';
 import 'board_tile.dart';
 
 /// Kullanıcı panoları + sonuna eklenen "yeni pano" kartı.

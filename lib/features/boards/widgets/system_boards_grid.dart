@@ -17,10 +17,10 @@ import '../../analysis/providers/recent_distribution_provider.dart';
 import '../../analysis/widgets/analysis_flights.dart';
 import '../../gallery/data/screenshot_repository.dart';
 import '../../gallery/providers/gallery_derived_providers.dart';
+import '../board_actions.dart';
 import '../providers/board_provider.dart';
 import 'board_context_menu.dart';
 import 'board_covers.dart';
-import 'board_edit_actions.dart';
 import 'board_tile.dart';
 
 /// [categories] listesindeki sistem kategorileri ızgarası. Liste çağıran

@@ -6,7 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/models/board.dart';
 import '../../../core/models/screenshot_category.dart';
 import '../../../core/widgets/app_menus.dart';
-import 'board_edit_actions.dart';
+import '../board_actions.dart';
 
 /// [child] karosunu bağlam menüsüyle sarar. [board] ya da [category]'den tam
 /// biri verilmelidir. Önizleme karonun ızgaradaki ölçüsüyle çizilir.

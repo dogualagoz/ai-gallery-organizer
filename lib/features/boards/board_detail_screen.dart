@@ -26,8 +26,8 @@ import '../analysis/providers/recent_distribution_provider.dart';
 import '../gallery/providers/gallery_derived_providers.dart';
 import '../gallery/screenshot_actions.dart';
 import '../gallery/widgets/screenshot_grid.dart';
+import 'board_actions.dart';
 import 'providers/board_provider.dart';
-import 'widgets/board_edit_actions.dart';
 
 /// Bir sistem kategorisinin ya da kullanıcı panosunun ekran görüntüleri;
 /// toplu işlem (seç → paylaş/taşı/sil) Pro'ya bağlıdır.
