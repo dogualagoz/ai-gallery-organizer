@@ -1,6 +1,7 @@
 // Native launch screen'den ilk ekrana kısa çapraz geçiş (logo/ses yok — HIG).
 import 'package:flutter/material.dart';
 
+import '../constants/app_curves.dart';
 import '../constants/motion_constants.dart';
 import '../theme/app_theme.dart';
 
@@ -30,7 +31,7 @@ class _LaunchRevealState extends State<LaunchReveal>
 
   late final CurvedAnimation _opacity = CurvedAnimation(
     parent: _fade,
-    curve: Curves.easeOut,
+    curve: AppCurves.fadeOut,
   );
 
   void _onRevealed() {

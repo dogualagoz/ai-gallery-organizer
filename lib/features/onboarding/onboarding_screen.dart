@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/constants/app_constants.dart';
-import '../../core/constants/motion_constants.dart';
+import '../../core/constants/app_curves.dart';
 import '../../core/constants/ui_constants.dart';
 import '../../core/l10n/l10n_extension.dart';
 import '../../core/services/photo_permission_service.dart';
@@ -30,12 +30,6 @@ class OnboardingScreen extends ConsumerStatefulWidget {
 class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   static const int _pageCount = 4;
   static const int _accessPage = _pageCount - 1;
-
-  /// "Devam" ile sayfa geçişi: sekmesiz yay; kullanıcı sürüklerse kesilir.
-  static final Curve _pageCurve = SpringCurve(
-    AppSprings.standard,
-    AppDurations.slow,
-  );
 
   final PageController _pageController = PageController();
   late final AppLifecycleListener _lifecycle;
@@ -149,7 +143,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       await _pageController.animateToPage(
         target,
         duration: AppDurations.slow,
-        curve: _pageCurve,
+        // Sekmesiz yay; kullanıcı sürüklerse kesilir.
+        curve: AppCurves.standardSlow,
       );
       return;
     }

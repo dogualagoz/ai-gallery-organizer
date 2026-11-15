@@ -4,6 +4,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
+import '../../../core/constants/app_curves.dart';
 import '../../../core/constants/motion_constants.dart';
 import '../../../core/constants/ui_constants.dart';
 import '../../../core/utils/motion_physics.dart';
@@ -140,11 +141,6 @@ class _FadeSlideIn extends StatelessWidget {
   final Widget child;
   final double delayFraction;
 
-  static final Curve _spring = SpringCurve(
-    AppSprings.standard,
-    AppDurations.slow,
-  );
-
   @override
   Widget build(BuildContext context) {
     final bool reduce = context.reduceMotion;
@@ -152,8 +148,8 @@ class _FadeSlideIn extends StatelessWidget {
       tween: Tween(begin: 0, end: 1),
       duration: reduce ? AppMotion.reducedCrossfade : AppDurations.slow,
       curve: reduce
-          ? Curves.linear
-          : Interval(delayFraction, 1, curve: _spring),
+          ? AppCurves.linear
+          : Interval(delayFraction, 1, curve: AppCurves.standardSlow),
       builder: (context, t, child) => Opacity(
         opacity: t,
         child: Transform.translate(

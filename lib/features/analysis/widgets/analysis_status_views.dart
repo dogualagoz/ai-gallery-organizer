@@ -4,6 +4,7 @@
 import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart';
 
+import '../../../core/constants/app_curves.dart';
 import '../../../core/constants/app_icons.dart';
 import '../../../core/constants/motion_constants.dart';
 import '../../../core/constants/ui_constants.dart';
@@ -201,12 +202,6 @@ class AnalysisMessageRow extends StatelessWidget {
   }
 }
 
-/// Yeni kaynak resmin gelişi: sekmesiz, hızlı yay.
-final Curve _sourceArrival = SpringCurve(
-  AppSprings.snappy,
-  AppDurations.medium,
-);
-
 /// İlerleme kartının başındaki küçük resim (uçuşların görsel kalkış yeri).
 /// Resim değişince yenisi büyüyerek gelir; eskisi beklemez, çünkü o anda
 /// uçuş kartı olarak karosuna kalkmıştır.
@@ -225,7 +220,7 @@ class _SourceThumb extends StatelessWidget {
         duration: reduceMotion
             ? AppMotion.reducedCrossfade
             : AppDurations.medium,
-        switchInCurve: reduceMotion ? Curves.linear : _sourceArrival,
+        switchInCurve: reduceMotion ? AppCurves.linear : AppCurves.snappyMedium,
         layoutBuilder: (current, previous) =>
             current ?? const SizedBox.shrink(),
         transitionBuilder: (child, animation) {
@@ -284,7 +279,7 @@ class _ProgressBar extends StatelessWidget {
             child: TweenAnimationBuilder<double>(
               tween: Tween<double>(end: value.clamp(0.0, 1.0)),
               duration: AppDurations.medium,
-              curve: Curves.easeOut,
+              curve: AppCurves.fadeOut,
               builder: (context, progress, _) => FractionallySizedBox(
                 alignment: Alignment.centerLeft,
                 widthFactor: progress,

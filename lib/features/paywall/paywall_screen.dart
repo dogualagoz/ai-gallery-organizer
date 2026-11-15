@@ -6,8 +6,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 
 import '../../core/constants/app_constants.dart';
+import '../../core/constants/app_curves.dart';
 import '../../core/constants/app_icons.dart';
-import '../../core/constants/motion_constants.dart';
 import '../../core/constants/ui_constants.dart';
 import '../../core/l10n/l10n_extension.dart';
 import '../../core/services/haptic_service.dart';
@@ -135,12 +135,6 @@ class _PaywallContent extends ConsumerStatefulWidget {
 
 class _PaywallContentState extends ConsumerState<_PaywallContent>
     with CtaVisibility<_PaywallContent> {
-  /// Paket bölümüne kaydırma: sekmesiz yay.
-  static final Curve _revealCurve = SpringCurve(
-    AppSprings.standard,
-    AppDurations.slow,
-  );
-
   /// Düzeltme kaydırmasının gerektiği en küçük sapma (px).
   static const double _settleTolerance = 1;
 
@@ -191,7 +185,7 @@ class _PaywallContentState extends ConsumerState<_PaywallContent>
     await _scrollController.animateTo(
       _scrollController.position.maxScrollExtent,
       duration: AppDurations.slow,
-      curve: _revealCurve,
+      curve: AppCurves.standardSlow,
     );
     if (!mounted || !_scrollController.hasClients) return;
     final double target = _scrollController.position.maxScrollExtent;
@@ -199,7 +193,7 @@ class _PaywallContentState extends ConsumerState<_PaywallContent>
       await _scrollController.animateTo(
         target,
         duration: AppDurations.fast,
-        curve: Curves.easeOut,
+        curve: AppCurves.fadeOut,
       );
     }
   }

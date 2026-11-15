@@ -11,6 +11,7 @@ import 'package:go_router/go_router.dart';
 import 'package:photo_manager/photo_manager.dart';
 
 import '../../../core/constants/app_constants.dart';
+import '../../../core/constants/app_curves.dart';
 import '../../../core/constants/app_icons.dart';
 import '../../../core/constants/ui_constants.dart';
 import '../../../core/l10n/l10n_extension.dart';
@@ -321,7 +322,7 @@ class _AnalysisStatusModuleState extends ConsumerState<AnalysisStatusModule> {
     return AnimatedSize(
       key: _flights?.sourceKey,
       duration: context.reduceMotion ? Duration.zero : AppDurations.medium,
-      curve: Curves.easeOutCubic,
+      curve: AppCurves.settle,
       alignment: Alignment.topCenter,
       child: AnimatedSwitcher(
         duration: AppDurations.medium,

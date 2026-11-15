@@ -5,6 +5,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import '../../../core/constants/app_constants.dart';
+import '../../../core/constants/app_curves.dart';
 import '../../../core/constants/app_icons.dart';
 import '../../../core/constants/ui_constants.dart';
 import 'illustration_loop.dart';
@@ -101,7 +102,7 @@ class _QuotaIllustrationState extends State<QuotaIllustration>
   double _phase(
     double begin,
     double end, {
-    Curve curve = Curves.easeInOutCubic,
+    Curve curve = AppCurves.scenePhase,
   }) {
     final double t = ((_controller.value - begin) / (end - begin)).clamp(0, 1);
     return curve.transform(t);

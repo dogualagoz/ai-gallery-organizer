@@ -4,6 +4,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
+import '../../../core/constants/app_curves.dart';
 import '../../../core/constants/ui_constants.dart';
 import 'illustration_loop.dart';
 
@@ -154,7 +155,7 @@ class _SortIllustrationState extends State<SortIllustration>
     final double t = Interval(
       index * _cardStagger,
       1,
-      curve: Curves.easeInOutCubic,
+      curve: AppCurves.scenePhase,
     ).transform(_controller.value);
 
     final Offset position = Offset.lerp(pose.scattered, pose.tidy, t)!;

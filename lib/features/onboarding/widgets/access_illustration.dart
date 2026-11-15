@@ -2,6 +2,7 @@
 // sırayla belirdiği 3x3 ızgara — "kütüphanen düzene giriyor" hissi.
 import 'package:flutter/material.dart';
 
+import '../../../core/constants/app_curves.dart';
 import '../../../core/constants/ui_constants.dart';
 import '../../../core/l10n/category_labels.dart';
 import '../../../core/models/screenshot_category.dart';
@@ -101,7 +102,7 @@ class _AccessIllustrationState extends State<AccessIllustration>
     final double t = Interval(
       index * _staggerStart,
       _firstEnd + index * _staggerEnd,
-      curve: Curves.easeOutCubic,
+      curve: AppCurves.settle,
     ).transform(_controller.value);
 
     return Transform.scale(

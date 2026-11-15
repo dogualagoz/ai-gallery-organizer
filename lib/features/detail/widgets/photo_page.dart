@@ -9,19 +9,13 @@ import 'package:flutter/physics.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:photo_manager_image_provider/photo_manager_image_provider.dart';
 
+import '../../../core/constants/app_curves.dart';
 import '../../../core/constants/motion_constants.dart';
 import '../../../core/constants/ui_constants.dart';
 import '../../../core/utils/app_logger.dart';
 import '../../../core/utils/motion_physics.dart';
 import '../../gallery/widgets/screenshot_grid_tile.dart';
 import '../../gallery/widgets/screenshot_thumbnail.dart';
-
-/// Hero uçuşunun eğrisi: geçiş süresine yayılmış sekmesiz yay. Kapanışta
-/// Hero bunu tersine çevirip uygular; görsel iki yönde de yay gibi yavaşlar.
-final Curve _flightCurve = SpringCurve(
-  AppSprings.standard,
-  AppViewer.transition,
-);
 
 /// Görüntüleyicide [asset]'in tek sayfası.
 class PhotoPage extends StatefulWidget {
@@ -181,7 +175,9 @@ class _PhotoPageState extends State<PhotoPage>
               enabled: widget.heroEnabled,
               child: Hero(
                 tag: widget.heroTag,
-                curve: _flightCurve,
+                // Kapanışta Hero eğriyi tersine çevirip uygular; görsel iki
+                // yönde de yay gibi yavaşlar.
+                curve: AppCurves.standardTransition,
                 // Düz yol (Material'ın kavisli varsayılanı yerine).
                 createRectTween: (begin, end) =>
                     RectTween(begin: begin, end: end),
