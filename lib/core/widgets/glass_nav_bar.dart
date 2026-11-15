@@ -6,32 +6,12 @@ import 'package:flutter/physics.dart';
 
 import '../constants/motion_constants.dart';
 import '../constants/ui_constants.dart';
-import '../l10n/l10n_extension.dart';
 import '../services/haptic_service.dart';
 import '../utils/motion_physics.dart';
+import 'glass_nav_item.dart';
 import 'glass_panel.dart';
-import 'pressable.dart';
 
-/// [GlassNavBar] içindeki tek sekme tanımı.
-class GlassNavDestination {
-  const GlassNavDestination({
-    required this.icon,
-    required this.selectedIcon,
-    required this.label,
-    this.badgeCount = 0,
-    this.badgeLabel,
-  });
-
-  final IconData icon;
-  final IconData selectedIcon;
-  final String label;
-
-  /// 0'dan büyükse ikonun sağ üstünde kırmızı sayı rozeti (iOS tab badge).
-  final int badgeCount;
-
-  /// Rozetin VoiceOver karşılığı (ör. "3 silinecek").
-  final String? badgeLabel;
-}
+export 'glass_nav_item.dart' show GlassNavDestination;
 
 /// Yüzen buzlu-cam sekme pili. Scaffold'a `extendBody: true` ile verilmelidir;
 /// içerik çubuğun arkasından akar ve [GlassPanel] onu bulanıklaştırır.
@@ -196,7 +176,7 @@ class _GlassNavBarState extends State<GlassNavBar>
                 children: [
                   for (int i = 0; i < _count; i++)
                     Expanded(
-                      child: _NavItem(
+                      child: GlassNavItem(
                         destination: widget.destinations[i],
                         selected: i == widget.selectedIndex,
                         onTap: () => widget.onSelected(i),
@@ -241,107 +221,6 @@ class _GlassNavBarState extends State<GlassNavBar>
               ),
             ),
           ),
-        ),
-      ),
-    );
-  }
-}
-
-/// İkon + etiketten oluşan tek sekme. Seçiliyken primary renk ve dolgulu ikon;
-/// seçili olmayan sekmeye dokunmak seçim haptiği verir.
-class _NavItem extends StatelessWidget {
-  const _NavItem({
-    required this.destination,
-    required this.selected,
-    required this.onTap,
-  });
-
-  final GlassNavDestination destination;
-  final bool selected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final ColorScheme scheme = Theme.of(context).colorScheme;
-    final Color color = selected ? scheme.primary : scheme.onSurface;
-
-    final bool badged = destination.badgeCount > 0;
-    return Pressable(
-      onPressed: onTap,
-      haptic: !selected,
-      child: Semantics(
-        selected: selected,
-        value: badged ? destination.badgeLabel : null,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Stack(
-              clipBehavior: Clip.none,
-              children: [
-                AnimatedSwitcher(
-                  duration: AppDurations.fast,
-                  child: Icon(
-                    selected ? destination.selectedIcon : destination.icon,
-                    key: ValueKey(selected),
-                    color: color,
-                    size: AppSizes.navBarIcon,
-                  ),
-                ),
-                if (badged)
-                  PositionedDirectional(
-                    top: -AppSpacing.xs,
-                    start: AppSizes.navBarIcon - AppSizes.tabBadgeOffset,
-                    child: _Badge(count: destination.badgeCount),
-                  ),
-              ],
-            ),
-            const SizedBox(height: AppSizes.navBarLabelGap),
-            Text(
-              destination.label,
-              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                color: color,
-                fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
-              ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-/// Sekme ikonundaki kırmızı sayı rozeti; tek haneli sayıda daire, fazlasında
-/// kapsül.
-class _Badge extends StatelessWidget {
-  const _Badge({required this.count});
-
-  final int count;
-
-  @override
-  Widget build(BuildContext context) {
-    final ColorScheme scheme = Theme.of(context).colorScheme;
-    return ExcludeSemantics(
-      child: Container(
-        constraints: const BoxConstraints(
-          minWidth: AppSizes.tabBadgeMinSize,
-          minHeight: AppSizes.tabBadgeMinSize,
-        ),
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppSizes.tabBadgePaddingH,
-        ),
-        decoration: BoxDecoration(
-          color: scheme.error,
-          borderRadius: BorderRadius.circular(AppSizes.tabBadgeMinSize / 2),
-        ),
-        alignment: Alignment.center,
-        child: Text(
-          count > AppSizes.tabBadgeMaxCount
-              ? context.l10n.tabBadgeOverflow(AppSizes.tabBadgeMaxCount)
-              : '$count',
-          style: Theme.of(context).textTheme.labelSmall
-              ?.copyWith(color: scheme.onError, fontWeight: FontWeight.w600),
         ),
       ),
     );
