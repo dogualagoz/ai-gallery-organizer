@@ -73,17 +73,17 @@ class PaywallCtaBar extends StatelessWidget {
     required this.onPressed,
   });
 
+  /// Satın alma sürüyor: butonda gösterge.
   final bool busy;
+
+  /// Yıllık seçili: deneme CTA'sı ve fiyat notu.
   final bool yearlySelected;
   final String? selectedPrice;
   final VoidCallback? onPressed;
 
   @override
   Widget build(BuildContext context) {
-    final l10n = context.l10n;
     final ColorScheme scheme = Theme.of(context).colorScheme;
-    final String? price = selectedPrice;
-
     return DecoratedBox(
       decoration: BoxDecoration(
         color: scheme.surfaceContainer,
@@ -100,34 +100,62 @@ class PaywallCtaBar extends StatelessWidget {
             AppSpacing.md,
             0,
           ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              FilledButton(
-                onPressed: onPressed,
-                child: busy
-                    ? const CupertinoActivityIndicator()
-                    : Text(
-                        yearlySelected
-                            ? l10n.paywallCtaTrial
-                            : l10n.paywallContinueAction,
-                      ),
-              ),
-              if (yearlySelected && price != null)
-                Padding(
-                  padding: const EdgeInsets.only(top: AppSpacing.xs),
-                  child: Text(
-                    l10n.paywallThenPerYear(price),
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.bodySmall
-                        ?.copyWith(color: scheme.onSurfaceVariant),
-                  ),
-                ),
-            ],
+          child: _CtaContent(
+            busy: busy,
+            yearlySelected: yearlySelected,
+            price: selectedPrice,
+            onPressed: onPressed,
           ),
         ),
       ),
+    );
+  }
+}
+
+/// Çubuğun içi: CTA butonu ve yıllıkta deneme sonrası fiyat notu.
+class _CtaContent extends StatelessWidget {
+  const _CtaContent({
+    required this.busy,
+    required this.yearlySelected,
+    required this.price,
+    required this.onPressed,
+  });
+
+  final bool busy;
+  final bool yearlySelected;
+  final String? price;
+  final VoidCallback? onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final String? price = this.price;
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        FilledButton(
+          onPressed: onPressed,
+          child: busy
+              ? const CupertinoActivityIndicator()
+              : Text(
+                  yearlySelected
+                      ? l10n.paywallCtaTrial
+                      : l10n.paywallContinueAction,
+                ),
+        ),
+        if (yearlySelected && price != null)
+          Padding(
+            padding: const EdgeInsets.only(top: AppSpacing.xs),
+            child: Text(
+              l10n.paywallThenPerYear(price),
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ),
+      ],
     );
   }
 }

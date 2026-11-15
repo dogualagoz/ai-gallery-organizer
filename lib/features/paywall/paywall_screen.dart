@@ -141,6 +141,13 @@ class _PaywallContentState extends ConsumerState<_PaywallContent>
   /// Düzeltme kaydırmasının gerektiği en küçük sapma (px).
   static const double _settleTolerance = 1;
 
+  static const EdgeInsets _listPadding = EdgeInsets.fromLTRB(
+    AppSpacing.md,
+    0,
+    AppSpacing.md,
+    AppSpacing.lg,
+  );
+
   late String _selectedProductId = _defaultProductId();
 
   late final ScrollController _scrollController;
@@ -235,12 +242,7 @@ class _PaywallContentState extends ConsumerState<_PaywallContent>
             child: ListView(
               key: listKey,
               controller: _scrollController,
-              padding: const EdgeInsets.fromLTRB(
-                AppSpacing.md,
-                0,
-                AppSpacing.md,
-                AppSpacing.lg,
-              ),
+              padding: _listPadding,
               children: [
                 const PaywallHero(),
                 const SizedBox(height: AppSpacing.lg),

@@ -8,6 +8,7 @@ import '../../../core/l10n/l10n_extension.dart';
 import '../../../core/widgets/surface_card.dart';
 import 'tinted_icon_tile.dart';
 
+/// Deneme zaman çizelgesi: bugün, 5. gün hatırlatma, 7. gün ücretlendirme.
 class TrialTimeline extends StatelessWidget {
   const TrialTimeline({super.key});
 
@@ -50,6 +51,7 @@ class TrialTimeline extends StatelessWidget {
   }
 }
 
+/// Çizelgenin tek adımı: solda ray, sağda başlık ve açıklama.
 class _TimelineStep extends StatelessWidget {
   const _TimelineStep({
     required this.icon,
@@ -71,26 +73,7 @@ class _TimelineStep extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Column(
-            children: [
-              TintedIconTile(icon: icon, circle: true),
-              if (!isLast)
-                Expanded(
-                  child: Container(
-                    width: AppPaywall.timelineLine,
-                    margin: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
-                    decoration: BoxDecoration(
-                      color: scheme.primary.withValues(
-                        alpha: AppPaywall.timelineLineAlpha,
-                      ),
-                      borderRadius: BorderRadius.circular(
-                        AppPaywall.timelineLine / 2,
-                      ),
-                    ),
-                  ),
-                ),
-            ],
-          ),
+          _TimelineRail(icon: icon, isLast: isLast),
           const SizedBox(width: AppSpacing.md),
           Expanded(
             child: Padding(
@@ -114,6 +97,39 @@ class _TimelineStep extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// Adımın sol rayı: tonlu ikon ve (son adım değilse) sonraki adıma inen çizgi.
+class _TimelineRail extends StatelessWidget {
+  const _TimelineRail({required this.icon, required this.isLast});
+
+  final IconData icon;
+  final bool isLast;
+
+  @override
+  Widget build(BuildContext context) {
+    final ColorScheme scheme = Theme.of(context).colorScheme;
+    return Column(
+      children: [
+        TintedIconTile(icon: icon, circle: true),
+        if (!isLast)
+          Expanded(
+            child: Container(
+              width: AppPaywall.timelineLine,
+              margin: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
+              decoration: BoxDecoration(
+                color: scheme.primary.withValues(
+                  alpha: AppPaywall.timelineLineAlpha,
+                ),
+                borderRadius: BorderRadius.circular(
+                  AppPaywall.timelineLine / 2,
+                ),
+              ),
+            ),
+          ),
+      ],
     );
   }
 }
