@@ -5,48 +5,17 @@ import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/physics.dart';
-import 'package:photo_manager/photo_manager.dart';
 
 import '../../../core/constants/motion_constants.dart';
 import '../../../core/constants/ui_constants.dart';
 import '../../../core/services/haptic_service.dart';
 import '../../../core/utils/motion_physics.dart';
 import '../swipe_decision.dart';
+import 'departing_card.dart';
 import 'swipe_card.dart';
+import 'swipe_deck_controller.dart';
 
-/// Destedeki tek kart: kimlik + görsel kaynağı.
-@immutable
-class SwipeDeckItem {
-  const SwipeDeckItem(this.id, this.asset);
-
-  final String id;
-  final AssetEntity? asset;
-}
-
-/// Desteye dışarıdan (alttaki butonlar, geri al) komut veren köprü.
-class SwipeDeckController {
-  _SwipeDeckState? _deck;
-
-  /// Bağlı deste var mı (test ve teşhis için).
-  bool get isAttached => _deck != null;
-
-  void _attach(_SwipeDeckState deck) => _deck = deck;
-
-  /// Yalnız kendi bağladığı desteyi çözer: yeni deste, eskisinin
-  /// `dispose`'undan önce bağlanabilir; kimlik bakılmazsa eski deste yeninin
-  /// bağlantısını silip butonları öldürürdü.
-  void _detach(_SwipeDeckState deck) {
-    if (identical(_deck, deck)) _deck = null;
-  }
-
-  /// Üstteki kartı [direction] yönünde fırlatır (buton dokunuşu).
-  void swipe(SwipeDirection direction) => _deck?._swipeByButton(direction);
-
-  /// [id]'li kart birazdan geri gelecek (geri al): üste çıktığında
-  /// [direction] kenarından — hâlâ uçuyorsa bulunduğu yerden — yayla döner.
-  void expectReturn(String id, SwipeDirection direction) =>
-      _deck?._expectReturn(id, direction);
-}
+export 'swipe_deck_controller.dart';
 
 /// Üst kart + arkasındaki sıradaki kart + uçmakta olan kartlar.
 class SwipeDeck extends StatefulWidget {
@@ -76,27 +45,6 @@ class SwipeDeck extends StatefulWidget {
   State<SwipeDeck> createState() => _SwipeDeckState();
 }
 
-/// Uçmakta olan kartın verisi; [offset] uçuş boyunca güncellenir (geri al
-/// kartı yarıda yakalarsa oradan döndürür). Dinleyicisi yok, düz alan: kart
-/// ağaçtan çıktıktan sonra son yay karesi yazsa da sorun olmaz.
-class _Departure {
-  _Departure({
-    required this.item,
-    required this.direction,
-    required this.from,
-    required this.velocity,
-    required this.scale,
-  }) : offset = from;
-
-  final Key key = UniqueKey();
-  final SwipeDeckItem item;
-  final SwipeDirection direction;
-  final Offset from;
-  final Offset velocity;
-  final double scale;
-  Offset offset;
-}
-
 /// Beklenen geri dönüş: kartın döneceği başlangıç noktası.
 class _Return {
   const _Return(this.id, this.from);
@@ -105,7 +53,9 @@ class _Return {
   final Offset from;
 }
 
-class _SwipeDeckState extends State<SwipeDeck> with TickerProviderStateMixin {
+class _SwipeDeckState extends State<SwipeDeck>
+    with TickerProviderStateMixin
+    implements SwipeDeckCommands {
   /// Üst kartın ofseti; iki eksen ayrı yaylarla sürülür (farklı hızlar
   /// birbirini bozmaz). Sınırsızdır, her hareket o anki değerden başlar.
   late final AnimationController _x = AnimationController.unbounded(
@@ -134,7 +84,7 @@ class _SwipeDeckState extends State<SwipeDeck> with TickerProviderStateMixin {
     _opacity,
   ]);
 
-  final List<_Departure> _departures = [];
+  final List<Departure> _departures = [];
   _Return? _expected;
 
   /// Son gönderilen kartın kimliği ve o an arkadaki kartın ölçeği: üste
@@ -159,15 +109,15 @@ class _SwipeDeckState extends State<SwipeDeck> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
-    widget.controller._attach(this);
+    widget.controller.attach(this);
   }
 
   @override
   void didUpdateWidget(SwipeDeck oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (!identical(oldWidget.controller, widget.controller)) {
-      oldWidget.controller._detach(this);
-      widget.controller._attach(this);
+      oldWidget.controller.detach(this);
+      widget.controller.attach(this);
     }
     final String? previousId = oldWidget.top?.id;
     final String? id = widget.top?.id;
@@ -187,7 +137,7 @@ class _SwipeDeckState extends State<SwipeDeck> with TickerProviderStateMixin {
 
   @override
   void dispose() {
-    widget.controller._detach(this);
+    widget.controller.detach(this);
     _x.dispose();
     _y.dispose();
     _scale.dispose();
@@ -239,7 +189,8 @@ class _SwipeDeckState extends State<SwipeDeck> with TickerProviderStateMixin {
 
   // ---- Hareketler --------------------------------------------------------
 
-  void _swipeByButton(SwipeDirection direction) {
+  @override
+  void swipeByButton(SwipeDirection direction) {
     final SwipeDeckItem? top = widget.top;
     if (top == null || _dragging || _isDeparting(top.id)) return;
     _commit(direction, Offset.zero);
@@ -254,7 +205,7 @@ class _SwipeDeckState extends State<SwipeDeck> with TickerProviderStateMixin {
     _promoteFrom = _nextScale;
     setState(() {
       _departures.add(
-        _Departure(
+        Departure(
           item: top,
           direction: direction,
           from: _offset,
@@ -306,8 +257,9 @@ class _SwipeDeckState extends State<SwipeDeck> with TickerProviderStateMixin {
       ..animateWith(SpringSimulation(AppSprings.standard, _promoteFrom, 1, 0));
   }
 
-  void _expectReturn(String id, SwipeDirection direction) {
-    final _Departure? flying = _departures
+  @override
+  void expectReturn(String id, SwipeDirection direction) {
+    final Departure? flying = _departures
         .where((departure) => departure.item.id == id)
         .firstOrNull;
     if (flying == null) {
@@ -350,7 +302,7 @@ class _SwipeDeckState extends State<SwipeDeck> with TickerProviderStateMixin {
     _opacity.value = 1;
   }
 
-  void _removeDeparture(_Departure departure) {
+  void _removeDeparture(Departure departure) {
     if (!_departures.contains(departure)) return;
     setState(() => _departures.remove(departure));
   }
@@ -385,8 +337,8 @@ class _SwipeDeckState extends State<SwipeDeck> with TickerProviderStateMixin {
               children: [
                 if (next != null) _nextCard(next),
                 if (top != null && !_isDeparting(top.id)) _topCard(top),
-                for (final _Departure departure in _departures)
-                  _DepartingCard(
+                for (final Departure departure in _departures)
+                  DepartingCard(
                     key: departure.key,
                     departure: departure,
                     cardSize: _cardSize,
@@ -433,7 +385,7 @@ class _SwipeDeckState extends State<SwipeDeck> with TickerProviderStateMixin {
           final Offset offset = _offset;
           return Opacity(
             opacity: _opacity.value,
-            child: _CardTransform(
+            child: CardTransform(
               offset: offset,
               scale: _scale.value,
               cardSize: _cardSize,
@@ -455,161 +407,6 @@ class _SwipeDeckState extends State<SwipeDeck> with TickerProviderStateMixin {
             ),
           );
         },
-      ),
-    );
-  }
-}
-
-/// Kartı ofset kadar taşır ve çekildiği yöne yatırır.
-class _CardTransform extends StatelessWidget {
-  const _CardTransform({
-    required this.offset,
-    required this.scale,
-    required this.cardSize,
-    required this.child,
-  });
-
-  final Offset offset;
-  final double scale;
-  final Size cardSize;
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    return Transform.translate(
-      offset: offset,
-      child: Transform.rotate(
-        angle: swipeRotation(offset.dx, cardSize.width),
-        // Mil alt kenarda: kart avuçtaki iskambil gibi yelpazelenir ve en
-        // sık tutulan alt yarı başparmağın altından kaymaz.
-        origin: Offset(0, cardSize.height / 2),
-        child: Transform.scale(scale: scale, child: child),
-      ),
-    );
-  }
-}
-
-/// Gönderilmiş, ekrandan çıkmakta olan kart: bırakış hızıyla başlayan iki
-/// eksenli yayla ekranın dışına uçar, sonra kendini kaldırır. Dokunulmaz.
-class _DepartingCard extends StatefulWidget {
-  const _DepartingCard({
-    super.key,
-    required this.departure,
-    required this.cardSize,
-    required this.screen,
-    required this.reduceMotion,
-    required this.assignIcon,
-    required this.assignLabel,
-    required this.onGone,
-  });
-
-  final _Departure departure;
-  final Size cardSize;
-  final Size screen;
-
-  /// Hareketi Azalt: uçmak yerine yerinde söner.
-  final bool reduceMotion;
-  final IconData assignIcon;
-  final String assignLabel;
-  final VoidCallback onGone;
-
-  @override
-  State<_DepartingCard> createState() => _DepartingCardState();
-}
-
-class _DepartingCardState extends State<_DepartingCard>
-    with TickerProviderStateMixin {
-  late final _Departure _departure = widget.departure;
-  late final AnimationController _x = AnimationController.unbounded(
-    vsync: this,
-    value: _departure.from.dx,
-  );
-  late final AnimationController _y = AnimationController.unbounded(
-    vsync: this,
-    value: _departure.from.dy,
-  );
-
-  /// Kartın ağaçtaki ömrü (0 → 1); Hareketi Azalt'ta solmayı da sürer.
-  late final AnimationController _life = AnimationController(
-    vsync: this,
-    duration: widget.reduceMotion
-        ? AppMotion.reducedCrossfade
-        : AppSwipe.exitDuration,
-  );
-
-  /// Konum ve ömrün birleşimi; her build'de yeniden kurulmaz.
-  late final Listenable _changes = Listenable.merge([_x, _y, _life]);
-
-  @override
-  void initState() {
-    super.initState();
-    if (!widget.reduceMotion) {
-      final Offset target = exitTarget(
-        _departure.direction,
-        _departure.from,
-        _departure.velocity,
-        widget.screen,
-      );
-      _x.animateWith(
-        SpringSimulation(
-          AppSprings.standard,
-          _departure.from.dx,
-          target.dx,
-          _departure.velocity.dx,
-        ),
-      );
-      _y.animateWith(
-        SpringSimulation(
-          AppSprings.standard,
-          _departure.from.dy,
-          target.dy,
-          _departure.velocity.dy,
-        ),
-      );
-    }
-    _x.addListener(_report);
-    _y.addListener(_report);
-    _life.forward().whenComplete(() {
-      if (mounted) widget.onGone();
-    });
-  }
-
-  @override
-  void dispose() {
-    _x.dispose();
-    _y.dispose();
-    _life.dispose();
-    super.dispose();
-  }
-
-  void _report() => _departure.offset = Offset(_x.value, _y.value);
-
-  @override
-  Widget build(BuildContext context) {
-    return Positioned.fill(
-      child: IgnorePointer(
-        child: AnimatedBuilder(
-          animation: _changes,
-          builder: (context, child) {
-            final Offset offset = Offset(_x.value, _y.value);
-            final double travel = travelAlong(offset, _departure.direction);
-            return Opacity(
-              opacity: widget.reduceMotion ? 1 - _life.value : 1,
-              child: _CardTransform(
-                offset: offset,
-                scale: _departure.scale,
-                cardSize: widget.cardSize,
-                child: SwipeCard(
-                  asset: _departure.item.asset,
-                  assignIcon: widget.assignIcon,
-                  assignLabel: widget.assignLabel,
-                  direction: _departure.direction,
-                  progress: (travel / AppSwipe.threshold).clamp(0.0, 1.0),
-                ),
-              ),
-            );
-          },
-        ),
       ),
     );
   }
