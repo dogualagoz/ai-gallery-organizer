@@ -1,12 +1,9 @@
 // Pano/kategori yönetim eylemleri: düzenleme modu action sheet'i, karo bağlam
 // menüsü ve detaydaki "…" menüsünün paylaştığı yeniden adlandır, yeniden analiz
 // et, seç (toplu sil/taşı), tümünü sil ve panoyu sil işlemleri.
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:photo_manager/photo_manager.dart';
 
 import '../../../core/constants/app_icons.dart';
 import '../../../core/l10n/category_labels.dart';
@@ -23,7 +20,7 @@ import '../../../core/widgets/app_dialogs.dart';
 import '../../../core/widgets/app_menus.dart';
 import '../../../core/widgets/status_toast.dart';
 import '../../analysis/providers/analysis_queue_provider.dart';
-import '../../gallery/data/screenshot_repository.dart';
+import '../../gallery/data/screenshot_commands.dart';
 import '../../gallery/providers/gallery_derived_providers.dart';
 import '../providers/board_provider.dart';
 
@@ -241,12 +238,9 @@ Future<bool> reanalyzeCategory(
   );
   if (!confirmed || !context.mounted) return false;
 
-  final ScreenshotRepository repo = ref.read(screenshotRepositoryProvider);
-  final AnalysisQueueNotifier queue = ref.read(analysisQueueProvider.notifier);
-  final List<String> ids = filtered.map((e) => e.assetId).toList();
-  await repo.markManyPending(ids);
-  // Tur arka planda sürer; ilerleme durum modülünde izlenir.
-  unawaited(queue.start(onlyAssetIds: ids));
+  await ref
+      .read(analysisQueueProvider.notifier)
+      .reanalyze(filtered.map((e) => e.assetId).toList());
   return true;
 }
 
@@ -285,11 +279,9 @@ Future<void> deleteAllInBoard(
   );
   if (!confirmed || !context.mounted) return;
 
-  final ScreenshotRepository repo = ref.read(screenshotRepositoryProvider);
   final List<String> ids = filtered.map((e) => e.assetId).toList();
   try {
-    final List<String> deleted = await PhotoManager.editor.deleteWithIds(ids);
-    await repo.removeEntries(deleted);
+    await ref.read(screenshotCommandsProvider).delete(ids);
   } catch (error, stackTrace) {
     logError('Pano toplu silme hatası', error, stackTrace);
     if (context.mounted) {

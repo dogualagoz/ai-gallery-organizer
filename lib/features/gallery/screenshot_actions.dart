@@ -4,16 +4,15 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:photo_manager/photo_manager.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../../core/constants/app_icons.dart';
 import '../../core/l10n/l10n_extension.dart';
 import '../../core/models/screenshot_category.dart';
-import '../../core/models/screenshot_entry.dart';
 import '../../core/services/haptic_service.dart';
 import '../../core/utils/app_logger.dart';
 import '../../core/widgets/status_toast.dart';
+import 'data/screenshot_commands.dart';
 import 'data/screenshot_repository.dart';
 import 'widgets/move_target_sheet.dart';
 
@@ -72,28 +71,16 @@ Future<bool> moveScreenshots(
 
   final l10n = context.l10n;
   final StatusToaster toaster = StatusToaster.of(context);
-  final ScreenshotRepository repo = ref.read(screenshotRepositoryProvider);
-  // Geri al için taşımadan önceki yerleşim saklanır.
-  final List<ScreenshotPlacement> before = [
-    for (final String assetId in assetIds)
-      if (repo.entryFor(assetId) case final ScreenshotEntry entry)
-        ScreenshotPlacement.of(entry),
-  ];
+  final ScreenshotCommands commands = ref.read(screenshotCommandsProvider);
+  final List<ScreenshotPlacement> before;
   try {
-    final ScreenshotCategory? category = target.category;
-    if (category != null) {
-      // Kategori değişimi kayıt başına düzeltme sinyali üretir; tek tek yazılır.
-      for (final String assetId in assetIds) {
-        await repo.setCategory(assetId, category);
-      }
-    } else {
-      await repo.assignManyToBoard(assetIds, target.boardId);
-    }
+    before = await commands.move(
+      assetIds,
+      category: target.category,
+      boardId: target.boardId,
+    );
   } catch (error, stackTrace) {
     logError('Taşıma hatası', error, stackTrace);
-    // Yarıda kalan taşıma geri sarılır: "taşınamadı" deyip bir kısmını
-    // taşınmış bırakmayalım.
-    await _undoMove(repo, before);
     toaster.show(l10n.moveFailed, tone: StatusToastTone.error);
     return false;
   }
@@ -105,26 +92,15 @@ Future<bool> moveScreenshots(
     icon: AppIcons.move,
     actionLabel: l10n.undoAction,
     onAction: () async {
-      if (!await _undoMove(repo, before)) {
+      try {
+        await commands.undoMove(before);
+      } catch (error, stackTrace) {
+        logError('Taşıma geri alınamadı', error, stackTrace);
         toaster.show(l10n.undoFailed, tone: StatusToastTone.error);
       }
     },
   );
   return true;
-}
-
-/// Kayıtları taşıma öncesi yerleşimlerine döndürür; başarılıysa true.
-Future<bool> _undoMove(
-  ScreenshotRepository repo,
-  List<ScreenshotPlacement> before,
-) async {
-  try {
-    await repo.restorePlacements(before);
-    return true;
-  } catch (error, stackTrace) {
-    logError('Taşıma geri alınamadı', error, stackTrace);
-    return false;
-  }
 }
 
 /// Fotoğraf kütüphanesinden siler; onayı iOS'un kendi diyaloğu ister (ek
@@ -140,13 +116,8 @@ Future<List<String>> deleteScreenshots(
       ? l10n.detailDeleteFailed
       : l10n.bulkDeleteFailed;
   final StatusToaster toaster = StatusToaster.of(context);
-  final ScreenshotRepository repo = ref.read(screenshotRepositoryProvider);
   try {
-    final List<String> deleted = await PhotoManager.editor.deleteWithIds(
-      assetIds,
-    );
-    await repo.removeEntries(deleted);
-    return deleted;
+    return await ref.read(screenshotCommandsProvider).delete(assetIds);
   } catch (error, stackTrace) {
     logError('Silme hatası', error, stackTrace);
     toaster.show(failure, tone: StatusToastTone.error);

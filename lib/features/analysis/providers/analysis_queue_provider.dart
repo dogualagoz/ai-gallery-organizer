@@ -1,6 +1,7 @@
 // Analiz kuyruğu state'i: bekleyen screenshot'ları profile'a göre (seri ya da
 // paralel worker havuzu) Gemini'ye gönderir, ilerlemeyi yayınlar, free
 // limitini, günlük kotayı ve iptali ele alır.
+import 'dart:async';
 import 'dart:collection';
 import 'dart:math';
 
@@ -176,6 +177,14 @@ class AnalysisQueueNotifier extends Notifier<AnalysisQueueState> {
 
   @override
   AnalysisQueueState build() => const AnalysisQueueState();
+
+  /// [assetIds] kayıtlarını yeniden analize hazırlar ve turu yalnız onlarla
+  /// başlatır ("yeniden analiz et"). Kayıtlar işaretlenince döner; tur arka
+  /// planda sürer, ilerleme durum modülünde izlenir.
+  Future<void> reanalyze(List<String> assetIds) async {
+    await ref.read(screenshotRepositoryProvider).markManyPending(assetIds);
+    unawaited(start(onlyAssetIds: assetIds));
+  }
 
   /// Bekleyen screenshot'ları [AiConfig.activeProfile] tempo/eşzamanlılık
   /// ayarıyla analiz eder. Free kullanıcıda kalan hak kadar işlenir; hak
