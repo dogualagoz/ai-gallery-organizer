@@ -14,18 +14,13 @@ import '../data/purchase_repository.dart';
 enum PurchaseFlowStatus { idle, pending, success, error }
 
 class PurchaseFlowState {
-  const PurchaseFlowState({
-    required this.status,
-    this.errorMessage,
-    this.productId,
-  });
+  const PurchaseFlowState({required this.status, this.productId});
 
   static const PurchaseFlowState initial = PurchaseFlowState(
     status: PurchaseFlowStatus.idle,
   );
 
   final PurchaseFlowStatus status;
-  final String? errorMessage;
 
   /// Başarılı satın almanın ürün kimliği — UI paket/abonelik ayrımı yapar
   /// (ör. paket alımı paywall'u kapatmaz, snackbar gösterir).
@@ -35,11 +30,10 @@ class PurchaseFlowState {
   bool operator ==(Object other) =>
       other is PurchaseFlowState &&
       other.status == status &&
-      other.errorMessage == errorMessage &&
       other.productId == productId;
 
   @override
-  int get hashCode => Object.hash(status, errorMessage, productId);
+  int get hashCode => Object.hash(status, productId);
 }
 
 /// Çifte teslimatı önlemek için hatırlanan işlem sayısı üst sınırı.
@@ -158,10 +152,13 @@ class PurchaseFlowNotifier extends Notifier<PurchaseFlowState> {
           );
           await _completeSafely(repo, purchase);
         case PurchaseStatus.error:
-          state = PurchaseFlowState(
-            status: PurchaseFlowStatus.error,
-            errorMessage: purchase.error?.message,
+          // Ham StoreKit mesajı kullanıcıya gösterilmez (dili/üslubu
+          // tutarsız); yalnız loglanır, arayüz lokalize genel hatayı gösterir.
+          logError(
+            'IAP: satın alma başarısız (${purchase.productID})',
+            purchase.error ?? 'bilinmeyen hata',
           );
+          state = const PurchaseFlowState(status: PurchaseFlowStatus.error);
           await _completeSafely(repo, purchase);
         case PurchaseStatus.canceled:
           state = PurchaseFlowState.initial;

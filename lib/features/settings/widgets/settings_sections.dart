@@ -154,14 +154,19 @@ class AnalysisSection extends StatelessWidget {
         GroupedRow(
           icon: AppIcons.quota,
           title: l10n.settingsWeeklyQuota,
-          value: '${current.remainingFreeAnalysis} / ${FreeLimits.aiAnalysis}',
+          value: l10n.quotaFraction(
+            current.remainingFreeAnalysis,
+            FreeLimits.aiAnalysis,
+          ),
         )
       else if (current.isInTrialWindow)
         GroupedRow(
           icon: AppIcons.schedule,
           title: l10n.settingsTrialQuota,
-          value:
-              '${current.remainingTrialAnalysis} / ${TrialLimits.aiAnalysis}',
+          value: l10n.quotaFraction(
+            current.remainingTrialAnalysis,
+            TrialLimits.aiAnalysis,
+          ),
         )
       else
         GroupedRow(
@@ -181,10 +186,13 @@ class AnalysisSection extends StatelessWidget {
   String _footer(AppLocalizations l10n) {
     final String autoSort = l10n.settingsAutoSortFooter;
     if (!entitlement.isPro) {
-      return '$autoSort ${l10n.homeWeeklyLimitResetIn(entitlement.daysUntilWeeklyReset)}';
+      return l10n.sentencePair(
+        autoSort,
+        l10n.homeWeeklyLimitResetIn(entitlement.daysUntilWeeklyReset),
+      );
     }
     if (entitlement.isInTrialWindow) {
-      return '$autoSort ${l10n.settingsTrialFooter}';
+      return l10n.sentencePair(autoSort, l10n.settingsTrialFooter);
     }
     return autoSort;
   }
@@ -260,9 +268,11 @@ class PurchasesSection extends ConsumerWidget {
 }
 
 /// Sürüm metni: "1.3.0 (11)"; platform cevabı gelene kadar boş.
-String _versionText(AsyncValue<PackageInfo> info) {
+String _versionText(AppLocalizations l10n, AsyncValue<PackageInfo> info) {
   final PackageInfo? value = info.value;
-  return value == null ? '' : '${value.version} (${value.buildNumber})';
+  return value == null
+      ? ''
+      : l10n.appVersionBuild(value.version, value.buildNumber);
 }
 
 /// Destek: geri bildirim e-postası ve App Store değerlendirmesi.
@@ -272,7 +282,7 @@ class SupportSection extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
-    final String version = _versionText(ref.watch(packageInfoProvider));
+    final String version = _versionText(l10n, ref.watch(packageInfoProvider));
     return GroupedSection(
       header: l10n.settingsSupportSection,
       children: [
@@ -334,7 +344,7 @@ class AboutSection extends ConsumerWidget {
         GroupedRow(
           icon: AppIcons.info,
           title: l10n.settingsVersionTitle,
-          value: _versionText(ref.watch(packageInfoProvider)),
+          value: _versionText(l10n, ref.watch(packageInfoProvider)),
         ),
       ],
     );

@@ -9,6 +9,7 @@ import '../../../core/constants/app_curves.dart';
 import '../../../core/constants/app_icons.dart';
 import '../../../core/constants/feature/onboarding_constants.dart';
 import '../../../core/constants/ui_constants.dart';
+import '../../../core/l10n/l10n_extension.dart';
 import 'illustration_loop.dart';
 
 class QuotaIllustration extends StatefulWidget {
@@ -176,7 +177,7 @@ class _QuotaRing extends StatelessWidget {
                     ?.copyWith(fontWeight: FontWeight.w700),
               ),
               Text(
-                '/ ${FreeLimits.aiAnalysis}',
+                context.l10n.quotaOfTotal(FreeLimits.aiAnalysis),
                 style: Theme.of(context).textTheme.bodySmall
                     ?.copyWith(color: scheme.onSurfaceVariant),
               ),

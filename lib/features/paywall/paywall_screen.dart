@@ -92,9 +92,12 @@ class PaywallScreen extends ConsumerWidget {
       }
     } else if (next.status == PurchaseFlowStatus.error) {
       Haptics.warning();
-      final String message = next.errorMessage ?? l10n.paywallPurchaseFailed;
       if (context.mounted) {
-        showStatusToast(context, message, tone: StatusToastTone.error);
+        showStatusToast(
+          context,
+          l10n.paywallPurchaseFailed,
+          tone: StatusToastTone.error,
+        );
       }
       ref.read(purchaseFlowProvider.notifier).dismissError();
     }

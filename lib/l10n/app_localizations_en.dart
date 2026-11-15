@@ -1008,4 +1008,34 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get startupErrorResetConfirmBody =>
       'Analysis results, custom boards and category settings stored on this device will be deleted. Your photos are not affected.';
+
+  @override
+  String quotaFraction(int remaining, int total) {
+    return '$remaining / $total';
+  }
+
+  @override
+  String quotaOfTotal(int total) {
+    return '/ $total';
+  }
+
+  @override
+  String sentencePair(String first, String second) {
+    return '$first $second';
+  }
+
+  @override
+  String appVersionBuild(String version, String build) {
+    return '$version ($build)';
+  }
+
+  @override
+  String categoryCountChip(String name, int count) {
+    return '$name · $count';
+  }
+
+  @override
+  String tabBadgeOverflow(int max) {
+    return '$max+';
+  }
 }

@@ -1813,6 +1813,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Analysis results, custom boards and category settings stored on this device will be deleted. Your photos are not affected.'**
   String get startupErrorResetConfirmBody;
+
+  /// Kalan hak / toplam hak (Ayarlar kota satırı).
+  ///
+  /// In en, this message translates to:
+  /// **'{remaining} / {total}'**
+  String quotaFraction(int remaining, int total);
+
+  /// Kota halkasında sayacın altındaki toplam.
+  ///
+  /// In en, this message translates to:
+  /// **'/ {total}'**
+  String quotaOfTotal(int total);
+
+  /// İki bağımsız cümleyi tek paragrafta birleştirir.
+  ///
+  /// In en, this message translates to:
+  /// **'{first} {second}'**
+  String sentencePair(String first, String second);
+
+  /// Sürüm ve derleme numarası.
+  ///
+  /// In en, this message translates to:
+  /// **'{version} ({build})'**
+  String appVersionBuild(String version, String build);
+
+  /// Kategori adı ve o kategoriye yerleşen sayı.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} · {count}'**
+  String categoryCountChip(String name, int count);
+
+  /// Sekme rozetinin sınırı aşan sayısı.
+  ///
+  /// In en, this message translates to:
+  /// **'{max}+'**
+  String tabBadgeOverflow(int max);
 }
 
 class _AppLocalizationsDelegate

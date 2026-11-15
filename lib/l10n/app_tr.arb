@@ -482,5 +482,11 @@
   "startupErrorBody": "Snaply yerel verilerini açamadı. Tekrar dene. Sorun sürerse yerel verileri sıfırlayabilirsin: fotoğraflarına dokunulmaz, kütüphane Ekran Resimleri albümünden yeniden oluşturulur.",
   "startupErrorReset": "Yerel Verileri Sıfırla",
   "startupErrorResetConfirmTitle": "Yerel veriler sıfırlansın mı?",
-  "startupErrorResetConfirmBody": "Bu cihazda saklanan analiz sonuçları, özel panolar ve kategori ayarları silinecek. Fotoğraflarını etkilemez."
+  "startupErrorResetConfirmBody": "Bu cihazda saklanan analiz sonuçları, özel panolar ve kategori ayarları silinecek. Fotoğraflarını etkilemez.",
+  "quotaFraction": "{remaining} / {total}",
+  "quotaOfTotal": "/ {total}",
+  "sentencePair": "{first} {second}",
+  "appVersionBuild": "{version} ({build})",
+  "categoryCountChip": "{name} · {count}",
+  "tabBadgeOverflow": "{max}+"
 }

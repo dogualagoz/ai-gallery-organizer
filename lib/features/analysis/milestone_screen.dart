@@ -143,9 +143,10 @@ class _TopCategories extends ConsumerWidget {
         for (final entry in top.take(AppCelebration.topCategories))
           AppChip(
             icon: entry.key.icon,
-            label:
-                '${entry.key.displayName(context.l10n, names)} '
-                '$kInlineSeparator ${entry.value}',
+            label: context.l10n.categoryCountChip(
+              entry.key.displayName(context.l10n, names),
+              entry.value,
+            ),
             background: Theme.of(context).colorScheme.surface,
           ),
       ],

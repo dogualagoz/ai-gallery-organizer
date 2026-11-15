@@ -6,6 +6,7 @@ import 'package:flutter/physics.dart';
 
 import '../constants/motion_constants.dart';
 import '../constants/ui_constants.dart';
+import '../l10n/l10n_extension.dart';
 import '../services/haptic_service.dart';
 import '../utils/motion_physics.dart';
 import 'glass_panel.dart';
@@ -337,7 +338,7 @@ class _Badge extends StatelessWidget {
         alignment: Alignment.center,
         child: Text(
           count > AppSizes.tabBadgeMaxCount
-              ? '${AppSizes.tabBadgeMaxCount}+'
+              ? context.l10n.tabBadgeOverflow(AppSizes.tabBadgeMaxCount)
               : '$count',
           style: Theme.of(context).textTheme.labelSmall
               ?.copyWith(color: scheme.onError, fontWeight: FontWeight.w600),

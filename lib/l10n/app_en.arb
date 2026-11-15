@@ -487,5 +487,35 @@
   "startupErrorBody": "Snaply couldn't open its local data. Try again. If it keeps failing, you can reset local data: your photos are not touched and the library is rebuilt from your Screenshots album.",
   "startupErrorReset": "Reset Local Data",
   "startupErrorResetConfirmTitle": "Reset local data?",
-  "startupErrorResetConfirmBody": "Analysis results, custom boards and category settings stored on this device will be deleted. Your photos are not affected."
+  "startupErrorResetConfirmBody": "Analysis results, custom boards and category settings stored on this device will be deleted. Your photos are not affected.",
+  "quotaFraction": "{remaining} / {total}",
+  "@quotaFraction": {
+    "description": "Kalan hak / toplam hak (Ayarlar kota satırı).",
+    "placeholders": {"remaining": {"type": "int"}, "total": {"type": "int"}}
+  },
+  "quotaOfTotal": "/ {total}",
+  "@quotaOfTotal": {
+    "description": "Kota halkasında sayacın altındaki toplam.",
+    "placeholders": {"total": {"type": "int"}}
+  },
+  "sentencePair": "{first} {second}",
+  "@sentencePair": {
+    "description": "İki bağımsız cümleyi tek paragrafta birleştirir.",
+    "placeholders": {"first": {"type": "String"}, "second": {"type": "String"}}
+  },
+  "appVersionBuild": "{version} ({build})",
+  "@appVersionBuild": {
+    "description": "Sürüm ve derleme numarası.",
+    "placeholders": {"version": {"type": "String"}, "build": {"type": "String"}}
+  },
+  "categoryCountChip": "{name} · {count}",
+  "@categoryCountChip": {
+    "description": "Kategori adı ve o kategoriye yerleşen sayı.",
+    "placeholders": {"name": {"type": "String"}, "count": {"type": "int"}}
+  },
+  "tabBadgeOverflow": "{max}+",
+  "@tabBadgeOverflow": {
+    "description": "Sekme rozetinin sınırı aşan sayısı.",
+    "placeholders": {"max": {"type": "int"}}
+  }
 }
