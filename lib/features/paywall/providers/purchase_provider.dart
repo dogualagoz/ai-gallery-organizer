@@ -30,6 +30,16 @@ class PurchaseFlowState {
   /// Başarılı satın almanın ürün kimliği — UI paket/abonelik ayrımı yapar
   /// (ör. paket alımı paywall'u kapatmaz, snackbar gösterir).
   final String? productId;
+
+  @override
+  bool operator ==(Object other) =>
+      other is PurchaseFlowState &&
+      other.status == status &&
+      other.errorMessage == errorMessage &&
+      other.productId == productId;
+
+  @override
+  int get hashCode => Object.hash(status, errorMessage, productId);
 }
 
 /// Çifte teslimatı önlemek için hatırlanan işlem sayısı üst sınırı.

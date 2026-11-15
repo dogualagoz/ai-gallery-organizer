@@ -76,9 +76,6 @@ class _AnalysisStatusModuleState extends ConsumerState<AnalysisStatusModule> {
 
   bool get _flying => _flights?.busy.value ?? false;
 
-  /// Özet, tur bitmiş ve son kart inmişken görünür.
-  bool get _summaryVisible => ref.read(analysisSummaryProvider) && !_flying;
-
   void _onFlightsChanged() {
     if (!mounted) return;
     _maybeCelebrate();
@@ -206,8 +203,13 @@ class _AnalysisStatusModuleState extends ConsumerState<AnalysisStatusModule> {
   }
 
   /// (anahtar, görünüm) — görünüm null ise modül gizlenir.
-  (String, Widget?) _view(AnalysisQueueState queue, EntitlementState e) {
-    if (_summaryVisible) {
+  /// [summaryPending]: tur özeti kapatılmayı bekliyor; son kart inince görünür.
+  (String, Widget?) _view(
+    AnalysisQueueState queue,
+    EntitlementState e, {
+    required bool summaryPending,
+  }) {
+    if (summaryPending && !_flying) {
       return (
         'summary',
         AnalysisSummaryRow(
@@ -303,10 +305,14 @@ class _AnalysisStatusModuleState extends ConsumerState<AnalysisStatusModule> {
   Widget build(BuildContext context) {
     ref.listen(analysisQueueProvider, _onQueueChanged);
     ref.listen(analysisSummaryProvider, (_, _) => _maybeCelebrate());
-    ref.watch(analysisSummaryProvider);
+    final bool summaryPending = ref.watch(analysisSummaryProvider);
     final AnalysisQueueState queue = ref.watch(analysisQueueProvider);
     final EntitlementState entitlement = ref.watch(entitlementProvider);
-    final (String phase, Widget? view) = _view(queue, entitlement);
+    final (String phase, Widget? view) = _view(
+      queue,
+      entitlement,
+      summaryPending: summaryPending,
+    );
 
     // Kaynak anahtarı geçişin dışında: çıkan ve giren görünüm aynı anda
     // ağaçta dururken GlobalKey çakışmaz; uçuşlar kutunun sol-ortasından

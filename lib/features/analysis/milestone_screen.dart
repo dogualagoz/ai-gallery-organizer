@@ -81,7 +81,12 @@ class _RunSummary extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
     final TextTheme text = Theme.of(context).textTheme;
-    final AnalysisQueueState queue = ref.watch(analysisQueueProvider);
+    // Tur özeti yalnız sayaç ve dağılımı kullanır; diğer alanlar yenilemez.
+    final (int done, Map<ScreenshotCategory, int> counts) = ref.watch(
+      analysisQueueProvider.select(
+        (queue) => (queue.done, queue.categoryCounts),
+      ),
+    );
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -100,10 +105,10 @@ class _RunSummary extends ConsumerWidget {
           textAlign: TextAlign.center,
           style: text.bodyLarge,
         ),
-        if (queue.done > 0) ...[
+        if (done > 0) ...[
           const SizedBox(height: AppSpacing.xs),
           Text(
-            l10n.milestoneRunSummary(queue.done),
+            l10n.milestoneRunSummary(done),
             textAlign: TextAlign.center,
             style: text.bodyMedium?.copyWith(
               color: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -111,7 +116,7 @@ class _RunSummary extends ConsumerWidget {
           ),
         ],
         const SizedBox(height: AppSpacing.md),
-        _TopCategories(counts: queue.categoryCounts),
+        _TopCategories(counts: counts),
       ],
     );
   }

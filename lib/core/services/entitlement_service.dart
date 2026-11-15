@@ -118,6 +118,31 @@ class EntitlementState {
       trialAnalysisUsed: trialAnalysisUsed ?? this.trialAnalysisUsed,
     );
   }
+
+  // Aynı değerle yeniden yazılan durum dinleyicileri boşuna yenilemez.
+  @override
+  bool operator ==(Object other) =>
+      other is EntitlementState &&
+      other.isPro == isPro &&
+      other.aiAnalysisUsed == aiAnalysisUsed &&
+      other.swipesUsed == swipesUsed &&
+      other.weekStartMs == weekStartMs &&
+      other.analysisCredits == analysisCredits &&
+      other.proPurchaseMs == proPurchaseMs &&
+      other.proProductId == proProductId &&
+      other.trialAnalysisUsed == trialAnalysisUsed;
+
+  @override
+  int get hashCode => Object.hash(
+    isPro,
+    aiAnalysisUsed,
+    swipesUsed,
+    weekStartMs,
+    analysisCredits,
+    proPurchaseMs,
+    proProductId,
+    trialAnalysisUsed,
+  );
 }
 
 final entitlementProvider =

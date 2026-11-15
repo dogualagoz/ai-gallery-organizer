@@ -123,11 +123,16 @@ class _SortingScreenState extends ConsumerState<SortingScreen> {
   /// tamamlar.
   Widget _content(List<ScreenshotEntry> entries) {
     final CleanSession session = ref.watch(cleanSessionProvider);
-    final EntitlementState entitlement = ref.watch(entitlementProvider);
+    // Deste yalnız swipe hakkını izler; analiz sayaçları yenilemez.
+    final (bool canSwipe, bool isPro, int swipesUsed) = ref.watch(
+      entitlementProvider.select(
+        (state) => (state.canSwipe, state.isPro, state.swipesUsed),
+      ),
+    );
     final int pending = ref.watch(pendingDeleteIdsProvider).length;
     final List<ScreenshotEntry> queue = session.queue(entries);
     _queue = queue;
-    final bool locked = queue.isNotEmpty && !entitlement.canSwipe;
+    final bool locked = queue.isNotEmpty && !canSwipe;
     return _deckLayout(
       queue: locked ? const [] : queue,
       finished: locked
@@ -138,9 +143,9 @@ class _SortingScreenState extends ConsumerState<SortingScreen> {
       // Deste bitince bekleyenler bitiş görünümünün kendi CTA'sında.
       showPending: queue.isNotEmpty && pending > 0,
       pending: pending,
-      freeSwipesLeft: entitlement.isPro
+      freeSwipesLeft: isPro
           ? null
-          : math.max(0, FreeLimits.swipeSorts - entitlement.swipesUsed),
+          : math.max(0, FreeLimits.swipeSorts - swipesUsed),
     );
   }
 

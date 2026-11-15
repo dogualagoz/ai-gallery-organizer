@@ -40,8 +40,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final EntitlementState entitlement = ref.watch(entitlementProvider);
-    final bool restorePending =
-        ref.watch(purchaseFlowProvider).status == PurchaseFlowStatus.pending;
+    final bool restorePending = ref.watch(
+      purchaseFlowProvider.select(
+        (flow) => flow.status == PurchaseFlowStatus.pending,
+      ),
+    );
 
     ref.listen(purchaseFlowProvider, _onPurchaseFlowChanged);
 

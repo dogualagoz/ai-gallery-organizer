@@ -91,6 +91,26 @@ class CleanSession {
       front: front,
     );
   }
+
+  // Aynı değerle yeniden yazılan durum dinleyicileri boşuna yenilemez.
+  @override
+  bool operator ==(Object other) =>
+      other is CleanSession &&
+      other.front == front &&
+      setEquals(other.skipped, skipped) &&
+      setEquals(other.pendingDeletes, pendingDeletes) &&
+      setEquals(other.assigned, assigned) &&
+      listEquals(other.history, history);
+
+  // Koleksiyonlar yalnız uzunluklarıyla katılır: eşitlikle tutarlı ve ucuz.
+  @override
+  int get hashCode => Object.hash(
+    front,
+    skipped.length,
+    pendingDeletes.length,
+    assigned.length,
+    history.length,
+  );
 }
 
 /// Oturum durumu; uygulama açık kaldıkça yaşar.

@@ -50,6 +50,15 @@ class AnalyzedItem {
 
   final String assetId;
   final ScreenshotCategory category;
+
+  @override
+  bool operator ==(Object other) =>
+      other is AnalyzedItem &&
+      other.assetId == assetId &&
+      other.category == category;
+
+  @override
+  int get hashCode => Object.hash(assetId, category);
 }
 
 /// Kuyruğun anlık görünümü (immutable).
@@ -143,6 +152,32 @@ class AnalysisQueueState {
       active: active ?? this.active,
     );
   }
+
+  // Aynı değerle yeniden yazılan durum dinleyicileri boşuna yenilemez.
+  @override
+  bool operator ==(Object other) =>
+      other is AnalysisQueueState &&
+      other.status == status &&
+      other.done == done &&
+      other.failed == failed &&
+      other.total == total &&
+      other.freeQuotaExhausted == freeQuotaExhausted &&
+      listEquals(other.recent, recent) &&
+      mapEquals(other.categoryCounts, categoryCounts) &&
+      listEquals(other.active, active);
+
+  // Koleksiyonlar yalnız uzunluklarıyla katılır: eşitlikle tutarlı ve ucuz.
+  @override
+  int get hashCode => Object.hash(
+    status,
+    done,
+    failed,
+    total,
+    freeQuotaExhausted,
+    recent.length,
+    categoryCounts.length,
+    active.length,
+  );
 }
 
 /// Tekil analiz denemesinin sonucu (detay ekranındaki "şimdi analiz et").
