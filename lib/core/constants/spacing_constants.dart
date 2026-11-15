@@ -2,8 +2,13 @@
 
 /// Standart boşluk ölçeği (4pt grid).
 abstract final class AppSpacing {
+  /// Rozet içi dikey pay ve kapak küçük resimleri arası ince ayraç.
+  static const double xxs = 2;
   static const double xs = 4;
   static const double sm = 8;
+
+  /// Durum kartlarının dikey iç boşluğu ve ikon-metin aralığı.
+  static const double smPlus = 12;
   static const double md = 16;
   static const double lg = 24;
   static const double xl = 32;

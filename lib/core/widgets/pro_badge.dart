@@ -22,7 +22,7 @@ class ProBadge extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.symmetric(
           horizontal: AppSpacing.sm,
-          vertical: AppSpacing.xs / 2,
+          vertical: AppSpacing.xxs,
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,

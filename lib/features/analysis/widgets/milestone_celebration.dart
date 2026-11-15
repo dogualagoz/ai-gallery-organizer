@@ -39,7 +39,7 @@ class _MilestoneCelebrationState extends State<MilestoneCelebration>
 
   late final AnimationController _drift = AnimationController(
     vsync: this,
-    duration: AppDurations.scene * 2,
+    duration: AppCelebration.drift,
   );
 
   /// Rozet ve süzülmenin birleşimi; her build'de yeniden kurulmaz.

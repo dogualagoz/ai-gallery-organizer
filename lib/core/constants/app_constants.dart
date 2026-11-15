@@ -55,6 +55,10 @@ abstract final class HiveBoxes {
   /// ad). Enum sabit kalır; yalnız görüntülenen ad değişir.
   static const String categoryNames = 'category_names';
 
+  /// [settings] box'ındaki kayıtların anahtarları.
+  static const String categoryOrderKey = 'category_order';
+  static const String categoryPriorsKey = 'category_priors';
+
   /// Box şifreleme anahtarının iOS Keychain'deki kaydının adı.
   static const String encryptionKeyName = 'snaply_hive_encryption_key';
 }

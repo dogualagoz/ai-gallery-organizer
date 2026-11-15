@@ -5,6 +5,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import '../../../core/constants/app_curves.dart';
+import '../../../core/constants/feature/onboarding_constants.dart';
 import '../../../core/constants/motion_constants.dart';
 import '../../../core/constants/ui_constants.dart';
 import '../../../core/utils/motion_physics.dart';
@@ -21,10 +22,6 @@ class OnboardingPage extends StatelessWidget {
     required this.body,
     this.note,
   });
-
-  /// Gövde ve dipnotun başlığa göre kademeli başlama oranları.
-  static const double _bodyDelay = 0.25;
-  static const double _noteDelay = 0.4;
 
   final Widget illustration;
   final String title;
@@ -109,7 +106,7 @@ class OnboardingPage extends StatelessWidget {
         ),
         const SizedBox(height: AppSpacing.md),
         _FadeSlideIn(
-          delayFraction: _bodyDelay,
+          delayFraction: AppOnboarding.bodyDelay,
           child: Text(
             body,
             style: textTheme.bodyLarge?.copyWith(color: secondary),
@@ -119,7 +116,7 @@ class OnboardingPage extends StatelessWidget {
         if (noteText != null) ...[
           const SizedBox(height: AppSpacing.sm),
           _FadeSlideIn(
-            delayFraction: _noteDelay,
+            delayFraction: AppOnboarding.noteDelay,
             child: Text(
               noteText,
               style: textTheme.bodySmall?.copyWith(color: secondary),

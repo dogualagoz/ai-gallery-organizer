@@ -6,9 +6,12 @@ import 'spacing_constants.dart';
 /// 2 satır); tamamı başlıktaki "Tümü" ile tam ekran Recents'te açılır.
 const int kLibraryRecentsLimit = 6;
 
+/// Dikey iPhone ekran görüntüsünün en-boy oranı.
+const double kScreenshotAspect = 9 / 16;
+
 /// Ekran görüntüsü ızgaralarının sütun sayısı ve karo oranı (dikey screenshot).
 const int kScreenshotGridColumns = 3;
-const double kScreenshotTileAspect = 9 / 16;
+const double kScreenshotTileAspect = kScreenshotAspect;
 
 /// Sabit bileşen ölçüleri.
 abstract final class AppSizes {

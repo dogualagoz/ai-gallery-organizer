@@ -3,24 +3,11 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/constants/app_curves.dart';
+import '../../../core/constants/feature/onboarding_constants.dart';
 import '../../../core/constants/ui_constants.dart';
 import '../../../core/l10n/category_labels.dart';
 import '../../../core/models/screenshot_category.dart';
 import 'illustration_loop.dart';
-
-/// Izgara: sütun sayısı, karo ve ikon boyutu.
-const int _columns = 3;
-const double _tileSize = 80;
-const double _tileIcon = 30;
-
-/// Karonun belirirken başladığı ölçek.
-const double _enterScale = 0.6;
-
-/// Kademeli giriş: her karonun başlangıç gecikmesi, ilk karonun bitişi ve
-/// bitişin karo başına kayması (zaman çizelgesinin oranı).
-const double _staggerStart = 0.08;
-const double _firstEnd = 0.6;
-const double _staggerEnd = 0.04;
 
 class AccessIllustration extends StatefulWidget {
   const AccessIllustration({super.key});
@@ -60,10 +47,7 @@ class _AccessIllustrationState extends State<AccessIllustration>
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: AppDurations.scene,
-    );
+    _controller = AnimationController(vsync: this, duration: AccessArt.loop);
   }
 
   @override
@@ -78,7 +62,9 @@ class _AccessIllustrationState extends State<AccessIllustration>
 
     return Center(
       child: SizedBox(
-        width: _columns * _tileSize + (_columns - 1) * AppSpacing.sm,
+        width:
+            AccessArt.columns * AccessArt.tileSize +
+            (AccessArt.columns - 1) * AppSpacing.sm,
         child: AnimatedBuilder(
           animation: _controller,
           builder: (context, _) {
@@ -100,18 +86,18 @@ class _AccessIllustrationState extends State<AccessIllustration>
     // Kutucuklar soldan sağa, yukarıdan aşağıya sırayla belirir. Eğri
     // doğrudan uygulanır: her karede CurvedAnimation kurmak dinleyici sızdırır.
     final double t = Interval(
-      index * _staggerStart,
-      _firstEnd + index * _staggerEnd,
+      index * AccessArt.staggerStart,
+      AccessArt.firstEnd + index * AccessArt.staggerEnd,
       curve: AppCurves.settle,
     ).transform(_controller.value);
 
     return Transform.scale(
-      scale: _enterScale + (1 - _enterScale) * t,
+      scale: AccessArt.enterScale + (1 - AccessArt.enterScale) * t,
       child: Opacity(
         opacity: t.clamp(0, 1),
         child: Container(
-          width: _tileSize,
-          height: _tileSize,
+          width: AccessArt.tileSize,
+          height: AccessArt.tileSize,
           decoration: BoxDecoration(
             color: scheme.surface,
             borderRadius: BorderRadius.circular(AppRadius.lg),
@@ -120,10 +106,10 @@ class _AccessIllustrationState extends State<AccessIllustration>
           child: Icon(
             _categories[index].icon,
             // Her satırın ortası aksan renginde.
-            color: index % _columns == 1
+            color: index % AccessArt.columns == 1
                 ? scheme.primary
                 : scheme.onSurfaceVariant,
-            size: _tileIcon,
+            size: AccessArt.tileIcon,
           ),
         ),
       ),

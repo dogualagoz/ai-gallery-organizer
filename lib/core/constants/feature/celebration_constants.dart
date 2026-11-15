@@ -1,8 +1,13 @@
 // Haftalık kota kutlama sahnesinin ölçüleri.
 import 'dart:ui' show Size;
 
+import '../motion_constants.dart';
+
 /// Haftalık kota kutlama sahnesinin ölçüleri.
 abstract final class AppCelebration {
+  /// Kartların yörünge salınımının bir turu.
+  static final Duration drift = AppDurations.scene * 2;
+
   /// Sahne yüksekliği ve rozet çevresindeki mini kartların yörüngesi.
   static const double sceneHeight = 220;
   static const int cardCount = 6;

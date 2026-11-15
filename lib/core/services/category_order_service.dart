@@ -5,6 +5,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_ce/hive.dart';
 
+import '../constants/app_constants.dart';
 import '../models/screenshot_category.dart';
 import 'hive_service.dart';
 
@@ -26,8 +27,6 @@ final orderedCategoriesProvider = Provider<List<ScreenshotCategory>>((ref) {
 });
 
 class CategoryOrderNotifier extends Notifier<List<int>> {
-  static const String _key = 'category_order';
-
   Box<dynamic> get _box => HiveService.settings;
 
   @override
@@ -39,7 +38,7 @@ class CategoryOrderNotifier extends Notifier<List<int>> {
     final List<int> enumOrder = [
       for (final ScreenshotCategory c in ScreenshotCategory.values) c.index,
     ];
-    final dynamic stored = _box.get(_key);
+    final dynamic stored = _box.get(HiveBoxes.categoryOrderKey);
     if (stored is! List) return enumOrder;
     final List<int> saved = [
       for (final dynamic v in stored)
@@ -67,7 +66,7 @@ class CategoryOrderNotifier extends Notifier<List<int>> {
     for (int i = 0; i < slots.length; i++) {
       full[slots[i]] = newVisibleOrder[i].index;
     }
-    await _box.put(_key, full);
+    await _box.put(HiveBoxes.categoryOrderKey, full);
     state = full;
   }
 }

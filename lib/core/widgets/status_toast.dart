@@ -2,11 +2,11 @@
 // yoldan (yukarı) çıkar; parmakla yukarı fırlatılarak da kapatılabilir.
 import 'dart:async';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/physics.dart';
 import 'package:flutter/semantics.dart';
 
+import '../constants/app_icons.dart';
 import '../constants/motion_constants.dart';
 import '../constants/ui_constants.dart';
 import '../utils/motion_physics.dart';
@@ -281,11 +281,11 @@ class _StatusToastViewState extends State<_StatusToastView>
     final TextTheme text = Theme.of(context).textTheme;
     final (IconData?, Color) glyph = switch (widget.tone) {
       StatusToastTone.success => (
-        widget.icon ?? CupertinoIcons.checkmark_circle_fill,
+        widget.icon ?? AppIcons.checkCircleFill,
         scheme.primary,
       ),
       StatusToastTone.error => (
-        widget.icon ?? CupertinoIcons.exclamationmark_circle_fill,
+        widget.icon ?? AppIcons.errorFill,
         scheme.error,
       ),
       StatusToastTone.neutral => (widget.icon, scheme.onSurfaceVariant),

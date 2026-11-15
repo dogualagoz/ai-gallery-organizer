@@ -118,7 +118,7 @@ class _NewBadge extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.symmetric(
           horizontal: AppSpacing.sm,
-          vertical: AppSpacing.xs / 2,
+          vertical: AppSpacing.xxs,
         ),
         child: Text(
           context.l10n.boardsNewBadge(count),
@@ -163,7 +163,7 @@ class _CoverMosaic extends StatelessWidget {
       child: Row(
         children: [
           for (int i = 0; i < kBoardCoverCount; i++) ...[
-            if (i > 0) const SizedBox(width: AppSpacing.xs / 2),
+            if (i > 0) const SizedBox(width: AppSpacing.xxs),
             Expanded(
               child: SizedBox.expand(
                 child: i < covers.length

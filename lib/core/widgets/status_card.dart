@@ -19,9 +19,9 @@ class StatusCardSurface extends StatelessWidget {
   /// Kartların varsayılan iç boşluğu (sağda eylem butonunun kendi payı var).
   static const EdgeInsetsGeometry defaultPadding = EdgeInsets.fromLTRB(
     AppSpacing.md,
-    AppSpacing.sm + AppSpacing.xs,
+    AppSpacing.smPlus,
     AppSpacing.sm,
-    AppSpacing.sm + AppSpacing.xs,
+    AppSpacing.smPlus,
   );
 
   final Widget child;
@@ -78,7 +78,7 @@ class StatusCard extends StatelessWidget {
           size: AppSizes.statusIcon,
           color: muted ? scheme.onSurfaceVariant : scheme.primary,
         ),
-        const SizedBox(width: AppSpacing.sm + AppSpacing.xs),
+        const SizedBox(width: AppSpacing.smPlus),
         Expanded(child: _texts(context)),
       ],
     );

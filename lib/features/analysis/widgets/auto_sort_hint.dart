@@ -36,9 +36,9 @@ class AutoSortHint extends ConsumerWidget {
         subtitle: l10n.autoSortHintBody,
         padding: const EdgeInsets.fromLTRB(
           AppSpacing.md,
-          AppSpacing.sm + AppSpacing.xs,
+          AppSpacing.smPlus,
           AppSpacing.xs,
-          AppSpacing.sm + AppSpacing.xs,
+          AppSpacing.smPlus,
         ),
         footer: InlineTextButton(
           label: l10n.autoSortHintAction,

@@ -44,6 +44,7 @@ abstract final class AppIcons {
   static const IconData info = CupertinoIcons.info_circle;
   static const IconData infoFill = CupertinoIcons.info_circle_fill;
   static const IconData error = CupertinoIcons.exclamationmark_circle;
+  static const IconData errorFill = CupertinoIcons.exclamationmark_circle_fill;
   static const IconData lock = CupertinoIcons.lock_fill;
   static const IconData lockOpen = CupertinoIcons.lock_open;
   static const IconData pro = CupertinoIcons.rosette;

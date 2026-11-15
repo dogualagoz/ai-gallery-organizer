@@ -9,6 +9,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_ce/hive.dart';
 
 import '../constants/ai_constants.dart';
+import '../constants/app_constants.dart';
 import '../models/screenshot_category.dart';
 import '../utils/app_logger.dart';
 import 'hive_service.dart';
@@ -82,8 +83,6 @@ final categoryPriorsProvider =
 /// Priors'ı [HiveService.settings] box'ında JSON olarak kalıcılaştıran Notifier.
 /// Yeni box/adapter gerekmez; mevcut şifreli settings box kullanılır.
 class CategoryPriorsNotifier extends Notifier<PriorsMap> {
-  static const String _key = 'category_priors';
-
   Box<dynamic> get _box => HiveService.settings;
 
   @override
@@ -91,7 +90,7 @@ class CategoryPriorsNotifier extends Notifier<PriorsMap> {
 
   /// JSON string'ini çözer; bozuk/eksik veride boş harita döner.
   PriorsMap _read() {
-    final dynamic stored = _box.get(_key);
+    final dynamic stored = _box.get(HiveBoxes.categoryPriorsKey);
     if (stored is! String || stored.isEmpty) return {};
     try {
       final dynamic decoded = jsonDecode(stored);
@@ -139,6 +138,6 @@ class CategoryPriorsNotifier extends Notifier<PriorsMap> {
             c.key.toString(): c.value,
         },
     };
-    await _box.put(_key, jsonEncode(encodable));
+    await _box.put(HiveBoxes.categoryPriorsKey, jsonEncode(encodable));
   }
 }

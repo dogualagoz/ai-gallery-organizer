@@ -1,9 +1,10 @@
 // Temizle destesinin görünüm sabitleri.
+import '../component_sizes.dart';
 
 /// Temizle destesinin görünümü.
 abstract final class AppDeck {
   /// Kartın en-boy oranı (dikey ekran görüntüsü).
-  static const double cardAspect = 9 / 16;
+  static const double cardAspect = kScreenshotAspect;
 
   /// Kart görselinin uzun kenar sınırı (px): kart ekranın yarısı kadar,
   /// görüntüleyicinin tam çözünürlüğü gerekmez.

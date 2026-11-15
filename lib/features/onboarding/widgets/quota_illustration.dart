@@ -7,55 +7,9 @@ import 'package:flutter/material.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/constants/app_curves.dart';
 import '../../../core/constants/app_icons.dart';
+import '../../../core/constants/feature/onboarding_constants.dart';
 import '../../../core/constants/ui_constants.dart';
 import 'illustration_loop.dart';
-
-/// Kota halkası: çap, çizgi kalınlığı ve çizginin kenardan içeri payı.
-const double _ringSize = 168;
-const double _ringStroke = 10;
-const double _ringInset = _ringStroke / 2 + 1;
-
-/// Halkaya süzülen mini kartın boyutu ve hafta çipindeki ikon.
-const Size _miniCardSize = Size(44, 76);
-const double _weekIcon = 22;
-
-/// Döngü koreografisi (0-1 döngü oranı): halka dolumu ve hafta dönüşü.
-const double _fillBegin = 0.05;
-const double _fillEnd = 0.50;
-const double _resetBegin = 0.62;
-const double _resetEnd = 0.82;
-
-/// Hareket azaltıldığında gösterilen kare: halka dolu, kartlar emilmiş
-/// (tazelenme fazından hemen önce).
-const double _stillFrame = 0.61;
-
-/// Kart uçuşları: ilk kartın aralığı ve kartlar arası kademe.
-const double _cardBegin = 0.06;
-const double _cardEnd = 0.36;
-const double _cardStagger = 0.07;
-
-/// Kart uçuşunun son çeyreğinde halkaya emilir gibi söner, yarıya küçülür;
-/// başlangıçtaki eğiklik (radyan) varışta düzelir.
-const double _cardFadeFrom = 0.75;
-const double _cardShrink = 0.5;
-const double _cardTiltEven = 0.25;
-const double _cardTiltOdd = -0.2;
-
-/// Hafta çipinin dikey konumu (Alignment y; halkanın altında).
-const double _weekChipY = 0.92;
-
-/// Mini kartın içi: gölge, görsel bloğu ve metin çizgileri.
-const double _miniShadowAlpha = 0.08;
-const double _miniShadowBlur = 8;
-const Offset _miniShadowOffset = Offset(0, 3);
-const double _miniImageHeight = 22;
-const double _miniImageAlpha = 0.25;
-const double _miniLineHeight = 3;
-const double _miniLineAlpha = 0.3;
-
-/// Çizgi genişliği: taban + karta/satıra göre sözde rastgele ek.
-const double _miniLineBase = 20;
-const int _miniLineVariance = 14;
 
 class QuotaIllustration extends StatefulWidget {
   const QuotaIllustration({super.key});
@@ -66,8 +20,6 @@ class QuotaIllustration extends StatefulWidget {
 
 class _QuotaIllustrationState extends State<QuotaIllustration>
     with SingleTickerProviderStateMixin, IllustrationLoop<QuotaIllustration> {
-  static const int _cardCount = 5;
-
   /// Kartların sahne kenarlarındaki başlangıç konumları (0-1 oran).
   static const List<Offset> _cardStarts = [
     Offset(0.04, 0.10),
@@ -80,14 +32,14 @@ class _QuotaIllustrationState extends State<QuotaIllustration>
   late final AnimationController _controller = AnimationController(
     vsync: this,
     // Tek yönlü döngü: dolum → duraklama → hafta dönüşü → tazelenme.
-    duration: AppDurations.scene * 3,
+    duration: QuotaArt.loop,
   );
 
   @override
   AnimationController get controller => _controller;
 
   @override
-  double get stillValue => _stillFrame;
+  double get stillValue => QuotaArt.stillFrame;
 
   @override
   void play() => _controller.repeat();
@@ -116,12 +68,13 @@ class _QuotaIllustrationState extends State<QuotaIllustration>
         return AnimatedBuilder(
           animation: _controller,
           builder: (context, _) {
-            final double fill = _phase(_fillBegin, _fillEnd);
-            final double reset = _phase(_resetBegin, _resetEnd);
+            final double fill = _phase(QuotaArt.fillBegin, QuotaArt.fillEnd);
+            final double reset = _phase(QuotaArt.resetBegin, QuotaArt.resetEnd);
             return Stack(
               alignment: Alignment.center,
               children: [
-                for (int i = 0; i < _cardCount; i++) _buildCard(i, area),
+                for (int i = 0; i < QuotaArt.cardCount; i++)
+                  _buildCard(i, area),
                 _QuotaRing(fill: fill, reset: reset),
                 _buildWeekChip(context, reset),
               ],
@@ -134,8 +87,11 @@ class _QuotaIllustrationState extends State<QuotaIllustration>
 
   /// Kenarlardan halkanın merkezine süzülüp kaybolan tek mini kart.
   Widget _buildCard(int index, Size area) {
-    final double delay = index * _cardStagger;
-    final double t = _phase(_cardBegin + delay, _cardEnd + delay);
+    final double delay = index * QuotaArt.cardStagger;
+    final double t = _phase(
+      QuotaArt.cardBegin + delay,
+      QuotaArt.cardEnd + delay,
+    );
     final Offset start = Offset(
       _cardStarts[index].dx * area.width,
       _cardStarts[index].dy * area.height,
@@ -148,13 +104,15 @@ class _QuotaIllustrationState extends State<QuotaIllustration>
       top: pos.dy,
       child: Opacity(
         // Halkaya varırken emilir gibi söner.
-        opacity: t < _cardFadeFrom
+        opacity: t < QuotaArt.cardFadeFrom
             ? 1
-            : 1 - (t - _cardFadeFrom) / (1 - _cardFadeFrom),
+            : 1 - (t - QuotaArt.cardFadeFrom) / (1 - QuotaArt.cardFadeFrom),
         child: Transform.scale(
-          scale: 1 - _cardShrink * t,
+          scale: 1 - QuotaArt.cardShrink * t,
           child: Transform.rotate(
-            angle: (index.isEven ? _cardTiltEven : _cardTiltOdd) * (1 - t),
+            angle:
+                (index.isEven ? QuotaArt.cardTiltEven : QuotaArt.cardTiltOdd) *
+                (1 - t),
             child: _MiniCard(seed: index),
           ),
         ),
@@ -166,7 +124,7 @@ class _QuotaIllustrationState extends State<QuotaIllustration>
   Widget _buildWeekChip(BuildContext context, double reset) {
     final ColorScheme scheme = Theme.of(context).colorScheme;
     return Align(
-      alignment: const Alignment(0, _weekChipY),
+      alignment: const Alignment(0, QuotaArt.weekChipY),
       child: Transform.rotate(
         angle: reset * 2 * math.pi,
         child: Container(
@@ -177,7 +135,7 @@ class _QuotaIllustrationState extends State<QuotaIllustration>
           ),
           child: Icon(
             AppIcons.sync,
-            size: _weekIcon,
+            size: QuotaArt.weekIcon,
             color: scheme.onSecondaryContainer,
           ),
         ),
@@ -199,8 +157,8 @@ class _QuotaRing extends StatelessWidget {
     final int count = (fill * FreeLimits.aiAnalysis).round();
 
     return SizedBox(
-      width: _ringSize,
-      height: _ringSize,
+      width: QuotaArt.ringSize,
+      height: QuotaArt.ringSize,
       child: CustomPaint(
         painter: _RingPainter(
           fill: fill,
@@ -248,17 +206,23 @@ class _RingPainter extends CustomPainter {
     final Rect rect = Offset.zero & size;
     final Paint track = Paint()
       ..style = PaintingStyle.stroke
-      ..strokeWidth = _ringStroke
+      ..strokeWidth = QuotaArt.ringStroke
       ..color = trackColor;
     final Paint arc = Paint()
       ..style = PaintingStyle.stroke
-      ..strokeWidth = _ringStroke
+      ..strokeWidth = QuotaArt.ringStroke
       ..strokeCap = StrokeCap.round
       ..color = fillColor;
 
-    canvas.drawArc(rect.deflate(_ringInset), 0, 2 * math.pi, false, track);
     canvas.drawArc(
-      rect.deflate(_ringInset),
+      rect.deflate(QuotaArt.ringInset),
+      0,
+      2 * math.pi,
+      false,
+      track,
+    );
+    canvas.drawArc(
+      rect.deflate(QuotaArt.ringInset),
       -math.pi / 2 + sweepShift,
       2 * math.pi * fill,
       false,
@@ -284,8 +248,8 @@ class _MiniCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final ColorScheme scheme = Theme.of(context).colorScheme;
     return Container(
-      width: _miniCardSize.width,
-      height: _miniCardSize.height,
+      width: QuotaArt.miniCardSize.width,
+      height: QuotaArt.miniCardSize.height,
       padding: const EdgeInsets.all(AppSpacing.xs),
       decoration: BoxDecoration(
         color: scheme.surface,
@@ -293,9 +257,9 @@ class _MiniCard extends StatelessWidget {
         border: Border.all(color: scheme.outline),
         boxShadow: [
           BoxShadow(
-            color: scheme.onSurface.withValues(alpha: _miniShadowAlpha),
-            blurRadius: _miniShadowBlur,
-            offset: _miniShadowOffset,
+            color: scheme.onSurface.withValues(alpha: QuotaArt.miniShadowAlpha),
+            blurRadius: QuotaArt.miniShadowBlur,
+            offset: QuotaArt.miniShadowOffset,
           ),
         ],
       ),
@@ -304,23 +268,29 @@ class _MiniCard extends StatelessWidget {
         children: [
           if (seed.isEven)
             Container(
-              height: _miniImageHeight,
+              height: QuotaArt.miniImageHeight,
               margin: const EdgeInsets.only(bottom: AppSpacing.xs),
               decoration: BoxDecoration(
-                color: scheme.primary.withValues(alpha: _miniImageAlpha),
+                color: scheme.primary.withValues(
+                  alpha: QuotaArt.miniImageAlpha,
+                ),
                 borderRadius: BorderRadius.circular(AppRadius.sm / 2),
               ),
             ),
           for (int line = 0; line < 2; line++)
             Container(
-              height: _miniLineHeight,
-              width: _miniLineBase + (seed * 7 + line * 5) % _miniLineVariance,
+              height: QuotaArt.miniLineHeight,
+              width:
+                  QuotaArt.miniLineBase +
+                  (seed * 7 + line * 5) % QuotaArt.miniLineVariance,
               margin: const EdgeInsets.only(bottom: AppSpacing.xs),
               decoration: BoxDecoration(
                 color: scheme.onSurfaceVariant.withValues(
-                  alpha: _miniLineAlpha,
+                  alpha: QuotaArt.miniLineAlpha,
                 ),
-                borderRadius: BorderRadius.circular(_miniLineHeight / 2),
+                borderRadius: BorderRadius.circular(
+                  QuotaArt.miniLineHeight / 2,
+                ),
               ),
             ),
         ],
