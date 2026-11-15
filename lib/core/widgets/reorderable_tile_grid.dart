@@ -15,6 +15,8 @@ import '../services/haptic_service.dart';
 import '../utils/motion_physics.dart';
 import '../utils/text_scale.dart';
 import 'jiggle.dart';
+import 'reorder_grid_layout.dart';
+import 'reorder_slot.dart';
 
 class ReorderableTileGrid extends StatefulWidget {
   const ReorderableTileGrid({
@@ -77,8 +79,10 @@ class _ReorderableTileGridState extends State<ReorderableTileGrid>
   Timer? _pendingTimeout;
 
   /// Sürüklenen karonun veri index'i ve sol üst köşesi (ızgara koordinatı).
+  /// Köşe her parmak hareketinde değişir; yalnız sürüklenen yuva dinler,
+  /// ızgara yalnız önizleme sırası değişince yeniden kurulur.
   int? _dragItem;
-  Offset _dragOrigin = Offset.zero;
+  final ValueNotifier<Offset> _dragOrigin = ValueNotifier(Offset.zero);
 
   /// Parmağın, tutulan karonun köşesine uzaklığı (tutulan yer korunur).
   Offset _grab = Offset.zero;
@@ -88,11 +92,8 @@ class _ReorderableTileGridState extends State<ReorderableTileGrid>
   /// Kalkık görünen (sürüklenen ya da yerine oturan) karo; en üstte çizilir.
   Key? _liftedKey;
 
-  Size _cell = Size.zero;
-
-  /// Geçerli sütun sayısı; [_cell] ile aynı yerleşimde (build) hesaplanır ki
-  /// jest sırasında yazı ölçeği değişse de slot hesapları tutarlı kalsın.
-  int _columns = 1;
+  /// Son yerleşim turunun hücre geometrisi (build'de hesaplanır).
+  ReorderGridLayout _layout = ReorderGridLayout.initial;
 
   List<Key> get _keys => [
     for (int i = 0; i < widget.itemCount; i++) widget.keyBuilder(i),
@@ -122,6 +123,7 @@ class _ReorderableTileGridState extends State<ReorderableTileGrid>
   void dispose() {
     _pendingTimeout?.cancel();
     _lift.dispose();
+    _dragOrigin.dispose();
     super.dispose();
   }
 
@@ -130,27 +132,6 @@ class _ReorderableTileGridState extends State<ReorderableTileGrid>
     _pendingTimeout = null;
     _pendingKeys = null;
     _displayOrder = null;
-  }
-
-  Offset _slotOrigin(int position) {
-    final int column = position % _columns;
-    final int row = position ~/ _columns;
-    return Offset(
-      column * (_cell.width + widget.spacing),
-      row * (_cell.height + widget.spacing),
-    );
-  }
-
-  /// [point]'in düştüğü karo konumu (yalnız sıralanabilir hücreler).
-  int _slotAt(Offset point) {
-    final int column = (point.dx / (_cell.width + widget.spacing))
-        .floor()
-        .clamp(0, _columns - 1);
-    final int row = (point.dy / (_cell.height + widget.spacing)).floor().clamp(
-      0,
-      (widget.itemCount - 1) ~/ _columns,
-    );
-    return (row * _columns + column).clamp(0, widget.itemCount - 1);
   }
 
   Offset _toLocal(Offset global) =>
@@ -168,13 +149,13 @@ class _ReorderableTileGridState extends State<ReorderableTileGrid>
 
   void _onLiftStart(int item, Offset global) {
     final List<int> order = _order;
-    final Offset origin = _slotOrigin(order.indexOf(item));
+    final Offset origin = _layout.originOf(order.indexOf(item));
+    _dragOrigin.value = origin;
     setState(() {
       _displayOrder = order;
       _dragItem = item;
       _liftedKey = widget.keyBuilder(item);
       _grab = _toLocal(global) - origin;
-      _dragOrigin = origin;
     });
     // Kaldırma haptiği karonun yükselmeye başladığı karede.
     Haptics.tick();
@@ -186,10 +167,13 @@ class _ReorderableTileGridState extends State<ReorderableTileGrid>
     final List<int>? order = _displayOrder;
     if (item == null || order == null) return;
     final Offset origin = _toLocal(global) - _grab;
-    final int target = _slotAt(origin + _cell.center(Offset.zero));
+    _dragOrigin.value = origin;
+    final int target = _layout.slotAt(
+      origin + _layout.cell.center(Offset.zero),
+      itemCount: widget.itemCount,
+    );
+    if (order.indexOf(item) == target) return;
     setState(() {
-      _dragOrigin = origin;
-      if (order.indexOf(item) == target) return;
       order
         ..remove(item)
         ..insert(target, item);
@@ -261,7 +245,7 @@ class _ReorderableTileGridState extends State<ReorderableTileGrid>
     final bool lifted = key == _liftedKey;
     return RawGestureDetector(
       gestures: _liftGestures(item),
-      child: _LiftDecoration(
+      child: ReorderLiftDecoration(
         lift: lifted ? _lift : kAlwaysDismissedAnimation,
         child: Jiggle(
           enabled: widget.editing && !lifted,
@@ -281,12 +265,12 @@ class _ReorderableTileGridState extends State<ReorderableTileGrid>
     for (int position = 0; position < order.length; position++) {
       final int item = order[position];
       final Key key = widget.keyBuilder(item);
-      final Widget slot = _SpringSlot(
+      final Widget slot = ReorderSpringSlot(
         key: key,
-        target: _slotOrigin(position),
+        target: _layout.originOf(position),
         follow: item == _dragItem ? _dragOrigin : null,
         releaseVelocity: _releaseVelocity,
-        size: _cell,
+        size: _layout.cell,
         child: _buildTile(context, item, key),
       );
       if (key == _liftedKey) {
@@ -298,11 +282,11 @@ class _ReorderableTileGridState extends State<ReorderableTileGrid>
     final Widget? trailing = widget.trailing;
     if (trailing != null) {
       children.add(
-        _SpringSlot(
+        ReorderSpringSlot(
           key: const ValueKey<Type>(_TrailingSlot),
-          target: _slotOrigin(widget.itemCount),
+          target: _layout.originOf(widget.itemCount),
           releaseVelocity: Offset.zero,
-          size: _cell,
+          size: _layout.cell,
           child: trailing,
         ),
       );
@@ -318,151 +302,22 @@ class _ReorderableTileGridState extends State<ReorderableTileGrid>
       builder: (context, constraints) {
         // Erişilebilirlik boyutlarında tek sütun: iki sütunlu karoda büyük
         // başlık kapağı ezer (Fotoğraflar albümleri de böyle akar).
-        final int columns = _columns = large ? 1 : widget.crossAxisCount;
+        final int columns = large ? 1 : widget.crossAxisCount;
         final double width = constraints.maxWidth;
         final double cellWidth =
             (width - widget.spacing * (columns - 1)) / columns;
-        _cell = Size(cellWidth, cellWidth / widget.childAspectRatio);
+        final ReorderGridLayout layout = _layout = ReorderGridLayout(
+          columns: columns,
+          cell: Size(cellWidth, cellWidth / widget.childAspectRatio),
+          spacing: widget.spacing,
+        );
         final int total = widget.itemCount + (widget.trailing == null ? 0 : 1);
-        final int rows = (total / columns).ceil();
         return SizedBox(
           width: width,
-          height: rows == 0
-              ? 0
-              : rows * _cell.height + (rows - 1) * widget.spacing,
+          height: layout.extentFor(total),
           child: Stack(clipBehavior: Clip.none, children: _buildSlots(context)),
         );
       },
-    );
-  }
-}
-
-/// Konumuna yayla giden hücre. [follow] verilirken parmağı birebir izler;
-/// bırakılınca [releaseVelocity] ile momentum yayına geçer. Yer değişimi
-/// transform ile yapılır (her karede yeniden yerleşim yok).
-class _SpringSlot extends StatefulWidget {
-  const _SpringSlot({
-    super.key,
-    required this.target,
-    required this.releaseVelocity,
-    required this.size,
-    required this.child,
-    this.follow,
-  });
-
-  final Offset target;
-  final Offset? follow;
-  final Offset releaseVelocity;
-  final Size size;
-  final Widget child;
-
-  @override
-  State<_SpringSlot> createState() => _SpringSlotState();
-}
-
-class _SpringSlotState extends State<_SpringSlot>
-    with TickerProviderStateMixin {
-  late final AnimationController _x = AnimationController.unbounded(
-    vsync: this,
-    value: widget.target.dx,
-  );
-  late final AnimationController _y = AnimationController.unbounded(
-    vsync: this,
-    value: widget.target.dy,
-  );
-  late final Listenable _position = Listenable.merge([_x, _y]);
-
-  @override
-  void didUpdateWidget(_SpringSlot oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    final Offset? follow = widget.follow;
-    if (follow != null) {
-      _x.value = follow.dx;
-      _y.value = follow.dy;
-      return;
-    }
-    final bool released = oldWidget.follow != null;
-    if (!released && oldWidget.target == widget.target) return;
-    // Bırakılan karo parmağın hızını devralır (hafif sekme yalnız burada);
-    // akan komşular o anki konum ve hızlarından sekmesiz yeniden hedeflenir.
-    final SpringDescription spring = released
-        ? AppSprings.momentum
-        : AppSprings.standard;
-    final Offset velocity = released
-        ? widget.releaseVelocity
-        : Offset(_x.velocity, _y.velocity);
-    _springTo(_x, widget.target.dx, velocity.dx, spring);
-    _springTo(_y, widget.target.dy, velocity.dy, spring);
-  }
-
-  void _springTo(
-    AnimationController axis,
-    double target,
-    double velocity,
-    SpringDescription spring,
-  ) {
-    if (context.reduceMotion) {
-      axis.value = target;
-      return;
-    }
-    axis.animateWith(SpringSimulation(spring, axis.value, target, velocity));
-  }
-
-  @override
-  void dispose() {
-    _x.dispose();
-    _y.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Positioned(
-      left: 0,
-      top: 0,
-      width: widget.size.width,
-      height: widget.size.height,
-      child: AnimatedBuilder(
-        animation: _position,
-        child: widget.child,
-        builder: (context, child) => Transform.translate(
-          offset: Offset(_x.value, _y.value),
-          child: child,
-        ),
-      ),
-    );
-  }
-}
-
-/// Kaldırılan karonun büyümesi ve altına düşen gölgesi.
-class _LiftDecoration extends AnimatedWidget {
-  const _LiftDecoration({required Animation<double> lift, required this.child})
-    : super(listenable: lift);
-
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    final double t = (listenable as Animation<double>).value;
-    final double shadow = t.clamp(0.0, 1.0);
-    return Transform.scale(
-      scale: 1 + (AppLift.scale - 1) * t,
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(AppRadius.lg),
-          boxShadow: shadow <= 0
-              ? null
-              : [
-                  BoxShadow(
-                    color: Theme.of(context).colorScheme.shadow
-                        .withValues(alpha: AppLift.shadowAlpha * shadow),
-                    blurRadius: AppLift.shadowBlur,
-                    offset: Offset(0, AppLift.shadowOffsetY * shadow),
-                  ),
-                ],
-        ),
-        child: child,
-      ),
     );
   }
 }
