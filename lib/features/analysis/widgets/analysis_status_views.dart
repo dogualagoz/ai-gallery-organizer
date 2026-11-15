@@ -4,7 +4,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart';
-import 'package:photo_manager_image_provider/photo_manager_image_provider.dart';
 
 import '../../../core/constants/app_icons.dart';
 import '../../../core/constants/motion_constants.dart';
@@ -14,6 +13,7 @@ import '../../../core/utils/motion_physics.dart';
 import '../../../core/utils/text_scale.dart';
 import '../../../core/widgets/app_nav_scaffold.dart';
 import '../../../core/widgets/surface_card.dart';
+import '../../gallery/widgets/screenshot_thumbnail.dart';
 
 /// Bekleyen ekran görüntüleri var: tonlu kart, başlıkta sayı, alt yazıda kota
 /// (kotanın göründüğü tek yer) ve "Analiz et".
@@ -381,26 +381,13 @@ class _SourceImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ColorScheme scheme = Theme.of(context).colorScheme;
-    final AssetEntity? image = asset;
-    final Widget placeholder = ColoredBox(
-      color: scheme.surfaceContainerHigh,
-      child: Icon(AppIcons.photo, color: scheme.onSurfaceVariant),
-    );
     return ClipRRect(
       borderRadius: BorderRadius.circular(AppRadius.sm),
       child: SizedBox.expand(
-        child: image == null
-            ? placeholder
-            : AssetEntityImage(
-                image,
-                isOriginal: false,
-                thumbnailSize: const ThumbnailSize.square(
-                  AppSizes.coverThumbnailPx,
-                ),
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) => placeholder,
-              ),
+        child: ScreenshotThumbnail(
+          asset: asset,
+          sizePx: AppSizes.coverThumbnailPx,
+        ),
       ),
     );
   }

@@ -25,6 +25,7 @@ import '../analysis/widgets/analysis_status_module.dart';
 import '../analysis/widgets/auto_sort_hint.dart';
 import '../boards/providers/board_provider.dart';
 import '../gallery/providers/gallery_provider.dart';
+import '../gallery/widgets/gallery_error_view.dart';
 import 'widgets/library_sections.dart';
 
 /// Uygulama açılış sayacının bu oturumda bir kez işlendiğini işaretler.
@@ -137,15 +138,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       error: (error, _) => [
         SliverFillRemaining(
           hasScrollBody: false,
-          child: error is PhotoAccessDeniedException
-              ? const PermissionDeniedView()
-              : EmptyStateView(
-                  icon: AppIcons.error,
-                  title: l10n.galleryLoadFailedTitle,
-                  message: l10n.galleryLoadFailedBody,
-                  actionLabel: l10n.retryAction,
-                  onAction: () => ref.invalidate(galleryProvider),
-                ),
+          child: GalleryErrorView(error: error),
         ),
       ],
       data: (entries) => entries.isEmpty

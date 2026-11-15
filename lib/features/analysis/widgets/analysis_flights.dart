@@ -12,13 +12,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/physics.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:photo_manager/photo_manager.dart';
-import 'package:photo_manager_image_provider/photo_manager_image_provider.dart';
 
 import '../../../core/constants/motion_constants.dart';
 import '../../../core/constants/ui_constants.dart';
 import '../../../core/models/screenshot_category.dart';
 import '../../../core/services/haptic_service.dart';
 import '../../../core/utils/motion_physics.dart';
+import '../../gallery/widgets/screenshot_thumbnail.dart';
 
 /// Uçacak tek öğe: küçük resmi ve ineceği kategori.
 typedef FlightRequest = ({AssetEntity? asset, ScreenshotCategory category});
@@ -387,12 +387,10 @@ class _FlightCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Color fallback = Theme.of(context).colorScheme.surfaceContainerHigh;
     final double done = flight.progress.clamp(0.0, 1.0);
     final double opacity = ((1 - flight.progress) / AppFlight.fadeFraction)
         .clamp(0.0, 1.0);
     final Size size = AppFlight.cardSize;
-    final AssetEntity? asset = flight.asset;
     return Positioned(
       left: flight.position.dx - size.width / 2,
       top: flight.position.dy - size.height / 2,
@@ -404,18 +402,13 @@ class _FlightCard extends StatelessWidget {
           scale: lerpDouble(1, AppFlight.landingScale, done),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(AppRadius.sm),
-            child: asset == null
-                ? ColoredBox(color: fallback)
-                : AssetEntityImage(
-                    asset,
-                    isOriginal: false,
-                    thumbnailSize: const ThumbnailSize.square(
-                      AppSizes.coverThumbnailPx,
-                    ),
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) =>
-                        ColoredBox(color: fallback),
-                  ),
+            // Kaynak küçük resim ve kategori kapaklarıyla aynı boyut: uçuş
+            // önbellekteki kaydı kullanır, yeniden çözmez.
+            child: ScreenshotThumbnail(
+              asset: flight.asset,
+              sizePx: AppSizes.coverThumbnailPx,
+              glyph: false,
+            ),
           ),
         ),
       ),

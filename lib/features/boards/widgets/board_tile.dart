@@ -3,12 +3,12 @@
 // bildirimi Pressable'dan; dokunma eylemi çağırana ait.
 import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart';
-import 'package:photo_manager_image_provider/photo_manager_image_provider.dart';
 
 import '../../../core/constants/ui_constants.dart';
 import '../../../core/l10n/l10n_extension.dart';
 import '../../../core/widgets/pressable.dart';
 import '../../../core/widgets/surface_card.dart';
+import '../../gallery/widgets/screenshot_thumbnail.dart';
 
 /// Kapakta gösterilecek en fazla thumbnail sayısı.
 const int kBoardCoverCount = 3;
@@ -167,15 +167,10 @@ class _CoverMosaic extends StatelessWidget {
             Expanded(
               child: SizedBox.expand(
                 child: i < covers.length
-                    ? AssetEntityImage(
-                        covers[i],
-                        isOriginal: false,
-                        thumbnailSize: const ThumbnailSize.square(
-                          AppSizes.coverThumbnailPx,
-                        ),
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) =>
-                            ColoredBox(color: fill),
+                    ? ScreenshotThumbnail(
+                        asset: covers[i],
+                        sizePx: AppSizes.coverThumbnailPx,
+                        glyph: false,
                       )
                     : ColoredBox(color: fill),
               ),

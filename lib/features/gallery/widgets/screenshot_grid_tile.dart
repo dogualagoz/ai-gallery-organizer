@@ -2,13 +2,13 @@
 // ve seçim modunda işaret dairesi. Basış geri bildirimi Pressable'dan gelir.
 import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart';
-import 'package:photo_manager_image_provider/photo_manager_image_provider.dart';
 
 import '../../../core/constants/app_icons.dart';
 import '../../../core/constants/ui_constants.dart';
 import '../../../core/l10n/l10n_extension.dart';
 import '../../../core/models/screenshot_entry.dart';
 import '../../../core/widgets/pressable.dart';
+import 'screenshot_thumbnail.dart';
 
 /// Izgara karosu ile görüntüleyicinin paylaştığı Hero etiketi.
 String screenshotHeroTag(String assetId) => 'screenshot-$assetId';
@@ -69,19 +69,7 @@ class ScreenshotGridTile extends StatelessWidget {
               children: [
                 // Küçük resim yüklenirken de karo dolgulu görünür.
                 ColoredBox(color: scheme.surfaceContainerHigh),
-                if (image == null)
-                  const _MissingImage()
-                else
-                  AssetEntityImage(
-                    image,
-                    isOriginal: false,
-                    thumbnailSize: const ThumbnailSize.square(
-                      AppGridTile.thumbnailPx,
-                    ),
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) =>
-                        const _MissingImage(),
-                  ),
+                ScreenshotThumbnail(asset: image),
                 if (isSelected ?? false)
                   ColoredBox(
                     color: light.withValues(alpha: AppGridTile.selectionWash),
@@ -176,18 +164,6 @@ class _SelectionBadge extends StatelessWidget {
       child: selected
           ? Icon(AppIcons.check, size: AppGridTile.badgeCheck, color: light)
           : null,
-    );
-  }
-}
-
-/// Küçük resim yoksa ya da yüklenemediyse dolgunun ortasındaki fotoğraf glifi.
-class _MissingImage extends StatelessWidget {
-  const _MissingImage();
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Icon(AppIcons.photo, color: Theme.of(context).colorScheme.outline),
     );
   }
 }

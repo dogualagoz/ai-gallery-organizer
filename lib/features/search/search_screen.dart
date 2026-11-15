@@ -17,11 +17,11 @@ import '../../core/models/screenshot_entry.dart';
 import '../../core/router/open_paywall.dart';
 import '../../core/services/category_names_service.dart';
 import '../../core/services/entitlement_service.dart';
-import '../../core/services/photo_permission_service.dart';
 import '../../core/services/recent_searches_service.dart';
 import '../../core/widgets/app_nav_scaffold.dart';
 import '../../core/widgets/empty_state_view.dart';
 import '../gallery/providers/gallery_provider.dart';
+import '../gallery/widgets/gallery_error_view.dart';
 import '../gallery/widgets/screenshot_grid.dart';
 import 'search_index.dart';
 import 'search_request_provider.dart';
@@ -189,26 +189,13 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
 
   /// Galeri durumu → içerik sliver'ları.
   List<Widget> _body() {
-    final l10n = context.l10n;
     final AsyncValue<List<ScreenshotEntry>> gallery = ref.watch(
       galleryProvider,
     );
     return gallery.when(
       skipLoadingOnReload: true,
       loading: () => [_fill(const Center(child: CupertinoActivityIndicator()))],
-      error: (error, _) => [
-        _fill(
-          error is PhotoAccessDeniedException
-              ? const PermissionDeniedView()
-              : EmptyStateView(
-                  icon: AppIcons.error,
-                  title: l10n.galleryLoadFailedTitle,
-                  message: l10n.galleryLoadFailedBody,
-                  actionLabel: l10n.retryAction,
-                  onAction: () => ref.invalidate(galleryProvider),
-                ),
-        ),
-      ],
+      error: (error, _) => [_fill(GalleryErrorView(error: error))],
       data: (_) => _searchSlivers(),
     );
   }

@@ -21,7 +21,6 @@ import '../../core/router/open_paywall.dart';
 import '../../core/services/category_names_service.dart';
 import '../../core/services/entitlement_service.dart';
 import '../../core/services/haptic_service.dart';
-import '../../core/services/photo_permission_service.dart';
 import '../../core/services/review_service.dart';
 import '../../core/widgets/app_nav_scaffold.dart';
 import '../../core/widgets/empty_state_view.dart';
@@ -30,6 +29,7 @@ import '../../core/widgets/status_toast.dart';
 import '../gallery/data/screenshot_repository.dart';
 import '../gallery/providers/gallery_provider.dart';
 import '../gallery/screenshot_actions.dart';
+import '../gallery/widgets/gallery_error_view.dart';
 import 'providers/clean_session_provider.dart';
 import 'swipe_decision.dart';
 import 'widgets/category_picker_sheet.dart';
@@ -101,15 +101,7 @@ class _SortingScreenState extends ConsumerState<SortingScreen> {
             child: gallery.when(
               skipLoadingOnReload: true,
               loading: () => const Center(child: CupertinoActivityIndicator()),
-              error: (error, _) => error is PhotoAccessDeniedException
-                  ? const PermissionDeniedView()
-                  : EmptyStateView(
-                      icon: AppIcons.error,
-                      title: l10n.galleryLoadFailedTitle,
-                      message: l10n.galleryLoadFailedBody,
-                      actionLabel: l10n.retryAction,
-                      onAction: () => ref.invalidate(galleryProvider),
-                    ),
+              error: (error, _) => GalleryErrorView(error: error),
               data: _content,
             ),
           ),

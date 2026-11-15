@@ -9,12 +9,12 @@ import 'package:flutter/physics.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:photo_manager_image_provider/photo_manager_image_provider.dart';
 
-import '../../../core/constants/app_icons.dart';
 import '../../../core/constants/motion_constants.dart';
 import '../../../core/constants/ui_constants.dart';
 import '../../../core/utils/app_logger.dart';
 import '../../../core/utils/motion_physics.dart';
 import '../../gallery/widgets/screenshot_grid_tile.dart';
+import '../../gallery/widgets/screenshot_thumbnail.dart';
 
 /// Hero uçuşunun eğrisi: geçiş süresine yayılmış sekmesiz yay. Kapanışta
 /// Hero bunu tersine çevirip uygular; görsel iki yönde de yay gibi yavaşlar.
@@ -236,15 +236,7 @@ class ViewerThumbnail extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final AssetEntity? image = asset;
-    if (image == null) return const _MissingImage();
-    return AssetEntityImage(
-      image,
-      isOriginal: false,
-      thumbnailSize: const ThumbnailSize.square(AppGridTile.thumbnailPx),
-      fit: BoxFit.cover,
-      errorBuilder: (context, error, stackTrace) => const _MissingImage(),
-    );
+    return ScreenshotThumbnail(asset: asset);
   }
 }
 
@@ -265,7 +257,7 @@ class ViewerImage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final AssetEntity? image = asset;
-    if (image == null) return const _MissingImage();
+    if (image == null) return const ThumbnailPlaceholder();
     return Stack(
       fit: StackFit.expand,
       children: [
@@ -314,18 +306,4 @@ ThumbnailSize viewerFullSize(
     (asset.width * scale).round(),
     (asset.height * scale).round(),
   );
-}
-
-/// Görsel yoksa ya da yüklenemediyse dolgunun ortasındaki fotoğraf glifi.
-class _MissingImage extends StatelessWidget {
-  const _MissingImage();
-
-  @override
-  Widget build(BuildContext context) {
-    final ColorScheme scheme = Theme.of(context).colorScheme;
-    return ColoredBox(
-      color: scheme.surfaceContainerHigh,
-      child: Center(child: Icon(AppIcons.photo, color: scheme.outline)),
-    );
-  }
 }
