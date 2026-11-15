@@ -16,13 +16,13 @@ import '../../core/widgets/empty_state_view.dart';
 import '../../core/widgets/sheet_close_button.dart';
 import '../../core/widgets/spring_visibility.dart';
 import '../../core/widgets/status_toast.dart';
+import 'data/paywall_products.dart';
 import 'providers/purchase_provider.dart';
 import 'widgets/cta_visibility.dart';
 import 'widgets/feature_list.dart';
 import 'widgets/pack_section.dart';
 import 'widgets/paywall_chrome.dart';
-import 'widgets/plan_card.dart';
-import 'widgets/trial_timeline.dart';
+import 'widgets/plan_list.dart';
 
 /// Pro planları ve analiz paketlerini sunan sheet; satın alma sonucunu
 /// dinleyip aboneliği kapatır, paket kredisini bildirir.
@@ -141,9 +141,6 @@ class _PaywallContentState extends ConsumerState<_PaywallContent>
   /// Düzeltme kaydırmasının gerektiği en küçük sapma (px).
   static const double _settleTolerance = 1;
 
-  // Not: firstWhere+orElse kullanılamıyor — liste çalışma zamanında
-  // platforma özgü alt tiple (AppStoreProduct2Details) geldiği için
-  // orElse closure'ı kovaryans nedeniyle tip hatası fırlatıyor.
   late String _selectedProductId = _defaultProductId();
 
   late final ScrollController _scrollController;
@@ -201,13 +198,6 @@ class _PaywallContentState extends ConsumerState<_PaywallContent>
     }
   }
 
-  /// Önerilen plan üstte olacak şekilde sabit sırada: yıllık, aylık, lifetime.
-  static const List<String> _planOrder = [
-    ProductIds.yearly,
-    ProductIds.monthly,
-    ProductIds.lifetime,
-  ];
-
   /// [_subscriptionProducts]'ın hesaplandığı ürün listesi; liste değişmedikçe
   /// filtre + sıralama her build'de yeniden yapılmaz. Getter önbelleği
   /// kendisi günceller; ürün listesi provider'dan her seferinde yeni gelir,
@@ -217,35 +207,15 @@ class _PaywallContentState extends ConsumerState<_PaywallContent>
 
   List<ProductDetails> get _subscriptionProducts {
     if (identical(_subscriptionsSource, widget.products)) return _subscriptions;
-    final List<ProductDetails> subs = [
-      for (final ProductDetails product in widget.products)
-        if (ProductIds.subscriptions.contains(product.id)) product,
-    ];
-    subs.sort(
-      (a, b) => _planOrder.indexOf(a.id).compareTo(_planOrder.indexOf(b.id)),
-    );
     _subscriptionsSource = widget.products;
-    return _subscriptions = subs;
+    return _subscriptions = subscriptionProducts(widget.products);
   }
 
-  List<ProductDetails> get _packProducts => [
-    for (final ProductDetails product in widget.products)
-      if (ProductIds.packs.contains(product.id)) product,
-  ];
+  ProductDetails? _findProduct(String id) =>
+      findProduct(_subscriptionProducts, id);
 
-  ProductDetails? _findProduct(String id) {
-    for (final ProductDetails product in _subscriptionProducts) {
-      if (product.id == id) return product;
-    }
-    return null;
-  }
-
-  String _defaultProductId() {
-    return _findProduct(ProductIds.yearly)?.id ??
-        (_subscriptionProducts.isNotEmpty
-            ? _subscriptionProducts.first.id
-            : widget.products.first.id);
-  }
+  String _defaultProductId() =>
+      defaultProductId(_subscriptionProducts, widget.products);
 
   @override
   Widget build(BuildContext context) {
@@ -255,7 +225,7 @@ class _PaywallContentState extends ConsumerState<_PaywallContent>
       ),
     );
     final bool yearlySelected = _selectedProductId == ProductIds.yearly;
-    final List<ProductDetails> packs = _packProducts;
+    final List<ProductDetails> packs = packProducts(widget.products);
 
     return SafeArea(
       bottom: false,
@@ -276,7 +246,12 @@ class _PaywallContentState extends ConsumerState<_PaywallContent>
                 const SizedBox(height: AppSpacing.lg),
                 const PaywallFeatureList(),
                 const SizedBox(height: AppSpacing.lg),
-                _plans(yearlySelected),
+                PlanList(
+                  subscriptions: _subscriptionProducts,
+                  selectedId: _selectedProductId,
+                  cardsKey: plansKey,
+                  onSelect: _select,
+                ),
                 if (packs.isNotEmpty)
                   KeyedSubtree(
                     key: packsKey,
@@ -298,38 +273,6 @@ class _PaywallContentState extends ConsumerState<_PaywallContent>
           ),
         ],
       ),
-    );
-  }
-
-  /// Plan kartları; yıllık seçiliyse altında deneme zaman çizelgesi.
-  Widget _plans(bool yearlySelected) {
-    final ProductDetails? monthly = _findProduct(ProductIds.monthly);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Column(
-          key: plansKey,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            for (final ProductDetails product in _subscriptionProducts)
-              Padding(
-                padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-                child: PlanCard(
-                  product: product,
-                  selected: product.id == _selectedProductId,
-                  monthlyProduct: product.id == ProductIds.yearly
-                      ? monthly
-                      : null,
-                  onTap: () => _select(product.id),
-                ),
-              ),
-          ],
-        ),
-        if (yearlySelected) ...[
-          const SizedBox(height: AppSpacing.sm),
-          const TrialTimeline(),
-        ],
-      ],
     );
   }
 
