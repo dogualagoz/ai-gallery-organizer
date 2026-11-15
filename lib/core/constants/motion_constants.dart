@@ -1,7 +1,18 @@
-// Hareket token'ları: Apple'ın damping/response yay modeli + jest sabitleri.
+// Hareket token'ları: süreler, Apple'ın damping/response yay modeli + jest
+// sabitleri.
 import 'dart:ui' show Size;
 
 import 'package:flutter/physics.dart';
+
+/// Standart animasyon süreleri.
+abstract final class AppDurations {
+  static const Duration fast = Duration(milliseconds: 150);
+  static const Duration medium = Duration(milliseconds: 300);
+  static const Duration slow = Duration(milliseconds: 600);
+
+  /// Onboarding gibi sahne animasyonları için uzun süre.
+  static const Duration scene = Duration(milliseconds: 1200);
+}
 
 /// Uygulamanın yay (spring) seti. Apple'ın iki parametreli modeli birebir:
 /// `duration` = response (hedefe varma hızı; sabit süre DEĞİL), `bounce` =
