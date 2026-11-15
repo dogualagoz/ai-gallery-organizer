@@ -1,6 +1,5 @@
 // Free kullanıcıya otomatik sıralamanın Pro'da olduğunu anlatan kapatılabilir
 // ipucu (TipKit benzeri). Bir kez kapatılınca kalıcı olarak gizlenir.
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -11,8 +10,10 @@ import '../../../core/router/open_paywall.dart';
 import '../../../core/services/entitlement_service.dart';
 import '../../../core/services/preferences_service.dart';
 import '../../../core/widgets/app_nav_scaffold.dart';
-import '../../../core/widgets/surface_card.dart';
+import '../../../core/widgets/inline_text_button.dart';
+import '../../../core/widgets/status_card.dart';
 
+/// Free kullanıcıya otomatik sıralama ipucu; Pro'da ya da kapatılınca gizli.
 class AutoSortHint extends ConsumerWidget {
   const AutoSortHint({super.key});
 
@@ -29,55 +30,27 @@ class AutoSortHint extends ConsumerWidget {
     final TextTheme text = Theme.of(context).textTheme;
     return Padding(
       padding: const EdgeInsets.only(bottom: AppSpacing.md),
-      child: SurfaceCard(
+      child: StatusCard(
+        icon: AppIcons.bolt,
+        title: l10n.autoSortHintTitle,
+        subtitle: l10n.autoSortHintBody,
         padding: const EdgeInsets.fromLTRB(
           AppSpacing.md,
           AppSpacing.sm + AppSpacing.xs,
           AppSpacing.xs,
           AppSpacing.sm + AppSpacing.xs,
         ),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Icon(
-              AppIcons.bolt,
-              size: AppSizes.statusIcon,
-              color: scheme.primary,
-            ),
-            const SizedBox(width: AppSpacing.sm + AppSpacing.xs),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(l10n.autoSortHintTitle, style: text.titleMedium),
-                  Text(
-                    l10n.autoSortHintBody,
-                    style: text.bodySmall?.copyWith(
-                      color: scheme.onSurfaceVariant,
-                    ),
-                  ),
-                  CupertinoButton(
-                    padding: EdgeInsets.zero,
-                    minimumSize: const Size(
-                      0,
-                      kMinInteractiveDimensionCupertino,
-                    ),
-                    onPressed: () => openPaywall(context),
-                    child: Text(
-                      l10n.autoSortHintAction,
-                      style: text.bodyMedium?.copyWith(color: scheme.primary),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            NavBarButton.icon(
-              icon: AppIcons.close,
-              label: l10n.dismissAction,
-              onPressed: () =>
-                  ref.read(autoSortHintDismissedProvider.notifier).dismiss(),
-            ),
-          ],
+        footer: InlineTextButton(
+          label: l10n.autoSortHintAction,
+          padding: EdgeInsets.zero,
+          style: text.bodyMedium?.copyWith(color: scheme.primary),
+          onPressed: () => openPaywall(context),
+        ),
+        trailing: NavBarButton.icon(
+          icon: AppIcons.close,
+          label: l10n.dismissAction,
+          onPressed: () =>
+              ref.read(autoSortHintDismissedProvider.notifier).dismiss(),
         ),
       ),
     );

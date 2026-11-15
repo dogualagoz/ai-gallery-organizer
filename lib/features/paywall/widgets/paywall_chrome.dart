@@ -9,6 +9,7 @@ import '../../../core/constants/app_icons.dart';
 import '../../../core/constants/ui_constants.dart';
 import '../../../core/l10n/l10n_extension.dart';
 import '../../../core/utils/link_opener.dart';
+import '../../../core/widgets/inline_text_button.dart';
 import '../providers/purchase_provider.dart';
 
 /// Üst kısım: uygulama ikonu gibi dolgulu Pro karosu, başlık ve alt başlık.
@@ -190,15 +191,11 @@ class _FooterLink extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CupertinoButton(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
-      minimumSize: const Size.square(kMinInteractiveDimensionCupertino),
+    return InlineTextButton(
+      label: label,
+      style: Theme.of(context).textTheme.bodySmall
+          ?.copyWith(color: Theme.of(context).colorScheme.primary),
       onPressed: () => openExternalUrl(context, url),
-      child: Text(
-        label,
-        style: Theme.of(context).textTheme.bodySmall
-            ?.copyWith(color: Theme.of(context).colorScheme.primary),
-      ),
     );
   }
 }

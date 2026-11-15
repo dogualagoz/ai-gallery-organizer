@@ -1,6 +1,5 @@
 // Kütüphane bölümleri: kategoriler ve panolar (başlıkta görünür Düzenle/Bitti),
 // "Son eklenenler" önizlemesi (başlıkta "Tümü") ve sınırlı erişim bandı.
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -16,9 +15,10 @@ import '../../../core/services/category_names_service.dart';
 import '../../../core/services/entitlement_service.dart';
 import '../../../core/services/photo_permission_service.dart';
 import '../../../core/utils/app_logger.dart';
+import '../../../core/widgets/inline_text_button.dart';
 import '../../../core/widgets/section_header.dart';
+import '../../../core/widgets/status_card.dart';
 import '../../../core/widgets/status_toast.dart';
-import '../../../core/widgets/surface_card.dart';
 import '../../boards/providers/board_provider.dart';
 import '../../boards/widgets/custom_boards_grid.dart';
 import '../../boards/widgets/system_boards_grid.dart';
@@ -164,38 +164,21 @@ class LimitedAccessBanner extends ConsumerWidget {
     if (!limited) return const SizedBox.shrink();
 
     final l10n = context.l10n;
-    final ColorScheme scheme = Theme.of(context).colorScheme;
     return Padding(
       padding: const EdgeInsets.only(bottom: AppSpacing.md),
-      child: SurfaceCard(
+      child: StatusCard(
+        icon: AppIcons.info,
+        muted: true,
+        subtitle: l10n.limitedAccessBody,
         padding: const EdgeInsets.fromLTRB(
           AppSpacing.md,
           AppSpacing.xs,
           AppSpacing.xs,
           AppSpacing.xs,
         ),
-        child: Row(
-          children: [
-            Icon(
-              AppIcons.info,
-              size: AppSizes.statusIcon,
-              color: scheme.onSurfaceVariant,
-            ),
-            const SizedBox(width: AppSpacing.sm + AppSpacing.xs),
-            Expanded(
-              child: Text(
-                l10n.limitedAccessBody,
-                style: Theme.of(context).textTheme.bodySmall
-                    ?.copyWith(color: scheme.onSurfaceVariant),
-              ),
-            ),
-            CupertinoButton(
-              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
-              minimumSize: const Size.square(kMinInteractiveDimensionCupertino),
-              onPressed: () => _selectMore(context, ref),
-              child: Text(l10n.limitedAccessAction),
-            ),
-          ],
+        trailing: InlineTextButton(
+          label: l10n.limitedAccessAction,
+          onPressed: () => _selectMore(context, ref),
         ),
       ),
     );

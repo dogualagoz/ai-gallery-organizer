@@ -6,13 +6,17 @@ import 'package:ai_gallery_organizer/core/constants/app_icons.dart';
 import 'package:ai_gallery_organizer/core/models/screenshot_category.dart';
 import 'package:ai_gallery_organizer/core/models/screenshot_entry.dart';
 import 'package:ai_gallery_organizer/core/services/category_names_service.dart';
+import 'package:ai_gallery_organizer/core/services/photo_permission_service.dart';
 import 'package:ai_gallery_organizer/core/services/preferences_service.dart';
 import 'package:ai_gallery_organizer/core/theme/app_theme.dart';
+import 'package:ai_gallery_organizer/core/widgets/status_card.dart';
 import 'package:ai_gallery_organizer/features/analysis/milestone_screen.dart';
 import 'package:ai_gallery_organizer/features/analysis/providers/analysis_queue_provider.dart';
 import 'package:ai_gallery_organizer/features/analysis/widgets/analysis_status_module.dart';
 import 'package:ai_gallery_organizer/features/analysis/widgets/analysis_status_views.dart';
+import 'package:ai_gallery_organizer/features/analysis/widgets/auto_sort_hint.dart';
 import 'package:ai_gallery_organizer/features/gallery/providers/gallery_derived_providers.dart';
+import 'package:ai_gallery_organizer/features/home/widgets/library_sections.dart';
 import 'package:ai_gallery_organizer/features/onboarding/onboarding_screen.dart';
 import 'package:ai_gallery_organizer/features/onboarding/widgets/sort_illustration.dart';
 import 'package:ai_gallery_organizer/features/paywall/data/purchase_repository.dart';
@@ -35,6 +39,12 @@ const double _ax5 = 53 / 17;
 class _NoCategoryNames extends CategoryNamesNotifier {
   @override
   Map<int, String> build() => {};
+}
+
+/// Sınırlı fotoğraf erişimi (bilgi bandı görünsün).
+class _LimitedAccess extends PhotoAccessNotifier {
+  @override
+  Future<PhotoAccess> build() async => PhotoAccess.limited;
 }
 
 class _FakePurchaseRepository extends PurchaseRepository {
@@ -261,6 +271,19 @@ void main() {
         home: _column([const AnalysisStatusModule()]),
       );
       expect(find.byType(AnalysisQuotaRow), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('ipucu ve sınırlı erişim bandı ($locale) taşmaz', (
+      tester,
+    ) async {
+      await _pump(
+        tester,
+        locale: locale,
+        overrides: [photoAccessProvider.overrideWith(_LimitedAccess.new)],
+        home: _column(const [AutoSortHint(), LimitedAccessBanner()]),
+      );
+      expect(find.byType(StatusCard), findsNWidgets(2));
       expect(tester.takeException(), isNull);
     });
 

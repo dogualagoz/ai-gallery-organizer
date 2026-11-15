@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import '../constants/ui_constants.dart';
+import 'inline_text_button.dart';
 
 /// Bölüm başlığı: başlık metni + sağda opsiyonel 44pt metin eylemi.
 class SectionHeader extends StatelessWidget {
@@ -37,11 +38,10 @@ class SectionHeader extends StatelessWidget {
             ),
           ),
           if (label != null)
-            CupertinoButton(
+            InlineTextButton(
+              label: label,
               padding: const EdgeInsets.only(left: AppSpacing.sm),
-              minimumSize: const Size.square(kMinInteractiveDimensionCupertino),
               onPressed: onAction,
-              child: Text(label),
             ),
         ],
       ),

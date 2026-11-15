@@ -1,7 +1,6 @@
 // Analiz durum modülünün sunum parçaları: bekleyen kartı, kompakt ilerleme,
 // tur özeti, kota satırı ve sonuç mesajı. Yalnız veriyi çizer; akış ve uçuşlar
 // analysis_status_module.dart'ta.
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart';
 
@@ -10,9 +9,9 @@ import '../../../core/constants/motion_constants.dart';
 import '../../../core/constants/ui_constants.dart';
 import '../../../core/l10n/l10n_extension.dart';
 import '../../../core/utils/motion_physics.dart';
-import '../../../core/utils/text_scale.dart';
 import '../../../core/widgets/app_nav_scaffold.dart';
-import '../../../core/widgets/surface_card.dart';
+import '../../../core/widgets/inline_text_button.dart';
+import '../../../core/widgets/status_card.dart';
 import '../../gallery/widgets/screenshot_thumbnail.dart';
 
 /// Bekleyen ekran görüntüleri var: tonlu kart, başlıkta sayı, alt yazıda kota
@@ -31,12 +30,12 @@ class AnalysisPendingCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return _StatusRow(
+    return StatusCard(
       tinted: true,
       icon: AppIcons.analyze,
       title: context.l10n.analyzeUngroupedBar(pending),
       subtitle: quotaHint,
-      trailing: _FilledPill(
+      trailing: FilledPillButton(
         label: context.l10n.analysisStartAction,
         onPressed: onAnalyze,
       ),
@@ -61,12 +60,12 @@ class AnalysisQuotaRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return _StatusRow(
+    return StatusCard(
       icon: AppIcons.quota,
       muted: true,
       title: context.l10n.analysisPendingBanner(pending),
       subtitle: detail,
-      trailing: _FilledPill(
+      trailing: FilledPillButton(
         label: context.l10n.analysisGetMoreAction,
         onPressed: onGetMore,
       ),
@@ -97,7 +96,7 @@ class AnalysisProgressCard extends StatelessWidget {
     final l10n = context.l10n;
     final TextTheme text = Theme.of(context).textTheme;
     final ColorScheme scheme = Theme.of(context).colorScheme;
-    return _ModuleCard(
+    return StatusCardSurface(
       child: Row(
         children: [
           _SourceThumb(asset: source),
@@ -146,15 +145,13 @@ class AnalysisSummaryRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    return _StatusRow(
+    return StatusCard(
       icon: AppIcons.checkCircleFill,
       title: l10n.analysisSceneSummaryTitle,
       subtitle: l10n.analysisSceneSummary(done, categories),
-      trailing: CupertinoButton(
-        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
-        minimumSize: const Size.square(kMinInteractiveDimensionCupertino),
+      trailing: InlineTextButton(
+        label: l10n.analysisSceneDone,
         onPressed: onDone,
-        child: Text(l10n.analysisSceneDone),
       ),
     );
   }
@@ -182,7 +179,7 @@ class AnalysisMessageRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final String? label = actionLabel;
     final VoidCallback? action = onAction;
-    return _StatusRow(
+    return StatusCard(
       icon: icon,
       muted: true,
       title: text,
@@ -192,12 +189,7 @@ class AnalysisMessageRow extends StatelessWidget {
         crossAxisAlignment: WrapCrossAlignment.center,
         children: [
           if (label != null && action != null)
-            CupertinoButton(
-              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
-              minimumSize: const Size.square(kMinInteractiveDimensionCupertino),
-              onPressed: action,
-              child: Text(label),
-            ),
+            InlineTextButton(label: label, onPressed: action),
           NavBarButton.icon(
             icon: AppIcons.close,
             label: context.l10n.dismissAction,
@@ -205,127 +197,6 @@ class AnalysisMessageRow extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
-}
-
-/// Modül kartı: ortak yüzey + satır iç boşlukları.
-class _ModuleCard extends StatelessWidget {
-  const _ModuleCard({required this.child, this.tinted = false});
-
-  final Widget child;
-  final bool tinted;
-
-  @override
-  Widget build(BuildContext context) {
-    return SurfaceCard(
-      tinted: tinted,
-      padding: const EdgeInsets.fromLTRB(
-        AppSpacing.md,
-        AppSpacing.sm + AppSpacing.xs,
-        AppSpacing.sm,
-        AppSpacing.sm + AppSpacing.xs,
-      ),
-      child: child,
-    );
-  }
-}
-
-/// İkon + başlık/alt yazı + sağda eylem: modül satırlarının ortak düzeni.
-class _StatusRow extends StatelessWidget {
-  const _StatusRow({
-    required this.icon,
-    required this.title,
-    required this.trailing,
-    this.subtitle,
-    this.tinted = false,
-    this.muted = false,
-  });
-
-  final IconData icon;
-  final String title;
-  final String? subtitle;
-  final Widget trailing;
-  final bool tinted;
-
-  /// true ise ikon aksan yerine ikincil renkte (bilgi/uyarı satırları).
-  final bool muted;
-
-  @override
-  Widget build(BuildContext context) {
-    final ColorScheme scheme = Theme.of(context).colorScheme;
-    final TextTheme text = Theme.of(context).textTheme;
-    final String? detail = subtitle;
-    final Widget label = Row(
-      children: [
-        Icon(
-          icon,
-          size: AppSizes.statusIcon,
-          color: muted ? scheme.onSurfaceVariant : scheme.primary,
-        ),
-        const SizedBox(width: AppSpacing.sm + AppSpacing.xs),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title,
-                style: detail == null ? text.bodyMedium : text.titleMedium,
-              ),
-              if (detail != null)
-                Text(
-                  detail,
-                  style: text.bodySmall?.copyWith(
-                    color: scheme.onSurfaceVariant,
-                  ),
-                ),
-            ],
-          ),
-        ),
-      ],
-    );
-    // Erişilebilirlik boyutlarında eylem metnin altına iner: yan yana
-    // kalırsa metin birkaç harflik sütuna sıkışır ya da satır taşar.
-    if (context.accessibilityText) {
-      return _ModuleCard(
-        tinted: tinted,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            label,
-            const SizedBox(height: AppSpacing.sm),
-            Align(alignment: AlignmentDirectional.centerEnd, child: trailing),
-          ],
-        ),
-      );
-    }
-    return _ModuleCard(
-      tinted: tinted,
-      child: Row(
-        children: [
-          Expanded(child: label),
-          const SizedBox(width: AppSpacing.sm),
-          trailing,
-        ],
-      ),
-    );
-  }
-}
-
-/// Satır içi küçük dolgulu kapsül buton (iOS küçük boy).
-class _FilledPill extends StatelessWidget {
-  const _FilledPill({required this.label, required this.onPressed});
-
-  final String label;
-  final VoidCallback onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    return CupertinoButton.filled(
-      sizeStyle: CupertinoButtonSize.small,
-      borderRadius: BorderRadius.circular(AppRadius.pill),
-      onPressed: onPressed,
-      child: Text(label),
     );
   }
 }
