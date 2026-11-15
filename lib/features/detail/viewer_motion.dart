@@ -2,6 +2,7 @@
 // bırakışta konum + hız projeksiyonuyla karar verir) ve bilgi paneli açıklığı.
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/physics.dart';
 import 'package:flutter/widgets.dart';
 
@@ -47,8 +48,12 @@ class ViewerMotion {
   bool reduceMotion = false;
 
   /// Panelin hedef durumu (animasyon sürerken de son karar).
-  bool get infoShown => _infoShown;
-  bool _infoShown = false;
+  bool get infoShown => _infoTarget.value;
+
+  /// [infoShown]'ın dinlenebilir hali: bilgi butonu ve sayfanın sığdırma
+  /// isteği görüntüleyiciyi yeniden kurmadan bunu izler.
+  ValueListenable<bool> get infoTarget => _infoTarget;
+  final ValueNotifier<bool> _infoTarget = ValueNotifier(false);
 
   _DragMode? _mode;
   Offset _origin = Offset.zero;
@@ -108,7 +113,7 @@ class ViewerMotion {
         // Yön belli olmadan biten jest: başlangıçta durdurulan hareketler
         // yarıda asılı kalmasın, hedeflerine devam etsin.
         if (drag.value != Offset.zero) _settleBack(0);
-        setInfo(_infoShown);
+        setInfo(infoShown);
     }
     _mode = null;
   }
@@ -119,8 +124,8 @@ class ViewerMotion {
   /// Paneli açar/kapatır; [velocity] sürüklemeden devralınan hızdır
   /// (açıklık/sn). Verilmezse süren hareketin hızı korunur.
   void setInfo(bool open, {double? velocity}) {
-    if (_infoShown != open) {
-      _infoShown = open;
+    if (_infoTarget.value != open) {
+      _infoTarget.value = open;
       onInfoChanged(open);
     }
     final double target = open ? 1 : 0;
@@ -185,5 +190,6 @@ class ViewerMotion {
     info.dispose();
     _settle.dispose();
     drag.dispose();
+    _infoTarget.dispose();
   }
 }

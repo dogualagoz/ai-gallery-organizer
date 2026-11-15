@@ -3,9 +3,7 @@
 // zemini siyaha çevirir. Alt cam çubukta Paylaş / Bilgi / Taşı / Sil.
 import 'dart:async';
 import 'dart:math' as math;
-import 'dart:ui' show lerpDouble;
 
-import 'package:flutter/cupertino.dart' show kMinInteractiveDimensionCupertino;
 import 'package:flutter/material.dart';
 import 'package:flutter/physics.dart';
 import 'package:flutter/services.dart';
@@ -23,15 +21,15 @@ import '../../core/router/app_routes.dart';
 import '../../core/services/haptic_service.dart';
 import '../../core/utils/motion_physics.dart';
 import '../../core/widgets/empty_state_view.dart';
-import '../../core/widgets/glass_toolbar.dart';
 import '../gallery/data/screenshot_repository.dart';
 import '../gallery/providers/gallery_provider.dart';
 import '../gallery/screenshot_actions.dart';
-import '../gallery/widgets/screenshot_grid_tile.dart';
 import '../search/search_request_provider.dart';
 import 'viewer_motion.dart';
-import 'widgets/info_panel.dart';
+import 'viewer_scope_snapshot.dart';
 import 'widgets/photo_page.dart';
+import 'widgets/viewer_layers.dart';
+import 'widgets/viewer_toolbar.dart';
 import 'widgets/viewer_top_bar.dart';
 
 /// Ekran görüntüsü görüntüleyicisi. [scope] açıldığı koleksiyonun sırasıdır;
@@ -52,18 +50,34 @@ class DetailScreen extends ConsumerStatefulWidget {
 class _DetailScreenState extends ConsumerState<DetailScreen>
     with TickerProviderStateMixin {
   late final List<String> _scope;
-  late String _currentId;
   late int _index;
   late final PageController _pages;
   late final ViewerMotion _motion;
 
+  /// Görünen sayfanın kimliği. Sayfa değişince ekran yeniden kurulmaz;
+  /// yalnız sayfalar, bilgi paneli ve çubuklar bunu dinler.
+  late final ValueNotifier<String> _current;
+
+  /// Son kurulumdaki kapsam (kayıtları hâlâ var olanlar).
+  List<String> _ids = const [];
+
   /// 1 = arayüz görünür (sistem zemini), 0 = gizli (siyah zemin).
   late final AnimationController _chrome;
 
-  bool _chromeVisible = true;
+  /// Arayüzün hedef görünürlüğü (dokunuş ve erişilebilirlik için).
+  final ValueNotifier<bool> _chromeVisible = ValueNotifier(true);
 
   /// Görünen sayfa yakınlaştırılmışken kaydırma ve aşağı çekiş kilitlenir.
-  bool _zoomed = false;
+  final ValueNotifier<bool> _zoomed = ValueNotifier(false);
+
+  late final Listenable _chromeChanges = Listenable.merge([
+    _chrome,
+    _motion.drag,
+  ]);
+  late final Listenable _pageState = Listenable.merge([
+    _current,
+    _motion.infoTarget,
+  ]);
 
   /// Paylaşım dosyaları hazırlanırken ya da silme onayı beklenirken true.
   bool _busy = false;
@@ -73,7 +87,7 @@ class _DetailScreenState extends ConsumerState<DetailScreen>
   void initState() {
     super.initState();
     _scope = _initialScope();
-    _currentId = widget.assetId;
+    _current = ValueNotifier(widget.assetId);
     _index = _scope.indexOf(widget.assetId);
     _pages = PageController(initialPage: _index);
     _motion = ViewerMotion(
@@ -98,6 +112,9 @@ class _DetailScreenState extends ConsumerState<DetailScreen>
     _pages.dispose();
     _motion.dispose();
     _chrome.dispose();
+    _current.dispose();
+    _chromeVisible.dispose();
+    _zoomed.dispose();
     super.dispose();
   }
 
@@ -110,13 +127,17 @@ class _DetailScreenState extends ConsumerState<DetailScreen>
 
   @override
   Widget build(BuildContext context) {
-    // Kayıt değişince (analiz, taşıma, silme) görüntüleyici tazelenir.
-    ref.watch(galleryProvider);
     final ScreenshotRepository repo = ref.watch(screenshotRepositoryProvider);
-    final List<String> ids = [
-      for (final String id in _scope)
-        if (repo.entryFor(id) != null) id,
-    ];
+    // Kayıt değişince (analiz, taşıma, silme) görüntüleyici tazelenir; ama
+    // yalnız kapsamdaki kayıtlar, görünen kayıt ya da görseller değiştiyse.
+    // Analiz turunun peş peşe galeri olayları ekranı yeniden kurmaz.
+    final List<String> ids = ref
+        .watch(
+          galleryProvider.select(
+            (_) => ViewerScopeSnapshot.of(repo, _scope, _current.value),
+          ),
+        )
+        .ids;
     final Widget body;
     if (ids.isNotEmpty) {
       body = _viewer(repo, ids);
@@ -132,41 +153,48 @@ class _DetailScreenState extends ConsumerState<DetailScreen>
 
   Widget _viewer(ScreenshotRepository repo, List<String> ids) {
     _syncIndex(ids);
-    final ScreenshotEntry entry = repo.entryFor(_currentId)!;
-    final bool lightBackground =
-        _chromeVisible && Theme.of(context).brightness == Brightness.light;
     final double toolbarBottom = AppSizes.navBarBottomGap(
       MediaQuery.paddingOf(context).bottom,
     );
 
-    return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: lightBackground
-          ? SystemUiOverlayStyle.dark
-          : SystemUiOverlayStyle.light,
+    return ValueListenableBuilder<bool>(
+      valueListenable: _chromeVisible,
+      builder: (context, visible, child) => AnnotatedRegion(
+        value: visible && Theme.of(context).brightness == Brightness.light
+            ? SystemUiOverlayStyle.dark
+            : SystemUiOverlayStyle.light,
+        child: child!,
+      ),
       child: LayoutBuilder(
         builder: (context, constraints) {
           final double height = constraints.maxHeight;
           return Stack(
             fit: StackFit.expand,
             children: [
-              _backdrop(height),
-              _pagesLayer(repo, ids, height),
-              _infoLayer(entry, height, toolbarBottom),
-              Positioned(
-                top: 0,
-                left: 0,
-                right: 0,
-                child: _chromeFade(
-                  height,
-                  ViewerTopBar(createdAt: entry.createdAt, onBack: _close),
+              ViewerBackdrop(
+                chrome: _chrome,
+                motion: _motion,
+                changes: _chromeChanges,
+                height: height,
+              ),
+              ViewerPagesLayer(
+                motion: _motion,
+                height: height,
+                zoomed: _zoomed,
+                pages: (context, zoomed) => ViewerPageView(
+                  controller: _pages,
+                  ids: ids,
+                  assetFor: repo.assetFor,
+                  current: _current,
+                  infoTarget: _motion.infoTarget,
+                  pageState: _pageState,
+                  zoomed: zoomed,
+                  onPageChanged: _onPageChanged,
+                  onTap: _toggleChrome,
+                  onZoomChanged: _onZoomChanged,
                 ),
               ),
-              Positioned(
-                left: AppSpacing.lg,
-                right: AppSpacing.lg,
-                bottom: toolbarBottom,
-                child: _chromeFade(height, _toolbar(entry)),
-              ),
+              ..._currentLayers(repo, height, toolbarBottom),
             ],
           );
         },
@@ -174,16 +202,73 @@ class _DetailScreenState extends ConsumerState<DetailScreen>
     );
   }
 
+  /// Görünen kayda bağlı katmanlar: bilgi paneli, üst çubuk, araç çubuğu.
+  /// Sayfa değişince yalnız bunlar yeniden kurulur.
+  List<Widget> _currentLayers(
+    ScreenshotRepository repo,
+    double height,
+    double toolbarBottom,
+  ) {
+    // Kayıt silinip liste henüz tazelenmediyse katman bir kare boş kalır;
+    // ardından _syncIndex sıradaki kayda geçer.
+    Widget forCurrent(Widget Function(ScreenshotEntry entry) build) =>
+        ValueListenableBuilder<String>(
+          valueListenable: _current,
+          builder: (context, id, _) {
+            final ScreenshotEntry? entry = repo.entryFor(id);
+            return entry == null ? const SizedBox.shrink() : build(entry);
+          },
+        );
+    Widget fade(Widget child) => ViewerChromeFade(
+      visible: _chromeVisible,
+      chrome: _chrome,
+      motion: _motion,
+      changes: _chromeChanges,
+      height: height,
+      child: child,
+    );
+
+    return [
+      forCurrent(
+        (entry) => ViewerInfoLayer(
+          motion: _motion,
+          height: height,
+          entry: entry,
+          bottomInset: AppSizes.navBarHeight + toolbarBottom + AppSpacing.md,
+          onMove: () => _move(entry),
+          onTag: _searchTag,
+        ),
+      ),
+      Positioned(
+        top: 0,
+        left: 0,
+        right: 0,
+        child: fade(
+          forCurrent(
+            (entry) => ViewerTopBar(createdAt: entry.createdAt, onBack: _close),
+          ),
+        ),
+      ),
+      Positioned(
+        left: AppSpacing.lg,
+        right: AppSpacing.lg,
+        bottom: toolbarBottom,
+        child: fade(forCurrent(_toolbar)),
+      ),
+    ];
+  }
+
   /// Liste değişince (silme) bulunulan öğe yeniden konumlanır: silinenin
   /// yerine sıradaki gelir (Fotoğraflar), sondaysa bir öncekine geçilir.
   /// build içinde çalışır çünkü liste yalnız build'de (galeri izlenirken)
   /// bilinir; sayfa denetleyicisi kare sonrasında hizalanır.
   void _syncIndex(List<String> ids) {
-    final int found = ids.indexOf(_currentId);
+    _ids = ids;
+    final int found = ids.indexOf(_current.value);
     final int index = found >= 0 ? found : math.min(_index, ids.length - 1);
     if (found < 0) {
-      _currentId = ids[index];
-      _zoomed = false;
+      _current.value = ids[index];
+      _zoomed.value = false;
     }
     if (index == _index) return;
     _index = index;
@@ -192,116 +277,20 @@ class _DetailScreenState extends ConsumerState<DetailScreen>
     });
   }
 
-  /// Arayüz açıkken sistem zemini, gizliyken siyah; aşağı çekişte solar ve
-  /// arkadaki ızgara görünür.
-  Widget _backdrop(double height) {
-    final ColorScheme scheme = Theme.of(context).colorScheme;
-    return AnimatedBuilder(
-      animation: Listenable.merge([_chrome, _motion.drag]),
-      builder: (context, _) {
-        final Color color = Color.lerp(
-          scheme.scrim,
-          scheme.surfaceContainerLowest,
-          _chrome.value.clamp(0.0, 1.0),
-        )!;
-        return ColoredBox(
-          color: color.withValues(alpha: 1 - _motion.dismissProgress(height)),
-        );
-      },
-    );
+  void _onPageChanged(int index) {
+    _index = index;
+    _current.value = _ids[index];
+    _zoomed.value = false;
+    // Silinmiş ama listeden henüz düşmemiş sayfaya gelindiyse kapsam hemen
+    // yeniden hesaplanır (eskiden her sayfa değişimi bunu yapardı).
+    if (ref.read(screenshotRepositoryProvider).entryFor(_ids[index]) == null) {
+      setState(() {});
+    }
+    _precacheNeighbors(_ids, index);
   }
 
-  /// Sayfalar: panel açıldıkça üst çubukla panel arasına sığar; aşağı
-  /// çekişte parmağı izleyip küçülür.
-  Widget _pagesLayer(
-    ScreenshotRepository repo,
-    List<String> ids,
-    double height,
-  ) {
-    final double panel = ViewerMotion.panelHeight(height);
-    final double barBottom =
-        MediaQuery.paddingOf(context).top +
-        kMinInteractiveDimensionCupertino +
-        AppSpacing.sm;
-    final bool canDrag = !_zoomed;
-
-    return AnimatedBuilder(
-      animation: _motion.info,
-      builder: (context, child) {
-        final double open = math.max(0, _motion.info.value);
-        return Positioned(
-          left: 0,
-          right: 0,
-          top: barBottom * math.min(open, 1),
-          bottom: panel * open,
-          child: child!,
-        );
-      },
-      child: GestureDetector(
-        onVerticalDragStart: canDrag ? _motion.dragStart : null,
-        onVerticalDragUpdate: canDrag
-            ? (details) => _motion.dragUpdate(details, height)
-            : null,
-        onVerticalDragEnd: canDrag
-            ? (details) => _motion.dragEnd(details, height)
-            : null,
-        onVerticalDragCancel: canDrag ? () => _motion.dragCancel(height) : null,
-        child: ValueListenableBuilder<Offset>(
-          valueListenable: _motion.drag,
-          builder: (context, offset, child) => Transform.translate(
-            offset: offset,
-            child: Transform.scale(
-              scale: lerpDouble(
-                1,
-                AppViewer.dismissMinScale,
-                _motion.dismissProgress(height),
-              ),
-              child: child,
-            ),
-          ),
-          child: _pageView(repo, ids),
-        ),
-      ),
-    );
-  }
-
-  Widget _pageView(ScreenshotRepository repo, List<String> ids) {
-    final bool reduceMotion = context.reduceMotion;
-    final Map<String, int> indexOf = {
-      for (int i = 0; i < ids.length; i++) ids[i]: i,
-    };
-    return PageView.builder(
-      controller: _pages,
-      physics: _zoomed ? const NeverScrollableScrollPhysics() : null,
-      itemCount: ids.length,
-      findChildIndexCallback: (key) =>
-          key is ValueKey<String> ? indexOf[key.value] : null,
-      onPageChanged: (index) => _onPageChanged(ids, index),
-      itemBuilder: (context, index) {
-        final String id = ids[index];
-        return PhotoPage(
-          key: ValueKey<String>(id),
-          asset: repo.assetFor(id),
-          heroTag: screenshotHeroTag(id),
-          isCurrent: id == _currentId,
-          heroEnabled: id == _currentId && !reduceMotion,
-          fitRequested: _motion.infoShown,
-          onTap: _toggleChrome,
-          onZoomChanged: (zoomed) {
-            if (id == _currentId) setState(() => _zoomed = zoomed);
-          },
-        );
-      },
-    );
-  }
-
-  void _onPageChanged(List<String> ids, int index) {
-    setState(() {
-      _index = index;
-      _currentId = ids[index];
-      _zoomed = false;
-    });
-    _precacheNeighbors(ids, index);
+  void _onZoomChanged(String id, bool zoomed) {
+    if (id == _current.value) _zoomed.value = zoomed;
   }
 
   /// Komşu sayfaların tam çözünürlüğü önceden çözülür: kaydırınca bulanık
@@ -323,105 +312,18 @@ class _DetailScreenState extends ConsumerState<DetailScreen>
     }
   }
 
-  /// Bilgi paneli alttan yükselir; başlığından sürüklenebilir, içeriği
-  /// ayrıca kaydırılır.
-  Widget _infoLayer(
-    ScreenshotEntry entry,
-    double height,
-    double toolbarBottom,
-  ) {
-    final double panel = ViewerMotion.panelHeight(height);
-    return AnimatedBuilder(
-      animation: _motion.info,
-      builder: (context, child) {
-        final double open = math.max(0, _motion.info.value);
-        return Positioned(
-          left: 0,
-          right: 0,
-          bottom: 0,
-          // Yay 1'i aşarsa panel uzar; altında boşluk açılmaz.
-          height: panel * math.max(1, open),
-          child: Offstage(
-            offstage: open <= 0,
-            child: Transform.translate(
-              offset: Offset(0, panel * (1 - math.min(open, 1))),
-              child: child,
-            ),
-          ),
-        );
-      },
-      child: GestureDetector(
-        onVerticalDragStart: _motion.dragStart,
-        onVerticalDragUpdate: (details) => _motion.dragUpdate(details, height),
-        onVerticalDragEnd: (details) => _motion.dragEnd(details, height),
-        onVerticalDragCancel: () => _motion.dragCancel(height),
-        child: ViewerInfoPanel(
-          key: ValueKey<String>(entry.assetId),
-          entry: entry,
-          bottomInset: AppSizes.navBarHeight + toolbarBottom + AppSpacing.md,
-          onMove: () => _move(entry),
-          onTag: _searchTag,
-        ),
-      ),
-    );
-  }
-
-  /// Üst çubuk ve araç çubuğu: arayüzle birlikte söner, aşağı çekişte solar.
-  Widget _chromeFade(double height, Widget child) {
-    return IgnorePointer(
-      ignoring: !_chromeVisible,
-      child: ExcludeSemantics(
-        excluding: !_chromeVisible,
-        child: AnimatedBuilder(
-          animation: Listenable.merge([_chrome, _motion.drag]),
-          child: child,
-          builder: (context, child) => Opacity(
-            opacity:
-                _chrome.value.clamp(0.0, 1.0) *
-                (1 - _motion.dismissProgress(height)),
-            child: child,
-          ),
-        ),
-      ),
-    );
-  }
-
   Widget _toolbar(ScreenshotEntry entry) {
-    final l10n = context.l10n;
-    final bool infoOpen = _motion.infoShown;
-    final List<ToolbarAction> actions = [
-      ToolbarAction(
-        icon: AppIcons.share,
-        label: l10n.shareAction,
-        onPressed: () =>
-            _whileBusy(() => shareScreenshots(context, ref, [entry.assetId])),
-      ),
-      ToolbarAction(
-        icon: infoOpen ? AppIcons.infoFill : AppIcons.info,
-        label: l10n.infoAction,
-        onPressed: () {
-          Haptics.tap();
-          _motion.setInfo(!infoOpen);
-        },
-      ),
-      ToolbarAction(
-        icon: AppIcons.move,
-        label: l10n.moveAction,
-        onPressed: () => _move(entry),
-      ),
-      ToolbarAction(
-        icon: AppIcons.delete,
-        label: l10n.deleteAction,
-        destructive: true,
-        onPressed: () => _delete(entry.assetId),
-      ),
-    ];
-    return GlassToolbar(
-      alignment: MainAxisAlignment.spaceBetween,
-      children: [
-        for (final ToolbarAction action in actions)
-          ToolbarButton(action: action, enabled: !_busy),
-      ],
+    return ViewerToolbar(
+      infoOpen: _motion.infoTarget,
+      enabled: !_busy,
+      onShare: () =>
+          _whileBusy(() => shareScreenshots(context, ref, [entry.assetId])),
+      onInfo: () {
+        Haptics.tap();
+        _motion.setInfo(!_motion.infoShown);
+      },
+      onMove: () => _move(entry),
+      onDelete: () => _delete(entry.assetId),
     );
   }
 
@@ -431,12 +333,12 @@ class _DetailScreenState extends ConsumerState<DetailScreen>
       _motion.setInfo(false);
       return;
     }
-    _setChrome(!_chromeVisible);
+    _setChrome(!_chromeVisible.value);
   }
 
   void _setChrome(bool visible) {
-    if (_chromeVisible == visible) return;
-    setState(() => _chromeVisible = visible);
+    if (_chromeVisible.value == visible) return;
+    _chromeVisible.value = visible;
     final double target = visible ? 1 : 0;
     if (context.reduceMotion) {
       _chrome.animateTo(target, duration: AppMotion.reducedCrossfade);
@@ -453,9 +355,8 @@ class _DetailScreenState extends ConsumerState<DetailScreen>
   }
 
   /// Panel açılırken arayüz de görünür olur (araç çubuğu panelin üstünde).
+  /// Bilgi butonu ve sayfanın sığdırma isteği panel hedefini kendisi izler.
   void _onInfoChanged(bool open) {
-    // Bilgi butonunun ikonu ve sayfanın sığdırma isteği panel hedefini izler.
-    setState(() {});
     if (open) _setChrome(true);
   }
 
