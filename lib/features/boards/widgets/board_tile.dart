@@ -13,6 +13,7 @@ import '../../gallery/widgets/screenshot_thumbnail.dart';
 /// Kapakta gösterilecek en fazla thumbnail sayısı.
 const int kBoardCoverCount = 3;
 
+/// Pano ya da kategori karosu: kapak mozaiği, başlık, sayaç ve yeni rozeti.
 class BoardTile extends StatelessWidget {
   const BoardTile({
     super.key,
@@ -40,9 +41,6 @@ class BoardTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ColorScheme scheme = Theme.of(context).colorScheme;
-    final TextTheme text = Theme.of(context).textTheme;
-
     return Pressable(
       onPressed: onPressed,
       child: SurfaceCard(
@@ -65,37 +63,56 @@ class BoardTile extends StatelessWidget {
               ),
             ),
             const SizedBox(height: AppSpacing.sm),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
-              child: Row(
-                children: [
-                  Icon(
-                    icon,
-                    size: AppSizes.boardTileIcon,
-                    color: scheme.primary,
-                  ),
-                  const SizedBox(width: AppSpacing.xs),
-                  Expanded(
-                    child: Text(
-                      label,
-                      style: text.titleMedium,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
-              child: Text(
-                context.l10n.galleryCount(count),
-                style: text.bodySmall?.copyWith(color: scheme.onSurfaceVariant),
-                maxLines: 1,
-              ),
-            ),
+            _TileCaption(icon: icon, label: label, count: count),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// Kapağın altı: ikonlu başlık ve sayaç.
+class _TileCaption extends StatelessWidget {
+  const _TileCaption({
+    required this.icon,
+    required this.label,
+    required this.count,
+  });
+
+  final IconData icon;
+  final String label;
+  final int count;
+
+  @override
+  Widget build(BuildContext context) {
+    final ColorScheme scheme = Theme.of(context).colorScheme;
+    final TextTheme text = Theme.of(context).textTheme;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(icon, size: AppSizes.boardTileIcon, color: scheme.primary),
+              const SizedBox(width: AppSpacing.xs),
+              Expanded(
+                child: Text(
+                  label,
+                  style: text.titleMedium,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+          Text(
+            context.l10n.galleryCount(count),
+            style: text.bodySmall?.copyWith(color: scheme.onSurfaceVariant),
+            maxLines: 1,
+          ),
+        ],
       ),
     );
   }

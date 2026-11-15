@@ -59,31 +59,11 @@ Future<void> showBoardEditActions(
     context,
     title: title,
     message: subtitle,
-    actions: [
-      SheetAction(
-        label: category != null
-            ? l10n.categoryRenameAction
-            : l10n.boardsRenameAction,
-        value: _BoardEditAction.rename,
-      ),
-      if (filtered.isNotEmpty)
-        SheetAction(
-          label: l10n.bulkSelectAction,
-          value: _BoardEditAction.select,
-        ),
-      if (filtered.isNotEmpty)
-        SheetAction(
-          label: l10n.categoryDeleteAllAction,
-          value: _BoardEditAction.deleteAll,
-          destructive: true,
-        ),
-      if (board != null)
-        SheetAction(
-          label: l10n.boardsDeleteAction,
-          value: _BoardEditAction.deleteBoard,
-          destructive: true,
-        ),
-    ],
+    actions: _editSheetActions(
+      l10n,
+      isCategory: category != null,
+      hasEntries: filtered.isNotEmpty,
+    ),
   );
 
   if (action == null || !context.mounted) return;
@@ -97,6 +77,35 @@ Future<void> showBoardEditActions(
     case _BoardEditAction.deleteBoard:
       await deleteBoard(context, ref, board!);
   }
+}
+
+/// Düzenleme sayfasının satırları: yeniden adlandır her zaman; seç ve tümünü
+/// sil içerik varsa; panoyu sil yalnız özel panoda.
+List<SheetAction<_BoardEditAction>> _editSheetActions(
+  AppLocalizations l10n, {
+  required bool isCategory,
+  required bool hasEntries,
+}) {
+  return [
+    SheetAction(
+      label: isCategory ? l10n.categoryRenameAction : l10n.boardsRenameAction,
+      value: _BoardEditAction.rename,
+    ),
+    if (hasEntries)
+      SheetAction(label: l10n.bulkSelectAction, value: _BoardEditAction.select),
+    if (hasEntries)
+      SheetAction(
+        label: l10n.categoryDeleteAllAction,
+        value: _BoardEditAction.deleteAll,
+        destructive: true,
+      ),
+    if (!isCategory)
+      SheetAction(
+        label: l10n.boardsDeleteAction,
+        value: _BoardEditAction.deleteBoard,
+        destructive: true,
+      ),
+  ];
 }
 
 /// Bağlam menüsü ve detaydaki "…" menüsünün ortak eylem listesi. Build içinde
@@ -135,27 +144,46 @@ List<AppMenuAction> boardMenuActions(
         icon: canSelect ? AppIcons.select : AppIcons.lock,
         onPressed: onSelect,
       ),
-    if (board != null)
-      AppMenuAction(
-        label: l10n.boardsDeleteAction,
-        icon: AppIcons.delete,
-        destructive: true,
-        onPressed: () async {
-          if (await deleteBoard(context, ref, board)) onLeave?.call();
-        },
-      )
-    else if (!isEmpty)
-      AppMenuAction(
-        label: l10n.categoryDeleteAllAction,
-        icon: AppIcons.delete,
-        destructive: true,
-        onPressed: () => deleteAllInBoard(
-          context,
-          ref,
-          boardEntries(ref, category: category),
-        ),
-      ),
+    ?_deleteMenuAction(
+      context,
+      ref,
+      isEmpty: isEmpty,
+      board: board,
+      category: category,
+      onLeave: onLeave,
+    ),
   ];
+}
+
+/// Menünün yıkıcı satırı: özel panoda panoyu sil, kategoride (boş değilse)
+/// tümünü sil; ikisi de yoksa null.
+AppMenuAction? _deleteMenuAction(
+  BuildContext context,
+  WidgetRef ref, {
+  required bool isEmpty,
+  required Board? board,
+  required ScreenshotCategory? category,
+  required VoidCallback? onLeave,
+}) {
+  final l10n = context.l10n;
+  if (board != null) {
+    return AppMenuAction(
+      label: l10n.boardsDeleteAction,
+      icon: AppIcons.delete,
+      destructive: true,
+      onPressed: () async {
+        if (await deleteBoard(context, ref, board)) onLeave?.call();
+      },
+    );
+  }
+  if (isEmpty) return null;
+  return AppMenuAction(
+    label: l10n.categoryDeleteAllAction,
+    icon: AppIcons.delete,
+    destructive: true,
+    onPressed: () =>
+        deleteAllInBoard(context, ref, boardEntries(ref, category: category)),
+  );
 }
 
 /// [board] ya da [category] içindeki kayıtlar (galeri sırasıyla).
