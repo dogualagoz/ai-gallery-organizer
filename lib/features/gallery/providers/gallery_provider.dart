@@ -5,8 +5,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/models/screenshot_entry.dart';
 import '../../../core/services/photo_permission_service.dart';
-import '../data/screenshot_repository.dart';
 import '../../../core/utils/app_logger.dart';
+import '../data/screenshot_repository.dart';
 
 /// Galeri listesi. İlk açılışta cihazla otomatik eşitler; sonrasında
 /// box değişikliklerini dinleyerek güncel kalır (AI analizi yazınca vs.).

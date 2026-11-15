@@ -12,17 +12,17 @@ import '../../../core/l10n/l10n_extension.dart';
 import '../../../core/models/board.dart';
 import '../../../core/models/screenshot_category.dart';
 import '../../../core/models/screenshot_entry.dart';
+import '../../../core/router/open_paywall.dart';
 import '../../../core/services/category_names_service.dart';
 import '../../../core/services/haptic_service.dart';
+import '../../../core/utils/app_logger.dart';
 import '../../../core/widgets/app_chip.dart';
 import '../../../core/widgets/grouped_section.dart';
 import '../../../core/widgets/status_toast.dart';
 import '../../../core/widgets/surface_card.dart';
 import '../../analysis/providers/analysis_queue_provider.dart';
 import '../../boards/providers/board_provider.dart';
-import '../../../core/router/open_paywall.dart';
 import 'viewer_top_bar.dart';
-import '../../../core/utils/app_logger.dart';
 
 /// [entry]'nin bilgileri. Üstteki başlık alanı sürükleme tutamağıdır
 /// (sürüklemeyi görüntüleyici yönetir); içerik ayrıca kaydırılır.

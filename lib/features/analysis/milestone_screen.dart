@@ -9,11 +9,11 @@ import '../../core/constants/ui_constants.dart';
 import '../../core/l10n/category_labels.dart';
 import '../../core/l10n/l10n_extension.dart';
 import '../../core/models/screenshot_category.dart';
+import '../../core/router/open_paywall.dart';
 import '../../core/services/category_names_service.dart';
 import '../../core/services/entitlement_service.dart';
 import '../../core/widgets/app_chip.dart';
 import '../../core/widgets/sheet_close_button.dart';
-import '../../core/router/open_paywall.dart';
 import 'providers/analysis_queue_provider.dart';
 import 'widgets/milestone_celebration.dart';
 

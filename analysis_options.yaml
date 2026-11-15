@@ -4,6 +4,7 @@ include: package:flutter_lints/flutter.yaml
 analyzer:
   exclude:
     - build/**
+    - "**/*.g.dart"
     - android/**
     - ios/**
     - web/**
@@ -20,3 +21,4 @@ linter:
     sort_constructors_first: true
     always_declare_return_types: true
     avoid_dynamic_calls: true
+    directives_ordering: true

@@ -15,11 +15,11 @@ import '../../../core/models/screenshot_entry.dart';
 import '../../../core/services/category_priors_service.dart';
 import '../../../core/services/daily_quota_tracker.dart';
 import '../../../core/services/entitlement_service.dart';
+import '../../../core/utils/app_logger.dart';
 import '../../gallery/data/screenshot_repository.dart';
 import '../data/analysis_exceptions.dart';
 import '../data/analysis_result.dart';
 import '../data/screenshot_analyzer.dart';
-import '../../../core/utils/app_logger.dart';
 
 /// Kuyruğun yaşam döngüsü durumları.
 enum AnalysisQueueStatus {
@@ -313,8 +313,8 @@ class AnalysisQueueNotifier extends Notifier<AnalysisQueueState> {
       state = state.afterSuccess(
         AnalyzedItem(assetId: entry.assetId, category: refined),
       );
-    } on AnalysisRateLimitException catch (error) {
-      logError('Günlük kota hatası (${entry.assetId})', error);
+    } on AnalysisRateLimitException catch (error, stackTrace) {
+      logError('Günlük kota hatası (${entry.assetId})', error, stackTrace);
       _dailyCapHit = true;
       _settle(entry.assetId, runId);
     } catch (error, stackTrace) {
@@ -361,8 +361,8 @@ class AnalysisQueueNotifier extends Notifier<AnalysisQueueState> {
       await ref.read(dailyQuotaTrackerProvider).register();
       await _analyzeAndPersist(repo, asset, assetId);
       return SingleAnalysisOutcome.success;
-    } on AnalysisRateLimitException catch (error) {
-      logError('Günlük kota hatası ($assetId)', error);
+    } on AnalysisRateLimitException catch (error, stackTrace) {
+      logError('Günlük kota hatası ($assetId)', error, stackTrace);
       return SingleAnalysisOutcome.failed;
     } catch (error, stackTrace) {
       logError('Tekil analiz hatası ($assetId)', error, stackTrace);

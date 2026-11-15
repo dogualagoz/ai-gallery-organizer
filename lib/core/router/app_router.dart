@@ -43,6 +43,8 @@ ScreenshotCategory? _categoryOf(GoRouterState state) {
 bool _startsInSelection(GoRouterState state) =>
     state.uri.queryParameters[AppRoutes.selectQuery] == AppRoutes.selectQueryOn;
 
+/// Uygulama router'ı tek instance; onboarding durumunu `refreshListenable`
+/// ile izler, böylece yönlendirme değişince router yeniden yaratılmaz.
 final appRouterProvider = Provider<GoRouter>((ref) {
   // Onboarding bayrağı değişince yalnız redirect yeniden değerlendirilir;
   // router (ve içindeki sekme stack'leri) yeniden yaratılmaz.

@@ -7,8 +7,8 @@ import 'package:in_app_purchase/in_app_purchase.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/services/entitlement_service.dart';
 import '../../../core/services/preferences_service.dart';
-import '../data/purchase_repository.dart';
 import '../../../core/utils/app_logger.dart';
+import '../data/purchase_repository.dart';
 
 /// Satın alma/restore akışının anlık UI durumu.
 enum PurchaseFlowStatus { idle, pending, success, error }
@@ -46,7 +46,7 @@ final purchaseProductsProvider = FutureProvider<List<ProductDetails>>((
   }
   final ProductDetailsResponse response = await repo.queryProducts();
   if (response.error != null) {
-    logInfo('IAP: ürün sorgu hatası — ${response.error}');
+    logError('IAP: ürün sorgu hatası', response.error!);
   }
   if (response.notFoundIDs.isNotEmpty) {
     logInfo('IAP: bulunamayan ürün ID\'leri — ${response.notFoundIDs}');

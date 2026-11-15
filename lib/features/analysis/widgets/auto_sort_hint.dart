@@ -7,11 +7,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/constants/app_icons.dart';
 import '../../../core/constants/ui_constants.dart';
 import '../../../core/l10n/l10n_extension.dart';
+import '../../../core/router/open_paywall.dart';
 import '../../../core/services/entitlement_service.dart';
 import '../../../core/services/preferences_service.dart';
 import '../../../core/widgets/app_nav_scaffold.dart';
 import '../../../core/widgets/surface_card.dart';
-import '../../../core/router/open_paywall.dart';
 
 class AutoSortHint extends ConsumerWidget {
   const AutoSortHint({super.key});

@@ -16,6 +16,7 @@ import '../../../core/services/category_names_service.dart';
 import '../../../core/services/category_order_service.dart';
 import '../../../core/services/entitlement_service.dart';
 import '../../../core/services/photo_permission_service.dart';
+import '../../../core/utils/app_logger.dart';
 import '../../../core/widgets/section_header.dart';
 import '../../../core/widgets/status_toast.dart';
 import '../../../core/widgets/surface_card.dart';
@@ -25,7 +26,6 @@ import '../../boards/widgets/system_boards_grid.dart';
 import '../../gallery/data/screenshot_repository.dart';
 import '../../gallery/providers/gallery_provider.dart';
 import '../../gallery/widgets/screenshot_grid.dart';
-import '../../../core/utils/app_logger.dart';
 
 /// Kategoriler ve panolar başlıklarının paylaştığı Düzenle/Bitti eylemi.
 class _EditToggle {

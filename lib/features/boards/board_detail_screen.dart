@@ -13,6 +13,7 @@ import '../../core/l10n/l10n_extension.dart';
 import '../../core/models/board.dart';
 import '../../core/models/screenshot_category.dart';
 import '../../core/models/screenshot_entry.dart';
+import '../../core/router/open_paywall.dart';
 import '../../core/router/tab_bar_visibility.dart';
 import '../../core/services/category_names_service.dart';
 import '../../core/services/entitlement_service.dart';
@@ -25,7 +26,6 @@ import '../analysis/providers/recent_distribution_provider.dart';
 import '../gallery/providers/gallery_provider.dart';
 import '../gallery/screenshot_actions.dart';
 import '../gallery/widgets/screenshot_grid.dart';
-import '../../core/router/open_paywall.dart';
 import 'providers/board_provider.dart';
 import 'widgets/board_edit_actions.dart';
 

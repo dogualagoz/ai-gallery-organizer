@@ -7,10 +7,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/models/screenshot_category.dart';
 import '../../../core/models/screenshot_entry.dart';
 import '../../../core/services/entitlement_service.dart';
+import '../../../core/utils/app_logger.dart';
 import '../../gallery/data/screenshot_repository.dart';
 import '../../gallery/providers/gallery_provider.dart';
 import '../swipe_decision.dart';
-import '../../../core/utils/app_logger.dart';
 
 /// Oturumdaki tek kaydırma; "Geri al" için saklanır.
 @immutable

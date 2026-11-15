@@ -1,13 +1,13 @@
 // Seçim modu parçaları (sekme çubuğu gizleme, yaylı görünürlük, araç çubuğu),
 // ortak menüler ve ızgara karosu davranış testleri.
 import 'package:ai_gallery_organizer/core/constants/app_icons.dart';
+import 'package:ai_gallery_organizer/core/models/screenshot_entry.dart';
 import 'package:ai_gallery_organizer/core/router/tab_bar_visibility.dart';
 import 'package:ai_gallery_organizer/core/theme/app_theme.dart';
 import 'package:ai_gallery_organizer/core/widgets/app_menus.dart';
 import 'package:ai_gallery_organizer/core/widgets/pressable.dart';
 import 'package:ai_gallery_organizer/core/widgets/selection_toolbar.dart';
 import 'package:ai_gallery_organizer/core/widgets/spring_visibility.dart';
-import 'package:ai_gallery_organizer/core/models/screenshot_entry.dart';
 import 'package:ai_gallery_organizer/features/gallery/widgets/screenshot_grid_tile.dart';
 import 'package:ai_gallery_organizer/l10n/app_localizations.dart';
 import 'package:flutter/cupertino.dart';

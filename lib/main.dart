@@ -12,10 +12,10 @@ import 'core/services/hive_service.dart';
 import 'core/services/preferences_service.dart';
 import 'core/startup/startup_error_app.dart';
 import 'core/theme/app_theme.dart';
+import 'core/utils/app_logger.dart';
 import 'core/widgets/launch_reveal.dart';
 import 'features/paywall/providers/purchase_provider.dart';
 import 'firebase_options.dart';
-import 'core/utils/app_logger.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();

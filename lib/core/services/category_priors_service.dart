@@ -10,8 +10,8 @@ import 'package:hive_ce/hive.dart';
 
 import '../constants/ai_constants.dart';
 import '../models/screenshot_category.dart';
-import 'hive_service.dart';
 import '../utils/app_logger.dart';
+import 'hive_service.dart';
 
 /// Etiket → (kategori index → oy sayısı) eşlemesi.
 typedef PriorsMap = Map<String, Map<int, int>>;

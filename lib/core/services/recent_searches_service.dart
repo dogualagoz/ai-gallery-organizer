@@ -3,9 +3,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../constants/app_constants.dart';
+import '../utils/app_logger.dart';
 import '../utils/text_normalize.dart';
 import 'preferences_service.dart';
-import '../utils/app_logger.dart';
 
 /// [query]'yi [recent] listesinin başına koyar. Boş sorgu yok sayılır;
 /// aynı sorgunun eski kaydı (büyük/küçük harf ve Türkçe karakter farkı
