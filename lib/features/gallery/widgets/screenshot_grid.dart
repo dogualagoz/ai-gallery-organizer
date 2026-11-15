@@ -2,6 +2,7 @@
 // Fotoğraflar gibi sıkı aralık. Normalde dokunuş görüntüleyiciyi bu ızgaranın
 // sırasıyla açar ve uzun basış bağlam menüsü getirir; seçim modunda dokunuş
 // seçimi değiştirir.
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -19,7 +20,7 @@ class ScreenshotGrid extends ConsumerWidget {
     super.key,
     required this.entries,
     this.inset = false,
-    this.selectedIds,
+    this.selection,
     this.onToggle,
     this.onOpen,
   });
@@ -31,7 +32,8 @@ class ScreenshotGrid extends ConsumerWidget {
   final bool inset;
 
   /// null değilse seçim modu: karolar işaret gösterir, bağlam menüsü kapalı.
-  final Set<String>? selectedIds;
+  /// Seçim değişince yalnız durumu değişen karolar yeniden kurulur.
+  final ValueListenable<Set<String>>? selection;
 
   /// Seçim modunda dokunulan karonun kimliği.
   final ValueChanged<String>? onToggle;
@@ -42,7 +44,7 @@ class ScreenshotGrid extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final ScreenshotRepository repo = ref.watch(screenshotRepositoryProvider);
-    final Set<String>? selection = selectedIds;
+    final ValueListenable<Set<String>>? selection = this.selection;
     final double gap = inset ? AppSpacing.xs : AppGridTile.gap;
     // Silme/taşıma sonrası liste kayınca karolar kendi öğesini izler.
     final Map<String, int> indexOf = {
@@ -66,29 +68,95 @@ class ScreenshotGrid extends ConsumerWidget {
         itemBuilder: (context, index) {
           final ScreenshotEntry entry = entries[index];
           final Key key = ValueKey<String>(entry.assetId);
-          final Widget tile = ScreenshotGridTile(
-            key: selection != null ? key : null,
+          if (selection != null) {
+            return _SelectableTile(
+              key: key,
+              selection: selection,
+              assetId: entry.assetId,
+              builder: (selected) => ScreenshotGridTile(
+                entry: entry,
+                asset: repo.assetFor(entry.assetId),
+                radius: inset ? AppRadius.sm : 0,
+                selected: selected,
+                onPressed: () => onToggle?.call(entry.assetId),
+              ),
+            );
+          }
+          return ScreenshotContextMenu(
+            key: key,
             entry: entry,
-            asset: repo.assetFor(entry.assetId),
-            radius: inset ? AppRadius.sm : 0,
-            selected: selection?.contains(entry.assetId),
-            onPressed: selection != null
-                ? () => onToggle?.call(entry.assetId)
-                : () {
-                    onOpen?.call();
-                    openViewer(
-                      context,
-                      entry.assetId,
-                      scope: [for (final item in entries) item.assetId],
-                    );
-                  },
+            child: ScreenshotGridTile(
+              entry: entry,
+              asset: repo.assetFor(entry.assetId),
+              radius: inset ? AppRadius.sm : 0,
+              onPressed: () {
+                onOpen?.call();
+                openViewer(
+                  context,
+                  entry.assetId,
+                  scope: [for (final item in entries) item.assetId],
+                );
+              },
+            ),
           );
-          if (selection != null) return tile;
-          return ScreenshotContextMenu(key: key, entry: entry, child: tile);
         },
       ),
     );
   }
+}
+
+/// Seçim modundaki karo: ortak seçimi dinler ama yalnız kendi üyeliği
+/// değişince yeniden kurulur (bir karoya dokunmak ızgarayı yenilemez).
+class _SelectableTile extends StatefulWidget {
+  const _SelectableTile({
+    super.key,
+    required this.selection,
+    required this.assetId,
+    required this.builder,
+  });
+
+  final ValueListenable<Set<String>> selection;
+  final String assetId;
+  final Widget Function(bool selected) builder;
+
+  @override
+  State<_SelectableTile> createState() => _SelectableTileState();
+}
+
+class _SelectableTileState extends State<_SelectableTile> {
+  late bool _selected = _isSelected();
+
+  bool _isSelected() => widget.selection.value.contains(widget.assetId);
+
+  @override
+  void initState() {
+    super.initState();
+    widget.selection.addListener(_onSelection);
+  }
+
+  @override
+  void didUpdateWidget(_SelectableTile oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.selection != widget.selection) {
+      oldWidget.selection.removeListener(_onSelection);
+      widget.selection.addListener(_onSelection);
+    }
+    _selected = _isSelected();
+  }
+
+  @override
+  void dispose() {
+    widget.selection.removeListener(_onSelection);
+    super.dispose();
+  }
+
+  void _onSelection() {
+    final bool selected = _isSelected();
+    if (selected != _selected) setState(() => _selected = selected);
+  }
+
+  @override
+  Widget build(BuildContext context) => widget.builder(_selected);
 }
 
 /// Izgarada analiz bekleyen varken üstte duran dipnot: karo köşesindeki

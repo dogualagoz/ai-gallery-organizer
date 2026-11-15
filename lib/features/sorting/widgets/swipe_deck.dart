@@ -537,6 +537,9 @@ class _DepartingCardState extends State<_DepartingCard>
         : AppSwipe.exitDuration,
   );
 
+  /// Konum ve ömrün birleşimi; her build'de yeniden kurulmaz.
+  late final Listenable _motion = Listenable.merge([_x, _y, _life]);
+
   @override
   void initState() {
     super.initState();
@@ -586,7 +589,7 @@ class _DepartingCardState extends State<_DepartingCard>
     return Positioned.fill(
       child: IgnorePointer(
         child: AnimatedBuilder(
-          animation: Listenable.merge([_x, _y, _life]),
+          animation: _motion,
           builder: (context, child) {
             final Offset offset = Offset(_x.value, _y.value);
             final double travel = travelAlong(offset, _departure.direction);

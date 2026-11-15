@@ -42,6 +42,9 @@ class _MilestoneCelebrationState extends State<MilestoneCelebration>
     duration: AppDurations.scene * 2,
   );
 
+  /// Rozet ve süzülmenin birleşimi; her build'de yeniden kurulmaz.
+  late final Listenable _motion = Listenable.merge([_badge, _drift]);
+
   late final List<double> _phases = () {
     final Random random = Random(_sceneSeed);
     return List.generate(
@@ -141,7 +144,7 @@ class _MilestoneCelebrationState extends State<MilestoneCelebration>
         child: SizedBox(
           height: AppCelebration.sceneHeight,
           child: AnimatedBuilder(
-            animation: Listenable.merge([_badge, _drift]),
+            animation: _motion,
             builder: (context, _) => Stack(
               alignment: Alignment.center,
               children: [

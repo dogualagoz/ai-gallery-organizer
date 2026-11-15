@@ -62,8 +62,8 @@ class ScreenshotGridTile extends StatelessWidget {
             : l10n.screenshotTileLabel,
         child: Hero(
           tag: screenshotHeroTag(entry.assetId),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(radius),
+          child: _RoundedClip(
+            radius: radius,
             child: Stack(
               fit: StackFit.expand,
               children: [
@@ -104,6 +104,21 @@ class ScreenshotGridTile extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+/// Yalnız köşe yuvarlatılmışsa kırpar: tam ekran ızgarada (yarıçap 0) karo
+/// içeriği zaten sınırlarını aşmaz, kırpma katmanı boşuna kurulmaz.
+class _RoundedClip extends StatelessWidget {
+  const _RoundedClip({required this.radius, required this.child});
+
+  final double radius;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    if (radius == 0) return child;
+    return ClipRRect(borderRadius: BorderRadius.circular(radius), child: child);
   }
 }
 

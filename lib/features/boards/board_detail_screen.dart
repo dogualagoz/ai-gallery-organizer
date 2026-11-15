@@ -20,14 +20,13 @@ import '../../core/services/entitlement_service.dart';
 import '../../core/widgets/app_menus.dart';
 import '../../core/widgets/app_nav_scaffold.dart';
 import '../../core/widgets/empty_state_view.dart';
-import '../../core/widgets/selection_toolbar.dart';
-import '../../core/widgets/spring_visibility.dart';
 import '../analysis/providers/recent_distribution_provider.dart';
 import '../gallery/providers/gallery_derived_providers.dart';
 import '../gallery/screenshot_actions.dart';
 import '../gallery/widgets/screenshot_grid.dart';
 import 'board_actions.dart';
 import 'providers/board_provider.dart';
+import 'widgets/board_selection_toolbar.dart';
 
 /// Bir sistem kategorisinin ya da kullanıcı panosunun ekran görüntüleri;
 /// toplu işlem (seç → paylaş/taşı/sil) Pro'ya bağlıdır.
@@ -58,7 +57,9 @@ class _BoardDetailScreenState extends ConsumerState<BoardDetailScreen> {
   /// dispose'da ref kullanılamadığı için baştan alınır.
   late final TabBarHiddenNotifier _tabBar;
 
-  final Set<String> _selectedIds = {};
+  /// Seçili kimlikler; her değişimde yeni küme yazılır. Dokunuş ekranı
+  /// yeniden kurmaz: yalnız ilgili karo, "Tümünü Seç" ve araç çubuğu dinler.
+  final ValueNotifier<Set<String>> _selection = ValueNotifier(const {});
   bool _selecting = false;
 
   /// Paylaşım dosyaları hazırlanırken ya da silme onayı beklenirken true.
@@ -103,6 +104,7 @@ class _BoardDetailScreenState extends ConsumerState<BoardDetailScreen> {
     final TabBarHiddenNotifier tabBar = _tabBar;
     final Object owner = this;
     scheduleMicrotask(() => tabBar.release(owner));
+    _selection.dispose();
     super.dispose();
   }
 
@@ -116,17 +118,15 @@ class _BoardDetailScreenState extends ConsumerState<BoardDetailScreen> {
   }
 
   void _setSelecting(bool selecting) {
-    setState(() {
-      _selecting = selecting;
-      _selectedIds.clear();
-    });
+    setState(() => _selecting = selecting);
+    _selection.value = const {};
     _syncTabBar();
   }
 
   void _toggle(String assetId) {
-    setState(() {
-      if (!_selectedIds.remove(assetId)) _selectedIds.add(assetId);
-    });
+    final Set<String> next = {..._selection.value};
+    if (!next.remove(assetId)) next.add(assetId);
+    _selection.value = next;
   }
 
   /// Panoyu geride bırakan eylemlerden sonra (pano silindi, yeniden analiz
@@ -151,11 +151,6 @@ class _BoardDetailScreenState extends ConsumerState<BoardDetailScreen> {
     final String title = category != null
         ? category.displayName(l10n, ref.watch(categoryNamesProvider))
         : (board?.name ?? l10n.boardsTitle);
-    // Silinen ya da başka yere taşınanlar seçimden kendiliğinden düşer.
-    final List<String> selected = [
-      for (final ScreenshotEntry entry in entries)
-        if (_selectedIds.contains(entry.assetId)) entry.assetId,
-    ];
 
     return PopScope(
       // Seçim modunda geri jesti önce seçimi kapatır, ekrandan çıkmaz.
@@ -168,7 +163,7 @@ class _BoardDetailScreenState extends ConsumerState<BoardDetailScreen> {
         children: [
           AppNavScaffold(
             title: title,
-            leading: _selecting ? _selectAllButton(entries, selected) : null,
+            leading: _selecting ? _selectAllButton(entries) : null,
             trailing: _selecting
                 ? NavBarButton.text(
                     label: l10n.cancelAction,
@@ -177,7 +172,16 @@ class _BoardDetailScreenState extends ConsumerState<BoardDetailScreen> {
                 : _trailing(entries, board),
             slivers: _slivers(entries),
           ),
-          _toolbar(selected),
+          BoardSelectionToolbar(
+            visible: _selecting,
+            busy: _busy,
+            entries: entries,
+            selection: _selection,
+            onShare: (ids) =>
+                _whileBusy(() => shareScreenshots(context, ref, ids)),
+            onMove: _move,
+            onDelete: _delete,
+          ),
         ],
       ),
     );
@@ -219,21 +223,21 @@ class _BoardDetailScreenState extends ConsumerState<BoardDetailScreen> {
   }
 
   /// Seçim modu: hepsi seçiliyse "Seçimi Kaldır", değilse "Tümünü Seç".
-  Widget _selectAllButton(
-    List<ScreenshotEntry> entries,
-    List<String> selected,
-  ) {
+  Widget _selectAllButton(List<ScreenshotEntry> entries) {
     final l10n = context.l10n;
-    final bool allSelected =
-        entries.isNotEmpty && selected.length == entries.length;
-    return NavBarButton.text(
-      label: allSelected ? l10n.deselectAllAction : l10n.selectAllAction,
-      onPressed: () => setState(() {
-        _selectedIds.clear();
-        if (!allSelected) {
-          _selectedIds.addAll(entries.map((entry) => entry.assetId));
-        }
-      }),
+    return ValueListenableBuilder<Set<String>>(
+      valueListenable: _selection,
+      builder: (context, ids, _) {
+        final bool allSelected =
+            entries.isNotEmpty &&
+            selectedAssetIds(entries, ids).length == entries.length;
+        return NavBarButton.text(
+          label: allSelected ? l10n.deselectAllAction : l10n.selectAllAction,
+          onPressed: () => _selection.value = allSelected
+              ? const {}
+              : {for (final ScreenshotEntry entry in entries) entry.assetId},
+        );
+      },
     );
   }
 
@@ -259,60 +263,10 @@ class _BoardDetailScreenState extends ConsumerState<BoardDetailScreen> {
         const SliverToBoxAdapter(child: ScreenshotPendingLegend()),
       ScreenshotGrid(
         entries: entries,
-        selectedIds: _selecting ? _selectedIds : null,
+        selection: _selecting ? _selection : null,
         onToggle: _toggle,
       ),
     ];
-  }
-
-  /// Sekme çubuğunun yerinde duran seçim araç çubuğu; yalnız seçim modunda
-  /// görünür (çubukla aynı yaylı geçişle yer değiştirir).
-  Widget _toolbar(List<String> selected) {
-    final l10n = context.l10n;
-    final bool none = selected.isEmpty;
-    // Kabuk Scaffold'u gövdeden cihaz alt boşluğunu çıkarır; sekme çubuğuyla
-    // aynı hizaya oturmak için pencerenin kendi değeri okunur.
-    final double deviceInset = MediaQueryData.fromView(View.of(context))
-        .padding
-        .bottom;
-    return Positioned(
-      left: AppSpacing.lg,
-      right: AppSpacing.lg,
-      bottom: AppSizes.navBarBottomGap(deviceInset),
-      child: SpringVisibility(
-        visible: _selecting,
-        child: SelectionToolbar(
-          busy: _busy,
-          status: none
-              ? l10n.selectItemsTitle
-              : l10n.bulkSelectionCount(selected.length),
-          leading: [
-            ToolbarAction(
-              icon: AppIcons.share,
-              label: l10n.shareAction,
-              onPressed: none
-                  ? null
-                  : () => _whileBusy(
-                      () => shareScreenshots(context, ref, selected),
-                    ),
-            ),
-          ],
-          trailing: [
-            ToolbarAction(
-              icon: AppIcons.move,
-              label: l10n.moveAction,
-              onPressed: none ? null : () => _move(selected),
-            ),
-            ToolbarAction(
-              icon: AppIcons.delete,
-              label: l10n.deleteAction,
-              destructive: true,
-              onPressed: none ? null : () => _delete(selected),
-            ),
-          ],
-        ),
-      ),
-    );
   }
 
   Future<void> _whileBusy(Future<void> Function() task) async {

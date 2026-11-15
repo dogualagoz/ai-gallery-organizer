@@ -211,7 +211,13 @@ class _PaywallContentState extends ConsumerState<_PaywallContent>
     ProductIds.lifetime,
   ];
 
+  /// [_subscriptionProducts]'ın hesaplandığı ürün listesi; liste değişmedikçe
+  /// filtre + sıralama her build'de yeniden yapılmaz.
+  List<ProductDetails>? _subscriptionsSource;
+  List<ProductDetails> _subscriptions = const [];
+
   List<ProductDetails> get _subscriptionProducts {
+    if (identical(_subscriptionsSource, widget.products)) return _subscriptions;
     final List<ProductDetails> subs = [
       for (final ProductDetails product in widget.products)
         if (ProductIds.subscriptions.contains(product.id)) product,
@@ -219,7 +225,8 @@ class _PaywallContentState extends ConsumerState<_PaywallContent>
     subs.sort(
       (a, b) => _planOrder.indexOf(a.id).compareTo(_planOrder.indexOf(b.id)),
     );
-    return subs;
+    _subscriptionsSource = widget.products;
+    return _subscriptions = subs;
   }
 
   List<ProductDetails> get _packProducts => [
