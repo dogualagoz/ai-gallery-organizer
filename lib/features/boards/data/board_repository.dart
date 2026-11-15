@@ -48,12 +48,14 @@ class BoardRepository {
   /// [orderedIds] sırasına göre tüm board'ların [Board.sortOrder] alanını
   /// yeniden yazar (0'dan artan). Listede olmayan id'ler atlanır.
   Future<void> reorder(List<String> orderedIds) async {
+    final Map<String, Board> changed = {};
     for (int i = 0; i < orderedIds.length; i++) {
       final Board? board = _box.get(orderedIds[i]);
       if (board == null || board.sortOrder == i) continue;
       board.sortOrder = i;
-      await _box.put(board.id, board);
+      changed[board.id] = board;
     }
+    if (changed.isNotEmpty) await _box.putAll(changed);
   }
 
   Future<void> rename(String id, String name) async {

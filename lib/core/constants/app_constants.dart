@@ -55,6 +55,13 @@ abstract final class HiveBoxes {
   static const String encryptionKeyName = 'snaply_hive_encryption_key';
 }
 
+/// Yerel depolama zamanlamaları.
+abstract final class StorageTimings {
+  /// Toplu yazımlarda (eşitleme, analiz) her kayıt ayrı box olayı üretir;
+  /// listeler bu süre olaysız geçince tek seferde yenilenir.
+  static const Duration reloadDebounce = Duration(milliseconds: 100);
+}
+
 /// IAP ürün kimlikleri — App Store Connect tanımlarıyla birebir eşleşmeli.
 abstract final class ProductIds {
   static const String monthly = 'snaply_pro_monthly';

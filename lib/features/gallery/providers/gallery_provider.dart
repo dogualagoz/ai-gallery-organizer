@@ -1,11 +1,10 @@
 // Galeri state'i: Hive'daki kayıt listesi + cihaz kütüphanesi eşitleme aksiyonu.
-import 'dart:async';
-
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/models/screenshot_entry.dart';
 import '../../../core/services/photo_permission_service.dart';
 import '../../../core/utils/app_logger.dart';
+import '../../../core/utils/debounced_listen.dart';
 import '../data/screenshot_repository.dart';
 
 /// Galeri listesi. İlk açılışta cihazla otomatik eşitler; sonrasında
@@ -18,26 +17,17 @@ final galleryProvider =
     );
 
 class GalleryNotifier extends AsyncNotifier<List<ScreenshotEntry>> {
-  Timer? _reloadDebounce;
-
   @override
   Future<List<ScreenshotEntry>> build() async {
     final ScreenshotRepository repo = ref.watch(screenshotRepositoryProvider);
 
-    // Toplu yazımlarda (sync/analiz) her put ayrı event üretir;
-    // listeyi tek seferde yenilemek için kısa debounce uygulanır.
-    final StreamSubscription<void> subscription = repo.watchChanges().listen((
-      _,
-    ) {
-      _reloadDebounce?.cancel();
-      _reloadDebounce = Timer(const Duration(milliseconds: 100), () {
-        state = AsyncData(repo.sortedEntries());
-      });
-    });
-    ref.onDispose(() {
-      subscription.cancel();
-      _reloadDebounce?.cancel();
-    });
+    // Toplu yazımlarda (sync/analiz) her put ayrı olay üretir; liste olaylar
+    // durulunca tek seferde yenilenir.
+    listenDebounced(
+      ref,
+      repo.watchChanges(),
+      () => state = AsyncData(repo.sortedEntries()),
+    );
 
     final PhotoAccess access = await ref.watch(photoAccessProvider.future);
     if (access == PhotoAccess.denied) throw const PhotoAccessDeniedException();

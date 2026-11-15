@@ -80,13 +80,14 @@ Future<bool> moveScreenshots(
         ScreenshotPlacement.of(entry),
   ];
   try {
-    for (final String assetId in assetIds) {
-      final ScreenshotCategory? category = target.category;
-      if (category != null) {
+    final ScreenshotCategory? category = target.category;
+    if (category != null) {
+      // Kategori değişimi kayıt başına düzeltme sinyali üretir; tek tek yazılır.
+      for (final String assetId in assetIds) {
         await repo.setCategory(assetId, category);
-      } else {
-        await repo.assignToBoard(assetId, target.boardId);
       }
+    } else {
+      await repo.assignManyToBoard(assetIds, target.boardId);
     }
   } catch (error, stackTrace) {
     logError('Taşıma hatası', error, stackTrace);
@@ -118,9 +119,7 @@ Future<bool> _undoMove(
   List<ScreenshotPlacement> before,
 ) async {
   try {
-    for (final ScreenshotPlacement placement in before) {
-      await repo.restorePlacement(placement);
-    }
+    await repo.restorePlacements(before);
     return true;
   } catch (error, stackTrace) {
     logError('Taşıma geri alınamadı', error, stackTrace);
@@ -146,9 +145,7 @@ Future<List<String>> deleteScreenshots(
     final List<String> deleted = await PhotoManager.editor.deleteWithIds(
       assetIds,
     );
-    for (final String assetId in deleted) {
-      await repo.removeEntry(assetId);
-    }
+    await repo.removeEntries(deleted);
     return deleted;
   } catch (error, stackTrace) {
     logError('Silme hatası', error, stackTrace);

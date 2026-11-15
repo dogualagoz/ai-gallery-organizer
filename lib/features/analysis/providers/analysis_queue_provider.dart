@@ -190,8 +190,7 @@ class AnalysisQueueNotifier extends Notifier<AnalysisQueueState> {
     final ScreenshotRepository repo = ref.read(screenshotRepositoryProvider);
     final Set<String>? scope = onlyAssetIds?.toSet();
     final List<ScreenshotEntry> pending = repo
-        .sortedEntries()
-        .where((entry) => entry.isPending)
+        .pendingEntries()
         .where((entry) => !_inFlightSingles.contains(entry.assetId))
         .where((entry) => scope == null || scope.contains(entry.assetId))
         .toList();

@@ -51,6 +51,20 @@ class ScreenshotRepository {
     return entries;
   }
 
+  /// Analiz bekleyen kayıtlar, en yeni başta (yalnız bekleyenler sıralanır).
+  List<ScreenshotEntry> pendingEntries() {
+    final List<ScreenshotEntry> entries =
+        _box.values.where((entry) => entry.isPending).toList()
+          ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    return entries;
+  }
+
+  /// [boardId] panosuna atanmış kayıtların kimlikleri.
+  List<String> assetIdsInBoard(String boardId) => [
+    for (final ScreenshotEntry entry in _box.values)
+      if (entry.boardId == boardId) entry.assetId,
+  ];
+
   /// Box değişikliklerini dinlemek için (analiz sonuçları vs. yazıldığında).
   Stream<BoxEvent> watchChanges() => _box.watch();
 
@@ -153,22 +167,32 @@ class ScreenshotRepository {
     await _box.put(assetId, entry);
   }
 
-  /// Kaydı yeniden analize hazır hale getirir: `analyzedAt`'i sıfırlar, böylece
-  /// [isPending] tekrar true olur ve analiz kuyruğu onu yeniden işler. Kategori
-  /// korunur; yeni sonuç üzerine yazana kadar mevcut grupta görünmeye devam eder.
-  Future<void> markPending(String assetId) async {
-    final ScreenshotEntry? entry = _box.get(assetId);
-    if (entry == null) return;
-    entry.analyzedAt = null;
-    await _box.put(assetId, entry);
+  /// [assetIds] kayıtlarını tek yazımda yeniden analize hazırlar:
+  /// `analyzedAt` sıfırlanır, böylece [ScreenshotEntry.isPending] tekrar true
+  /// olur ve analiz kuyruğu onları yeniden işler. Kategori korunur; yeni sonuç
+  /// üzerine yazana kadar mevcut grupta görünmeye devam eder. Bulunamayan
+  /// kimlikler atlanır.
+  Future<void> markManyPending(Iterable<String> assetIds) async {
+    final Map<String, ScreenshotEntry> changed = {
+      for (final String assetId in assetIds)
+        if (_box.get(assetId) case final ScreenshotEntry entry)
+          assetId: entry..analyzedAt = null,
+    };
+    if (changed.isNotEmpty) await _box.putAll(changed);
   }
 
-  /// Kaydı kullanıcı board'una taşır ([boardId] null ise board'dan çıkarır).
-  Future<void> assignToBoard(String assetId, String? boardId) async {
-    final ScreenshotEntry? entry = _box.get(assetId);
-    if (entry == null) return;
-    entry.boardId = boardId;
-    await _box.put(assetId, entry);
+  /// [assetIds] kayıtlarını tek yazımda [boardId] panosuna taşır (null ise
+  /// panodan çıkarır). Bulunamayan kimlikler atlanır.
+  Future<void> assignManyToBoard(
+    Iterable<String> assetIds,
+    String? boardId,
+  ) async {
+    final Map<String, ScreenshotEntry> changed = {
+      for (final String assetId in assetIds)
+        if (_box.get(assetId) case final ScreenshotEntry entry)
+          assetId: entry..boardId = boardId,
+    };
+    if (changed.isNotEmpty) await _box.putAll(changed);
   }
 
   /// Kaydın sistem kategorisini elle değiştirir (kullanıcı düzeltmesi/taşıması).
@@ -200,19 +224,33 @@ class ScreenshotRepository {
   /// Kaydın taşıma öncesi yerleşimini birebir geri yazar ("Geri al"). Taşıma
   /// sırasında kaydedilen kişiselleşme sinyali geri alınmaz; tek düzeltme
   /// öneri eşiğini tek başına aşamaz.
-  Future<void> restorePlacement(ScreenshotPlacement placement) async {
-    final ScreenshotEntry? entry = _box.get(placement.assetId);
-    if (entry == null) return;
-    entry
-      ..category = placement.category
-      ..aiCategory = placement.aiCategory
-      ..analyzedAt = placement.analyzedAt
-      ..boardId = placement.boardId;
-    await _box.put(placement.assetId, entry);
+  Future<void> restorePlacement(ScreenshotPlacement placement) =>
+      restorePlacements([placement]);
+
+  /// [restorePlacement]'ın toplu hali: tüm yerleşimler tek yazımda döner.
+  Future<void> restorePlacements(
+    Iterable<ScreenshotPlacement> placements,
+  ) async {
+    final Map<String, ScreenshotEntry> changed = {
+      for (final ScreenshotPlacement placement in placements)
+        if (_box.get(placement.assetId) case final ScreenshotEntry entry)
+          placement.assetId: entry
+            ..category = placement.category
+            ..aiCategory = placement.aiCategory
+            ..analyzedAt = placement.analyzedAt
+            ..boardId = placement.boardId,
+    };
+    if (changed.isNotEmpty) await _box.putAll(changed);
   }
 
   /// Metadata kaydını siler (cihazdan silme photo_manager editor ile ayrıca yapılır).
   Future<void> removeEntry(String assetId) => _box.delete(assetId);
+
+  /// [assetIds] kayıtlarını tek yazımda siler.
+  Future<void> removeEntries(Iterable<String> assetIds) async {
+    final List<String> keys = assetIds.toList();
+    if (keys.isNotEmpty) await _box.deleteAll(keys);
+  }
 
   ScreenshotEntry? entryFor(String assetId) => _box.get(assetId);
 }

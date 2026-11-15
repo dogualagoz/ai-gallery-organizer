@@ -244,9 +244,7 @@ Future<bool> reanalyzeCategory(
   final ScreenshotRepository repo = ref.read(screenshotRepositoryProvider);
   final AnalysisQueueNotifier queue = ref.read(analysisQueueProvider.notifier);
   final List<String> ids = filtered.map((e) => e.assetId).toList();
-  for (final String assetId in ids) {
-    await repo.markPending(assetId);
-  }
+  await repo.markManyPending(ids);
   // Tur arka planda sürer; ilerleme durum modülünde izlenir.
   unawaited(queue.start(onlyAssetIds: ids));
   return true;
@@ -291,9 +289,7 @@ Future<void> deleteAllInBoard(
   final List<String> ids = filtered.map((e) => e.assetId).toList();
   try {
     final List<String> deleted = await PhotoManager.editor.deleteWithIds(ids);
-    for (final String assetId in deleted) {
-      await repo.removeEntry(assetId);
-    }
+    await repo.removeEntries(deleted);
   } catch (error, stackTrace) {
     logError('Pano toplu silme hatası', error, stackTrace);
     if (context.mounted) {
