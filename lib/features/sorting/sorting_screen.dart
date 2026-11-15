@@ -5,9 +5,7 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../core/constants/app_constants.dart';
 import '../../core/constants/app_icons.dart';
@@ -16,15 +14,11 @@ import '../../core/l10n/category_labels.dart';
 import '../../core/l10n/l10n_extension.dart';
 import '../../core/models/screenshot_category.dart';
 import '../../core/models/screenshot_entry.dart';
-import '../../core/router/app_routes.dart';
-import '../../core/router/open_paywall.dart';
 import '../../core/services/category_names_service.dart';
 import '../../core/services/entitlement_service.dart';
 import '../../core/services/haptic_service.dart';
 import '../../core/services/review_service.dart';
 import '../../core/widgets/app_nav_scaffold.dart';
-import '../../core/widgets/empty_state_view.dart';
-import '../../core/widgets/spring_visibility.dart';
 import '../../core/widgets/status_toast.dart';
 import '../gallery/data/screenshot_repository.dart';
 import '../gallery/providers/gallery_provider.dart';
@@ -33,7 +27,8 @@ import '../gallery/widgets/gallery_error_view.dart';
 import 'providers/clean_session_provider.dart';
 import 'swipe_decision.dart';
 import 'widgets/category_picker_sheet.dart';
-import 'widgets/clean_controls.dart';
+import 'widgets/clean_deck_layout.dart';
+import 'widgets/clean_finished_view.dart';
 import 'widgets/clean_info_sheet.dart';
 import 'widgets/swipe_deck.dart';
 
@@ -125,145 +120,48 @@ class _SortingScreenState extends ConsumerState<SortingScreen> {
     final List<ScreenshotEntry> queue = session.queue(entries);
     _queue = queue;
     final bool locked = queue.isNotEmpty && !canSwipe;
-    return _deckLayout(
-      queue: locked ? const [] : queue,
-      finished: locked
-          ? const _LimitView()
-          : queue.isEmpty
-          ? _finished(session, entries, pending)
-          : null,
-      // Deste bitince bekleyenler bitiş görünümünün kendi CTA'sında.
-      showPending: queue.isNotEmpty && pending > 0,
-      pending: pending,
-      freeSwipesLeft: isPro
-          ? null
-          : math.max(0, FreeLimits.swipeSorts - swipesUsed),
-    );
-  }
-
-  /// Durum satırı + deste + bekleyen silme yuvası + eylem satırı. Satırlar
-  /// deste bitince de yer kaplar: son kart uçarken kart boyu değişmez.
-  Widget _deckLayout({
-    required List<ScreenshotEntry> queue,
-    required Widget? finished,
-    required bool showPending,
-    required int pending,
-    required int? freeSwipesLeft,
-  }) {
+    final List<ScreenshotEntry> visible = locked ? const [] : queue;
     final ScreenshotRepository repo = ref.watch(screenshotRepositoryProvider);
     final String targetLabel = _target.displayName(
       context.l10n,
       ref.watch(categoryNamesProvider),
     );
-    final bool hasCards = queue.isNotEmpty;
-    SwipeDeckItem? item(int index) => index < queue.length
+    SwipeDeckItem? item(int index) => index < visible.length
         ? SwipeDeckItem(
-            queue[index].assetId,
-            repo.assetFor(queue[index].assetId),
+            visible[index].assetId,
+            repo.assetFor(visible[index].assetId),
           )
         : null;
 
-    return Column(
-      children: [
-        SpringVisibility(
-          visible: hasCards,
-          child: _DeckStatus(
-            remaining: queue.length,
-            freeSwipesLeft: freeSwipesLeft,
-            targetLabel: targetLabel,
-            onPickTarget: _pickTarget,
-          ),
-        ),
-        const SizedBox(height: AppSpacing.sm),
-        Expanded(
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              ?finished,
-              SwipeDeck(
-                top: item(0),
-                next: item(1),
-                controller: _deck,
-                onSwipe: _onSwipe,
-                assignIcon: _target.icon,
-                assignLabel: targetLabel,
-              ),
-            ],
-          ),
-        ),
-        _pendingSlot(pending, visible: showPending),
-        SpringVisibility(
-          visible: hasCards,
-          child: CleanActionRow(
-            assignIcon: _target.icon,
-            assignLabel: targetLabel,
-            onSwipe: hasCards ? _deck.swipe : null,
-          ),
-        ),
-        const SizedBox(height: AppSpacing.sm),
-      ],
-    );
-  }
-
-  /// Bekleyen silme kapsülünün sabit yuvası (yer hep ayrılır).
-  Widget _pendingSlot(int pending, {required bool visible}) {
-    return SizedBox(
-      height: AppDeck.pendingSlot,
-      child: Center(
-        child: SpringVisibility(
-          visible: visible,
-          child: PendingDeleteBar(
-            count: pending,
-            deleting: _deleting,
-            onDelete: _commitDeletes,
-          ),
-        ),
-      ),
-    );
-  }
-
-  /// Deste bitti: bekleyen silme varsa tamamlatır, atlanan varsa yeniden
-  /// gösterir, yoksa Kütüphane'ye yönlendirir.
-  Widget _finished(
-    CleanSession session,
-    List<ScreenshotEntry> entries,
-    int pending,
-  ) {
-    final l10n = context.l10n;
-    if (pending > 0) {
-      return EmptyStateView(
-        icon: AppIcons.delete,
-        title: l10n.sortingPendingDeleteCount(pending),
-        message: l10n.sortingFinishConfirmBody,
-        actionLabel: l10n.sortingFinishAction(pending),
-        onAction: _deleting ? null : _commitDeletes,
-        secondaryActionLabel: l10n.sortingFinishKeep,
-        onSecondaryAction: _deleting
-            ? null
-            : ref.read(cleanSessionProvider.notifier).keepPendingDeletes,
-      );
-    }
-    final int skipped = entries
-        .where((entry) => session.skipped.contains(entry.assetId))
-        .length;
-    void backToLibrary() => context.go(AppRoutes.library);
-    if (skipped > 0) {
-      return EmptyStateView(
-        icon: AppIcons.done,
-        title: l10n.cleanDoneTitle,
-        message: l10n.cleanSkippedBody(skipped),
-        actionLabel: l10n.cleanShowSkipped,
-        onAction: ref.read(cleanSessionProvider.notifier).resetSkipped,
-        secondaryActionLabel: l10n.cleanBackToLibrary,
-        onSecondaryAction: backToLibrary,
-      );
-    }
-    return EmptyStateView(
-      icon: AppIcons.done,
-      title: l10n.sortingEmptyTitle,
-      message: l10n.sortingEmptyBody,
-      actionLabel: l10n.cleanBackToLibrary,
-      onAction: backToLibrary,
+    return CleanDeckLayout(
+      top: item(0),
+      next: item(1),
+      remaining: visible.length,
+      finished: locked
+          ? const CleanLimitView()
+          : queue.isEmpty
+          ? CleanFinishedView(
+              pending: pending,
+              skipped: entries
+                  .where((entry) => session.skipped.contains(entry.assetId))
+                  .length,
+              deleting: _deleting,
+              onDelete: _commitDeletes,
+            )
+          : null,
+      freeSwipesLeft: isPro
+          ? null
+          : math.max(0, FreeLimits.swipeSorts - swipesUsed),
+      assignIcon: _target.icon,
+      assignLabel: targetLabel,
+      deck: _deck,
+      onSwipe: _onSwipe,
+      onPickTarget: _pickTarget,
+      pending: pending,
+      // Deste bitince bekleyenler bitiş görünümünün kendi CTA'sında.
+      showPending: queue.isNotEmpty && pending > 0,
+      deleting: _deleting,
+      onDelete: _commitDeletes,
     );
   }
 
@@ -343,62 +241,6 @@ class _SortingScreenState extends ConsumerState<SortingScreen> {
     showCleanInfoSheet(
       context,
       freeSwipes: isPro ? null : FreeLimits.swipeSorts,
-    );
-  }
-}
-
-/// Destenin üstü: kalan sayı (ücretsizde kalan hak) + yukarı hedefi.
-class _DeckStatus extends StatelessWidget {
-  const _DeckStatus({
-    required this.remaining,
-    required this.freeSwipesLeft,
-    required this.targetLabel,
-    required this.onPickTarget,
-  });
-
-  final int remaining;
-  final int? freeSwipesLeft;
-  final String targetLabel;
-  final VoidCallback onPickTarget;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = context.l10n;
-    final int? swipes = freeSwipesLeft;
-    return Row(
-      children: [
-        Expanded(
-          child: Text(
-            swipes == null
-                ? l10n.sortingRemainingCount(remaining)
-                : l10n.cleanStatusWithSwipes(remaining, swipes),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
-          ),
-        ),
-        const SizedBox(width: AppSpacing.sm),
-        CleanTargetChip(label: targetLabel, onPressed: onPickTarget),
-      ],
-    );
-  }
-}
-
-/// Ücretsiz haftalık kaydırma hakkı bitti.
-class _LimitView extends StatelessWidget {
-  const _LimitView();
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = context.l10n;
-    return EmptyStateView(
-      icon: AppIcons.lock,
-      title: l10n.sortingLimitTitle,
-      message: l10n.sortingLimitBody,
-      actionLabel: l10n.paywallTitle,
-      onAction: () => openPaywall(context),
     );
   }
 }
