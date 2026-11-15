@@ -57,30 +57,41 @@ class _CleanInfoSheet extends StatelessWidget {
             ),
           ),
         ),
-        SliverToBoxAdapter(
-          child: GroupedSection(
-            footer: footer,
-            children: [
-              _GestureRow(
-                direction: SwipeDirection.left,
-                icon: AppIcons.delete,
-                title: l10n.cleanInfoLeftTitle,
-                body: l10n.cleanInfoLeftBody,
-              ),
-              _GestureRow(
-                direction: SwipeDirection.up,
-                icon: AppIcons.swipeUp,
-                title: l10n.cleanInfoUpTitle,
-                body: l10n.cleanInfoUpBody,
-              ),
-              _GestureRow(
-                direction: SwipeDirection.right,
-                icon: AppIcons.skip,
-                title: l10n.cleanInfoRightTitle,
-                body: l10n.cleanInfoRightBody,
-              ),
-            ],
-          ),
+        SliverToBoxAdapter(child: _GestureSection(footer: footer)),
+      ],
+    );
+  }
+}
+
+/// Üç jestin gruplu açıklaması; dipnotta geri alma ve (ücretsizde) hak.
+class _GestureSection extends StatelessWidget {
+  const _GestureSection({required this.footer});
+
+  final String footer;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    return GroupedSection(
+      footer: footer,
+      children: [
+        _GestureRow(
+          direction: SwipeDirection.left,
+          icon: AppIcons.delete,
+          title: l10n.cleanInfoLeftTitle,
+          body: l10n.cleanInfoLeftBody,
+        ),
+        _GestureRow(
+          direction: SwipeDirection.up,
+          icon: AppIcons.swipeUp,
+          title: l10n.cleanInfoUpTitle,
+          body: l10n.cleanInfoUpBody,
+        ),
+        _GestureRow(
+          direction: SwipeDirection.right,
+          icon: AppIcons.skip,
+          title: l10n.cleanInfoRightTitle,
+          body: l10n.cleanInfoRightBody,
         ),
       ],
     );

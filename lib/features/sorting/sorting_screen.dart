@@ -137,18 +137,13 @@ class _SortingScreenState extends ConsumerState<SortingScreen> {
       top: item(0),
       next: item(1),
       remaining: visible.length,
-      finished: locked
-          ? const CleanLimitView()
-          : queue.isEmpty
-          ? CleanFinishedView(
-              pending: pending,
-              skipped: entries
-                  .where((entry) => session.skipped.contains(entry.assetId))
-                  .length,
-              deleting: _deleting,
-              onDelete: _commitDeletes,
-            )
-          : null,
+      finished: _finishedLayer(
+        locked: locked,
+        empty: queue.isEmpty,
+        pending: pending,
+        session: session,
+        entries: entries,
+      ),
       freeSwipesLeft: isPro
           ? null
           : math.max(0, FreeLimits.swipeSorts - swipesUsed),
@@ -160,6 +155,27 @@ class _SortingScreenState extends ConsumerState<SortingScreen> {
       pending: pending,
       // Deste bitince bekleyenler bitiş görünümünün kendi CTA'sında.
       showPending: queue.isNotEmpty && pending > 0,
+      deleting: _deleting,
+      onDelete: _commitDeletes,
+    );
+  }
+
+  /// Destenin altındaki bitiş katmanı: hak dolduysa kilit, deste bittiyse
+  /// bitiş görünümü (atlananlar bu oturumda atlanıp galeride duranlardır).
+  Widget? _finishedLayer({
+    required bool locked,
+    required bool empty,
+    required int pending,
+    required CleanSession session,
+    required List<ScreenshotEntry> entries,
+  }) {
+    if (locked) return const CleanLimitView();
+    if (!empty) return null;
+    return CleanFinishedView(
+      pending: pending,
+      skipped: entries
+          .where((entry) => session.skipped.contains(entry.assetId))
+          .length,
       deleting: _deleting,
       onDelete: _commitDeletes,
     );

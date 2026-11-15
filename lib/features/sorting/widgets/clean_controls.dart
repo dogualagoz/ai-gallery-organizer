@@ -211,36 +211,41 @@ class CleanTargetChip extends StatelessWidget {
                 horizontal: AppSizes.chipPaddingH,
                 vertical: AppSizes.chipPaddingV,
               ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    AppIcons.swipeUp,
-                    size: AppDeck.chipIcon,
-                    color: scheme.primary,
-                  ),
-                  const SizedBox(width: AppSpacing.xs),
-                  Flexible(
-                    child: Text(
-                      label,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: Theme.of(context).textTheme.titleSmall
-                          ?.copyWith(color: scheme.primary),
-                    ),
-                  ),
-                  const SizedBox(width: AppSpacing.xs),
-                  Icon(
-                    AppIcons.chevronDown,
-                    size: AppDeck.chipChevron,
-                    color: scheme.primary,
-                  ),
-                ],
-              ),
+              child: _TargetChipLabel(label: label),
             ),
           ),
         ),
       ),
+    );
+  }
+}
+
+/// Hedef kapsülünün içi: yukarı oku, kategori adı ve açılır işareti.
+class _TargetChipLabel extends StatelessWidget {
+  const _TargetChipLabel({required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    final Color color = Theme.of(context).colorScheme.primary;
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(AppIcons.swipeUp, size: AppDeck.chipIcon, color: color),
+        const SizedBox(width: AppSpacing.xs),
+        Flexible(
+          child: Text(
+            label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: Theme.of(context).textTheme.titleSmall
+                ?.copyWith(color: color),
+          ),
+        ),
+        const SizedBox(width: AppSpacing.xs),
+        Icon(AppIcons.chevronDown, size: AppDeck.chipChevron, color: color),
+      ],
     );
   }
 }
