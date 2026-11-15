@@ -18,6 +18,8 @@ import 'jiggle.dart';
 import 'reorder_grid_layout.dart';
 import 'reorder_slot.dart';
 
+/// Düzenleme modunda karoları basılı tutup sürükleyerek sıralanabilen sabit
+/// sütunlu ızgara (pano ve kategori ızgaraları).
 class ReorderableTileGrid extends StatefulWidget {
   const ReorderableTileGrid({
     super.key,
@@ -32,6 +34,7 @@ class ReorderableTileGrid extends StatefulWidget {
     this.trailing,
   });
 
+  /// Sıralanabilir karo sayısı ([trailing] hariç).
   final int itemCount;
 
   /// Karonun görselini üretir (dokunma davranışı çağırana ait).
@@ -46,8 +49,13 @@ class ReorderableTileGrid extends StatefulWidget {
   /// [from] index'indeki karo [to] konumuna taşındı.
   final void Function(int from, int to) onReorder;
 
+  /// Normal yazı boyutunda sütun sayısı (erişilebilirlik boyutlarında 1).
   final int crossAxisCount;
+
+  /// Karonun genişlik / yükseklik oranı.
   final double childAspectRatio;
+
+  /// Karolar arası yatay ve dikey boşluk.
   final double spacing;
 
   /// Sıralanmayan son hücre (ör. "yeni pano" kartı). null ise yok.

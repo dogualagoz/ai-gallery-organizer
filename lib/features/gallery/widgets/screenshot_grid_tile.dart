@@ -117,7 +117,7 @@ class _RoundedClip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (radius == 0) return child;
+    if (radius <= 0) return child;
     return ClipRRect(borderRadius: BorderRadius.circular(radius), child: child);
   }
 }

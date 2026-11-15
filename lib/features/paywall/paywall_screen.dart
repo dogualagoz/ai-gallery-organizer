@@ -212,7 +212,9 @@ class _PaywallContentState extends ConsumerState<_PaywallContent>
   ];
 
   /// [_subscriptionProducts]'ın hesaplandığı ürün listesi; liste değişmedikçe
-  /// filtre + sıralama her build'de yeniden yapılmaz.
+  /// filtre + sıralama her build'de yeniden yapılmaz. Getter önbelleği
+  /// kendisi günceller; ürün listesi provider'dan her seferinde yeni gelir,
+  /// yerinde değişmez.
   List<ProductDetails>? _subscriptionsSource;
   List<ProductDetails> _subscriptions = const [];
 

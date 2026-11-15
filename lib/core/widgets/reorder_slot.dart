@@ -30,6 +30,8 @@ class ReorderSpringSlot extends StatefulWidget {
 
   /// Bırakılan karonun devraldığı parmak hızı (px/sn).
   final Offset releaseVelocity;
+
+  /// Hücre boyutu (yerleşim turunda hesaplanır).
   final Size size;
   final Widget child;
 

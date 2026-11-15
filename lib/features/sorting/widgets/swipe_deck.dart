@@ -538,7 +538,7 @@ class _DepartingCardState extends State<_DepartingCard>
   );
 
   /// Konum ve ömrün birleşimi; her build'de yeniden kurulmaz.
-  late final Listenable _motion = Listenable.merge([_x, _y, _life]);
+  late final Listenable _changes = Listenable.merge([_x, _y, _life]);
 
   @override
   void initState() {
@@ -589,7 +589,7 @@ class _DepartingCardState extends State<_DepartingCard>
     return Positioned.fill(
       child: IgnorePointer(
         child: AnimatedBuilder(
-          animation: _motion,
+          animation: _changes,
           builder: (context, child) {
             final Offset offset = Offset(_x.value, _y.value);
             final double travel = travelAlong(offset, _departure.direction);

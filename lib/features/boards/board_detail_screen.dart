@@ -25,6 +25,7 @@ import '../gallery/providers/gallery_derived_providers.dart';
 import '../gallery/screenshot_actions.dart';
 import '../gallery/widgets/screenshot_grid.dart';
 import 'board_actions.dart';
+import 'board_selection.dart';
 import 'providers/board_provider.dart';
 import 'widgets/board_selection_toolbar.dart';
 

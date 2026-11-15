@@ -1,9 +1,11 @@
 // Görüntüleyici duman testi: bilgi paneli açılır, sayfa kaydırınca panel
-// görünen kayda geçer, görünen kayıt silinince sıradaki gelir.
+// görünen kayda geçer, kaydın kategorisi değişince panel tazelenir, görünen
+// kayıt silinince sıradaki gelir.
 import 'dart:async';
 
 import 'package:ai_gallery_organizer/core/constants/app_constants.dart';
 import 'package:ai_gallery_organizer/core/constants/app_icons.dart';
+import 'package:ai_gallery_organizer/core/l10n/category_labels.dart';
 import 'package:ai_gallery_organizer/core/models/screenshot_category.dart';
 import 'package:ai_gallery_organizer/core/models/screenshot_entry.dart';
 import 'package:ai_gallery_organizer/core/services/category_names_service.dart';
@@ -39,6 +41,13 @@ class _FakeRepository implements ScreenshotRepository {
   void remove(String id) {
     _entries.remove(id);
     _changes.add(BoxEvent(id, null, true));
+  }
+
+  /// Kaydı yerinde değiştirir (Hive'daki gibi) ve olay yayınlar.
+  void mutate(String id, void Function(ScreenshotEntry entry) change) {
+    final ScreenshotEntry entry = _entries[id]!;
+    change(entry);
+    _changes.add(BoxEvent(id, entry, false));
   }
 
   @override
@@ -112,6 +121,16 @@ void main() {
     await tester.fling(find.byType(PageView), const Offset(-400, 0), 1500);
     await tester.pumpAndSettle();
     expect(_panelFor('b'), findsOneWidget);
+
+    final AppLocalizations l10n = AppLocalizations.of(
+      tester.element(find.byType(ViewerInfoPanel)),
+    );
+    final ScreenshotCategory moved = ScreenshotCategory.values.last;
+    expect(find.text(moved.displayName(l10n, const {})), findsNothing);
+    repo.mutate('b', (entry) => entry.category = moved);
+    await tester.pump(StorageTimings.reloadDebounce);
+    await tester.pumpAndSettle();
+    expect(find.text(moved.displayName(l10n, const {})), findsOneWidget);
 
     repo.remove('b');
     await tester.pump(StorageTimings.reloadDebounce);

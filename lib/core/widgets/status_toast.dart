@@ -119,7 +119,7 @@ class _StatusToastViewState extends State<_StatusToastView>
   );
 
   /// Ofset ve opaklığın birleşimi; her build'de yeniden kurulmaz.
-  late final Listenable _motion = Listenable.merge([_offset, _opacity]);
+  late final Listenable _changes = Listenable.merge([_offset, _opacity]);
 
   Timer? _timer;
   bool _started = false;
@@ -249,7 +249,7 @@ class _StatusToastViewState extends State<_StatusToastView>
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: AppToast.maxWidth),
           child: AnimatedBuilder(
-            animation: _motion,
+            animation: _changes,
             builder: (context, child) => Opacity(
               opacity: _opacity.value,
               child: Transform.translate(

@@ -128,14 +128,12 @@ class _DetailScreenState extends ConsumerState<DetailScreen>
   @override
   Widget build(BuildContext context) {
     final ScreenshotRepository repo = ref.watch(screenshotRepositoryProvider);
-    // Kayıt değişince (analiz, taşıma, silme) görüntüleyici tazelenir; ama
-    // yalnız kapsamdaki kayıtlar, görünen kayıt ya da görseller değiştiyse.
-    // Analiz turunun peş peşe galeri olayları ekranı yeniden kurmaz.
+    // Ekran yalnız kapsamdan kayıt düşünce (silme) ya da görseller yüklenince
+    // yeniden kurulur; analiz/taşıma sonuçlarını bilgi paneli kendisi izler.
+    // Analiz turunun peş peşe galeri olayları sayfaları yeniden kurmaz.
     final List<String> ids = ref
         .watch(
-          galleryProvider.select(
-            (_) => ViewerScopeSnapshot.of(repo, _scope, _current.value),
-          ),
+          galleryProvider.select((_) => ViewerScopeSnapshot.of(repo, _scope)),
         )
         .ids;
     final Widget body;
@@ -166,38 +164,43 @@ class _DetailScreenState extends ConsumerState<DetailScreen>
         child: child!,
       ),
       child: LayoutBuilder(
-        builder: (context, constraints) {
-          final double height = constraints.maxHeight;
-          return Stack(
-            fit: StackFit.expand,
-            children: [
-              ViewerBackdrop(
-                chrome: _chrome,
-                motion: _motion,
-                changes: _chromeChanges,
-                height: height,
-              ),
-              ViewerPagesLayer(
-                motion: _motion,
-                height: height,
-                zoomed: _zoomed,
-                pages: (context, zoomed) => ViewerPageView(
-                  controller: _pages,
-                  ids: ids,
-                  assetFor: repo.assetFor,
-                  current: _current,
-                  infoTarget: _motion.infoTarget,
-                  pageState: _pageState,
-                  zoomed: zoomed,
-                  onPageChanged: _onPageChanged,
-                  onTap: _toggleChrome,
-                  onZoomChanged: _onZoomChanged,
-                ),
-              ),
-              ..._currentLayers(repo, height, toolbarBottom),
-            ],
-          );
-        },
+        builder: (context, constraints) => Stack(
+          fit: StackFit.expand,
+          children: [
+            ViewerBackdrop(
+              chrome: _chrome,
+              motion: _motion,
+              changes: _chromeChanges,
+              height: constraints.maxHeight,
+            ),
+            _pagesLayer(repo, ids, constraints.maxHeight),
+            ..._currentLayers(repo, constraints.maxHeight, toolbarBottom),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _pagesLayer(
+    ScreenshotRepository repo,
+    List<String> ids,
+    double height,
+  ) {
+    return ViewerPagesLayer(
+      motion: _motion,
+      height: height,
+      zoomed: _zoomed,
+      pages: (context, zoomed) => ViewerPageView(
+        controller: _pages,
+        ids: ids,
+        assetFor: repo.assetFor,
+        current: _current,
+        infoTarget: _motion.infoTarget,
+        pageState: _pageState,
+        zoomed: zoomed,
+        onPageChanged: _onPageChanged,
+        onTap: _toggleChrome,
+        onZoomChanged: _onZoomChanged,
       ),
     );
   }
@@ -230,13 +233,24 @@ class _DetailScreenState extends ConsumerState<DetailScreen>
 
     return [
       forCurrent(
-        (entry) => ViewerInfoLayer(
-          motion: _motion,
-          height: height,
-          entry: entry,
-          bottomInset: AppSizes.navBarHeight + toolbarBottom + AppSpacing.md,
-          onMove: () => _move(entry),
-          onTag: _searchTag,
+        (entry) => Consumer(
+          builder: (context, ref, _) {
+            // Yalnız panel, görünen kaydın analiz/taşıma alanlarını izler.
+            ref.watch(
+              galleryProvider.select(
+                (_) => viewerEntryFields(repo.entryFor(entry.assetId)),
+              ),
+            );
+            return ViewerInfoLayer(
+              motion: _motion,
+              height: height,
+              entry: entry,
+              bottomInset:
+                  AppSizes.navBarHeight + toolbarBottom + AppSpacing.md,
+              onMove: () => _move(entry.assetId),
+              onTag: _searchTag,
+            );
+          },
         ),
       ),
       Positioned(
@@ -262,6 +276,10 @@ class _DetailScreenState extends ConsumerState<DetailScreen>
   /// yerine sıradaki gelir (Fotoğraflar), sondaysa bir öncekine geçilir.
   /// build içinde çalışır çünkü liste yalnız build'de (galeri izlenirken)
   /// bilinir; sayfa denetleyicisi kare sonrasında hizalanır.
+  ///
+  /// Notifier'lar build içinde yazılabilir: tüm dinleyicileri bu ekranın alt
+  /// ağacındadır, bu kare içinde ebeveynden sonra kurulurlar. Ağaç dışından
+  /// bir dinleyici eklenirse yazım kare sonrasına alınmalı.
   void _syncIndex(List<String> ids) {
     _ids = ids;
     final int found = ids.indexOf(_current.value);
@@ -322,7 +340,7 @@ class _DetailScreenState extends ConsumerState<DetailScreen>
         Haptics.tap();
         _motion.setInfo(!_motion.infoShown);
       },
-      onMove: () => _move(entry),
+      onMove: () => _move(entry.assetId),
       onDelete: () => _delete(entry.assetId),
     );
   }
@@ -380,11 +398,17 @@ class _DetailScreenState extends ConsumerState<DetailScreen>
     }
   }
 
-  Future<void> _move(ScreenshotEntry entry) async {
+  /// Güncel yerleşim dokunuş anında okunur (taşıma/analiz sonrası çubuk
+  /// yeniden kurulmamış olabilir).
+  Future<void> _move(String assetId) async {
+    final ScreenshotEntry? entry = ref
+        .read(screenshotRepositoryProvider)
+        .entryFor(assetId);
+    if (entry == null) return;
     await moveScreenshots(
       context,
       ref,
-      [entry.assetId],
+      [assetId],
       currentCategory: entry.category,
       currentBoardId: entry.boardId,
     );

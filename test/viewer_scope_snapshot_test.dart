@@ -1,5 +1,5 @@
-// Görüntüleyici dilimi: başka kayıtların analizi eşit sayılır (ekran yeniden
-// kurulmaz); görünen kaydın değişimi, silme ve geri alma farklı sayılır.
+// Görüntüleyici dilimi: analiz/taşıma kapsamı değiştirmez, silme değiştirir;
+// görünen kaydın alanları analiz ve taşımada farklı sayılır.
 import 'dart:io';
 
 import 'package:ai_gallery_organizer/core/models/hive/hive_registrar.g.dart';
@@ -16,8 +16,7 @@ void main() {
   late ScreenshotRepository repo;
   const List<String> scope = ['a', 'b', 'c'];
 
-  ViewerScopeSnapshot snapshot([String current = 'a']) =>
-      ViewerScopeSnapshot.of(repo, scope, current);
+  ViewerScopeSnapshot snapshot() => ViewerScopeSnapshot.of(repo, scope);
 
   setUpAll(() {
     dir = Directory.systemTemp.createTempSync('viewer_snapshot_test');
@@ -46,20 +45,24 @@ void main() {
     tags: const ['fiş'],
   );
 
-  test('kapsamdaki başka kaydın analizi dilimi değiştirmez', () async {
+  test('analiz ve taşıma kapsam dilimini değiştirmez', () async {
     final ViewerScopeSnapshot before = snapshot();
-    await analyze('b');
+    await analyze('a');
+    await repo.assignManyToBoard(['b'], 'board');
     expect(snapshot(), before);
   });
 
-  test('görünen kaydın analizi ve taşınması dilimi değiştirir', () async {
-    final ViewerScopeSnapshot initial = snapshot();
+  test('görünen kaydın alanları analiz ve taşımada değişir', () async {
+    final ViewerEntryFields? initial = viewerEntryFields(repo.entryFor('a'));
+    await analyze('b');
+    expect(viewerEntryFields(repo.entryFor('a')), initial);
+
     await analyze('a');
-    final ViewerScopeSnapshot analyzed = snapshot();
+    final ViewerEntryFields? analyzed = viewerEntryFields(repo.entryFor('a'));
     expect(analyzed, isNot(initial));
 
     await repo.assignManyToBoard(['a'], 'board');
-    expect(snapshot(), isNot(analyzed));
+    expect(viewerEntryFields(repo.entryFor('a')), isNot(analyzed));
   });
 
   test('silinen kayıt kapsamdan düşer, dilim değişir', () async {
@@ -70,9 +73,9 @@ void main() {
     expect(after, isNot(before));
   });
 
-  test('görünen kayıt yoksa yerleşim alanı boş kalır', () async {
+  test('kayıt yoksa alanlar boş kalır', () async {
     await repo.removeEntries(['a']);
-    expect(snapshot().current, isNull);
+    expect(viewerEntryFields(repo.entryFor('a')), isNull);
     expect(snapshot().ids, ['b', 'c']);
   });
 }

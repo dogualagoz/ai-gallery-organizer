@@ -30,10 +30,14 @@ class ViewerBackdrop extends StatelessWidget {
 
   /// Arayüz görünürlüğü: 1 görünür, 0 gizli.
   final Animation<double> chrome;
+
+  /// Aşağı çekiş ofseti buradan okunur (kapanırken zemin solar).
   final ViewerMotion motion;
 
   /// [chrome] ile sürükleme ofsetinin birleşimi (State'te bir kez kurulur).
   final Listenable changes;
+
+  /// Görüntüleyicinin yüksekliği (kapanma ilerlemesinin ölçeği).
   final double height;
 
   @override
@@ -66,8 +70,13 @@ class ViewerPagesLayer extends StatelessWidget {
     required this.pages,
   });
 
+  /// Aşağı çekiş jesti ve panel açıklığı.
   final ViewerMotion motion;
+
+  /// Görüntüleyicinin yüksekliği (panel ve kapanma ölçeği).
   final double height;
+
+  /// true iken aşağı çekiş kapalı (sayfa yakınlaştırılmış).
   final ValueListenable<bool> zoomed;
 
   /// Sayfa görünümü; yalnız yakınlaştırma durumu değişince yeniden kurulur.
@@ -149,7 +158,11 @@ class ViewerPageView extends StatelessWidget {
   });
 
   final PageController controller;
+
+  /// Sayfaların kimlikleri, kapsam sırasıyla.
   final List<String> ids;
+
+  /// Kimliğin görseli; kütüphane henüz eşitlenmediyse null.
   final AssetEntity? Function(String id) assetFor;
 
   /// Görünen sayfanın kimliği.
@@ -160,9 +173,15 @@ class ViewerPageView extends StatelessWidget {
 
   /// [current] ile [infoTarget]'ın birleşimi (State'te bir kez kurulur).
   final Listenable pageState;
+
+  /// true iken yatay kaydırma kilitli.
   final bool zoomed;
   final ValueChanged<int> onPageChanged;
+
+  /// Sayfaya tek dokunuş (arayüzü gizle/göster).
   final VoidCallback onTap;
+
+  /// [id] sayfasının yakınlaştırma durumu değişti.
   final void Function(String id, bool zoomed) onZoomChanged;
 
   @override
@@ -213,8 +232,13 @@ class ViewerInfoLayer extends StatelessWidget {
     required this.onTag,
   });
 
+  /// Panel açıklığı ve başlıktan sürükleme jesti.
   final ViewerMotion motion;
+
+  /// Görüntüleyicinin yüksekliği (panel yüksekliğinin ölçeği).
   final double height;
+
+  /// Görünen kayıt.
   final ScreenshotEntry entry;
 
   /// Panel içeriğinin altta araç çubuğuna bıraktığı boşluk.
@@ -274,12 +298,19 @@ class ViewerChromeFade extends StatelessWidget {
     required this.child,
   });
 
+  /// Arayüzün hedef görünürlüğü (dokunuş ve erişilebilirlik).
   final ValueListenable<bool> visible;
+
+  /// Arayüz görünürlüğü animasyonu: 1 görünür, 0 gizli.
   final Animation<double> chrome;
+
+  /// Aşağı çekiş ofseti buradan okunur.
   final ViewerMotion motion;
 
   /// [chrome] ile sürükleme ofsetinin birleşimi (State'te bir kez kurulur).
   final Listenable changes;
+
+  /// Görüntüleyicinin yüksekliği (kapanma ilerlemesinin ölçeği).
   final double height;
   final Widget child;
 
