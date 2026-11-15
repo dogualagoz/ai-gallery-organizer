@@ -8,6 +8,7 @@ import '../../../core/models/screenshot_entry.dart';
 import '../../../core/utils/app_logger.dart';
 import 'screenshot_repository.dart';
 
+/// Uygulama genelindeki tek [ScreenshotCommands] örneği.
 final screenshotCommandsProvider = Provider<ScreenshotCommands>((ref) {
   return ScreenshotCommands(ref.watch(screenshotRepositoryProvider));
 });

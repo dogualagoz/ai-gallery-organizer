@@ -112,6 +112,7 @@ class AnalysisQueueState {
     );
   }
 
+  /// Verilen alanları değiştirilmiş kopya.
   AnalysisQueueState copyWith({
     AnalysisQueueStatus? status,
     int? done,

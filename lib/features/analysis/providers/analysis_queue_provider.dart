@@ -26,6 +26,8 @@ import 'analysis_queue_state.dart';
 
 export 'analysis_queue_state.dart';
 
+/// Uygulama genelindeki tek analiz kuyruğu; Kütüphane modülü, auto-sort ve
+/// görüntüleyici aynı turu izler.
 final analysisQueueProvider =
     NotifierProvider<AnalysisQueueNotifier, AnalysisQueueState>(
       AnalysisQueueNotifier.new,

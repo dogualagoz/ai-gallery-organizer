@@ -96,3 +96,13 @@ abstract final class AiConfig {
   /// Öneri kategorisi, o etiketin tüm oylarının en az bu oranını almalı.
   static const double personalizationMinDominance = 0.7;
 }
+
+/// DEBUG analiz simülasyonunun temposu (Gemini dönüşlerinin düzensizliğini
+/// taklit eder).
+abstract final class AiSimulation {
+  /// Sahte tur adımları arasındaki en kısa gecikme.
+  static const Duration minDelay = Duration(milliseconds: 250);
+
+  /// Gecikmeye eklenen rastgele aralığın üst sınırı (ms).
+  static const int delayJitterMs = 450;
+}

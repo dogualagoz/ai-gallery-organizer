@@ -121,6 +121,13 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     });
   }
 
+  /// Klavyeden "Ara": bekleyen duraklama beklenmez, sonuçlar hemen gelir.
+  void _submit() {
+    _debounce?.cancel();
+    setState(() => _query = _controller.text);
+    _remember();
+  }
+
   /// Anlamlı arama anı (gönderme, sonuç açma, öneri ya da görüntüleyicide
   /// etiket seçme) geçmişe yazılır; yazarken her harf kaydedilmez. Alandaki
   /// güncel metin yazılır (bekleyen duraklamadan bağımsız).
@@ -173,7 +180,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
         autofocus: _active,
         placeholder: l10n.searchHint,
         onChanged: _onChanged,
-        onSubmitted: (_) => _remember(),
+        onSubmitted: (_) => _submit(),
       ),
       onSearchActiveChanged: _onActiveChanged,
       slivers: _body(),

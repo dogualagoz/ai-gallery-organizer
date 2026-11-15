@@ -1,16 +1,10 @@
 // DEBUG analiz simülasyonunun saf parçaları: sahte tur öğeleri ve tempo.
 import 'dart:math';
 
+import '../../../core/constants/ai_constants.dart';
 import '../../../core/models/screenshot_category.dart';
 import '../../../core/models/screenshot_entry.dart';
 import 'analysis_queue_state.dart';
-
-/// Sahte tur adımları arasındaki en kısa gecikme (ms).
-const int _minDelayMs = 250;
-
-/// Gecikmeye eklenen rastgele aralık (ms): Gemini dönüşlerinin düzensiz
-/// temposunu taklit eder.
-const int _delayJitterMs = 450;
 
 /// [entries]'in ilk [count] kaydı için sahte analiz sonuçları. Kategoriler
 /// yalnız halihazırda dolu olanlardan seçilir ki uçan küçük resimler ekranda
@@ -39,4 +33,5 @@ List<AnalyzedItem> simulatedRun(
 
 /// Sahte turda iki sonuç arasındaki rastgele bekleme.
 Duration simulatedDelay(Random random) =>
-    Duration(milliseconds: _minDelayMs + random.nextInt(_delayJitterMs));
+    AiSimulation.minDelay +
+    Duration(milliseconds: random.nextInt(AiSimulation.delayJitterMs));
