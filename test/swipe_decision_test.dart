@@ -3,7 +3,7 @@
 import 'dart:ui';
 
 import 'package:ai_gallery_organizer/core/constants/motion_constants.dart';
-import 'package:ai_gallery_organizer/features/sorting/swipe_decision.dart';
+import 'package:ai_gallery_organizer/features/clean/swipe_decision.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 const Size _screen = Size(400, 800);

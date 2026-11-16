@@ -3,10 +3,10 @@
 import 'package:ai_gallery_organizer/core/models/screenshot_category.dart';
 import 'package:ai_gallery_organizer/core/models/screenshot_entry.dart';
 import 'package:ai_gallery_organizer/core/theme/app_theme.dart';
-import 'package:ai_gallery_organizer/features/sorting/providers/clean_session_provider.dart';
-import 'package:ai_gallery_organizer/features/sorting/swipe_decision.dart';
-import 'package:ai_gallery_organizer/features/sorting/widgets/swipe_card.dart';
-import 'package:ai_gallery_organizer/features/sorting/widgets/swipe_deck.dart';
+import 'package:ai_gallery_organizer/features/clean/providers/clean_session_provider.dart';
+import 'package:ai_gallery_organizer/features/clean/swipe_decision.dart';
+import 'package:ai_gallery_organizer/features/clean/widgets/swipe_card.dart';
+import 'package:ai_gallery_organizer/features/clean/widgets/swipe_deck.dart';
 import 'package:ai_gallery_organizer/l10n/app_localizations.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';

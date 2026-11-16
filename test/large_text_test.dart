@@ -16,7 +16,7 @@ import 'package:ai_gallery_organizer/features/analysis/widgets/analysis_status_m
 import 'package:ai_gallery_organizer/features/analysis/widgets/analysis_status_views.dart';
 import 'package:ai_gallery_organizer/features/analysis/widgets/auto_sort_hint.dart';
 import 'package:ai_gallery_organizer/features/gallery/providers/gallery_derived_providers.dart';
-import 'package:ai_gallery_organizer/features/home/widgets/library_sections.dart';
+import 'package:ai_gallery_organizer/features/library/widgets/library_sections.dart';
 import 'package:ai_gallery_organizer/features/onboarding/onboarding_screen.dart';
 import 'package:ai_gallery_organizer/features/onboarding/widgets/sort_illustration.dart';
 import 'package:ai_gallery_organizer/features/paywall/data/purchase_repository.dart';
