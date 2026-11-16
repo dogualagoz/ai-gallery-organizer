@@ -21,7 +21,7 @@ import '../../../core/widgets/grouped_section.dart';
 import '../../../core/widgets/status_toast.dart';
 import '../../../core/widgets/surface_card.dart';
 import '../../analysis/providers/analysis_queue_provider.dart';
-import '../../boards/providers/board_provider.dart';
+import '../../gallery/providers/board_provider.dart';
 import 'viewer_top_bar.dart';
 
 /// [entry]'nin bilgileri. Üstteki başlık alanı sürükleme tutamağıdır

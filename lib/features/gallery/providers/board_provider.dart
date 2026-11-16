@@ -3,8 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/models/board.dart';
 import '../../../core/utils/debounced_listen.dart';
-import '../../gallery/data/screenshot_repository.dart';
 import '../data/board_repository.dart';
+import '../data/screenshot_repository.dart';
 
 final boardsProvider = AsyncNotifierProvider<BoardsNotifier, List<Board>>(
   BoardsNotifier.new,

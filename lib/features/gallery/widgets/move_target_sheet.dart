@@ -13,7 +13,7 @@ import '../../../core/services/category_order_service.dart';
 import '../../../core/widgets/app_nav_scaffold.dart';
 import '../../../core/widgets/app_sheet.dart';
 import '../../../core/widgets/grouped_section.dart';
-import '../../boards/providers/board_provider.dart';
+import '../providers/board_provider.dart';
 
 /// Seçilen taşıma hedefi: bir sistem kategorisi ya da bir kullanıcı panosu.
 class MoveTarget {

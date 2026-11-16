@@ -21,8 +21,8 @@ import '../../core/widgets/app_menus.dart';
 import '../../core/widgets/status_toast.dart';
 import '../analysis/providers/analysis_queue_provider.dart';
 import '../gallery/data/screenshot_commands.dart';
+import '../gallery/providers/board_provider.dart';
 import '../gallery/providers/gallery_derived_providers.dart';
-import 'providers/board_provider.dart';
 
 /// Düzenleme modu aksiyon sayfasından seçilen işlem.
 enum _BoardEditAction { rename, select, deleteAll, deleteBoard }

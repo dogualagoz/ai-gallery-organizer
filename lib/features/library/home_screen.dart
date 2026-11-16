@@ -23,7 +23,7 @@ import '../analysis/providers/auto_sort_provider.dart';
 import '../analysis/widgets/analysis_flights.dart';
 import '../analysis/widgets/analysis_status_module.dart';
 import '../analysis/widgets/auto_sort_hint.dart';
-import '../boards/providers/board_provider.dart';
+import '../gallery/providers/board_provider.dart';
 import '../gallery/providers/gallery_provider.dart';
 import '../gallery/widgets/gallery_error_view.dart';
 import 'widgets/library_sections.dart';

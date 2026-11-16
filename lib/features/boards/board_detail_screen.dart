@@ -21,12 +21,12 @@ import '../../core/widgets/app_menus.dart';
 import '../../core/widgets/app_nav_scaffold.dart';
 import '../../core/widgets/empty_state_view.dart';
 import '../analysis/providers/recent_distribution_provider.dart';
+import '../gallery/providers/board_provider.dart';
 import '../gallery/providers/gallery_derived_providers.dart';
 import '../gallery/screenshot_actions.dart';
 import '../gallery/widgets/screenshot_grid.dart';
 import 'board_actions.dart';
 import 'board_selection.dart';
-import 'providers/board_provider.dart';
 import 'widgets/board_selection_toolbar.dart';
 
 /// Bir sistem kategorisinin ya da kullanıcı panosunun ekran görüntüleri;
