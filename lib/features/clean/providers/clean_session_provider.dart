@@ -10,7 +10,7 @@ import '../../../core/services/entitlement_service.dart';
 import '../../../core/utils/app_logger.dart';
 import '../../gallery/data/screenshot_repository.dart';
 import '../../gallery/providers/gallery_provider.dart';
-import '../swipe_decision.dart';
+import '../logic/swipe_decision.dart';
 
 /// Oturumdaki tek kaydırma; "Geri al" için saklanır.
 @immutable

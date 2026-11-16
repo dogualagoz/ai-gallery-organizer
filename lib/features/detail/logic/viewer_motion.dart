@@ -6,8 +6,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/physics.dart';
 import 'package:flutter/widgets.dart';
 
-import '../../core/constants/motion_constants.dart';
-import '../../core/utils/motion_physics.dart';
+import '../../../core/constants/motion_constants.dart';
+import '../../../core/utils/motion_physics.dart';
 
 enum _DragMode { dismiss, info }
 

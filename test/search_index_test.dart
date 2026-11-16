@@ -2,7 +2,7 @@
 // filtresi, bekleyenlerin dışarıda kalması ve sık etiket sıralaması.
 import 'package:ai_gallery_organizer/core/models/screenshot_category.dart';
 import 'package:ai_gallery_organizer/core/models/screenshot_entry.dart';
-import 'package:ai_gallery_organizer/features/search/search_index.dart';
+import 'package:ai_gallery_organizer/features/search/data/search_index.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 ScreenshotEntry _entry(

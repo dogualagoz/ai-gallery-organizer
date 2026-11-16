@@ -13,7 +13,7 @@ import '../../../core/constants/ui_constants.dart';
 import '../../../core/models/screenshot_entry.dart';
 import '../../../core/utils/motion_physics.dart';
 import '../../gallery/widgets/screenshot_grid_tile.dart';
-import '../viewer_motion.dart';
+import '../logic/viewer_motion.dart';
 import 'info_panel.dart';
 import 'photo_page.dart';
 

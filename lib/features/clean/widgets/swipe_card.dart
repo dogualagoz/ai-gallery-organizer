@@ -7,7 +7,7 @@ import '../../../core/constants/app_icons.dart';
 import '../../../core/constants/ui_constants.dart';
 import '../../../core/l10n/l10n_extension.dart';
 import '../../detail/widgets/photo_page.dart';
-import '../swipe_decision.dart';
+import '../logic/swipe_decision.dart';
 
 /// Bir kaydırma yönünün rengi ve üstündeki içerik rengi; kart ipucu ve
 /// alttaki eylem butonları aynı tonu paylaşır.

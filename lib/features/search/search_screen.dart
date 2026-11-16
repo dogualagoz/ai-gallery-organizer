@@ -23,8 +23,8 @@ import '../../core/widgets/empty_state_view.dart';
 import '../gallery/providers/gallery_provider.dart';
 import '../gallery/widgets/gallery_error_view.dart';
 import '../gallery/widgets/screenshot_grid.dart';
-import 'search_index.dart';
-import 'search_request_provider.dart';
+import 'data/search_index.dart';
+import 'providers/search_request_provider.dart';
 import 'widgets/search_category_bar.dart';
 import 'widgets/search_suggestions.dart';
 

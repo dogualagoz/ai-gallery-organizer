@@ -2,9 +2,9 @@
 // belirleyen değerler: kapsamın dilimi ve görünen kaydın alanları.
 import 'package:flutter/foundation.dart';
 
-import '../../core/models/screenshot_category.dart';
-import '../../core/models/screenshot_entry.dart';
-import '../gallery/data/screenshot_repository.dart';
+import '../../../core/models/screenshot_category.dart';
+import '../../../core/models/screenshot_entry.dart';
+import '../../gallery/data/screenshot_repository.dart';
 
 /// Görüntüleyicinin (sayfalar dahil) galeriden izlediği dilim: kapsamda hâlâ
 /// var olan kayıtlar ve yüklenmiş görsel sayısı. Kayıtların analiz/taşıma

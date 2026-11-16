@@ -10,7 +10,7 @@ import '../../../core/constants/motion_constants.dart';
 import '../../../core/constants/ui_constants.dart';
 import '../../../core/services/haptic_service.dart';
 import '../../../core/utils/motion_physics.dart';
-import '../swipe_decision.dart';
+import '../logic/swipe_decision.dart';
 import 'departing_card.dart';
 import 'swipe_card.dart';
 import 'swipe_deck_controller.dart';

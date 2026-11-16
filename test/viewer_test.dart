@@ -1,9 +1,9 @@
 // Görüntüleyici davranış testleri: aşağı çekip kapatma ve bilgi paneli
 // kararları, çift dokunuş yakınlaştırması, tam çözünürlük ölçüsü, arama isteği.
 import 'package:ai_gallery_organizer/core/theme/app_theme.dart';
-import 'package:ai_gallery_organizer/features/detail/viewer_motion.dart';
+import 'package:ai_gallery_organizer/features/detail/logic/viewer_motion.dart';
 import 'package:ai_gallery_organizer/features/detail/widgets/photo_page.dart';
-import 'package:ai_gallery_organizer/features/search/search_request_provider.dart';
+import 'package:ai_gallery_organizer/features/search/providers/search_request_provider.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

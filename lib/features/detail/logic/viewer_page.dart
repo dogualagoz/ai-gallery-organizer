@@ -2,7 +2,7 @@
 // görünür), solarak açılıp kapanır; görselin yolunu Hero uçuşu taşır.
 import 'package:flutter/widgets.dart';
 
-import '../../core/constants/motion_constants.dart';
+import '../../../core/constants/motion_constants.dart';
 
 /// go_router `pageBuilder`'ında kullanılan görüntüleyici sayfası.
 class ViewerPage<T> extends Page<T> {

@@ -2,10 +2,10 @@
 // normalize edilir; tuş başına yalnız `contains` taraması kalır.
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../core/models/screenshot_category.dart';
-import '../../core/models/screenshot_entry.dart';
-import '../../core/utils/text_normalize.dart';
-import '../gallery/providers/gallery_derived_providers.dart';
+import '../../../core/models/screenshot_category.dart';
+import '../../../core/models/screenshot_entry.dart';
+import '../../../core/utils/text_normalize.dart';
+import '../../gallery/providers/gallery_derived_providers.dart';
 
 final RegExp _whitespace = RegExp(r'\s+');
 

@@ -5,7 +5,7 @@ import 'dart:io';
 import 'package:ai_gallery_organizer/core/models/hive/hive_registrar.g.dart';
 import 'package:ai_gallery_organizer/core/models/screenshot_category.dart';
 import 'package:ai_gallery_organizer/core/models/screenshot_entry.dart';
-import 'package:ai_gallery_organizer/features/detail/viewer_scope_snapshot.dart';
+import 'package:ai_gallery_organizer/features/detail/logic/viewer_scope_snapshot.dart';
 import 'package:ai_gallery_organizer/features/gallery/data/screenshot_repository.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hive_ce/hive.dart';

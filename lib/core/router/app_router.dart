@@ -9,7 +9,7 @@ import '../../features/boards/board_detail_screen.dart';
 import '../../features/clean/providers/clean_session_provider.dart';
 import '../../features/clean/sorting_screen.dart';
 import '../../features/detail/detail_screen.dart';
-import '../../features/detail/viewer_page.dart';
+import '../../features/detail/logic/viewer_page.dart';
 import '../../features/library/home_screen.dart';
 import '../../features/library/recents_screen.dart';
 import '../../features/onboarding/onboarding_screen.dart';

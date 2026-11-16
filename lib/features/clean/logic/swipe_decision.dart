@@ -3,8 +3,8 @@
 import 'dart:math' as math;
 import 'dart:ui' show Offset, Size;
 
-import '../../core/constants/motion_constants.dart';
-import '../../core/utils/motion_physics.dart';
+import '../../../core/constants/motion_constants.dart';
+import '../../../core/utils/motion_physics.dart';
 
 /// Kartın gidebileceği yönler: sola sil, sağa atla, yukarı kategoriye ata.
 enum SwipeDirection { left, right, up }

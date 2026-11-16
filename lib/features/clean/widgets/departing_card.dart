@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/physics.dart';
 
 import '../../../core/constants/motion_constants.dart';
-import '../swipe_decision.dart';
+import '../logic/swipe_decision.dart';
 import 'swipe_card.dart';
 import 'swipe_deck_controller.dart';
 
