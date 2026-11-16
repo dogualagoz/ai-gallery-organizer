@@ -8,7 +8,7 @@ import '../../../core/l10n/l10n_extension.dart';
 import '../../../core/widgets/app_nav_scaffold.dart';
 import '../../../core/widgets/app_sheet.dart';
 import '../../../core/widgets/grouped_section.dart';
-import '../logic/swipe_decision.dart';
+import '../logic/swipe_direction.dart';
 import 'swipe_card.dart';
 
 /// Bilgi sheet'ini açar. [freeSwipes] verilirse (ücretsiz plan) haftalık

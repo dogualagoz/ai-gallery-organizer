@@ -24,7 +24,7 @@ import '../gallery/data/screenshot_repository.dart';
 import '../gallery/providers/gallery_provider.dart';
 import '../gallery/screenshot_actions.dart';
 import '../gallery/widgets/gallery_error_view.dart';
-import 'logic/swipe_decision.dart';
+import 'logic/swipe_direction.dart';
 import 'providers/clean_session_provider.dart';
 import 'widgets/category_picker_sheet.dart';
 import 'widgets/clean_deck_layout.dart';

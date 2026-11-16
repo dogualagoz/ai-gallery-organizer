@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import '../../../core/constants/ui_constants.dart';
 import '../../../core/l10n/l10n_extension.dart';
 import '../../../core/widgets/spring_visibility.dart';
-import '../logic/swipe_decision.dart';
+import '../logic/swipe_direction.dart';
 import 'clean_controls.dart';
 import 'swipe_deck.dart';
 

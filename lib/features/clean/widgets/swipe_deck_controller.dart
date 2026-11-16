@@ -2,7 +2,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:photo_manager/photo_manager.dart';
 
-import '../logic/swipe_decision.dart';
+import '../logic/swipe_direction.dart';
 
 /// Destedeki tek kart: kimlik + görsel kaynağı.
 @immutable

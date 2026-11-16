@@ -7,7 +7,7 @@ import '../../../core/constants/app_icons.dart';
 import '../../../core/constants/ui_constants.dart';
 import '../../../core/l10n/l10n_extension.dart';
 import '../../../core/widgets/pressable.dart';
-import '../logic/swipe_decision.dart';
+import '../logic/swipe_direction.dart';
 import 'swipe_card.dart';
 
 /// Kartın altındaki eylemler: konumları jest yönüyle eşleşir (sil solda,

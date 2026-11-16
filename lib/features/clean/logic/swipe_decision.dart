@@ -5,9 +5,9 @@ import 'dart:ui' show Offset, Size;
 
 import '../../../core/constants/motion_constants.dart';
 import '../../../core/utils/motion_physics.dart';
+import 'swipe_direction.dart';
 
-/// Kartın gidebileceği yönler: sola sil, sağa atla, yukarı kategoriye ata.
-enum SwipeDirection { left, right, up }
+export 'swipe_direction.dart';
 
 /// [offset]'in baskın yönü. Yatay yol yukarı yoldan büyükse sol/sağ; aşağı
 /// hareketin karşılığı yoktur (yatay bileşen yoksa null).
